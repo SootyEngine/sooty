@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://c4w83k2iu1blv"]
+
+[ext_resource type="Script" path="res://addons/sooty_engine/DialogueManager.gd" id="1_85x62"]
+[ext_resource type="Script" path="res://addons/sooty_engine/dummy_messenger.gd" id="2_a28c6"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource( "1_85x62" )
+
+[node name="dummer1" type="Node" parent="." groups=["dummy1"]]
+script = ExtResource( "2_a28c6" )
+
+[node name="dummer2" type="Node" parent="." groups=["dummy2"]]
+script = ExtResource( "2_a28c6" )

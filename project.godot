@@ -1,0 +1,131 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+_global_script_classes=[{
+"base": "Resource",
+"class": &"Dialogue",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/Dialogue.gd"
+}, {
+"base": "Node",
+"class": &"DialogueManager",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/DialogueManager.gd"
+}, {
+"base": "Resource",
+"class": &"EvalHelper",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/EvalHelper.gd"
+}, {
+"base": "Node",
+"class": &"FE_BaseFile",
+"language": &"GDScript",
+"path": "res://addons/file_editor/data/FE_BaseFile.gd"
+}, {
+"base": "FE_BaseFile",
+"class": &"FE_Directory",
+"language": &"GDScript",
+"path": "res://addons/file_editor/data/FE_Directory.gd"
+}, {
+"base": "CodeEdit",
+"class": &"FE_Editor",
+"language": &"GDScript",
+"path": "res://addons/file_editor/ext_editor/FE_Editor.gd"
+}, {
+"base": "Container",
+"class": &"FE_Editors",
+"language": &"GDScript",
+"path": "res://addons/file_editor/comp/FE_Editors.gd"
+}, {
+"base": "FE_BaseFile",
+"class": &"FE_File",
+"language": &"GDScript",
+"path": "res://addons/file_editor/data/FE_File.gd"
+}, {
+"base": "Node",
+"class": &"FE_Files",
+"language": &"GDScript",
+"path": "res://addons/file_editor/comp/FE_Files.gd"
+}, {
+"base": "Resource",
+"class": &"FE_Util",
+"language": &"GDScript",
+"path": "res://addons/file_editor/FE_Util.gd"
+}, {
+"base": "Resource",
+"class": &"FontHelper",
+"language": &"GDScript",
+"path": "res://addons/rich_text/FontHelper.gd"
+}, {
+"base": "Resource",
+"class": &"FontSet",
+"language": &"GDScript",
+"path": "res://addons/rich_text/FontSet.gd"
+}, {
+"base": "Node",
+"class": &"GameStateBase",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/GameStateBase.gd"
+}, {
+"base": "Resource",
+"class": &"Markdown",
+"language": &"GDScript",
+"path": "res://addons/rich_text/Markdown.gd"
+}, {
+"base": "PopupMenu",
+"class": &"OptionsMenu",
+"language": &"GDScript",
+"path": "res://addons/file_editor/OptionsMenu.gd"
+}, {
+"base": "RichTextLabel3",
+"class": &"RichTextAnimation",
+"language": &"GDScript",
+"path": "res://addons/rich_text/RichTextAnimation.gd"
+}, {
+"base": "RichTextLabel",
+"class": &"RichTextLabel3",
+"language": &"GDScript",
+"path": "res://addons/rich_text/RichTextLabel3.gd"
+}]
+_global_script_class_icons={
+"Dialogue": "",
+"DialogueManager": "",
+"EvalHelper": "",
+"FE_BaseFile": "",
+"FE_Directory": "",
+"FE_Editor": "",
+"FE_Editors": "",
+"FE_File": "",
+"FE_Files": "",
+"FE_Util": "",
+"FontHelper": "",
+"FontSet": "",
+"GameStateBase": "",
+"Markdown": "",
+"OptionsMenu": "",
+"RichTextAnimation": "",
+"RichTextLabel3": ""
+}
+
+[application]
+
+config/name="sooty_engine"
+run/main_scene="res://addons/file_editor/file_editor.tscn"
+config/icon="res://icon.png"
+config/features=PackedStringArray("4.0", "Vulkan Clustered")
+
+[autoload]
+
+Global="*res://addons/Global.gd"
+State="*res://addons/state.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/file_editor/plugin.cfg", "res://addons/tool_button/plugin.cfg")

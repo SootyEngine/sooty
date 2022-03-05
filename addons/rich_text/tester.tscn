@@ -1,0 +1,26 @@
+[gd_scene load_steps=7 format=3 uid="uid://cu5qu21vou7jq"]
+
+[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel3.gd" id="1_t0hmd"]
+[ext_resource type="FontData" uid="uid://dq2imiejh1ci5" path="res://fonts/robotomono/robotomono-bi.ttf" id="1_vdoxl"]
+[ext_resource type="Font" uid="uid://gaslg38f16nv" path="res://fonts/robotomono/robotomono_i.tres" id="2_u5q2y"]
+[ext_resource type="Font" uid="uid://beb81bi6s03fl" path="res://fonts/robotomono/robotomono_b.tres" id="3_0tfp1"]
+[ext_resource type="Font" uid="uid://b4g61a4hgqqak" path="res://fonts/robotomono/robotomono.tres" id="4_kxgbr"]
+
+[sub_resource type="Font" id="Font_h0kgq"]
+data/0 = ExtResource( "1_vdoxl" )
+
+[node name="Node2D" type="Node2D"]
+
+[node name="RichTextLabel" type="RichTextLabel" parent="."]
+offset_left = 289.0
+offset_top = 146.0
+offset_right = 604.0
+offset_bottom = 412.0
+theme_override_fonts/bold_italics_font = SubResource( "Font_h0kgq" )
+theme_override_fonts/italics_font = ExtResource( "2_u5q2y" )
+theme_override_fonts/bold_font = ExtResource( "3_0tfp1" )
+theme_override_fonts/normal_font = ExtResource( "4_kxgbr" )
+bbcode_enabled = true
+script = ExtResource( "1_t0hmd" )
+bbcode = "okay [sparkle;teal]***ready***[] [sparkle;tomato]*ok* **or** not[] [$score]okay.."
+effects_mode = 1

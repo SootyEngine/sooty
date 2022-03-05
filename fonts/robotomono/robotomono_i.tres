@@ -1,0 +1,10 @@
+[gd_resource type="Font" load_steps=4 format=3 uid="uid://gaslg38f16nv"]
+
+[ext_resource type="FontData" uid="uid://dw0hrbje7waa2" path="res://fonts/robotomono/robotomono-i.ttf" id="1_apxnl"]
+[ext_resource type="FontData" uid="uid://dhlm735o5phw0" path="res://fonts/unifont/unifont-13.0.01.ttf" id="2_jfhfo"]
+[ext_resource type="FontData" uid="uid://dfus0kvrbquox" path="res://fonts/unifont/unifont_upper-13.0.01.ttf" id="3_fwob7"]
+
+[resource]
+data/0 = ExtResource( "1_apxnl" )
+data/1 = ExtResource( "2_jfhfo" )
+data/2 = ExtResource( "3_fwob7" )
