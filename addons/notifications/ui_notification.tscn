@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3 uid="uid://dd5icnaraucyh"]
+
+[ext_resource type="Script" path="res://addons/notifications/ui_notification.gd" id="1_nagff"]
+[ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="1_wxrxi"]
+
+[node name="notificiation" type="Control"]
+rect_min_size = Vector2(0, 64)
+offset_right = 394.0
+offset_bottom = 64.0
+script = ExtResource( "1_nagff" )
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.294118)
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer"]
+offset_right = 64.0
+offset_bottom = 64.0
+texture = ExtResource( "1_wxrxi" )
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+offset_left = 68.0
+offset_right = 108.0
+offset_bottom = 64.0
+alignment = 1
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer"]
+offset_top = 19.0
+offset_right = 40.0
+offset_bottom = 45.0
+text = "Okay"
+horizontal_alignment = 1
+vertical_alignment = 1

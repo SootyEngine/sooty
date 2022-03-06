@@ -523,14 +523,9 @@ func _install_effect(id:String) -> bool:
 	for dir in [DIR_TEXT_EFFECTS, DIR_TEXT_ANIMATIONS]:
 		var path = dir.plus_file("RTE_%s.gd" % id)
 		if File.new().file_exists(path):
-			# don't install in editor, or there can be bugs
-#			if Engine.is_editor_hint():
-#				return true
-
 			var effect: RichTextEffect = load(path).new()
 			effect.resource_name = id
-#			effect.resource_local_to_scene = true
-			Global.T[effect] = self
+			effect.set_meta("rt", get_instance_id())
 			install_effect(effect)
 			return true
 
