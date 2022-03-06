@@ -8,12 +8,13 @@ func _get_tool_buttons():
 
 func _init():
 	add_to_group("sa:bg")
+	State.changed_from_to.connect(_changed)
 
-func test():
-	StringAction.do("bg 1 2 3 dmg:20 pwr:3,4")
+func _changed(a, b, c):
+	prints("CHANGED %s FROM %s TO %s" % [a, b, c])
 
 const _bg_ARGS := ["", "args", "kwargs"]
-func bg(a, args: Array = [], kwargs: Dictionary = {}):
+func bg(a, args: Array = [], kwargs: Dictionary = {"ok": true}):
 	var path := UFile.get_user_dir().plus_file("bgs").plus_file(a)
 	
 	State.set("bg", a)

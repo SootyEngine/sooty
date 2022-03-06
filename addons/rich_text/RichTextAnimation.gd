@@ -19,7 +19,17 @@ signal wait_ended()				# wait timer ended.
 signal quote_started()			# "quote" starts.
 signal quote_ended()			# "quote" ends.
 
-enum { TRIG_NONE, TRIG_WAIT, TRIG_PACE, TRIG_HOLD, TRIG_SKIP, TRIG_COMMAND, TRIG_QUOTE }
+enum {
+	TRIG_NONE = 1000,
+	TRIG_WAIT, TRIG_PACE, TRIG_HOLD,
+	TRIG_SKIP_STARTED, TRIG_SKIP_ENDED,
+	TRIG_ACTION, TRIG_COMMAND,
+	TRIG_QUOTE_STARTED, TRIG_QUOTE_ENDED
+}
+
+func _init():
+	print("WAIT ", TRIG_WAIT)
+	print("PACE ", TRIG_PACE)
 
 #@export_enum("","back","console","fader","focus","prickle","redact","wfc")
 @export var animation:String = "fader":
@@ -38,10 +48,11 @@ enum { TRIG_NONE, TRIG_WAIT, TRIG_PACE, TRIG_HOLD, TRIG_SKIP, TRIG_COMMAND, TRIG
 
 @export var _wait := 0.0
 @export var _pace := 1.0
-@export var _skipping := false
+@export var _skip := false
 @export var _triggers := {}
 @export var _alpha_real: Array[float] = []
 @export var _alpha_goal: Array[float] = []
+@export var _command_head: String = "!"
 
 func is_finished() -> bool:
 	return progress == 0 if fade_out else progress == 1.0
@@ -49,9 +60,12 @@ func is_finished() -> bool:
 func is_waiting() -> bool:
 	return _wait > 0.0
 
+func is_playing() -> bool:
+	return play
+
 func set_bbcode(btext: String):
 	_triggers.clear()
-	_skipping = false
+	_skip = false
 	_wait = 0.0
 	_pace = 1.0
 	progress = 0.0
@@ -66,28 +80,63 @@ func set_bbcode(btext: String):
 	_alpha_real.fill(0.0)
 	_alpha_goal.fill(0.0)
 
+func advance():
+	if not play:
+		play = true
+	else:
+		finish()
+
+func finish():
+	_triggers.clear()
+	_wait = 0.0
+	set_progress(1.0)
+
 func _preparse(btext: String) -> String:
-	return "[%s]%s[]" % [animation, super._preparse(btext)]
+	var final := "[%s]%s[]" % [animation, super._preparse(btext)]
+	print(final)
+	return final
 
 func _parse_tag_unused(tag: String, info: String, raw: String) -> bool:
-	if raw.begins_with("!"):
+	if raw.begins_with("@"):
+		return _register_trigger(TRIG_ACTION, raw.substr(1))
+	
+	elif raw.begins_with("!"):
 		return _register_trigger(TRIG_COMMAND, raw.substr(1))
 	
 	match tag:
-		"w", "wait": return _register_trigger(TRIG_WAIT, info)
-		"h", "hold": return _register_trigger(TRIG_HOLD, info)
-		"p", "pace": return _register_trigger(TRIG_PACE, info)
-		"q", "quote": return _register_trigger(TRIG_QUOTE, info)
-		"skip": return _register_trigger(TRIG_SKIP, info)
+		"skip":
+			_stack_push(TRIG_SKIP_STARTED, null, true)
+			return _register_trigger(TRIG_SKIP_STARTED, info_to_dict(info))
+		"w", "wait": return _register_trigger(TRIG_WAIT, info_to_dict(info))
+		"h", "hold": return _register_trigger(TRIG_HOLD, info_to_dict(info))
+		"p", "pace": return _register_trigger(TRIG_PACE, info_to_dict(info))
+		"q", "quote":
+			_stack_push(TRIG_QUOTE_STARTED, null, true)
+			return _register_trigger(TRIG_QUOTE_STARTED, info_to_dict(info))
 	
 	return super._parse_tag_unused(tag, info, raw)
 
 func _tag_closed(tag: int, data: Variant):
-	pass
+	match tag:
+		TRIG_SKIP_STARTED: _register_trigger(TRIG_SKIP_ENDED)
+		TRIG_QUOTE_STARTED: _register_trigger(TRIG_QUOTE_ENDED)
 
-func _register_trigger(type: int, data: Variant) -> bool:
-	var at := len(text)-1
-	var tr := [type, data]
+func _trigger(type: int, data: Variant):
+	match type:
+		TRIG_COMMAND: command.emit(data)
+		TRIG_ACTION: StringAction.do(data)
+		TRIG_WAIT: _wait += data.get("wait", data.get("w", 1.0))
+		TRIG_HOLD: play = false
+		TRIG_PACE: _pace = data.get("pace", data.get("p", 1.0))
+		TRIG_QUOTE_STARTED: quote_started.emit()
+		TRIG_QUOTE_ENDED: quote_ended.emit()
+		TRIG_SKIP_STARTED: _skip = true
+		TRIG_SKIP_ENDED: _skip = false
+		_: print("UNKOWN TRIGGER")
+
+func _register_trigger(type: int, data: Variant=null) -> bool:
+	var at := get_total_character_count()-1
+	var tr = [type, data]
 	
 	if not at in _triggers:
 		_triggers[at] = [tr]
@@ -112,7 +161,7 @@ func set_progress(p:float):
 			
 			if i in _triggers:
 				for t in _triggers[i]:
-					call("_trigger_" + t[0], t[1], t[2])
+					_trigger(t[0], t[1])
 				
 				if is_waiting():
 					next_progress = (i+1) / float(get_total_character_count())
@@ -148,7 +197,11 @@ func set_progress(p:float):
 			emit_signal("faded_in")
 
 func _process(delta: float) -> void:
-	effect_time += delta
+	if play:
+		effect_time += delta
+	
+	if len(_alpha_real) != get_total_character_count():
+		return
 	
 	if fade_out:
 		for i in get_total_character_count():
@@ -156,7 +209,7 @@ func _process(delta: float) -> void:
 				_alpha_real[i] = maxf(0.0, _alpha_real[i] - delta * fade_speed)
 		
 		if progress > 0.0:
-			self.progress -= delta * fade_out_speed
+			progress -= delta * fade_out_speed
 	
 	else:
 		var fs := delta * fade_speed
@@ -174,12 +227,15 @@ func _process(delta: float) -> void:
 			_wait = maxf(0.0, _wait - delta)
 		
 		elif play and progress < 1.0 and get_total_character_count():
-			if _skipping:
-				while _skipping:
-					self.progress += 1.0 / float(get_total_character_count())
+			if _skip:
+				while _skip:
+					progress += 1.0 / float(get_total_character_count())
+				
+#				for i in get_total_character_count():
+#					_alpha_real[i] = _alpha_goal[i]
 			else:
 				var t = (1.0 / float(get_total_character_count()))
-				self.progress += delta * t * play_speed * _pace
+				progress += delta * t * play_speed * _pace
 
 func _get_character_alpha(index:int) -> float:
 	if index < 0 or index >= get_total_character_count():

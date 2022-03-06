@@ -6,7 +6,7 @@ extends RichTextEffect
 var bbcode = "fader"
 
 func _process_custom_fx(c:CharFXTransform):
-	var t:RichTextAnimation = Global._d.get(self)
+	var t:RichTextAnimation = Global.T.get(self)
 	if not t:
 		return true
 	var a := t._get_character_alpha(c.range.x)

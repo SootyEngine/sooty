@@ -13,9 +13,27 @@ extends Control
 
 @export var waiting_for_option := false
 
+func _ready() -> void:
+	visible = false
+	option.visible = false
+	options.visible = false
+	
+	text.nicer_quotes_format = "[w=.5;q;tomato][dim]“[]%s[dim]”[][][w=.5]"
+	text.quote_started.connect(_quote_started)
+	text.quote_ended.connect(_quote_ended)
+
+func _quote_started():
+	print("QUOTE STARTED")
+
+func _quote_ended():
+	print("QUOTE ENDED")
+
 func _input(event: InputEvent) -> void:
 	if visible and Input.is_action_just_pressed("continue") and not waiting_for_option:
-		end()
+		if not text.is_finished():
+			text.advance()
+		else:
+			end()
 
 func show_line(d: DialogueLine):
 	get_tree().get_first_node_in_group("flow_manager").add_pauser(self)
@@ -51,5 +69,5 @@ func select_option(o: DialogueLine):
 		if child != option:
 			child.queue_free()
 	
-	o.select()
+	get_tree().get_first_node_in_group("flow_manager").stack.select_option(o)
 	end()

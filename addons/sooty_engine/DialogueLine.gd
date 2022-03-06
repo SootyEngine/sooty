@@ -1,16 +1,24 @@
 extends Resource
 class_name DialogueLine
 
-var _dialogue: Dialogue
-var _stack: DialogueStack
-var _parent: DialogueLine
-var _index: int
-var _data := {}
+@export var _dialogue_id: String
+@export var _data := {}
 
-func _init(stack: DialogueStack, dialogue: Dialogue, data: Dictionary):
-	_stack = stack
-	_dialogue = dialogue
+func _init(dialogue: String, data: Dictionary):
+	_dialogue_id = dialogue
 	_data = data
+
+var line: int:
+	get: return _data.line
+
+var dialogue: Dialogue:
+	get: return DialogueServer.get_dialogue(_dialogue_id)
+
+var parent: DialogueLine:
+	get: return DialogueLine.new(_dialogue_id, dialogue.get_line(_data.parent))
+
+var option_index: int:
+	get: return _data.get("option_index", -1)
 
 var text: String:
 	get: return _data.get("text", "")
@@ -27,25 +35,15 @@ func get_options(only_passing: bool = false) -> Array:
 	if "options" in _data:
 		for i in len(_data.options):
 			var line = _data.options[i]
-			var opdata := _dialogue.get_line(line)
+			var opdata := dialogue.get_line(line)
 			
 			if only_passing and "condition" in opdata and not StringAction.test(opdata.condition):
 				continue
 			
-			var opline := DialogueLine.new(_stack, _dialogue, opdata)
-			opline._parent = self
-			opline._index = i
+			var opline := DialogueLine.new(_dialogue_id, opdata)
 			out.append(opline)
 	
 	return out
-
-# Used for options.
-func select() -> bool:
-	if _parent and _stack and "lines" in _data:
-		_stack.select_option(_parent._data, _index)
-		return true
-	push_error("Line is not an Option.")
-	return false
 
 func _to_string() -> String:
 	return "DialogueLine(%s)" % _data

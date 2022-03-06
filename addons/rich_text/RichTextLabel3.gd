@@ -28,7 +28,8 @@ enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
 @export var effects_mode: EffectsMode = EffectsMode.OFF_IN_EDITOR
 @export var alignment: Align = Align.CENTER
 @export var color: Color = Color.WHITE
-
+@export var font: String = "":
+	set = set_font
 @export var outline_mode: Outline = Outline.DARKEN
 @export var outline_colored := 0
 @export_range(0.0, 1.0) var outline_adjust := 0.5
@@ -46,11 +47,31 @@ enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
 var _stack: Array = []
 var _state: Dictionary = {}
 
+var _shortcuts: Dictionary = {}
+var _custom_colors: Dictionary = {}
+
 func _get_tool_buttons():
 	return ["_redraw"]
 
 func _ready() -> void:
+	_reload_config()
 	_redraw()
+
+func _reload_config():
+	if not "rich_text_config" in Global.T:
+		var c := ConfigFile.new()
+		var rtc := {shortcuts={}, colors={}}
+		if c.load("res://addons/rich_text/rich_text_config.cfg") == OK:
+			print("CONFIG", c)
+			for key in c.get_section_keys("colors"):
+				rtc.colors[key] = Color(c.get_value("colors", key))
+			for key in c.get_section_keys("shortcuts"):
+				rtc.shortcuts[key] = c.get_value("shortcuts", key)
+		Global.T.rich_text_config = rtc
+	_shortcuts = Global.T.rich_text_config.shortcuts
+	_custom_colors = Global.T.rich_text_config.colors
+	prints("SC", _shortcuts)
+	prints("CC", _custom_colors)
 
 func _redraw():
 	set_bbcode(bbcode)
@@ -69,6 +90,10 @@ func set_bbcode(btext: String):
 	}
 	_parse(_preparse(btext))
 
+func set_font(id: String):
+	font = id
+	FontHelper.new().set_fonts(self, id)
+
 func uninstall_effects():
 	while len(custom_effects):
 		custom_effects.pop_back()
@@ -76,9 +101,9 @@ func uninstall_effects():
 func _preparse(btext :String) -> String:
 	# alignment
 	match alignment:
-		1: btext = "[left]" + btext
-		2: btext = "[center]" + btext
-		3: btext = "[right]" + btext
+		1: btext = "[left]%s[]" % btext
+		2: btext = "[center]%s[]" % btext
+		3: btext = "[right]%s[]" % btext
 	
 	# escaped brackets
 	btext = btext.replace("\\[", "[lb]")
@@ -86,9 +111,6 @@ func _preparse(btext :String) -> String:
 	
 	# nicefy up stuff that isn't tagged.
 	btext = _replace_outside(btext, TAG_OPENED, TAG_CLOSED, _preparse_untagged)
-	
-#	if nicer_quotes_enabled:
-#		btext = _replace_between2(btext, '"', '"', func(t): return nicer_quotes_format % t)
 	
 	return btext
 
@@ -160,7 +182,7 @@ func _parse_opening(tag: String):
 		
 		var got = StringAction.execute(p[0])
 		if got == null:
-			push_error("Couldn't replace '%s'." % p[0])
+			push_error("BBCode: Couldn't replace '%s'." % p[0])
 			push_bgcolor(Color.RED)
 			_add_text("[%s]" % tag)
 			pop()
@@ -173,10 +195,23 @@ func _parse_opening(tag: String):
 	else:
 		_parse_tags(tag)
 
-func _parse_tags(tags: String):
+func _parse_tags(tags_string: String):
 	_stack.append([])
-	for tag in tags.split(";"):
+	
+	# check for shortcuts
+	var p := tags_string.split(";")
+	var tags := []
+	for i in len(p):
+		if p[i] in _shortcuts:
+			tags.append_array(_shortcuts[p[i]].split(";"))
+		else:
+			tags.append(p[i])
+	
+	for tag in tags:
 		_parse_tag(tag)
+	
+	if not len(_stack[-1]):
+		_stack.pop_back()
 
 func _parse_tag(tag: String):
 	var tag_name: String
@@ -227,6 +262,10 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 	if not _passes_condition(tag, raw):
 		return
 	
+	if tag in _custom_colors:
+		_push_color(_custom_colors[tag])
+		return
+	
 	match tag:
 		"b": _push_bold()
 		"i": _push_italics()
@@ -239,9 +278,13 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		"center": _push_paragraph(HORIZONTAL_ALIGNMENT_CENTER)
 		"fill": _push_paragraph(HORIZONTAL_ALIGNMENT_FILL)
 		
+		"dim": _push_color(_state.color.darkened(.33))
+		"lit": _push_color(_state.color.lightened(.33))
+		
 		_:
 			if not _has_effect(tag):
-				print("no effect ", tag)
+				pass
+#				print("no effect ", tag)
 			
 			# custom effect
 			if _has_effect(tag):
@@ -335,20 +378,23 @@ func _stack_pop():
 		for i in range(len(last)-1, -1, -1):
 			var type = last[i][0]
 			var data = last[i][1]
+			var nopop = last[i][2]
 			match type:
 				T_COLOR: _pop_color(data)
 				T_PARAGRAPH: _pop_paragraph(data)
 				T_CONDITION: _state.erase("condition")
-				T_NONE, _: pop()
+				T_NONE, _:
+					if not nopop:
+						pop()
 			_tag_closed(type, data)
 
 # called when a tag is closed
-func _tag_closed(_tag :int, _data :Variant):
+func _tag_closed(_tag: int, _data: Variant):
 	pass
 
 # push a single tag to the last set of tags.
-func _stack_push(item :int=-1, data :Variant=null):
-	_stack[-1].append([item, data])
+func _stack_push(item: int = -1, data: Variant = null, nopop: bool = false):
+	_stack[-1].append([item, data, nopop])
 
 func _replace_outside(s: String, head: String, tail: String, fr: Callable) -> String:
 	var parts := []
@@ -418,59 +464,43 @@ func _part(s :String, begin: int=0, end=null) -> String:
 	
 	return s.substr(begin, end-begin)
 
+static func info_to_dict(info:String) -> Dictionary:
+	var out:Dictionary = {}
+	if "=" in info:
+		for part in info.split(" "):
+			var kv = part.split("=", true, 1)
+			out[kv[0]] = _str2var(kv[1])
+	return out
+
+static func _str2var(s: String) -> Variant:
+	# allow floats starting with a decimal: .5
+	if s.begins_with(".") and s.substr(1).is_valid_int():
+		return ("0" + s).to_float()
+	return str2var(s)
+
 # [if name == "Paul"]Hey Paul.[elif name != ""]Hey friend.[else]Who are you?[endif]
-func _get_if_chain(s:String) -> Array:
-	var p := s.split("]", true, 1)
-	var elifs := [Array(p)]
-	
-	while "[elif " in elifs[-1][-1]:
-		p = elifs[-1][-1].split("[elif ", true, 1)
-		elifs[-1][-1] = p[0]
-		p = p[1].split("]", true, 1)
-		elifs.append(Array(p))
-	
-	if "[else]" in elifs[-1][-1]:
-		p = elifs[-1][-1].split("[else]", true, 1)
-		elifs[-1][-1] = p[0]
-		elifs.append(["true", p[1]])
-	
-	return elifs
-	
+#func _get_if_chain(s:String) -> Array:
+#	var p := s.split("]", true, 1)
+#	var elifs := [Array(p)]
+#
+#	while "[elif " in elifs[-1][-1]:
+#		p = elifs[-1][-1].split("[elif ", true, 1)
+#		elifs[-1][-1] = p[0]
+#		p = p[1].split("]", true, 1)
+#		elifs.append(Array(p))
+#
+#	if "[else]" in elifs[-1][-1]:
+#		p = elifs[-1][-1].split("[else]", true, 1)
+#		elifs[-1][-1] = p[0]
+#		elifs.append(["true", p[1]])
+#
+#	return elifs
+
 #func _replace_conditions(s: String):
 #	for test in _get_if_chain(s):
 #		if execute_expression(test[0]):
 #			return test[1]
 #	return ""
-
-#const EXPRESSION_FAILED:String = "%EXPRESSION_FAILED%"
-#func execute_expression(e: String, default=EXPRESSION_FAILED):
-#	if not context_enabled:
-#		return default
-#
-#	var objs := context
-#
-#	if not len(objs):
-#		if get_tree():
-#			objs = [Global, get_tree().current_scene]
-#		else:
-#			objs = [Global]
-#
-#	var expression := Expression.new()
-#	if expression.parse(e) == OK:
-#		var errors := []
-#
-#		# check each different object
-#		for c in objs:
-#			var result = expression.execute([], c, false)
-#			if expression.has_execute_failed():
-#				errors.append(expression.get_error_text())
-#			else:
-#				return result
-#
-#		for e in errors:
-#			push_error(e)
-#
-#	return default
 
 func _has_effect(id:String) -> bool:
 	for e in custom_effects:
@@ -489,7 +519,7 @@ func _install_effect(id:String) -> bool:
 	for e in custom_effects:
 		if e.resource_name == id:
 			return true
-
+	
 	for dir in [DIR_TEXT_EFFECTS, DIR_TEXT_ANIMATIONS]:
 		var path = dir.plus_file("RTE_%s.gd" % id)
 		if File.new().file_exists(path):
@@ -500,7 +530,7 @@ func _install_effect(id:String) -> bool:
 			var effect: RichTextEffect = load(path).new()
 			effect.resource_name = id
 #			effect.resource_local_to_scene = true
-			Global._d[effect] = self
+			Global.T[effect] = self
 			install_effect(effect)
 			return true
 

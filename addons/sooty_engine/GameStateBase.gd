@@ -9,8 +9,8 @@ var _default := {}
 
 func _init():
 	_default = UObject.get_state(self)
-	print("INITIAL STATE", _default)
-	print(_get_properties_of_class("Quest"))
+#	print("INITIAL STATE", _default)
+#	print(_get_properties_of_class("Quest"))
 	_post_init.call_deferred()
 
 func _post_init():

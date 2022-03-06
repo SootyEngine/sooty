@@ -1,12 +1,77 @@
-[gd_scene load_steps=5 format=3 uid="uid://cak5qvo5tsctv"]
+[gd_scene load_steps=23 format=3 uid="uid://cak5qvo5tsctv"]
 
 [ext_resource type="Script" path="res://addons/simple_visual_novel/ui_dialogue.gd" id="1_vd4rm"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextLabel3.gd" id="2_es3h4"]
+[ext_resource type="FontData" uid="uid://by1aqauhysmgf" path="res://fonts/robotomono/robotomono-r.ttf" id="2_pt87i"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextAnimation.gd" id="3_35sk3"]
+[ext_resource type="FontData" uid="uid://dhlm735o5phw0" path="res://fonts/unifont/unifont-13.0.01.ttf" id="3_svt8a"]
+[ext_resource type="FontData" uid="uid://dfus0kvrbquox" path="res://fonts/unifont/unifont_upper-13.0.01.ttf" id="4_2xwo7"]
 [ext_resource type="Script" path="res://addons/simple_visual_novel/ui_option.gd" id="4_v0qse"]
+[ext_resource type="FontData" uid="uid://dq2imiejh1ci5" path="res://fonts/robotomono/robotomono-bi.ttf" id="5_8rsjk"]
+[ext_resource type="FontData" uid="uid://dw0hrbje7waa2" path="res://fonts/robotomono/robotomono-i.ttf" id="6_mlshm"]
+[ext_resource type="FontData" uid="uid://5hcq4bx4kalo" path="res://fonts/robotomono/robotomono-b.ttf" id="7_c8v6b"]
+
+[sub_resource type="Font" id="Font_wv8gv"]
+data/0 = ExtResource( "2_pt87i" )
+data/1 = ExtResource( "3_svt8a" )
+data/2 = ExtResource( "4_2xwo7" )
+
+[sub_resource type="Font" id="Font_26c2u"]
+data/0 = ExtResource( "5_8rsjk" )
+data/1 = ExtResource( "3_svt8a" )
+data/2 = ExtResource( "4_2xwo7" )
+
+[sub_resource type="Font" id="Font_hajd8"]
+data/0 = ExtResource( "6_mlshm" )
+data/1 = ExtResource( "3_svt8a" )
+data/2 = ExtResource( "4_2xwo7" )
+
+[sub_resource type="Font" id="Font_gkamf"]
+data/0 = ExtResource( "7_c8v6b" )
+data/1 = ExtResource( "3_svt8a" )
+data/2 = ExtResource( "4_2xwo7" )
+
+[sub_resource type="Font" id="Font_2gmrm"]
+data/0 = ExtResource( "2_pt87i" )
+data/1 = ExtResource( "3_svt8a" )
+data/2 = ExtResource( "4_2xwo7" )
+
+[sub_resource type="Font" id="Font_1n8jo"]
+data/0 = ExtResource( "5_8rsjk" )
+data/1 = ExtResource( "3_svt8a" )
+data/2 = ExtResource( "4_2xwo7" )
+
+[sub_resource type="Font" id="Font_hltwy"]
+data/0 = ExtResource( "6_mlshm" )
+data/1 = ExtResource( "3_svt8a" )
+data/2 = ExtResource( "4_2xwo7" )
+
+[sub_resource type="Font" id="Font_082y2"]
+data/0 = ExtResource( "7_c8v6b" )
+data/1 = ExtResource( "3_svt8a" )
+data/2 = ExtResource( "4_2xwo7" )
+
+[sub_resource type="Font" id="Font_g0qsf"]
+data/0 = ExtResource( "2_pt87i" )
+data/1 = ExtResource( "3_svt8a" )
+data/2 = ExtResource( "4_2xwo7" )
+
+[sub_resource type="Font" id="Font_dx41c"]
+data/0 = ExtResource( "5_8rsjk" )
+data/1 = ExtResource( "3_svt8a" )
+data/2 = ExtResource( "4_2xwo7" )
+
+[sub_resource type="Font" id="Font_piytp"]
+data/0 = ExtResource( "6_mlshm" )
+data/1 = ExtResource( "3_svt8a" )
+data/2 = ExtResource( "4_2xwo7" )
+
+[sub_resource type="Font" id="Font_xojnr"]
+data/0 = ExtResource( "7_c8v6b" )
+data/1 = ExtResource( "3_svt8a" )
+data/2 = ExtResource( "4_2xwo7" )
 
 [node name="dialogue" type="Control"]
-visible = false
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
@@ -26,7 +91,7 @@ _from = NodePath("c/from")
 _text = NodePath("c/text")
 _options = NodePath("c/options")
 _option = NodePath("c/options/c/c/option")
-_option_container = NodePath("c/options/c/c/option")
+_option_container = NodePath("c/options/c/c")
 
 [node name="backing" type="ColorRect" parent="."]
 anchor_right = 1.0
@@ -45,11 +110,17 @@ __meta__ = {
 
 [node name="from" type="RichTextLabel" parent="c"]
 offset_right = 356.0
-offset_bottom = 117.0
+offset_bottom = 77.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_fonts/mono_font = SubResource( "Font_wv8gv" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_26c2u" )
+theme_override_fonts/italics_font = SubResource( "Font_hajd8" )
+theme_override_fonts/bold_font = SubResource( "Font_gkamf" )
+theme_override_fonts/normal_font = SubResource( "Font_wv8gv" )
 script = ExtResource( "2_es3h4" )
 effects_mode = 0
+font = "robotomono"
 
 [node name="@@64447" type="VScrollBar" parent="c/from"]
 visible = false
@@ -59,13 +130,20 @@ max_value = 0.0
 step = 1.0
 
 [node name="text" type="RichTextLabel" parent="c"]
-offset_top = 121.0
+offset_top = 81.0
 offset_right = 356.0
-offset_bottom = 239.0
+offset_bottom = 158.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_fonts/mono_font = SubResource( "Font_2gmrm" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_1n8jo" )
+theme_override_fonts/italics_font = SubResource( "Font_hltwy" )
+theme_override_fonts/bold_font = SubResource( "Font_082y2" )
+theme_override_fonts/normal_font = SubResource( "Font_2gmrm" )
 script = ExtResource( "3_35sk3" )
-effect_time = 18.6525
+font = "robotomono"
+fade_speed = 5.0
+effect_time = 2855.77
 _triggers = {}
 _alpha_real = []
 _alpha_goal = []
@@ -78,7 +156,6 @@ max_value = 0.0
 step = 1.0
 
 [node name="options" type="Control" parent="c"]
-visible = false
 offset_top = 162.0
 offset_right = 356.0
 offset_bottom = 239.0
@@ -116,8 +193,14 @@ color = Color(0, 0, 0, 0.192157)
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
+theme_override_fonts/mono_font = SubResource( "Font_g0qsf" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_dx41c" )
+theme_override_fonts/italics_font = SubResource( "Font_piytp" )
+theme_override_fonts/bold_font = SubResource( "Font_xojnr" )
+theme_override_fonts/normal_font = SubResource( "Font_g0qsf" )
 script = ExtResource( "2_es3h4" )
 bbcode = "clicky"
+font = "robotomono"
 
 [node name="@@64449" type="VScrollBar" parent="c/options/c/c/option/text"]
 visible = false

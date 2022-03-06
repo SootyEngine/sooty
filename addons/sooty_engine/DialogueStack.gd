@@ -4,12 +4,13 @@ class_name DialogueStack
 
 signal started()
 signal finished()
-signal ticked()
+signal tick_started()
+signal tick_finished()
 signal option_selected(option: Dictionary)
 signal on_action(action: String)
 signal on_line(text: DialogueLine)
 
-@export var is_waiting: Callable
+@export var wait := false
 @export var _started := false
 @export var _stack := []
 
@@ -20,7 +21,7 @@ func get_current_dialogue() -> Dialogue:
 	return null if not len(_stack) else DialogueServer.get_dialogue(_stack[-1].did)
 
 func tick():
-	if is_waiting.call():
+	if wait:
 		return
 	
 	if not _started and has_steps():
@@ -32,21 +33,28 @@ func tick():
 		finished.emit()
 	
 	var safety := 100
-	while has_steps() and not is_waiting.call():
+	if has_steps() and not wait:
+		tick_started.emit()
+	else:
+		return
+	
+	while has_steps() and not wait:
 		safety -= 1
 		if safety <= 0:
 			print("Tripped safety!", safety)
-			return
+			break
 		
 		var line := pop_next_line()
 		
-		if "action" in line:
-			on_action.emit(line.action)
-		elif "text" in line:
-			on_line.emit(DialogueLine.new(self, get_current_dialogue(), line))
+		if "action" in line.line:
+			on_action.emit(line.line.action)
+		elif "text" in line.line:
+			on_line.emit(DialogueLine.new(line.did, line.line))
 		else:
 			print("Huh? ", line)
-
+	
+	tick_finished.emit()
+	
 func start(id: String):
 	if _started:
 		push_warning("Already started.")
@@ -88,10 +96,22 @@ func goto(flow: String, clear_stack: bool = true):
 	
 	_stack.append(step)
 
+
+
+# Used for options.
+#func select() -> bool:
+#	if _parent and _stack and "lines" in _data:
+#		_stack.select_option(_parent._data, _index)
+#		return true
+#	push_error("Line is not an Option.")
+#	return false
+
 # select an option, adding it's lines to the stack
-func select_option(step: Dictionary, option: int):
+func select_option(option: DialogueLine): # step: Dictionary, option: int):
 	var d := get_current_dialogue()
-	var o := d.get_line(step.options[option])
+	print("OPTION ", option)
+	print("PARENT ", option.parent)
+	var o := d.get_line(option.parent._data.options[option.option_index])
 	if "then_goto" in o:
 		_stack.append({did=d.id, lines=o.lines, step=0, goto=o.then_goto})
 	else:
@@ -104,26 +124,26 @@ func pop_next_line() -> Dictionary:
 	
 	# only show lines that pass a test
 	var safety := 100
-	while "condition" in line:
+	while "condition" in line.line:
 		safety -= 1
 		if safety <= 0:
 			push_error("Tripped safety.")
 			return {}
 		
-		if StringAction.test(line.condition):
+		if StringAction.test(line.line.condition):
 			break
 		
 		line = _pop_next_line()
 	
 	safety = 100
-	while "call" in line or "goto" in line:
+	while "call" in line.line or "goto" in line.line:
 		safety -= 1
 		if safety <= 0:
 			push_error("Tripped safety.")
 			return {}
 		
-		if "call" in line:
-			goto(line.call, false)
+		if "call" in line.line:
+			goto(line.line.call, false)
 			line = _pop_next_line()
 		else:
 			goto(line.goto)
@@ -135,6 +155,7 @@ func _pop_next_line() -> Dictionary:
 	if len(_stack):
 		var step: Dictionary = _stack[-1]
 		var line: Dictionary = DialogueServer.get_dialogue(step.did).get_line(step.lines[step.step])
+		var out := { did=step.did, line=line }
 		
 		step.step += 1
 		
@@ -144,7 +165,7 @@ func _pop_next_line() -> Dictionary:
 			if "goto" in step:
 				goto(step.goto)
 		
-		return line
+		return out
 	
 	else:
 		push_error("Dialogue stack is empty.")

@@ -3,7 +3,6 @@ class_name FontHelper
 
 const DIR := "res://fonts"
 const DEFAULT_FONT := ""
-const DEFAULT_SIZE := 16
 const FALLBACK_FONTS := [
 	"res://fonts/unifont/unifont-13.0.01.ttf",
 	"res://fonts/unifont/unifont_upper-13.0.01.ttf"
@@ -20,7 +19,6 @@ var font_cache := {}
 var fontset_cache := {}
 
 func _get_font(path: String) -> Font:
-	
 	if not path in font_cache:
 		if file.file_exists(path):
 			var font:Font = Font.new()
@@ -29,7 +27,6 @@ func _get_font(path: String) -> Font:
 				if file.file_exists(fallback):
 					font.add_data(load(fallback))
 			font_cache[path] = font
-	
 	return font_cache.get(path)
 
 func _find_variant(id: String, tails: Array) -> String:
@@ -57,21 +54,16 @@ func _get_font_set(head: String) -> Dictionary:
 	
 	return fontset_cache[head]
 
-func set_fonts(node: Node, font: Dictionary):
-	if not is_instance_valid(node) or node.is_queued_for_deletion():
-		return
-	
-	var fname = font.get("font", DEFAULT_FONT)
-	var fsize = font.get("size", DEFAULT_SIZE)
-	
+func set_fonts(node: Node, fname: String):
 	if node is RichTextLabel:
 		var rt := node as RichTextLabel
 		var f = _get_font_set(fname)
-		node.add_theme_font_override("normal_font", f.r)
-		node.add_theme_font_override("bold_font", f.get("b", f.r))
-		node.add_theme_font_override("italics_font", f.get("i", f.r))
-		node.add_theme_font_override("bold_italics_font", f.get("bi", f.r))
-		node.add_theme_font_override("mono_font", f.r if not f.m else f.m)
+		if f.r:
+			node.add_theme_font_override("normal_font", f.r)
+			node.add_theme_font_override("bold_font", f.get("b", f.r))
+			node.add_theme_font_override("italics_font", f.get("i", f.r))
+			node.add_theme_font_override("bold_italics_font", f.get("bi", f.r))
+			node.add_theme_font_override("mono_font", f.r if not f.m else f.m)
 		
 	else:
 		var f = _get_font("%s_regular" % [fname])

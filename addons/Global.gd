@@ -1,16 +1,16 @@
 @tool
 extends Node
 
-var _d := {}
-
-var flow_manager: Node:
-	get: return get_tree().get_first_node_in_group("flow_manager")
+var T := {}
 
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		set_process(false)
 	
-	if Input.is_action_just_pressed("quick_save"):
+	if Input.is_action_just_pressed("reload_scene"):
+		get_tree().reload_current_scene()
+		
+	elif Input.is_action_just_pressed("quick_save"):
 		var file_path = "user://quick_save.scn"
 		var scene = PackedScene.new()
 		get_tree().current_scene.set_meta("STATE", State._get_changed_states())

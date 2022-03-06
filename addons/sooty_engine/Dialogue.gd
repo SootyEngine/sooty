@@ -84,7 +84,6 @@ func to_flow_id(s: String) -> String:
 func _line_to_index(line: Dictionary) -> int:
 	var index: int = line.line
 	lines[index] = line
-	line.erase("line")
 	return index
 
 func _parse_block(block: Dictionary) -> Dictionary:
@@ -162,6 +161,12 @@ func _parse_dialogue(data: Dictionary) -> Dictionary:
 		data.text = p[1].strip_edges()
 	
 	if data.lines:
+		# so options know who their parent line is
+		for i in len(data.lines):
+			data.lines[i].parent = data.line
+			data.lines[i].option_index = i
+		
+		# convert to line numbers
 		_parse_lines(data, "options")
 	
 	data.erase("lines")

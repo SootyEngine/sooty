@@ -54,64 +54,176 @@ static func patch(target: Variant, patch: Dictionary):
 			push_error("Couldn't find '%s' in %s." % [k, target])
 
 # Properly divides an array as arguments for a function. Like python.
-static func call_w_args(obj: Object, method: String, args: Array = []) -> Variant:
+static func call_w_args(obj: Object, method: String, in_args: Array = []) -> Variant:
 	if not obj.has_method(method):
-		push_error("No method '%s(%s)' in %s." % [method, args, obj])
+		push_error("No method '%s(%s)' in %s." % [method, in_args, obj])
 		return
 	
-	var arg_info = "_%s_ARGS" % method
+	var arg_info := get_method_arg_info(obj, method)
+	var old := in_args.duplicate(true)
+	var out := []
+	var kwargs := {}
 	
-	if arg_info in obj:
-		arg_info = obj[arg_info]
+	# pop last dictionary, regardless
+	if len(in_args) and in_args[-1] is Dictionary:
+		if "kwargs" in arg_info:
+			kwargs = in_args.pop_back()
+		else:
+			in_args.pop_back()
 		
-		var new_args := []
-		
-		for k in arg_info:
-			if not len(args):
-				break
-			
-			match k:
-				"kwargs":
-					if args[-1] is Dictionary:
-						new_args.append(args.pop_back())
-				"args":
-					new_args.append(args)
-				_:
-					new_args.append(args.pop_front())
-		
-		args = new_args
+	# add the initial values up front
+	for property in arg_info:
+		if property in ["args", "kwargs"]:
+			break
+		elif len(in_args):
+			var v = in_args.pop_front()
+#			if arg_info[property].type != typeof(v):
+#				var d = arg_info[property].get("default", null)
+#				push_error("call_w_args: Wrong type '%' (%s) given for '%s'. Using default (%s) instead." % [arg_info[property].type_name, v, property, d ])
+#				out.append(d)
+#			else:
+			out.append(v)
+		else:
+			out.append(arg_info[property].get("default", null))
 	
-	var got = obj.callv(method, args)
+	# insert the array
+	if "args" in arg_info:
+		if len(in_args):
+			out.append(in_args)
+		else:
+			out.append(arg_info.args.get("default", []))
+	
+	# pop back in the kwargs
+	if "kwargs" in arg_info:
+		out.append(kwargs)
+	
+#	print(method.to_upper())
+#	for i in len(out):
+#		print("\t* %s\t\t%s\t\t%s" % [old[i] if i < len(old) else "??", out[i], arg_info.values()[i]])
+	var got = obj.callv(method, out)
 	return got
 
-func type_name(v: Variant) -> String:
-	match typeof(v):
+static func get_method_arg_info(obj: Object, meth: String) -> Dictionary:
+	return get_methods(obj).get(meth, {})
+
+static func get_methods(obj: Object) -> Dictionary:
+	var script = obj.get_script()
+	if script == null:
+		return {}
+	var out := {}
+	for line in script.source_code.split("\n", false):
+		if line.begins_with("func "):
+			var p = line.substr(5).split("(")
+			var fname = p[0]
+			var args = _parese_method_arguments(p[1].rsplit(")")[0])
+			out[fname] = args
+	return out
+
+static func _parese_method_arguments(s: String) -> Dictionary:
+	if s.strip_edges() == "":
+		return {}
+	
+	var args = [["", ""]]
+	var open := {}
+	var in_name := true
+	
+	for c in s:
+		if not len(open):
+			if c == ":":
+				in_name = false
+				continue
+			elif c == ",":
+				args.append(["", ""])
+				in_name = true
+				continue
+		match c:
+			"{": UDict.tick(open, "{")
+			"}": UDict.tick(open, "{", -1)
+			"[": UDict.tick(open, "[")
+			"]": UDict.tick(open, "[", -1)
+			"(": UDict.tick(open, "(")
+			")": UDict.tick(open, "(", -1)
+		args[-1][0 if in_name else 1] += c
+	
+	var out := {}
+	for i in len(args):
+		var k = args[i][0].strip_edges()
+		var v = args[i][1].split("=", true, 1)
+		var type_name = v[0].strip_edges()
+		out[k] = {}
+		out[k].type_name = type_name
+		out[k].type = UObject.get_type_from_name(type_name)
+		if len(v) == 2:
+			out[k].default = str2var(v[1].strip_edges())
+	return out
+
+static func get_type_from_name(name: String) -> int:
+	match name:
+		"null": return TYPE_NIL
+		"bool": return TYPE_BOOL
+		"int": return TYPE_INT
+		"float": return TYPE_FLOAT
+		"String": return TYPE_STRING
+		"Vector2": return TYPE_VECTOR2
+		"Vector2i": return TYPE_VECTOR2I
+		"Rect2": return TYPE_RECT2
+		"Rect2i": return TYPE_RECT2I
+		"Vector3": return TYPE_VECTOR3
+		"Vector3i": return TYPE_VECTOR3I
+		"Transform2D": return TYPE_TRANSFORM2D
+		"Plane": return TYPE_PLANE
+		"Quaternion": return TYPE_QUATERNION
+		"AABB": return TYPE_AABB
+		"Basis": return TYPE_BASIS
+		"Transform3D": return TYPE_TRANSFORM3D
+		"Color": return TYPE_COLOR
+		"StringName": return TYPE_STRING_NAME
+		"NodePath": return TYPE_NODE_PATH
+		"RID": return TYPE_RID
+		"Object": return TYPE_OBJECT
+		"Callable": return TYPE_CALLABLE
+		"Signal": return TYPE_SIGNAL
+		"Dictionary": return TYPE_DICTIONARY
+		"Array": return TYPE_ARRAY
+		"PackedByteArray": return TYPE_PACKED_BYTE_ARRAY
+		"PackedInt32Array": return TYPE_PACKED_INT32_ARRAY
+		"PackedInt64Array": return TYPE_PACKED_INT64_ARRAY
+		"PackedFloat32Array": return TYPE_PACKED_FLOAT32_ARRAY
+		"PackedFloat64Array": return TYPE_PACKED_FLOAT64_ARRAY
+		"PackedStringArray": return TYPE_PACKED_STRING_ARRAY
+		"PackedVector2Array": return TYPE_PACKED_VECTOR2_ARRAY
+		"PackedVector3Array": return TYPE_PACKED_VECTOR3_ARRAY
+		"PackedColorArray": return TYPE_PACKED_COLOR_ARRAY
+		_: return TYPE_NIL
+
+static func get_name_from_type(type: int) -> String:
+	match type:
 		TYPE_NIL: return "null"
 		TYPE_BOOL: return "bool"
 		TYPE_INT: return "int"
 		TYPE_FLOAT: return "float"
 		TYPE_STRING: return "String"
-		
 		TYPE_VECTOR2: return "Vector2"
+		TYPE_VECTOR2I: return "Vector2i"
 		TYPE_RECT2: return "Rect2"
+		TYPE_RECT2I: return "Rect2i"
 		TYPE_VECTOR3: return "Vector3"
+		TYPE_VECTOR3I: return "Vector3i"
 		TYPE_TRANSFORM2D: return "Transform2D"
 		TYPE_PLANE: return "Plane"
 		TYPE_QUATERNION: return "Quaternion"
 		TYPE_AABB: return "AABB"
 		TYPE_BASIS: return "Basis"
-		TYPE_TRANSFORM2D: return "Transform2D"
-		TYPE_TRANSFORM3D: return "Transform2D"
+		TYPE_TRANSFORM3D: return "Transform3D"
 		TYPE_COLOR: return "Color"
-		
+		TYPE_STRING_NAME: return "StringName"
 		TYPE_NODE_PATH: return "NodePath"
 		TYPE_RID: return "RID"
 		TYPE_OBJECT: return "Object"
-		
+		TYPE_CALLABLE: return "Callable"
+		TYPE_SIGNAL: return "Signal"
 		TYPE_DICTIONARY: return "Dictionary"
 		TYPE_ARRAY: return "Array"
-		
-		TYPE_PACKED_BYTE_ARRAY: return "PoolByteArray"
 		TYPE_PACKED_BYTE_ARRAY: return "PackedByteArray"
 		TYPE_PACKED_INT32_ARRAY: return "PackedInt32Array"
 		TYPE_PACKED_INT64_ARRAY: return "PackedInt64Array"
@@ -121,6 +233,4 @@ func type_name(v: Variant) -> String:
 		TYPE_PACKED_VECTOR2_ARRAY: return "PackedVector2Array"
 		TYPE_PACKED_VECTOR3_ARRAY: return "PackedVector3Array"
 		TYPE_PACKED_COLOR_ARRAY: return "PackedColorArray"
-		
 		_: return "???"
-

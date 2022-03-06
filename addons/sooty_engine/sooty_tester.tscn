@@ -53,7 +53,7 @@ scale = Vector2(5.12038, 4.67631)
 texture = ExtResource( "2_iu2hg" )
 
 [node name="Camera2D" type="Camera2D" parent="Node2D"]
-position = Vector2(514, 299)
+position = Vector2(514, 298)
 rotating = true
 current = true
 script = ExtResource( "3_7u876" )

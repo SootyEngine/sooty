@@ -44,11 +44,9 @@ static func _do_assign(parts: Array):
 	var old_value = State[key]
 	var new_value = _str_to_var(parts[2])
 	match parts[1]:
-		"=": State[key] = new_value
-		"+=": State[key] = old_value + new_value
-		"-=": State[key] = old_value - new_value
-	State.changed.emit(key)
-	State.changed_from.emit(key, old_value)
+		"=": State._set(key, new_value)
+		"+=": State._set(key, old_value + new_value)
+		"-=": State._set(key, old_value - new_value)
 	return State[key]
 
 static func _do_function(parts: Array):
