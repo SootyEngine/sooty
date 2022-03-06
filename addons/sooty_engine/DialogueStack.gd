@@ -9,7 +9,7 @@ signal option_selected(option: Dictionary)
 signal on_action(action: String)
 signal on_line(text: DialogueLine)
 
-@export var _wait := false
+@export var is_waiting: Callable
 @export var _started := false
 @export var _stack := []
 
@@ -19,11 +19,9 @@ func has_steps() -> bool:
 func get_current_dialogue() -> Dialogue:
 	return null if not len(_stack) else DialogueServer.get_dialogue(_stack[-1].did)
 
-func wait():
-	_wait = true
-
 func tick():
-	_wait = false
+	if is_waiting.call():
+		return
 	
 	if not _started and has_steps():
 		_started = true
@@ -34,7 +32,7 @@ func tick():
 		finished.emit()
 	
 	var safety := 100
-	while has_steps() and not _wait:
+	while has_steps() and not is_waiting.call():
 		safety -= 1
 		if safety <= 0:
 			print("Tripped safety!", safety)
@@ -67,10 +65,6 @@ func start(id: String):
 			var first = DialogueServer.get_dialogue(id).flows.keys()[0]
 			goto("%s.%s" % [id, first])
 
-#func end():
-#	if len(_stack):
-#		_stack.clear()
-
 func goto(flow: String, clear_stack: bool = true):
 	var step := { step=0 }
 	
@@ -90,8 +84,6 @@ func goto(flow: String, clear_stack: bool = true):
 		return
 	
 	if clear_stack:
-#		assert(false)
-#		print("clear stack")
 		_stack.clear()
 	
 	_stack.append(step)

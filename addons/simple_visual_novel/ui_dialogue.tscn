@@ -1,0 +1,127 @@
+[gd_scene load_steps=5 format=3 uid="uid://cak5qvo5tsctv"]
+
+[ext_resource type="Script" path="res://addons/simple_visual_novel/ui_dialogue.gd" id="1_vd4rm"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel3.gd" id="2_es3h4"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextAnimation.gd" id="3_35sk3"]
+[ext_resource type="Script" path="res://addons/simple_visual_novel/ui_option.gd" id="4_v0qse"]
+
+[node name="dialogue" type="Control"]
+visible = false
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -178.0
+offset_top = -239.0
+offset_right = 178.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource( "1_vd4rm" )
+__meta__ = {
+"_edit_group_": true,
+"_edit_layout_mode": 1,
+"_edit_use_custom_anchors": false
+}
+_from = NodePath("c/from")
+_text = NodePath("c/text")
+_options = NodePath("c/options")
+_option = NodePath("c/options/c/c/option")
+_option_container = NodePath("c/options/c/c/option")
+
+[node name="backing" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.2)
+
+[node name="c" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+__meta__ = {
+"_edit_layout_mode": 1,
+"_edit_use_custom_anchors": false
+}
+
+[node name="from" type="RichTextLabel" parent="c"]
+offset_right = 356.0
+offset_bottom = 117.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource( "2_es3h4" )
+effects_mode = 0
+
+[node name="@@64447" type="VScrollBar" parent="c/from"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+max_value = 0.0
+step = 1.0
+
+[node name="text" type="RichTextLabel" parent="c"]
+offset_top = 121.0
+offset_right = 356.0
+offset_bottom = 239.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource( "3_35sk3" )
+effect_time = 18.6525
+_triggers = {}
+_alpha_real = []
+_alpha_goal = []
+
+[node name="@@64448" type="VScrollBar" parent="c/text"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+max_value = 0.0
+step = 1.0
+
+[node name="options" type="Control" parent="c"]
+visible = false
+offset_top = 162.0
+offset_right = 356.0
+offset_bottom = 239.0
+size_flags_vertical = 3
+__meta__ = {
+"_edit_layout_mode": 0,
+"_edit_use_custom_anchors": false
+}
+
+[node name="c" type="MarginContainer" parent="c/options"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="c" type="VBoxContainer" parent="c/options/c"]
+offset_right = 356.0
+offset_bottom = 77.0
+__meta__ = {
+"_edit_layout_mode": 0,
+"_edit_use_custom_anchors": false
+}
+
+[node name="option" type="Button" parent="c/options/c/c"]
+offset_right = 356.0
+offset_bottom = 31.0
+flat = true
+script = ExtResource( "4_v0qse" )
+
+[node name="back" type="ColorRect" parent="c/options/c/c/option"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.192157)
+
+[node name="text" type="RichTextLabel" parent="c/options/c/c/option"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource( "2_es3h4" )
+bbcode = "clicky"
+
+[node name="@@64449" type="VScrollBar" parent="c/options/c/c/option/text"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+max_value = 0.0
+step = 1.0

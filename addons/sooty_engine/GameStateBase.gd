@@ -3,7 +3,7 @@ extends Node
 class_name GameStateBase
 
 signal changed(key: String)
-signal changed_from(key: String, old: Variant)
+signal changed_from_to(key: String, from: Variant, to: Variant)
 
 var _default := {}
 
@@ -15,6 +15,16 @@ func _init():
 
 func _post_init():
 	pass
+
+func _set(property: StringName, value) -> bool:
+	if property in self:
+		var old = self[property]
+		if old != value:
+			self[property] = value
+			changed.emit(property)
+			changed_from_to.emit(property, old, value)
+		return true
+	return false
 
 func _reset_state():
 	UObject.set_state(self, _default)

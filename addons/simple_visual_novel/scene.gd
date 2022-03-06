@@ -16,7 +16,7 @@ const _bg_ARGS := ["", "args", "kwargs"]
 func bg(a, args: Array = [], kwargs: Dictionary = {}):
 	var path := UFile.get_user_dir().plus_file("bgs").plus_file(a)
 	
-	State.bg = a
+	State.set("bg", a)
 	
 	for e in UFile.EXT_IMAGE:
 		var p = path + "." + e

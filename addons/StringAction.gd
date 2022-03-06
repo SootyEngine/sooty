@@ -54,19 +54,6 @@ static func _do_assign(parts: Array):
 static func _do_function(parts: Array):
 	var args := []
 	var fname: String = parts.pop_front()
-#	var target: Node
-#	var target_id := "action_target"
-#
-#	if "." in fname:
-#		var p := fname.split(".")
-#		target_id = p[0]
-#		fname = p[1]
-#
-#	target = Global.get_tree().get_first_node_in_group(target_id)
-#
-#	if not target:
-#		push_error("Can't find node '%s'." % target_id)
-#		return
 	
 	for p in parts:
 		if ":" in p:
@@ -78,7 +65,14 @@ static func _do_function(parts: Array):
 		else:
 			args.append(_str_to_var(p))
 	
-	for node in Global.get_tree().get_nodes_in_group("sa:%s" % fname):
+	var gname := fname
+	
+	if "." in fname:
+		var p := fname.split(".", true, 1)
+		gname = p[0]
+		fname = p[1]
+	
+	for node in Global.get_tree().get_nodes_in_group("sa:%s" % gname):
 		UObject.call_w_args(node, fname, args)
 
 static func _split_string(s: String) -> Array:
