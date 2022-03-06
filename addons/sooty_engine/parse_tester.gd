@@ -36,36 +36,11 @@ func _action(a: String):
 	print("ACTION ", a)
 
 func _run():
-	print(EvalHelper.new().parse('ok.who_cares who $cares 1,false,ok,4 dmg:10 str:20,30 quest:true'))
-	print(EvalHelper.new().parse('score++'))
-	print(EvalHelper.new().parse('score += 20'))
+#	print(EvalHelper.new().parse('ok.who_cares who $cares 1,false,ok,4 dmg:10 str:20,30 quest:true'))
+#	print(EvalHelper.new().parse('score++'))
+#	print(EvalHelper.new().parse('score += 20'))
 #	print(EvalHelper.parse("ok who cares not me"))
-
-func _dtest():
-#	_parse_test()
-	var d := Dialogue.new(test_string, false)
-	var dm := DialogueManager.new()
-	
-	dm.action.connect(_action)
-	dm.add_dialogue("mister", d)
-	dm.start("mister")
-	var safety := 20
-	while dm.is_active():
-		safety -= 1
-		if safety <= 0:
-			print("safety")
-			break
-		
-		var line := dm.get_next_line()
-		
-		if "options" in line:
-			dm.select_option(line, 0)
-		
-		if "action" in line:
-			dm.do_action(line.action)
-#			dm.action.emit(line.action)
-		else:
-			print(line)
+	pass
 
 func _parse_test():
 	var d := Dialogue.new(test_string, false)

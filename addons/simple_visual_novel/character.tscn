@@ -1,0 +1,83 @@
+[gd_scene load_steps=8 format=3 uid="uid://buar7svotrmn"]
+
+[ext_resource type="Script" path="res://addons/simple_visual_novel/character.gd" id="1_wo8qt"]
+
+[sub_resource type="Animation" id="Animation_3fn5u"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(-33, 518)]
+}
+
+[sub_resource type="Animation" id="Animation_vss05"]
+resource_name = "fade_in"
+
+[sub_resource type="Animation" id="Animation_k1wnq"]
+resource_name = "from_left"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.993174),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-33, 518), Vector2(297, 428)]
+}
+
+[sub_resource type="Animation" id="Animation_eildp"]
+resource_name = "from_right"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.995332),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1116, 536), Vector2(728, 436)]
+}
+
+[sub_resource type="Animation" id="Animation_mixq8"]
+length = 0.001
+
+[sub_resource type="Animation" id="Animation_sa40o"]
+resource_name = "fade_in"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[node name="character" type="Node2D"]
+position = Vector2(-33, 518)
+script = ExtResource( "1_wo8qt" )
+
+[node name="movement" type="AnimationPlayer" parent="."]
+anims/RESET = SubResource( "Animation_3fn5u" )
+anims/fade_in = SubResource( "Animation_vss05" )
+anims/from_left = SubResource( "Animation_k1wnq" )
+anims/from_right = SubResource( "Animation_eildp" )
+
+[node name="color" type="AnimationPlayer" parent="."]
+anims/RESET = SubResource( "Animation_mixq8" )
+anims/fade_in = SubResource( "Animation_sa40o" )

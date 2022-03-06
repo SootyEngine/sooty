@@ -14,7 +14,7 @@ var EXTENSIONS := {
 	"yaml": { name="YAML", start_hidden=false },
 	"ini": { name="INI File", start_hidden=false },
 	"cfg": { name="Config File", start_hidden=false },
-	"dlg": { name="Dialogue File", start_hidden=false },
+	"soot": { name="Sooty Dialogue", start_hidden=false },
 #	"rpy": { name="Ren'py Script", start_hidden=true },
 	"txt": { name="Text File", start_hidden=true },
 	"gd": { name="GDScript", start_hidden=true },

@@ -21,11 +21,11 @@ enum {
 
 enum Align { NONE, LEFT, CENTER, RIGHT }
 enum Outline { OFF, DARKEN, LIGHTEN }
-enum EffectsMode { OFF, RUNTIME, ALWAYS }
+enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
 
 @export_multiline var bbcode := "": set = set_bbcode
 
-@export var effects_mode: EffectsMode = EffectsMode.OFF
+@export var effects_mode: EffectsMode = EffectsMode.OFF_IN_EDITOR
 @export var alignment: Align = Align.CENTER
 @export var color: Color = Color.WHITE
 
@@ -42,9 +42,6 @@ enum EffectsMode { OFF, RUNTIME, ALWAYS }
 @export var markdown_format_italics := "[i]%s[]"
 @export var markdown_format_bold_italics := "[bi]%s[]"
 @export var markdown_format_strike_through := "[s]%s[]"
-
-@export var context_enabled := true
-var context = [State]
 
 var _stack: Array = []
 var _state: Dictionary = {}
@@ -161,9 +158,12 @@ func _parse_opening(tag: String):
 		if len(p) == 2:
 			_parse_tags(p[1])
 		
-		var got = execute_expression(p[0])
-		if got is String and got == EXPRESSION_FAILED:
+		var got = StringAction.execute(p[0])
+		if got == null:
+			push_error("Couldn't replace '%s'." % p[0])
+			push_bgcolor(Color.RED)
 			_add_text("[%s]" % tag)
+			pop()
 		else:
 			_add_text(str(got))
 		
@@ -203,14 +203,14 @@ func _passes_condition(cond: String, raw: String) -> bool:
 	match cond:
 		"if":
 			var test := raw.split(" ", true, 1)[1]
-			_state.condition = true if execute_expression(test, false) else false
+			_state.condition = StringAction.test(test)
 			_stack_push(T_CONDITION)
 			
 		"elif":
 			prints("ELIF", raw)
 			if "condition" in _state and _state.condition == false:
 				var test := raw.split(" ", true, 1)[1]
-				_state.condition = true if execute_expression(test, false) else false
+				_state.condition = StringAction.test(test)
 				prints("tested:", test, "got:", _state.condition)
 		
 		"else":
@@ -296,7 +296,7 @@ func _push_effect(effect :String, info :String):
 	if effects_mode == EffectsMode.OFF:
 		return
 	
-	if effects_mode == EffectsMode.RUNTIME and Engine.is_editor_hint():
+	if effects_mode == EffectsMode.OFF_IN_EDITOR and Engine.is_editor_hint():
 		return
 	
 	_install_effect(effect)
@@ -436,41 +436,41 @@ func _get_if_chain(s:String) -> Array:
 	
 	return elifs
 	
-func _replace_conditions(s: String):
-	for test in _get_if_chain(s):
-		if execute_expression(test[0]):
-			return test[1]
-	return ""
+#func _replace_conditions(s: String):
+#	for test in _get_if_chain(s):
+#		if execute_expression(test[0]):
+#			return test[1]
+#	return ""
 
-const EXPRESSION_FAILED:String = "%EXPRESSION_FAILED%"
-func execute_expression(e: String, default=EXPRESSION_FAILED):
-	if not context_enabled:
-		return default
-	
-	var objs := context
-	
-	if not len(objs):
-		if get_tree():
-			objs = [Global, get_tree().current_scene]
-		else:
-			objs = [Global]
-	
-	var expression := Expression.new()
-	if expression.parse(e) == OK:
-		var errors := []
-		
-		# check each different object
-		for c in objs:
-			var result = expression.execute([], c, false)
-			if expression.has_execute_failed():
-				errors.append(expression.get_error_text())
-			else:
-				return result
-		
-		for e in errors:
-			push_error(e)
-	
-	return default
+#const EXPRESSION_FAILED:String = "%EXPRESSION_FAILED%"
+#func execute_expression(e: String, default=EXPRESSION_FAILED):
+#	if not context_enabled:
+#		return default
+#
+#	var objs := context
+#
+#	if not len(objs):
+#		if get_tree():
+#			objs = [Global, get_tree().current_scene]
+#		else:
+#			objs = [Global]
+#
+#	var expression := Expression.new()
+#	if expression.parse(e) == OK:
+#		var errors := []
+#
+#		# check each different object
+#		for c in objs:
+#			var result = expression.execute([], c, false)
+#			if expression.has_execute_failed():
+#				errors.append(expression.get_error_text())
+#			else:
+#				return result
+#
+#		for e in errors:
+#			push_error(e)
+#
+#	return default
 
 func _has_effect(id:String) -> bool:
 	for e in custom_effects:
@@ -500,7 +500,7 @@ func _install_effect(id:String) -> bool:
 			var effect: RichTextEffect = load(path).new()
 			effect.resource_name = id
 #			effect.resource_local_to_scene = true
-#			Global._d[effect] = self
+			Global._d[effect] = self
 			install_effect(effect)
 			return true
 

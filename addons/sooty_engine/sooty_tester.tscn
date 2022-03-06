@@ -1,13 +1,229 @@
-[gd_scene load_steps=3 format=3 uid="uid://c4w83k2iu1blv"]
+[gd_scene load_steps=10 format=3 uid="uid://bbbrtp7r5a2wi"]
 
-[ext_resource type="Script" path="res://addons/sooty_engine/DialogueManager.gd" id="1_85x62"]
+[ext_resource type="Script" path="res://addons/simple_visual_novel/scene.gd" id="1_iw4k6"]
 [ext_resource type="Script" path="res://addons/sooty_engine/dummy_messenger.gd" id="2_a28c6"]
+[ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="2_iu2hg"]
+[ext_resource type="PackedScene" uid="uid://buar7svotrmn" path="res://addons/simple_visual_novel/character.tscn" id="2_q2okp"]
+[ext_resource type="Script" path="res://addons/sooty_engine/captions/text_manager.gd" id="3_40qba"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel3.gd" id="3_4378l"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextAnimation.gd" id="4_6a0x3"]
+[ext_resource type="Script" path="res://addons/ui/dialogue/ui_options.gd" id="5_lxqkc"]
+[ext_resource type="Script" path="res://addons/ui/dialogue/ui_option.gd" id="6_205lf"]
 
-[node name="Node2D" type="Node2D"]
-script = ExtResource( "1_85x62" )
+[node name="dialogue_tester" type="CanvasLayer"]
+script = ExtResource( "1_iw4k6" )
+
+[node name="bg" type="TextureRect" parent="." groups=["bg"]]
+anchor_right = 1.0
+anchor_bottom = 1.0
+ignore_texture_size = true
+stretch_mode = 5
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="paul" parent="." instance=ExtResource( "2_q2okp" )]
+
+[node name="Sprite2D" type="Sprite2D" parent="paul"]
+position = Vector2(0, -32)
+texture = ExtResource( "2_iu2hg" )
 
 [node name="dummer1" type="Node" parent="." groups=["dummy1"]]
 script = ExtResource( "2_a28c6" )
 
 [node name="dummer2" type="Node" parent="." groups=["dummy2"]]
 script = ExtResource( "2_a28c6" )
+
+[node name="texts" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( "3_40qba" )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="bottom" type="Control" parent="texts"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -178.0
+offset_top = -239.0
+offset_right = 178.0
+grow_horizontal = 2
+grow_vertical = 0
+__meta__ = {
+"_edit_group_": true,
+"_edit_layout_mode": 1,
+"_edit_use_custom_anchors": false
+}
+
+[node name="backing" type="ColorRect" parent="texts/bottom"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.2)
+
+[node name="bottom" type="VBoxContainer" parent="texts/bottom"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+__meta__ = {
+"_edit_layout_mode": 1,
+"_edit_use_custom_anchors": false
+}
+
+[node name="from" type="RichTextLabel" parent="texts/bottom/bottom"]
+offset_right = 356.0
+offset_bottom = 77.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource( "3_4378l" )
+effects_mode = 0
+
+[node name="text" type="RichTextLabel" parent="texts/bottom/bottom"]
+offset_top = 81.0
+offset_right = 356.0
+offset_bottom = 158.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource( "4_6a0x3" )
+effect_time = 5639.76
+_triggers = {}
+_alpha_real = []
+_alpha_goal = []
+
+[node name="options" type="Control" parent="texts/bottom/bottom"]
+offset_top = 162.0
+offset_right = 356.0
+offset_bottom = 239.0
+size_flags_vertical = 3
+script = ExtResource( "5_lxqkc" )
+__meta__ = {
+"_edit_layout_mode": 0,
+"_edit_use_custom_anchors": false
+}
+_button_prefab = NodePath("c/c/option")
+
+[node name="c" type="MarginContainer" parent="texts/bottom/bottom/options"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="c" type="VBoxContainer" parent="texts/bottom/bottom/options/c"]
+offset_right = 356.0
+offset_bottom = 77.0
+__meta__ = {
+"_edit_layout_mode": 0,
+"_edit_use_custom_anchors": false
+}
+
+[node name="option" type="Button" parent="texts/bottom/bottom/options/c/c"]
+offset_right = 356.0
+offset_bottom = 31.0
+flat = true
+script = ExtResource( "6_205lf" )
+
+[node name="back" type="ColorRect" parent="texts/bottom/bottom/options/c/c/option"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.192157)
+
+[node name="text" type="RichTextLabel" parent="texts/bottom/bottom/options/c/c/option"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource( "3_4378l" )
+bbcode = "clicky"
+
+[node name="top" type="Control" parent="texts"]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -178.0
+offset_right = 178.0
+offset_bottom = 239.0
+grow_horizontal = 2
+grow_vertical = 0
+__meta__ = {
+"_edit_group_": true,
+"_edit_layout_mode": 1,
+"_edit_use_custom_anchors": false
+}
+
+[node name="backing" type="ColorRect" parent="texts/top"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.2)
+
+[node name="bottom" type="VBoxContainer" parent="texts/top"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+__meta__ = {
+"_edit_layout_mode": 1,
+"_edit_use_custom_anchors": false
+}
+
+[node name="from" type="RichTextLabel" parent="texts/top/bottom"]
+offset_right = 356.0
+offset_bottom = 77.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource( "3_4378l" )
+effects_mode = 0
+
+[node name="text" type="RichTextLabel" parent="texts/top/bottom"]
+offset_top = 81.0
+offset_right = 356.0
+offset_bottom = 158.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource( "4_6a0x3" )
+effect_time = 5614.62
+_triggers = {}
+_alpha_real = []
+_alpha_goal = []
+
+[node name="options" type="Control" parent="texts/top/bottom"]
+offset_top = 162.0
+offset_right = 356.0
+offset_bottom = 239.0
+size_flags_vertical = 3
+script = ExtResource( "5_lxqkc" )
+__meta__ = {
+"_edit_layout_mode": 0,
+"_edit_use_custom_anchors": false
+}
+_button_prefab = NodePath("c/c/option")
+
+[node name="c" type="MarginContainer" parent="texts/top/bottom/options"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="c" type="VBoxContainer" parent="texts/top/bottom/options/c"]
+offset_right = 356.0
+offset_bottom = 77.0
+__meta__ = {
+"_edit_layout_mode": 0,
+"_edit_use_custom_anchors": false
+}
+
+[node name="option" type="Button" parent="texts/top/bottom/options/c/c"]
+offset_right = 356.0
+offset_bottom = 31.0
+flat = true
+script = ExtResource( "6_205lf" )
+
+[node name="back" type="ColorRect" parent="texts/top/bottom/options/c/c/option"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.192157)
+
+[node name="text" type="RichTextLabel" parent="texts/top/bottom/options/c/c/option"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource( "3_4378l" )
+bbcode = "clicky"

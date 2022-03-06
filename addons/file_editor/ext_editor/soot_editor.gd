@@ -6,6 +6,9 @@ var choices_opened := true
 func _init_settings():
 	super._init_settings()
 	set_string_delimiters(['" "'])
+	self.auto_brace_completion_pairs["*"] = "*"
+	self.auto_brace_completion_pairs["|"] = "|"
+	self.auto_brace_completion_pairs["<"] = ">"
 
 func _popup_init():
 	var m := get_menu()

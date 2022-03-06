@@ -10,19 +10,24 @@ config_version=5
 
 _global_script_classes=[{
 "base": "Resource",
+"class": &"Character",
+"language": &"GDScript",
+"path": "res://addons/character_system/Character.gd"
+}, {
+"base": "Resource",
 "class": &"Dialogue",
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/Dialogue.gd"
 }, {
-"base": "Node",
-"class": &"DialogueManager",
+"base": "Resource",
+"class": &"DialogueLine",
 "language": &"GDScript",
-"path": "res://addons/sooty_engine/DialogueManager.gd"
+"path": "res://addons/sooty_engine/DialogueLine.gd"
 }, {
 "base": "Resource",
-"class": &"EvalHelper",
+"class": &"DialogueStack",
 "language": &"GDScript",
-"path": "res://addons/sooty_engine/EvalHelper.gd"
+"path": "res://addons/sooty_engine/DialogueStack.gd"
 }, {
 "base": "Node",
 "class": &"FE_BaseFile",
@@ -75,6 +80,21 @@ _global_script_classes=[{
 "path": "res://addons/sooty_engine/GameStateBase.gd"
 }, {
 "base": "Resource",
+"class": &"Goal",
+"language": &"GDScript",
+"path": "res://addons/quest_system/Goal.gd"
+}, {
+"base": "Resource",
+"class": &"Inventory",
+"language": &"GDScript",
+"path": "res://addons/inventory_system/Inventory.gd"
+}, {
+"base": "Resource",
+"class": &"Item",
+"language": &"GDScript",
+"path": "res://addons/inventory_system/Item.gd"
+}, {
+"base": "Resource",
 "class": &"Markdown",
 "language": &"GDScript",
 "path": "res://addons/rich_text/Markdown.gd"
@@ -83,6 +103,11 @@ _global_script_classes=[{
 "class": &"OptionsMenu",
 "language": &"GDScript",
 "path": "res://addons/file_editor/OptionsMenu.gd"
+}, {
+"base": "Resource",
+"class": &"Quest",
+"language": &"GDScript",
+"path": "res://addons/quest_system/Quest.gd"
 }, {
 "base": "RichTextLabel3",
 "class": &"RichTextAnimation",
@@ -93,11 +118,52 @@ _global_script_classes=[{
 "class": &"RichTextLabel3",
 "language": &"GDScript",
 "path": "res://addons/rich_text/RichTextLabel3.gd"
+}, {
+"base": "Resource",
+"class": &"StringAction",
+"language": &"GDScript",
+"path": "res://addons/StringAction.gd"
+}, {
+"base": "Resource",
+"class": &"UDict",
+"language": &"GDScript",
+"path": "res://addons/util/UDict.gd"
+}, {
+"base": "RefCounted",
+"class": &"UError",
+"language": &"GDScript",
+"path": "res://addons/util/UError.gd"
+}, {
+"base": "RefCounted",
+"class": &"UFile",
+"language": &"GDScript",
+"path": "res://addons/util/UFile.gd"
+}, {
+"base": "Resource",
+"class": &"UFlag",
+"language": &"GDScript",
+"path": "res://addons/util/UFlag.gd"
+}, {
+"base": "RefCounted",
+"class": &"UList",
+"language": &"GDScript",
+"path": "res://addons/util/UList.gd"
+}, {
+"base": "Resource",
+"class": &"UObject",
+"language": &"GDScript",
+"path": "res://addons/util/UObject.gd"
+}, {
+"base": "Resource",
+"class": &"URand",
+"language": &"GDScript",
+"path": "res://addons/util/URand.gd"
 }]
 _global_script_class_icons={
+"Character": "",
 "Dialogue": "",
-"DialogueManager": "",
-"EvalHelper": "",
+"DialogueLine": "",
+"DialogueStack": "",
 "FE_BaseFile": "",
 "FE_Directory": "",
 "FE_Editor": "",
@@ -108,24 +174,55 @@ _global_script_class_icons={
 "FontHelper": "",
 "FontSet": "",
 "GameStateBase": "",
+"Goal": "",
+"Inventory": "",
+"Item": "",
 "Markdown": "",
 "OptionsMenu": "",
+"Quest": "",
 "RichTextAnimation": "",
-"RichTextLabel3": ""
+"RichTextLabel3": "",
+"StringAction": "",
+"UDict": "",
+"UError": "",
+"UFile": "",
+"UFlag": "",
+"UList": "",
+"UObject": "",
+"URand": ""
 }
 
 [application]
 
 config/name="sooty_engine"
-run/main_scene="res://addons/file_editor/file_editor.tscn"
+run/main_scene="res://addons/sooty_engine/sooty_tester.tscn"
 config/icon="res://icon.png"
 config/features=PackedStringArray("4.0", "Vulkan Clustered")
 
 [autoload]
 
 Global="*res://addons/Global.gd"
-State="*res://addons/state.gd"
+State="*res://state.gd"
+DialogueServer="*res://addons/sooty_engine/DialogueServer.gd"
 
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/file_editor/plugin.cfg", "res://addons/tool_button/plugin.cfg")
+
+[input]
+
+continue={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"store_command":true,"alt_pressed":false,"shift_pressed":false,"meta_pressed":false,"command_pressed":false,"pressed":false,"keycode":0,"physical_keycode":32,"unicode":0,"echo":false,"script":null)
+]
+}
+quick_save={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"store_command":true,"alt_pressed":false,"shift_pressed":false,"meta_pressed":false,"command_pressed":false,"pressed":false,"keycode":0,"physical_keycode":16777248,"unicode":0,"echo":false,"script":null)
+]
+}
+quick_load={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"store_command":true,"alt_pressed":false,"shift_pressed":false,"meta_pressed":false,"command_pressed":false,"pressed":false,"keycode":0,"physical_keycode":16777249,"unicode":0,"echo":false,"script":null)
+]
+}

@@ -33,15 +33,15 @@ enum { TRIG_NONE, TRIG_WAIT, TRIG_PACE, TRIG_HOLD, TRIG_SKIP, TRIG_COMMAND, TRIG
 @export var fade_out_speed := 120.0
 
 @export_range(0.0, 1.0) var progress := 0.0: set = set_progress
-var effect_time := 0.0
-var visible_character := -1
+@export var effect_time := 0.0
+@export var visible_character := -1
 
-var _wait := 0.0
-var _pace := 1.0
-var _skipping := false
-var _triggers := {}
-var _alpha_real: Array[float] = []
-var _alpha_goal: Array[float] = []
+@export var _wait := 0.0
+@export var _pace := 1.0
+@export var _skipping := false
+@export var _triggers := {}
+@export var _alpha_real: Array[float] = []
+@export var _alpha_goal: Array[float] = []
 
 func is_finished() -> bool:
 	return progress == 0 if fade_out else progress == 1.0

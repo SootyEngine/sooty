@@ -5,20 +5,24 @@ class_name Dialogue
 @export var flows := {}
 @export var lines := {}
 @export var errors := []
+@export var path := ""
+@export var last_modified := 0
 
-func _init(d_id: String, is_id: bool = true):
-	var text: String = d_id
-	
+func _init(text: String, is_id: bool = true):
 	if is_id:
-		var path := "res://dialogue/%s.dlg" % [id.replace(".", "/")]
-		var file := File.new()
-		if not file.file_exists(path):
-			push_error("No dialogue '%s'." % id)
-			return
-		
-		var _err := file.open(path, File.READ)
-		text = file.get_as_text()
-		file.close()
+		path = "res://dialogue/%s.soot" % text.replace(".", "/")
+		_reload()
+	else:
+		_reload_from_text(text)
+
+func _reload():
+	var text := UFile.load_text(path)
+	_reload_from_text(text)
+	last_modified = UFile.get_modified_time(path)
+
+func _reload_from_text(text: String):
+	flows.clear()
+	lines.clear()
 	
 	var text_lines := text.split("\n")
 	var blocks := []
@@ -31,7 +35,7 @@ func _init(d_id: String, is_id: bool = true):
 		if text_lines[i].strip_edges(true, false).begins_with("//"):
 			continue
 		
-		var deep := count_leading(text_lines[i], "\t")
+		var deep := _count_leading_tabs(text_lines[i])
 		var line := { line=i, text=text_lines[i].strip_edges(), lines=[] }
 		
 		if deep+1 > len(stack):
@@ -49,8 +53,14 @@ func _init(d_id: String, is_id: bool = true):
 	
 	for i in len(blocks):
 		blocks[i] = _parse_block(blocks[i])
+	
+#	output(flows)
+#	output(lines)
 
-func has_error() -> bool:
+func was_file_modified() -> bool:
+	return path != "" and UFile.get_modified_time(path) != last_modified
+
+func has_errors() -> bool:
 	return len(errors) != 0
 
 func has_flows() -> bool:
@@ -97,14 +107,14 @@ func _parse_lines(line: Dictionary, key: String = "lines"):
 		if "is_prop_line" in l:
 			if not "properties" in line:
 				line.properties = {}
-			merge(line.properties, l.properties)
+			_merge(line.properties, l.properties)
 		else:
 			new_list.append(_line_to_index(l))
 	line[key] = new_list
 
 func _parse_line(data: Dictionary) -> Dictionary:
 	var text = data.text
-	if text.begins_with("<"): return _parse_option(data)
+	if text.begins_with(">"): return _parse_option(data)
 	if text.begins_with("@"): return _parse_action(data)
 	if text.begins_with(">>"): return _parse_flow_goto(data)
 	if text.begins_with("::"): return _parse_flow_call(data)
@@ -123,10 +133,7 @@ func _parse_line_property(data: Dictionary) -> Dictionary:
 	return data
 	
 func _parse_option(data: Dictionary) -> Dictionary:
-	var text: String = data.text.substr(1)
-	var p := text.split(">", true, 1)
-	data.text = p[1].strip_edges()
-	data.option = p[0]
+	data.text = data.text.substr(len(">"))
 	
 	_extract_flow_option(data)
 	
@@ -140,7 +147,7 @@ func _parse_option(data: Dictionary) -> Dictionary:
 	return data
 
 func _parse_action(data: Dictionary) -> Dictionary:
-	var text: String = data.text.substr(1)
+	var text: String = data.text.substr(len("@"))
 	data.action = text
 	data.erase("text")
 	data.erase("lines")
@@ -202,8 +209,9 @@ func _extract_properties(data: Dictionary):
 			data.text += p[1].strip_edges()
 			
 			for prop in p[0].split(" "):
-				p = prop.split(":", true, 1)
-				properties[p[0]] = p[1]
+				if ":" in prop:
+					p = prop.split(":", true, 1)
+					properties[p[0]] = p[1]
 		
 		data.properties = properties
 
@@ -219,13 +227,17 @@ func _extract_conditional(data: Dictionary):
 			
 			data.condition = p[0]
 
-func count_leading(s: String, c: String) -> int:
+func _count_leading_tabs(s: String) -> int:
 	var out := 0
-	while s[out] == c:
-		out += 1
+	for c in s:
+		match c:
+			"\t": out += 4
+			" ": out += 1
+			_: break
+	out /= 4
 	return out
 
-func merge(target: Dictionary, patch: Dictionary) -> Dictionary:
+func _merge(target: Dictionary, patch: Dictionary) -> Dictionary:
 	for k in patch:
 		target[k] = patch[k]
 	return target

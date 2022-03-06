@@ -27,7 +27,7 @@ const C_OPTION_TAG_INNER := Color.LIGHT_SKY_BLUE
 const C_OPTION_TEXT := Color.LIGHT_BLUE
 
 # strings
-const S_FLOW := "=="
+const S_FLOW := "==="
 const S_FLOW_GOTO := ">>"
 const S_FLOW_CALL := "::"
 const S_COMMENT := "//"
@@ -41,6 +41,7 @@ func c(clr: Color):
 	return {color=clr}
 
 func _get_var_color(v: String) -> Color:
+	if v.begins_with("$"): return Color.HOT_PINK
 	if v.is_valid_int(): return C_VAR_INT
 	if v.is_valid_float(): return C_VAR_FLOAT
 	if v in ["true", "false"]: return C_VAR_BOOL
@@ -138,16 +139,18 @@ func _h_properties(raw: String, out: Dictionary, default: Color):
 			var inner := raw.substr(i+len("(("), j-i-len("(("))
 			var parts := inner.split(" ")
 			var off := i+len("((")
+			_h_property_keys(raw, off, parts, out)
 			
-			for k in len(parts):
-				if ":" in parts[k]:
-					var p := parts[k].split(":")
-					out[off] = {color=C_PROPERTY}
-					off += len(p[0])
-					out[off] = {color=C_SYMBOL}
-					out[off+1] = {color=_get_var_color(p[1])}
-					off += len(p[1])+1
-					off += 1
+func _h_property_keys(raw: String, off: int, parts: PackedStringArray, out: Dictionary):
+	for k in len(parts):
+		if ":" in parts[k]:
+			var p := parts[k].split(":")
+			out[off] = {color=C_PROPERTY}
+			off += len(p[0])
+			out[off] = {color=C_SYMBOL}
+			out[off+1] = {color=_get_var_color(p[1])}
+			off += len(p[1])+1
+			off += 1
 
 func _h_bbcode(raw: String, from: int, out: Dictionary, default: Color):
 	var i := from
@@ -158,7 +161,9 @@ func _h_bbcode(raw: String, from: int, out: Dictionary, default: Color):
 				out[i] = { color=default.darkened(.5) }
 				out[i+1] = { color=default.darkened(.25) }
 				i += 1
-				
+			"$":
+				out[i] = { color=Color.HOT_PINK }
+				i += 1
 			"@":
 				var end = raw.find(";", i)
 				if end == -1:
@@ -190,30 +195,38 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 		out[0] = { color=C_FLOW.darkened(.25) }
 		out[len(S_FLOW)] = { color=C_FLOW }
 	
+	elif stripped.begins_with("|"):
+		var i := text.find("|")
+		out[i] = { color=C_SYMBOL }
+		out[i+1] = { color=C_TEXT }
+		var parts := text.substr(i+1).split(" ")
+		_h_property_keys(text, i+1, parts, out)
+		
 	# conditionals
-	elif stripped.ends_with(":"):
-		if stripped.begins_with("if ") or stripped.begins_with("elif ") or stripped.begins_with("else"):
-			out[0] = { color=C_CONDITION }
-			var start := len(text) - len(text.strip_edges(true, false))
-			var space := text.find(" ", start)
-			var end := text.rfind(":")
-			out[end] = {color=C_SYMBOL }
-			_h_conditional(text, space+1, end, out)
+	elif stripped.begins_with("{{"):
+		out[0] = { color=C_SYMBOL }
+		var start := len(text) - len(text.strip_edges(true, false))
+		start = text.find("{{", start)
+		var end := text.rfind("}}")
+		out[end] = { color=C_SYMBOL }
+		_h_conditional(text, start+len("{{"), end, out)
 	
 	# action
 	elif stripped.begins_with(S_ACTION):
 		_h_action(text, 0, len(text), out)
 	
 	# options
-	elif stripped.begins_with("<"):
-		var a := text.find("<")
+	elif stripped.begins_with(">"):
+		var a := text.find(">")
 		var b := text.find(">", a)
 		out[a] = { color=C_OPTION_TAG }
-		out[a+1] = { color=C_OPTION_TAG_INNER }
-		out[b] = { color=C_OPTION_TAG }
-		out[b+1] = { color=C_OPTION_TEXT }
+		out[a+len(">")] = { color=C_OPTION_TAG }
+#		out[a+1] = { color=C_OPTION_TAG_INNER }
+#		out[b] = { color=C_OPTION_TAG }
+#		out[b+1] = { color=C_OPTION_TEXT }
 		
-		_h_bbcode(text, b+1, out, C_OPTION_TEXT)
+		_h_bbcode(text, a+len(">"), out, C_OPTION_TEXT)
+#		_h_bbcode(text, b+1, out, C_OPTION_TEXT)
 		
 		if S_CONDITION_TAG_START in text:
 			var i = text.find(S_CONDITION_TAG_START, a)

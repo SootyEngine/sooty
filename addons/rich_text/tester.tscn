@@ -1,5 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://cu5qu21vou7jq"]
+[gd_scene load_steps=8 format=3]
 
+[ext_resource type="Script" path="res://addons/sooty_engine/DialogueServer.gd" id="1_47bta"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextLabel3.gd" id="1_t0hmd"]
 [ext_resource type="FontData" uid="uid://dq2imiejh1ci5" path="res://fonts/robotomono/robotomono-bi.ttf" id="1_vdoxl"]
 [ext_resource type="Font" uid="uid://gaslg38f16nv" path="res://fonts/robotomono/robotomono_i.tres" id="2_u5q2y"]
@@ -10,6 +11,7 @@
 data/0 = ExtResource( "1_vdoxl" )
 
 [node name="Node2D" type="Node2D"]
+script = ExtResource( "1_47bta" )
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
 offset_left = 289.0
