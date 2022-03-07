@@ -210,6 +210,8 @@ config/features=PackedStringArray("4.0", "Vulkan Clustered")
 Global="*res://addons/Global.gd"
 State="*res://state.gd"
 DialogueServer="*res://addons/sooty_engine/DialogueServer.gd"
+SaveManager="*res://addons/saver/SaveManager.gd"
+ModManager="*res://addons/saver/ModManager.gd"
 
 [editor_plugins]
 
