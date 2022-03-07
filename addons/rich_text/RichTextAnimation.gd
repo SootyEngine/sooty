@@ -1,5 +1,5 @@
 @tool
-extends RichTextLabel3
+extends RichTextLabel2
 class_name RichTextAnimation
 
 signal command(command: String)
@@ -26,10 +26,6 @@ enum {
 	TRIG_ACTION, TRIG_COMMAND,
 	TRIG_QUOTE_STARTED, TRIG_QUOTE_ENDED
 }
-
-func _init():
-	print("WAIT ", TRIG_WAIT)
-	print("PACE ", TRIG_PACE)
 
 #@export_enum("","back","console","fader","focus","prickle","redact","wfc")
 @export var animation:String = "fader":
@@ -93,7 +89,6 @@ func finish():
 
 func _preparse(btext: String) -> String:
 	var final := "[%s]%s[]" % [animation, super._preparse(btext)]
-	print(final)
 	return final
 
 func _parse_tag_unused(tag: String, info: String, raw: String) -> bool:
@@ -220,8 +215,6 @@ func _process(delta: float) -> void:
 			
 			elif _alpha_real[i] < _alpha_goal[i]:
 				_alpha_real[i] = minf(_alpha_goal[i], _alpha_real[i] + fs)
-		
-#		print(_alpha_real)
 		
 		if _wait > 0.0:
 			_wait = maxf(0.0, _wait - delta)

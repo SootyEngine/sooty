@@ -3,17 +3,17 @@ class_name UError
 
 static func warning(error: int, msg: String = "") -> bool:
 	if error != OK:
-		push_warning("%s (%s)" % [msg, get_type(error)])
+		push_warning("%s (%s)" % [msg, get_error_name(error)])
 		return true
 	return false
 
 static func error(error: int, msg: String = "") -> bool:
 	if error != OK:
-		push_error("%s (%s)" % [msg, get_type(error)])
+		push_error("%s (%s)" % [msg, get_error_name(error)])
 		return true
 	return false
 
-static func get_type(error: int) -> String:
+static func get_error_name(error: int) -> String:
 	match error:
 		OK: return "Okay"
 		FAILED: return "Generic"

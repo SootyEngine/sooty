@@ -1,7 +1,7 @@
-[gd_scene load_steps=23 format=3 uid="uid://cak5qvo5tsctv"]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://addons/simple_visual_novel/ui_dialogue.gd" id="1_vd4rm"]
-[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel3.gd" id="2_es3h4"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="2_es3h4"]
 [ext_resource type="FontData" uid="uid://by1aqauhysmgf" path="res://fonts/robotomono/robotomono-r.ttf" id="2_pt87i"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextAnimation.gd" id="3_35sk3"]
 [ext_resource type="FontData" uid="uid://dhlm735o5phw0" path="res://fonts/unifont/unifont-13.0.01.ttf" id="3_svt8a"]
@@ -11,62 +11,62 @@
 [ext_resource type="FontData" uid="uid://dw0hrbje7waa2" path="res://fonts/robotomono/robotomono-i.ttf" id="6_mlshm"]
 [ext_resource type="FontData" uid="uid://5hcq4bx4kalo" path="res://fonts/robotomono/robotomono-b.ttf" id="7_c8v6b"]
 
-[sub_resource type="Font" id="Font_tabnd"]
+[sub_resource type="Font" id="Font_lepbp"]
 data/0 = ExtResource( "2_pt87i" )
 data/1 = ExtResource( "3_svt8a" )
 data/2 = ExtResource( "4_2xwo7" )
 
-[sub_resource type="Font" id="Font_olx2b"]
+[sub_resource type="Font" id="Font_yb0na"]
 data/0 = ExtResource( "5_8rsjk" )
 data/1 = ExtResource( "3_svt8a" )
 data/2 = ExtResource( "4_2xwo7" )
 
-[sub_resource type="Font" id="Font_n1dfd"]
+[sub_resource type="Font" id="Font_3k26b"]
 data/0 = ExtResource( "6_mlshm" )
 data/1 = ExtResource( "3_svt8a" )
 data/2 = ExtResource( "4_2xwo7" )
 
-[sub_resource type="Font" id="Font_eab7h"]
+[sub_resource type="Font" id="Font_f2un8"]
 data/0 = ExtResource( "7_c8v6b" )
 data/1 = ExtResource( "3_svt8a" )
 data/2 = ExtResource( "4_2xwo7" )
 
-[sub_resource type="Font" id="Font_nr3t6"]
+[sub_resource type="Font" id="Font_7fcgf"]
 data/0 = ExtResource( "2_pt87i" )
 data/1 = ExtResource( "3_svt8a" )
 data/2 = ExtResource( "4_2xwo7" )
 
-[sub_resource type="Font" id="Font_ai442"]
+[sub_resource type="Font" id="Font_vc4m4"]
 data/0 = ExtResource( "5_8rsjk" )
 data/1 = ExtResource( "3_svt8a" )
 data/2 = ExtResource( "4_2xwo7" )
 
-[sub_resource type="Font" id="Font_kuxxh"]
+[sub_resource type="Font" id="Font_3n0h0"]
 data/0 = ExtResource( "6_mlshm" )
 data/1 = ExtResource( "3_svt8a" )
 data/2 = ExtResource( "4_2xwo7" )
 
-[sub_resource type="Font" id="Font_y772o"]
+[sub_resource type="Font" id="Font_i23u3"]
 data/0 = ExtResource( "7_c8v6b" )
 data/1 = ExtResource( "3_svt8a" )
 data/2 = ExtResource( "4_2xwo7" )
 
-[sub_resource type="Font" id="Font_ffcgh"]
+[sub_resource type="Font" id="Font_hxokj"]
 data/0 = ExtResource( "2_pt87i" )
 data/1 = ExtResource( "3_svt8a" )
 data/2 = ExtResource( "4_2xwo7" )
 
-[sub_resource type="Font" id="Font_hht0l"]
+[sub_resource type="Font" id="Font_7isht"]
 data/0 = ExtResource( "5_8rsjk" )
 data/1 = ExtResource( "3_svt8a" )
 data/2 = ExtResource( "4_2xwo7" )
 
-[sub_resource type="Font" id="Font_cjro6"]
+[sub_resource type="Font" id="Font_spqoe"]
 data/0 = ExtResource( "6_mlshm" )
 data/1 = ExtResource( "3_svt8a" )
 data/2 = ExtResource( "4_2xwo7" )
 
-[sub_resource type="Font" id="Font_fjgyv"]
+[sub_resource type="Font" id="Font_x5g5r"]
 data/0 = ExtResource( "7_c8v6b" )
 data/1 = ExtResource( "3_svt8a" )
 data/2 = ExtResource( "4_2xwo7" )
@@ -113,11 +113,11 @@ offset_right = 356.0
 offset_bottom = 77.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_fonts/mono_font = SubResource( "Font_tabnd" )
-theme_override_fonts/bold_italics_font = SubResource( "Font_olx2b" )
-theme_override_fonts/italics_font = SubResource( "Font_n1dfd" )
-theme_override_fonts/bold_font = SubResource( "Font_eab7h" )
-theme_override_fonts/normal_font = SubResource( "Font_tabnd" )
+theme_override_fonts/mono_font = SubResource( "Font_lepbp" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_yb0na" )
+theme_override_fonts/italics_font = SubResource( "Font_3k26b" )
+theme_override_fonts/bold_font = SubResource( "Font_f2un8" )
+theme_override_fonts/normal_font = SubResource( "Font_lepbp" )
 script = ExtResource( "2_es3h4" )
 effects_mode = 0
 font = "robotomono"
@@ -135,15 +135,15 @@ offset_right = 356.0
 offset_bottom = 158.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_fonts/mono_font = SubResource( "Font_nr3t6" )
-theme_override_fonts/bold_italics_font = SubResource( "Font_ai442" )
-theme_override_fonts/italics_font = SubResource( "Font_kuxxh" )
-theme_override_fonts/bold_font = SubResource( "Font_y772o" )
-theme_override_fonts/normal_font = SubResource( "Font_nr3t6" )
+theme_override_fonts/mono_font = SubResource( "Font_7fcgf" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_vc4m4" )
+theme_override_fonts/italics_font = SubResource( "Font_3n0h0" )
+theme_override_fonts/bold_font = SubResource( "Font_i23u3" )
+theme_override_fonts/normal_font = SubResource( "Font_7fcgf" )
 script = ExtResource( "3_35sk3" )
 font = "robotomono"
 fade_speed = 5.0
-effect_time = 3079.44
+effect_time = 3089.77
 _triggers = {}
 _alpha_real = []
 _alpha_goal = []
@@ -193,11 +193,11 @@ color = Color(0, 0, 0, 0.192157)
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-theme_override_fonts/mono_font = SubResource( "Font_ffcgh" )
-theme_override_fonts/bold_italics_font = SubResource( "Font_hht0l" )
-theme_override_fonts/italics_font = SubResource( "Font_cjro6" )
-theme_override_fonts/bold_font = SubResource( "Font_fjgyv" )
-theme_override_fonts/normal_font = SubResource( "Font_ffcgh" )
+theme_override_fonts/mono_font = SubResource( "Font_hxokj" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_7isht" )
+theme_override_fonts/italics_font = SubResource( "Font_spqoe" )
+theme_override_fonts/bold_font = SubResource( "Font_x5g5r" )
+theme_override_fonts/normal_font = SubResource( "Font_hxokj" )
 script = ExtResource( "2_es3h4" )
 bbcode = "clicky"
 font = "robotomono"

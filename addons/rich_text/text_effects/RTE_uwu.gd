@@ -1,19 +1,19 @@
 # Turns words into babble.
 # "R" & "L" become "W" -> Royal Rumble = Woyaw Wumbwe.
 # Requires a monospaced font.
-tool
+@tool
 extends RichTextEffect
 
 # Syntax: [uwu][/uwu]
 var bbcode = "uwu"
 
-const r = ord("r")
-const R = ord("R")
-const l = ord("l")
-const L = ord("L")
+const r = "r"
+const R = "R"
+const l = "l"
+const L = "L"
 
-const w = ord("w")
-const W = ord("W")
+const w = "w"
+const W = "W"
 
 func _process_custom_fx(char_fx):
 	match char_fx.character:

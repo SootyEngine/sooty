@@ -1,6 +1,6 @@
 @tool
 extends RichTextLabel
-class_name RichTextLabel3
+class_name RichTextLabel2
 
 const DIR_TEXT_EFFECTS := "res://addons/rich_text/text_effects"
 const DIR_TEXT_ANIMATIONS := "res://addons/rich_text/text_animations"
@@ -62,7 +62,6 @@ func _reload_config():
 		var c := ConfigFile.new()
 		var rtc := {shortcuts={}, colors={}}
 		if c.load("res://addons/rich_text/rich_text_config.cfg") == OK:
-			print("CONFIG", c)
 			for key in c.get_section_keys("colors"):
 				rtc.colors[key] = Color(c.get_value("colors", key))
 			for key in c.get_section_keys("shortcuts"):
@@ -70,8 +69,6 @@ func _reload_config():
 		Global.T.rich_text_config = rtc
 	_shortcuts = Global.T.rich_text_config.shortcuts
 	_custom_colors = Global.T.rich_text_config.colors
-	prints("SC", _shortcuts)
-	prints("CC", _custom_colors)
 
 func _redraw():
 	set_bbcode(bbcode)

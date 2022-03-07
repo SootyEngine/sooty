@@ -1,11 +1,11 @@
 [gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://addons/sooty_engine/DialogueServer.gd" id="1_47bta"]
-[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel3.gd" id="1_t0hmd"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="1_t0hmd"]
 [ext_resource type="FontData" uid="uid://dq2imiejh1ci5" path="res://fonts/robotomono/robotomono-bi.ttf" id="1_vdoxl"]
 [ext_resource type="Font" uid="uid://gaslg38f16nv" path="res://fonts/robotomono/robotomono_i.tres" id="2_u5q2y"]
 [ext_resource type="Font" uid="uid://beb81bi6s03fl" path="res://fonts/robotomono/robotomono_b.tres" id="3_0tfp1"]
-[ext_resource type="Font" path="res://fonts/robotomono/robotomono_r.tres" id="4_kxgbr"]
+[ext_resource type="Font" uid="uid://b4g61a4hgqqak" path="res://fonts/robotomono/robotomono_r.tres" id="4_kxgbr"]
 
 [sub_resource type="Font" id="Font_h0kgq"]
 data/0 = ExtResource( "1_vdoxl" )

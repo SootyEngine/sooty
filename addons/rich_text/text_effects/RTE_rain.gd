@@ -1,7 +1,7 @@
-tool
+@tool
 extends RichTextEffect
 
-# Syntax: [rain][/rain]
+# Syntax: [rain][]
 var bbcode = "rain"
 
 func rand(c:CharFXTransform) -> float:

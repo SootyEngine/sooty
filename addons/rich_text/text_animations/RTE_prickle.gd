@@ -1,6 +1,6 @@
 # Fades characters in more randomly.
 # You should set 'fade_speed' to a low value for this to look right. 
-tool
+@tool
 extends RichTextEffect
 
 # Syntax: [prickle pow=2][]
@@ -10,7 +10,7 @@ func rand(c):
 	return fmod(c.character * 33.33 + c.absolute_index * 4545.5454, 1.0)
 
 func _process_custom_fx(c:CharFXTransform):
-	var t:RichTextLabelAnimated = Global._d.get(self)
+	var t: RichTextAnimation = instance_from_id(get_meta("rt"))
 	var power:float = c.env.get("pow", 2.0)
 	var a := t._get_character_alpha(c.absolute_index)
 	var r = rand(c)

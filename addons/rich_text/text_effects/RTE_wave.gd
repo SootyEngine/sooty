@@ -1,4 +1,4 @@
-tool
+@tool
 extends RichTextEffect
 
 # Syntax: [wave][]
@@ -6,7 +6,6 @@ var bbcode = "www"
 
 
 func _process_custom_fx(c:CharFXTransform):
-	var t:RichTextLabel2 = Global._d.get(self)
 	var s:float = c.env.get("wave", 1.0)
 	var f:float = c.env.get("freq", 1.0)
 #	c.offset.y += sin(c.elapsed_time + c.absolute_index * f) * t.size * 32

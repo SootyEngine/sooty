@@ -1,29 +1,35 @@
-@tool
 extends Node
-class_name GameStateBase
 
 signal changed(key: String)
 signal changed_from_to(key: String, from: Variant, to: Variant)
 
 var _default := {}
+var _mods := [load("res://state.gd").new()]
 
 func _init():
-	_default = UObject.get_state(self)
 #	print("INITIAL STATE", _default)
 #	print(_get_properties_of_class("Quest"))
 	_post_init.call_deferred()
 
 func _post_init():
-	pass
+	_default = _get_state()
+
+func _get(property: StringName):
+	for m in _mods:
+		if property in m:
+			return m[property]
 
 func _set(property: StringName, value) -> bool:
-	if property in self:
-		var old = self[property]
-		if old != value:
-			self[property] = value
-			changed.emit(property)
-			changed_from_to.emit(property, old, value)
-		return true
+	for m in _mods:
+		if property in m:
+			var old = m[property]
+			m[property] = value
+			var new = m[property]
+			if old != new:
+				changed.emit(property)
+				changed_from_to.emit(property, old, new)
+				print("Changed %s to %s from %s." % [property, new, old])
+			return true
 	return false
 
 func _reset_state():
@@ -33,8 +39,18 @@ func _load_state(state: Dictionary):
 	_reset_state()
 	UObject.set_state(self, state)
 
+func _get_state() -> Dictionary:
+	var out := {}
+	for mod in _mods:
+		UDict.merge(out, UObject.get_state(mod), true)
+	return out
+
+func _set_state(state: Dictionary):
+	_reset_state()
+	UObject.patch(self, state)
+
 func _get_changed_states() -> Dictionary:
-	var current := UObject.get_state(self)
+	var current := _get_state()# UObject.get_state(self)
 	return UDict.get_different(_default, current)
 
 # Collect all properties that extend the type of class.

@@ -5,7 +5,7 @@ extends Control
 @export var _options: NodePath
 @export var _option: NodePath
 @export var _option_container: NodePath
-@onready var from: RichTextLabel3 = get_node(_from)
+@onready var from: RichTextLabel2 = get_node(_from)
 @onready var text: RichTextAnimation = get_node(_text)
 @onready var options: Control = get_node(_options)
 @onready var option: Control = get_node(_option)

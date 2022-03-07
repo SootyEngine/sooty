@@ -1,8 +1,8 @@
 # bounces text in
-tool
+@tool
 extends RichTextEffect
 
-# Syntax: [back scale=8.0][/back]
+# Syntax: [back scale=8.0][]
 var bbcode = "back"
 
 const c1 := 1.70158
@@ -12,7 +12,7 @@ func ease_back(x):
 	return c3 * x * x * x - c1 * x * x
 
 func _process_custom_fx(c:CharFXTransform):
-	var t:RichTextLabelAnimated = Global._d.get(self)
+	var t: RichTextAnimation = instance_from_id(get_meta("rt"))
 	var a := 1.0 - t._get_character_alpha(c.absolute_index)
 	var scale = c.env.get("scale", 1.0)
 	c.offset.y += ease_back(a) * t.size * scale

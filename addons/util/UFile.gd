@@ -166,7 +166,7 @@ static func load_json(path: String, default: Variant = null) -> Variant:
 			var text := f.get_as_text()
 			f.close()
 			if not UError.error(json.parse(text), "Can't parse JSON at '%s'." % path):
-				return json.result
+				return json.get_data()
 	return default
 
 static func save_json(path: String, data: Variant, tabs: bool = false) -> bool:

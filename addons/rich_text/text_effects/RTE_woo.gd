@@ -1,7 +1,7 @@
-tool
+@tool
 extends RichTextEffect
 
-# Syntax: [woo scale=1.0 freq=8.0][/woo]
+# Syntax: [woo scale=1.0 freq=8.0][]
 var bbcode = "woo"
 
 func rand_time(c, scale:=1):

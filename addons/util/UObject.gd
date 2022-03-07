@@ -39,19 +39,24 @@ static func set_state(o: Object, data: Dictionary):
 				_:
 					o[prop.name] = data[prop.name]
 
-static func patch(target: Variant, patch: Dictionary):
+static func patch(target: Variant, patch: Dictionary) -> int:
+	var lines_changed := 0
 	for k in patch:
 		if k in target:
-			if target[k] is Dictionary:
-				patch(target[k], patch[k])
-			else:
+			if patch[k] is Dictionary:
+				lines_changed += patch(target[k], patch[k])
+			
+			elif target[k] != patch[k]:
 				target[k] = patch[k]
+				lines_changed += 1
 		
 		elif target is Dictionary:
 			target[k] = patch[k]
+			lines_changed += 1
 		
 		else:
 			push_error("Couldn't find '%s' in %s." % [k, target])
+	return lines_changed
 
 # Properly divides an array as arguments for a function. Like python.
 static func call_w_args(obj: Object, method: String, in_args: Array = []) -> Variant:

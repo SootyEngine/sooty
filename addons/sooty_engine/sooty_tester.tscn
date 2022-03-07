@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://buar7svotrmn" path="res://addons/simple_visual_novel/character.tscn" id="2_q2okp"]
 [ext_resource type="Script" path="res://addons/simple_visual_novel/camera.gd" id="3_7u876"]
 [ext_resource type="Script" path="res://addons/simple_visual_novel/ui_flow_manager.gd" id="3_40qba"]
-[ext_resource type="PackedScene" uid="uid://cak5qvo5tsctv" path="res://addons/simple_visual_novel/ui_dialogue.tscn" id="7_bpxay"]
+[ext_resource type="PackedScene" path="res://addons/simple_visual_novel/ui_dialogue.tscn" id="7_bpxay"]
 
 [node name="dialogue_tester" type="CanvasLayer"]
 follow_viewport_enable = true
@@ -85,3 +85,5 @@ offset_left = 144.0
 offset_top = -587.0
 offset_right = 500.0
 offset_bottom = -348.0
+
+[node name="scene" type="Node" parent="."]

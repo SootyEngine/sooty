@@ -3,7 +3,7 @@ extends RichTextEffect
 
 # v2: last letter in each word won't be symbolized.
 
-# Syntax: [cuss][/cuss]
+# Syntax: [cuss][]
 var bbcode = "cuss"
 
 const VOWELS := "aeiouAEIOU"

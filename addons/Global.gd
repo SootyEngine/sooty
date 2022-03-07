@@ -3,10 +3,11 @@ extends Node
 
 var T := {}
 
-func _process(delta: float) -> void:
+func _init() -> void:
 	if Engine.is_editor_hint():
 		set_process(false)
-	
+
+func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("reload_scene"):
 		get_tree().reload_current_scene()
 		
