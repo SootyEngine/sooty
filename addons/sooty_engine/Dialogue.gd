@@ -66,11 +66,28 @@ func has_errors() -> bool:
 func has_flows() -> bool:
 	return len(flows) != 0
 
-func get_flow(id: String) -> Dictionary:
-	return flows.get(to_flow_id(id), {})
+func has_flow(flow: String) -> bool:
+	flow = to_flow_id(flow)
+	return flow in flows
 
-func get_line(id: int) -> Dictionary:
-	return lines.get(id, {})
+func get_flow(flow: String) -> Dictionary:
+	flow = to_flow_id(flow)
+	if flow in flows:
+		return flows[flow]
+	
+	var most_similar := UString.find_most_similar(flow, flows.keys())
+	if len(most_similar):
+		push_error("No flow '%s' in dialogue '%s'. Did you mean '%s'?" % [flow, id, "', '".join(most_similar)])
+	else:
+		push_error("No flow '%s' in dialogue '%s'." % [flow, id])
+	
+	return {}
+
+func get_line(line: int) -> Dictionary:
+	if line in lines:
+		return lines[line]
+	push_error("No line '%s' in dialogue '%s'." % [line, id])
+	return {}
 
 func to_flow_id(s: String) -> String:
 	var out := ""
@@ -113,7 +130,7 @@ func _parse_lines(line: Dictionary, key: String = "lines"):
 
 func _parse_line(data: Dictionary) -> Dictionary:
 	var text = data.text
-	if text.begins_with(">"): return _parse_option(data)
+	if text.begins_with("<>"): return _parse_option(data)
 	if text.begins_with("@"): return _parse_action(data)
 	if text.begins_with(">>"): return _parse_flow_goto(data)
 	if text.begins_with("::"): return _parse_flow_call(data)
@@ -132,7 +149,7 @@ func _parse_line_property(data: Dictionary) -> Dictionary:
 	return data
 	
 func _parse_option(data: Dictionary) -> Dictionary:
-	data.text = data.text.substr(len(">"))
+	data.text = data.text.substr(len("<>"))
 	
 	_extract_flow_option(data)
 	
@@ -188,11 +205,13 @@ func _extract_flow_option(data: Dictionary):
 	if ">>" in data.text:
 		var p = data.text.rsplit(">>", true, 1)
 		data.text = p[0].strip_edges()
+		data.flow = "goto"
 		data.goto = p[1].strip_edges()
 	
 	if "::" in data.text:
 		var p = data.text.split("::", true, 1)
 		data.text = p[0].strip_edges()
+		data.flow = "call"
 		data.call = p[1].strip_edges()
 
 func _extract_comment(data: Dictionary):

@@ -46,8 +46,15 @@ func tick():
 		
 		var line := pop_next_line()
 		
+		if not len(line):
+			break
+		
 		if "action" in line.line:
 			on_action.emit(line.line.action)
+		elif "goto" in line.line:
+			goto(line.line.goto, true, line.did)
+		elif "call" in line.line:
+			goto(line.line.call, false, line.did)
 		elif "text" in line.line:
 			on_line.emit(DialogueLine.new(line.did, line.line))
 		else:
@@ -73,44 +80,42 @@ func start(id: String):
 			var first = DialogueServer.get_dialogue(id).flows.keys()[0]
 			goto("%s.%s" % [id, first])
 
-func goto(flow: String, clear_stack: bool = true):
+func goto(flow: String, clear_stack: bool = true, dia_id: Variant = null) -> bool:
 	var step := { step=0 }
+	var d: Dialogue
+	var f: Dictionary
 	
 	if "." in flow:
 		var p := flow.split(".", true, 1)
-		var d := DialogueServer.get_dialogue(p[0])
-		step.did=d.id
-		step.lines=d.get_flow(p[1]).lines
+		d = DialogueServer.get_dialogue(p[0])
+		flow = p[1]
 	
+	elif dia_id:
+		d = DialogueServer.get_dialogue(dia_id)
+		
 	elif has_steps():
-		var d := get_current_dialogue()
-		step.did=d.id
-		step.lines=d.get_flow(flow).lines
+		d = get_current_dialogue()
 	
 	else:
 		push_error("Call start() before goto().")
-		return
+		return false
+	
+	f = d.get_flow(flow)
+	if not len(f):
+		return false
+	
+	step.did = d.id
+	step.lines = f.lines
 	
 	if clear_stack:
 		_stack.clear()
 	
 	_stack.append(step)
-
-
-
-# Used for options.
-#func select() -> bool:
-#	if _parent and _stack and "lines" in _data:
-#		_stack.select_option(_parent._data, _index)
-#		return true
-#	push_error("Line is not an Option.")
-#	return false
+	return true
 
 # select an option, adding it's lines to the stack
 func select_option(option: DialogueLine): # step: Dictionary, option: int):
 	var d := get_current_dialogue()
-	print("OPTION ", option)
-	print("PARENT ", option.parent)
 	var o := d.get_line(option.parent._data.options[option.option_index])
 	if "then_goto" in o:
 		_stack.append({did=d.id, lines=o.lines, step=0, goto=o.then_goto})
@@ -135,26 +140,29 @@ func pop_next_line() -> Dictionary:
 		
 		line = _pop_next_line()
 	
-	safety = 100
-	while "call" in line.line or "goto" in line.line:
-		safety -= 1
-		if safety <= 0:
-			push_error("Tripped safety.")
-			return {}
-		
-		if "call" in line.line:
-			goto(line.line.call, false)
-			line = _pop_next_line()
-		else:
-			goto(line.goto)
-			line = _pop_next_line()
+#	safety = 100
+#	while len(line) and "flow" in line.line:
+#		safety -= 1
+#		if safety <= 0:
+#			push_error("Tripped safety.")
+#			return {}
+#
+#		var sl = line.line
+#		match sl.flow:
+#			"call":
+#				goto(sl.call, false)
+#				line = _pop_next_line()
+#			"goto":
+#				if goto(sl.goto):
+#					line = _pop_next_line()
 	
 	return line
 
 func _pop_next_line() -> Dictionary:
 	if len(_stack):
 		var step: Dictionary = _stack[-1]
-		var line: Dictionary = DialogueServer.get_dialogue(step.did).get_line(step.lines[step.step])
+		var dia := DialogueServer.get_dialogue(step.did)
+		var line: Dictionary = dia.get_line(step.lines[step.step])
 		var out := { did=step.did, line=line }
 		
 		step.step += 1

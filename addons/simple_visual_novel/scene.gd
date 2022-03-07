@@ -1,30 +1,15 @@
 @tool
 extends Node
 
-@export var tats = true
+func _init() -> void:
+	add_to_group("sa:scene")
 
-func _get_tool_buttons():
-	return ["test"]
-
-func _init():
-	add_to_group("sa:bg")
-	State.changed_from_to.connect(_changed)
-
-func _changed(a, b, c):
-	prints("CHANGED %s FROM %s TO %s" % [a, b, c])
-
-const _bg_ARGS := ["", "args", "kwargs"]
-func bg(a, args: Array = [], kwargs: Dictionary = {"ok": true}):
-	var path := UFile.get_user_dir().plus_file("bgs").plus_file(a)
+func scene(id: String):
+	for child in $scene.get_children():
+		child.queue_free()
 	
-	State.set("bg", a)
-	
-	for e in UFile.EXT_IMAGE:
-		var p = path + "." + e
-		print("check for ", p)
-		if UFile.file_exists(p):
-			$bg.set_texture(UFile.load_image(p))
-			return
-	print("couldnt find it")
-	
-	prints("GOT", a, args, kwargs)
+	for p in ["res://story_scenes/%s.tscn", "res://story_scenes/%s.scn"]:
+		var path: String = p % id
+		if UFile.file_exists(path):
+			var scene: Node = load(path).instantiate()
+			$scene.add_child(scene)

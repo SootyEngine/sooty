@@ -7,12 +7,20 @@ signal reloaded(dialogue: Dialogue)
 
 var cache := {}
 
+func get_dialogue_ids() -> Dictionary:
+	var out := {}
+	for id in cache:
+		out[id] = cache[id].flows.keys()
+	return out
+
 func _ready() -> void:
 	if not Engine.is_editor_hint():
 		var timer := Timer.new()
 		add_child(timer)
 		timer.timeout.connect(_timer)
 		timer.start(CHECK_FILES_EVERY)
+		
+		
 
 func _timer():
 	for d in cache.values():

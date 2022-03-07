@@ -69,7 +69,7 @@ func _ready() -> void:
 	_init_settings()
 	_update_title()
 	clear_undo_history()
-	add_theme_font_override("font", preload("res://fonts/robotomono/robotomono.tres"))
+	add_theme_font_override("font", preload("res://fonts/robotomono/robotomono_r.tres"))
 	update_settings()
 	
 	for node in get_children(true):

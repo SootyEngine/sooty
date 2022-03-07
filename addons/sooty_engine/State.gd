@@ -30,7 +30,8 @@ func _set(property: StringName, value) -> bool:
 				changed_from_to.emit(property, old, new)
 				print("Changed %s to %s from %s." % [property, new, old])
 			return true
-	return false
+	push_error("No property '%s' in State. (Attempted '%s = %s')" % [property, property, value])
+	return true
 
 func _reset_state():
 	UObject.set_state(self, _default)

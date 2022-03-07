@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3 uid="uid://bqdo7cn80hv3c"]
+
+[ext_resource type="Script" path="res://addons/simple_visual_novel/scene.gd" id="1_iw4k6"]
+[ext_resource type="Script" path="res://addons/simple_visual_novel/ui_flow_manager.gd" id="3_40qba"]
+[ext_resource type="PackedScene" path="res://addons/simple_visual_novel/ui_dialogue.tscn" id="7_bpxay"]
+
+[node name="dialogue_tester" type="CanvasLayer"]
+follow_viewport_enable = true
+script = ExtResource( "1_iw4k6" )
+
+[node name="scene" type="Node" parent="."]
+
+[node name="flow_manager" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( "3_40qba" )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="bottom" parent="flow_manager" instance=ExtResource( "7_bpxay" )]
+
+[node name="top" parent="flow_manager" instance=ExtResource( "7_bpxay" )]
+offset_left = 144.0
+offset_top = -587.0
+offset_right = 500.0
+offset_bottom = -348.0

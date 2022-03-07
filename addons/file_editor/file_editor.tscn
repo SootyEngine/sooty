@@ -1,11 +1,11 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=19 format=3 uid="uid://ccai0oqbtflfi"]
 
 [ext_resource type="Script" path="res://addons/file_editor/comp/menu_top.gd" id="2_2e6gq"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/confirmation_dialog.gd" id="2_ou848"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/file_dialog.gd" id="2_xi4e3"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/FE_Files.gd" id="2_ynr54"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/file_list.gd" id="3_5namj"]
-[ext_resource type="Font" path="res://fonts/robotomono/robotomono_r.tres" id="4_fmosd"]
+[ext_resource type="Font" uid="uid://b4g61a4hgqqak" path="res://fonts/robotomono/robotomono_r.tres" id="4_fmosd"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/chapter_list.gd" id="4_r00tw"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/meta_panel.gd" id="4_td4f3"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/menu_text_input.gd" id="5_xlouk"]

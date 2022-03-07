@@ -3,7 +3,7 @@ extends TabBar
 signal current_changed()
 
 var _tab_parent: Node
-var font := preload("res://fonts/robotomono/robotomono.tres")
+var font := preload("res://fonts/robotomono/robotomono_r.tres")
 var font_i := preload("res://fonts/robotomono/robotomono_i.tres")
 var font_b := preload("res://fonts/robotomono/robotomono_b.tres")
 

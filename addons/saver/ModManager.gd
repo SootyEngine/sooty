@@ -58,8 +58,8 @@ func load_mod(mod: String):
 	op.call_deferred()
 	
 func op():
-	print(JSON.new().stringify(State._get_state(), "\t", false))
-
+	#print(JSON.new().stringify(State._get_state(), "\t", false))
+	print(DialogueServer.get_dialogue_ids())
 #func _merge_script_parts(a: Array) -> String:
 #	var lines = ["extends GameStateBase"]
 #	var funcs = {}
