@@ -8,7 +8,7 @@ const SPACE := " "
 const BLOCK := "█"
 const MID_BLOCK := "▓"
 
-func _process_custom_fx(c:CharFXTransform):
+func _process_custom_fx(c: CharFXTransform):
 	var t: RichTextAnimation = instance_from_id(get_meta("rt"))
 	var a := t._get_character_alpha(c.absolute_index)
 	

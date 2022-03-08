@@ -7,7 +7,7 @@ var bbcode = "woo"
 func rand_time(c, scale:=1):
 	return fmod(c.character * 12.9898 + c.absolute_index * 78.233 + c.elapsed_time * scale, 1.0)
 	
-func _process_custom_fx(c:CharFXTransform):
+func _process_custom_fx(c: CharFXTransform):
 	var scale:float = c.env.get("scale", 1.0)
 	var freq:float = c.env.get("freq", 8.0)
 	

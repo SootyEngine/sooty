@@ -5,8 +5,8 @@ extends RichTextEffect
 # Syntax: [fader][]
 var bbcode = "fader"
 
-func _process_custom_fx(c:CharFXTransform):
-	var t:RichTextAnimation = instance_from_id(get_meta("rt"))
+func _process_custom_fx(c: CharFXTransform):
+	var t: RichTextAnimation = instance_from_id(get_meta("rt"))
 	if not t:
 		return true
 	var a := t._get_character_alpha(c.range.x)

@@ -1,15 +1,15 @@
-tool
+@tool
 extends RichTextEffect
 
-# Syntax: [console][/console]
+# Syntax: [console][]
 var bbcode = "console"
 
-const SPACE := ord(" ")
-const CURSOR := ord("█")
-const CURSOR_COLOR := Color.greenyellow
+const SPACE := " "
+const CURSOR := "█"
+const CURSOR_COLOR := Color.GREEN_YELLOW
 
-func _process_custom_fx(c:CharFXTransform):
-	var t:RichTextLabelAnimated = Global._d.get(self)
+func _process_custom_fx(c: CharFXTransform):
+	var t: RichTextAnimation = instance_from_id(get_meta("rt"))
 	
 	if t.fade_out:
 		var a := t._get_character_alpha(c.absolute_index)

@@ -207,7 +207,7 @@ config/features=PackedStringArray("4.0", "Vulkan Clustered")
 
 [autoload]
 
-Global="*res://addons/Global.gd"
+Global="*res://addons/sooty_engine/Global.gd"
 DialogueServer="*res://addons/sooty_engine/DialogueServer.gd"
 SaveManager="*res://addons/saver/SaveManager.gd"
 ModManager="*res://addons/saver/ModManager.gd"

@@ -19,7 +19,7 @@ var _length := 0
 var _text := ""
 var _temp_text := ""
 
-func _process_custom_fx(c:CharFXTransform):
+func _process_custom_fx(c: CharFXTransform):
 	if c.relative_index == 0:
 		if _last_index > 0:
 			_length = _last_index

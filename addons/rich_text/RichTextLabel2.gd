@@ -58,17 +58,11 @@ func _ready() -> void:
 	_redraw()
 
 func _reload_config():
-	if not "rich_text_config" in Global.T:
-		var c := ConfigFile.new()
-		var rtc := {shortcuts={}, colors={}}
-		if c.load("res://addons/rich_text/rich_text_config.cfg") == OK:
-			for key in c.get_section_keys("colors"):
-				rtc.colors[key] = Color(c.get_value("colors", key))
-			for key in c.get_section_keys("shortcuts"):
-				rtc.shortcuts[key] = c.get_value("shortcuts", key)
-		Global.T.rich_text_config = rtc
-	_shortcuts = Global.T.rich_text_config.shortcuts
-	_custom_colors = Global.T.rich_text_config.colors
+	for key in Global.config.get_section_keys("rich_text_colors"):
+		_shortcuts[key] = Color(Global.config.get_value("rich_text_shortcuts", key))
+	
+	for key in Global.config.get_section_keys("rich_text_shortcuts"):
+		_custom_colors[key] = Global.config.get_value("rich_text_shortcuts", key)
 
 func _redraw():
 	set_bbcode(bbcode)

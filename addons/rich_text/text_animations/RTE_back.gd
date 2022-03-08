@@ -11,7 +11,7 @@ const c3 := c1 + .5
 func ease_back(x):
 	return c3 * x * x * x - c1 * x * x
 
-func _process_custom_fx(c:CharFXTransform):
+func _process_custom_fx(c: CharFXTransform):
 	var t: RichTextAnimation = instance_from_id(get_meta("rt"))
 	var a := 1.0 - t._get_character_alpha(c.absolute_index)
 	var scale = c.env.get("scale", 1.0)

@@ -2,11 +2,15 @@
 extends Node
 
 var T := {}
+var config := ConfigFile.new()
 
 func _init() -> void:
 	if Engine.is_editor_hint():
 		set_process(false)
-
+	
+	if config.load("res://config.cfg") != OK:
+		push_error("Couldn't load config.cfg.")
+	
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		set_process(false)

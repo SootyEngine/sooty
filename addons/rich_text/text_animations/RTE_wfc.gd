@@ -8,13 +8,13 @@ var bbcode = "wfc"
 const SPACE := " "
 const SYMBOLS := "10"
 
-func rand2(c:CharFXTransform):
+func rand2(c: CharFXTransform):
 	return abs(sin(c.absolute_index * 321.123 + c.elapsed_time * 0.025))
 	
-func rand(c:CharFXTransform):
+func rand(c: CharFXTransform):
 	return int(sin(c.absolute_index * 321.123 + c.elapsed_time * 0.025) * 100.0)
 
-func _process_custom_fx(c:CharFXTransform):
+func _process_custom_fx(c: CharFXTransform):
 	var t: RichTextAnimation = instance_from_id(get_meta("rt"))
 	var a := t._get_character_alpha(c.absolute_index)
 	
