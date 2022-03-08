@@ -58,11 +58,13 @@ func _ready() -> void:
 	_redraw()
 
 func _reload_config():
-	for key in Global.config.get_section_keys("rich_text_colors"):
-		_shortcuts[key] = Color(Global.config.get_value("rich_text_shortcuts", key))
+	if Global.config.has_section("rich_text_colors"):
+		for key in Global.config.get_section_keys("rich_text_colors"):
+			_shortcuts[key] = Color(Global.config.get_value("rich_text_colors", key))
 	
-	for key in Global.config.get_section_keys("rich_text_shortcuts"):
-		_custom_colors[key] = Global.config.get_value("rich_text_shortcuts", key)
+	if Global.config.has_section("rich_text_shortcuts"):
+		for key in Global.config.get_section_keys("rich_text_shortcuts"):
+			_custom_colors[key] = Global.config.get_value("rich_text_shortcuts", key)
 
 func _redraw():
 	set_bbcode(bbcode)

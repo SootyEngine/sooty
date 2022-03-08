@@ -1,7 +1,6 @@
 @tool
 extends Node
 
-var T := {}
 var config := ConfigFile.new()
 
 func _init() -> void:

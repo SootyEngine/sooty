@@ -120,11 +120,11 @@ static func get_methods(obj: Object) -> Dictionary:
 		if line.begins_with("func "):
 			var p = line.substr(5).split("(")
 			var fname = p[0]
-			var args = _parese_method_arguments(p[1].rsplit(")")[0])
+			var args = _parse_method_arguments(p[1].rsplit(")")[0])
 			out[fname] = args
 	return out
 
-static func _parese_method_arguments(s: String) -> Dictionary:
+static func _parse_method_arguments(s: String) -> Dictionary:
 	if s.strip_edges() == "":
 		return {}
 	
@@ -157,7 +157,7 @@ static func _parese_method_arguments(s: String) -> Dictionary:
 		var type_name = v[0].strip_edges()
 		out[k] = {}
 		out[k].type_name = type_name
-		out[k].type = UObject.get_type_from_name(type_name)
+		out[k].type = get_type_from_name(type_name)
 		if len(v) == 2:
 			out[k].default = str2var(v[1].strip_edges())
 	return out

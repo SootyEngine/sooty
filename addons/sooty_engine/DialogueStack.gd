@@ -81,7 +81,6 @@ func start(id: String):
 			goto("%s.%s" % [id, first])
 
 func goto(flow: String, clear_stack: bool = true, dia_id: Variant = null) -> bool:
-	var step := { step=0 }
 	var d: Dialogue
 	
 	if "." in flow:
@@ -106,13 +105,10 @@ func goto(flow: String, clear_stack: bool = true, dia_id: Variant = null) -> boo
 		print("Can't find lines for %s" % fid)
 		return false
 	
-	step.did = d.id
-	step.lines = lines
-	
 	if clear_stack:
 		_stack.clear()
 	
-	_stack.append(step)
+	_stack.append({did=d.id, lines=lines, step=0})
 	return true
 
 # select an option, adding it's lines to the stack
@@ -135,7 +131,7 @@ func pop_next_line() -> Dictionary:
 	
 	# only show lines that pass a test
 	var safety := 100
-	while "cond" in line.line:
+	while len(line) and "cond" in line.line:
 		safety -= 1
 		if safety <= 0:
 			push_error("Tripped safety.")
@@ -143,41 +139,27 @@ func pop_next_line() -> Dictionary:
 		
 		# 'if' 'elif' 'else' chain
 		if "cond_type" in line.line:
-			var do_break := false
+#			var do_break := false
 			if line.line.cond_type == "if":
 				var d := DialogueServer.get_dialogue(line.did)
+				var broke := false
 				for i in len(line.line.tests):
 					var test_line := d.get_line(line.line.tests[i])
 					if StringAction.test(test_line.cond):
 						_stack.append({did=d.id, lines=test_line.lines, step=0})
-						do_break = true
+						broke = true
 						break
-				if do_break:
+				if broke:
 					break
 			else:
 				push_error("This should never happen.")
-		
-		if StringAction.test(line.line.cond):
+			
+		elif StringAction.test(line.line.cond):
 			break
 		
 		line = _pop_next_line()
 	
-#	safety = 100
-#	while len(line) and "flow" in line.line:
-#		safety -= 1
-#		if safety <= 0:
-#			push_error("Tripped safety.")
-#			return {}
-#
-#		var sl = line.line
-#		match sl.flow:
-#			"call":
-#				goto(sl.call, false)
-#				line = _pop_next_line()
-#			"goto":
-#				if goto(sl.goto):
-#					line = _pop_next_line()
-	
+	print("GOT NEXT LINE ", line)
 	return line
 
 func _pop_next_line() -> Dictionary:

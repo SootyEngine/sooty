@@ -1,6 +1,6 @@
 extends Node
 
-var score := -1
+var score := 1
 var choice := ""
 
 var paul := Character.new({
