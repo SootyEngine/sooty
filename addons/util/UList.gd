@@ -10,27 +10,6 @@ static func part(a: Array, begin: int = 0, end=null) -> Array:
 	
 #	if a is Array:
 	return a.slice(begin, end)
-#	else:
-#		return (a as String).substr(begin, end-begin)
-
-#static func map(list:Array, map) -> Array:
-#	var out = []
-#	for item in list:
-#		if map is String:
-#			out.append(Util.getat(item, map))
-#
-#		elif map is Dictionary:
-#			var item_out = {}
-#			for k in map:
-#				item_out[k] = item[k]
-#			out.append(item_out)
-#
-#		elif map is Callable:
-#			out.append(map.call(item))
-#
-#		else:
-#			push_error("not implemented")
-#	return out
 
 static func list(thing: Variant) -> Array:
 	return [] if thing == null else thing if thing is Array else [thing]

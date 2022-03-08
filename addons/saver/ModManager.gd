@@ -2,6 +2,7 @@ extends Node
 
 const DIR := "user://mods"
 
+var auto_load_mods := false
 var loaded := []
 
 func _ready() -> void:
@@ -9,8 +10,9 @@ func _ready() -> void:
 	if not d.dir_exists(DIR):
 		d.make_dir(DIR)
 	
-	for mod in get_mod_names():
-		load_mod(mod)
+	if auto_load_mods:
+		for mod in get_mod_names():
+			load_mod(mod)
 
 func get_mod_names() -> PackedStringArray:
 	var out := PackedStringArray()

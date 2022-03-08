@@ -18,7 +18,13 @@ static func execute(e: String, default = null, d: Dictionary={}):
 #		push_error(expression.get_error_text())
 	return default
 
-static func do(s: String):
+static func do(s: String) -> Variant:
+	var got = null
+	for a in s.split(";"):
+		got = _do(a)
+	return got
+
+static func _do(s: String) -> Variant:
 	var parts := _split_string(s)
 	
 	# assignment
@@ -35,7 +41,7 @@ static func do(s: String):
 	
 	return _do_function(parts)
 
-static func _do_assign(parts: Array):
+static func _do_assign(parts: Array) -> Variant:
 	var key = parts[0]
 	if not key in State:
 		push_error("No property '%s' in State." % key)
@@ -49,7 +55,7 @@ static func _do_assign(parts: Array):
 		"-=": State._set(key, old_value - new_value)
 	return State[key]
 
-static func _do_function(parts: Array):
+static func _do_function(parts: Array) -> Variant:
 	var args := []
 	var fname: String = parts.pop_front()
 	
@@ -70,9 +76,11 @@ static func _do_function(parts: Array):
 		gname = p[0]
 		fname = p[1]
 	
+	var out = null
 	for node in Global.get_tree().get_nodes_in_group("sa:%s" % gname):
-		UObject.call_w_args(node, fname, args)
-
+		out = UObject.call_w_args(node, fname, args)
+	return out
+	
 static func _split_string(s: String) -> Array:
 	var out := [""]
 	var in_quotes := false

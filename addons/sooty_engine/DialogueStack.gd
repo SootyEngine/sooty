@@ -119,6 +119,10 @@ func goto(flow: String, clear_stack: bool = true, dia_id: Variant = null) -> boo
 func select_option(option: DialogueLine): # step: Dictionary, option: int):
 	var d := get_current_dialogue()
 	var o := option._data
+	
+	if "action" in o:
+		StringAction.do(o.action)
+	
 	if "then_goto" in o:
 		_stack.append({did=d.id, lines=o.lines, step=0, goto=o.then_goto})
 	else:

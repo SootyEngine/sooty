@@ -1,4 +1,5 @@
 # Sooty (0.1) (Godot4)
+`WARNING: Currently under heavy construction.`
 A dialogue engine for Godot4.
 
 # Features
@@ -23,11 +24,9 @@ It's been rewritten multiple times, and may again in future.
 	@camera shake 10 // StringActions can be used to call object functions.
 	
 	Dialogue with some options.
-		<> Yes.
+		<> Yes. [[@choice = yes]]
 			Dialogue that occurs when 'Yes' is chosen.
-			@choice = yes
-		<> No.
-			@choice = no
+		<> No. [[@choice = no]]
 		<> Nevermind.
 	
 	// Let's go to another node.
@@ -82,6 +81,17 @@ It's been rewritten multiple times, and may again in future.
 		|x:0 y:-16 type:flash // Multiple properties can be on the same line.
 
 === options_example
+	// Can call StringActions on the same line.
+	// These two choices would play the same.
+	Are you sure?
+		<> Yes [[@play ding; @choice = yes]] >> next_node
+			Okay then, let's go.
+		<> Yes
+			@play ding
+			@choice = yes
+			Okay then, let's go.
+			>> next_node
+	
 	// Options can have conditionals, like any other line.
 	Greetings stranger.
 		<> I'm here for the gold. {{mission_started}}

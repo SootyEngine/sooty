@@ -232,11 +232,9 @@ static func get_files(paths, extensions=null, nested: bool = true, hidden: bool 
 	var dir := Directory.new()
 	dir.include_hidden = hidden
 	
-	var exts := PackedStringArray()
-	for ext in UList.list(extensions):
-		exts.append("." + ext)
+	var exts := UList.list(extensions)
 	
-	for path in ([paths] if paths is String else paths):
+	for path in UList.list(paths):
 		if dir.dir_exists(path) and not UError.error(dir.open(path), "Can't open '%s'." % path):
 			_get_files(dir, out, exts, nested)
 	

@@ -15,11 +15,6 @@ _global_script_classes=[{
 "path": "res://addons/character_system/Character.gd"
 }, {
 "base": "Resource",
-"class": &"Dialogue",
-"language": &"GDScript",
-"path": "res://addons/sooty_engine/Dialogue.gd"
-}, {
-"base": "Resource",
 "class": &"DialogueLine",
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/DialogueLine.gd"
@@ -166,7 +161,6 @@ _global_script_classes=[{
 }]
 _global_script_class_icons={
 "Character": "",
-"Dialogue": "",
 "DialogueLine": "",
 "DialogueStack": "",
 "FE_BaseFile": "",

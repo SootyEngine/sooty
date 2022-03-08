@@ -1,10 +1,10 @@
-@tool
 extends Node
 
 const CHECK_FILES_EVERY := 1
 
 signal reloaded(dialogue: Dialogue)
 
+var load_all_on_startup := true
 var cache := {}
 
 func get_dialogue_ids() -> Dictionary:
@@ -13,12 +13,16 @@ func get_dialogue_ids() -> Dictionary:
 		out[id] = cache[id].flows.keys()
 	return out
 
-#func _ready() -> void:
-#	if not Engine.is_editor_hint():
-#		var timer := Timer.new()
-#		add_child(timer)
-#		timer.timeout.connect(_timer)
-#		timer.start(CHECK_FILES_EVERY)
+func _ready() -> void:
+	if load_all_on_startup:
+		for file in UFile.get_files("res://dialogue", ".soot"):
+			var d := Dialogue.new(file)
+			cache[d.id] = d
+	
+	var timer := Timer.new()
+	add_child(timer)
+	timer.timeout.connect(_timer)
+	timer.start(CHECK_FILES_EVERY)
 
 func _timer():
 	for d in cache.values():
@@ -45,7 +49,7 @@ func get_flow(flow: String) -> Dictionary:
 	var d := get_dialogue(p[0])
 	return d.get_flow(p[1])
 
-func get_flow_lines(flow: String) -> Array[int]:
+func get_flow_lines(flow: String) -> Array[String]:
 	var p := flow.split(".", true, 1)
 	var d := get_dialogue(p[0])
 	flow = p[1]

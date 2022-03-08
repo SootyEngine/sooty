@@ -24,6 +24,8 @@ func _reload():
 func _parse_file(file: String):
 	files[file] = UFile.get_modified_time(file)
 	var text_lines := UFile.load_text(file).split("\n")
+	if text_lines[0].strip_edges() == "IGNORE":
+		return
 	var blocks := []
 	var stack := []
 	var i := 0
@@ -37,7 +39,7 @@ func _parse_file(file: String):
 			continue
 		
 		var deep := _count_leading_tabs(text_lines[i])
-		var line := { line=i, file=file_index, text=text_lines[i].strip_edges(), lines=[] }
+		var line := { file=file_index, line=i, text=text_lines[i].strip_edges(), lines=[] }
 		
 		if deep+1 > len(stack):
 			stack.resize(deep+1)
@@ -87,13 +89,13 @@ func get_flow(flow: String) -> Dictionary:
 	
 	return {}
 
-func get_line(line: int) -> Dictionary:
+func get_line(line: String) -> Dictionary:
 	if line in lines:
 		return lines[line]
 	push_error("No line '%s' in dialogue '%s'." % [line, id])
 	return {}
 
-func get_lines(lines: Array[int]) -> Array[Dictionary]:
+func get_lines(lines: Array[String]) -> Array[Dictionary]:
 	var out := []
 	for i in len(lines):
 		out.append(get_line(lines[i]))
@@ -108,8 +110,8 @@ func to_flow_id(s: String) -> String:
 			out += "_"
 	return out
 
-func _line_to_index(line: Dictionary) -> int:
-	var index: int = line.line
+func _line_to_index(line: Dictionary) -> String:
+	var index: String = "%s.%s" % [line.file, line.line]
 	lines[index] = line
 	return index
 
@@ -129,14 +131,61 @@ func _parse_lines(line: Dictionary, key: String = "lines"):
 	line.erase("lines")
 	
 	var new_list := []
+	var cond_list := []
+	var last_cond_type := ""
 	for i in len(list):
-		var l = _parse_line(list[i])
-		if "is_prop_line" in l:
-			if not "properties" in line:
-				line.properties = {}
-			_merge(line.properties, l.properties)
+		var l = list[i]
+		
+		# conditional lines are handled differently
+		if l.text == "" and "cond" in l:
+			var cond: String = l.cond
+			if cond.begins_with("elif "):
+				if last_cond_type == "" or last_cond_type == "else":
+					push_error("'elif' must follow an 'if'. Line %s in %s." % [l.line, files.keys()[l.file]])
+					continue
+				last_cond_type = "elif"
+				l.cond_type = "elif"
+				l.cond = l.cond.substr(len("elif")).strip_edges(true, false)
+			elif cond.begins_with("else"):
+				if last_cond_type == "":
+					push_error("'else' must follow an 'if' or 'elif'. Line %s in %s." % [l.line, files.keys()[l.file]])
+					continue
+				last_cond_type = "else"
+				l.cond_type = "else"
+				l.cond = "true"
+			elif cond.begins_with("if "):
+				last_cond_type = "if"
+				l.cond_type = "if"
+				l.cond = l.cond.substr(len("if")).strip_edges(true, false)
+			else:
+				last_cond_type = "if"
+				l.cond_type = "if"
+			
+			l.erase("text")
+			if l.cond_type == "if":
+				l["else"] = []
+				cond_list.append(l)
+				new_list.append(_line_to_index(l))
+			
+			# add 'elif' and 'else' to 'if' line, instead of main flow lines.
+			else:
+				cond_list[-1]["else"].append(_line_to_index(l))
+			
+			prints("CONDITION", l)
+			
 		else:
-			new_list.append(_line_to_index(l))
+			last_cond_type = ""
+			
+			l = _parse_line(l)
+			if "is_prop_line" in l:
+				if not "properties" in line:
+					line.properties = {}
+				_merge(line.properties, l.properties)
+			else:
+				new_list.append(_line_to_index(l))
+	
+	for i in len(cond_lines):
+		
 	
 	line[key] = new_list
 
@@ -232,7 +281,7 @@ func _extract_flow_option(data: Dictionary):
 			data.call = "%s.%s" % [id, data.call]
 
 func _extract_action(data: Dictionary):
-	var p := _trim_between(data.text, "[[", "]]")
+	var p := UString.extract(data.text, "[[", "]]")
 	data.text = p[0]
 	if p[1] != "":
 		data.action = p[1]
@@ -245,57 +294,21 @@ func _extract_comment(data: Dictionary):
 		data.comment = p[1].strip_edges()
 
 func _extract_properties(data: Dictionary):
-	var p := _trim_between(data.text, "((", "))")
+	var p := UString.extract(data.text, "((", "))")
 	data.text = p[0]
 	if p[1] != "":
-		data.condition = p[1]
-#	var text: String = data.text
-#	if "((" in text:
-#		var p := text.split("((", true, 1)
-#		data.text = p[0].strip_edges()
-#		var properties := {}
-#
-#		if "))" in p[1]:
-#			p = p[1].split("))", true, 1)
-#			data.text += p[1].strip_edges()
-#
-#			for prop in p[0].split(" "):
-#				if ":" in prop:
-#					p = prop.split(":", true, 1)
-#					properties[p[0]] = p[1]
-#
-#		data.properties = properties
+		var properties := {}
+		for prop in p[1].split(" "):
+			if ":" in prop:
+				p = prop.split(":", true, 1)
+				properties[p[0]] = p[1]
+		data.properties = properties
 
 func _extract_conditional(data: Dictionary):
-	var p := _trim_between(data.text, "{{", "}}")
+	var p := UString.extract(data.text, "{{", "}}")
 	data.text = p[0]
 	if p[1] != "":
-		data.condition = p[1]
-#	if "{{" in text:
-#		var a := text.split("{{", true, 1)
-#
-#		if "}}" in a[1]:
-#			a = a[1].split("}}", true, 1)
-#			data.text += a[1].strip_edges()
-#			data.condition = a[0]
-#
-#		else:
-#			data.text = a[0].strip_edges()
-
-func _trim_between(t: String, head: String, tail: String) -> Array:
-	var a := t.find(head)
-	if a != -1:
-		var b := t.find(tail, a+len(head))
-		if b != -1:
-			var outer := t.substr(0, a).strip_edges(false, true) + t.substr(b+len(tail)).strip_edges(true, false)
-			var inner := t.substr(a+len(head), b)
-			return [outer, inner]
-		else:
-			var outer := t.substr(0, a).strip_edges(false, true)
-			var inner :=  t.substr(a+len(head))
-			return [outer, inner]
-	else:
-		return [t, ""]
+		data.cond = p[1]
 
 func _count_leading_tabs(s: String) -> int:
 	var out := 0
