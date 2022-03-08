@@ -135,13 +135,29 @@ func pop_next_line() -> Dictionary:
 	
 	# only show lines that pass a test
 	var safety := 100
-	while "condition" in line.line:
+	while "cond" in line.line:
 		safety -= 1
 		if safety <= 0:
 			push_error("Tripped safety.")
 			return {}
 		
-		if StringAction.test(line.line.condition):
+		# 'if' 'elif' 'else' chain
+		if "cond_type" in line.line:
+			var do_break := false
+			if line.line.cond_type == "if":
+				var d := DialogueServer.get_dialogue(line.did)
+				for i in len(line.line.tests):
+					var test_line := d.get_line(line.line.tests[i])
+					if StringAction.test(test_line.cond):
+						_stack.append({did=d.id, lines=test_line.lines, step=0})
+						do_break = true
+						break
+				if do_break:
+					break
+			else:
+				push_error("This should never happen.")
+		
+		if StringAction.test(line.line.cond):
 			break
 		
 		line = _pop_next_line()

@@ -27,7 +27,7 @@ func _ready() -> void:
 func _timer():
 	for d in cache.values():
 		if d.was_file_modified():
-			print("reload: %s" % d.path)
+			print("Relading dialogue: %s" % d.id)
 			d._reload()
 			reloaded.emit(d)
 

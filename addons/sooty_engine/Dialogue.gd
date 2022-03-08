@@ -111,7 +111,7 @@ func to_flow_id(s: String) -> String:
 	return out
 
 func _line_to_index(line: Dictionary) -> String:
-	var index: String = "%s.%s" % [line.file, line.line]
+	var index: String = "%s-%s" % [line.file, line.line]
 	lines[index] = line
 	return index
 
@@ -131,7 +131,7 @@ func _parse_lines(line: Dictionary, key: String = "lines"):
 	line.erase("lines")
 	
 	var new_list := []
-	var cond_list := []
+	var cond_lines := []
 	var last_cond_type := ""
 	for i in len(list):
 		var l = list[i]
@@ -162,16 +162,18 @@ func _parse_lines(line: Dictionary, key: String = "lines"):
 				l.cond_type = "if"
 			
 			l.erase("text")
+			_parse_lines(l)
+			
 			if l.cond_type == "if":
-				l["else"] = []
-				cond_list.append(l)
-				new_list.append(_line_to_index(l))
+				var index := _line_to_index(l)
+				l.tests = [index]
+				cond_lines.append(l)
+				new_list.append(index)
 			
 			# add 'elif' and 'else' to 'if' line, instead of main flow lines.
 			else:
-				cond_list[-1]["else"].append(_line_to_index(l))
-			
-			prints("CONDITION", l)
+				var index := _line_to_index(l)
+				cond_lines[-1].tests.append(index)
 			
 		else:
 			last_cond_type = ""
@@ -185,7 +187,7 @@ func _parse_lines(line: Dictionary, key: String = "lines"):
 				new_list.append(_line_to_index(l))
 	
 	for i in len(cond_lines):
-		
+		print("COND ", cond_lines[i])
 	
 	line[key] = new_list
 

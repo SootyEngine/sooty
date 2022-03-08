@@ -49,7 +49,7 @@ func _ready() -> void:
 
 func _startup():
 	if not stack._started:
-		stack.start("start.start")
+		stack.start("test.start")
 
 func _on_started():
 	print("STARTED")
