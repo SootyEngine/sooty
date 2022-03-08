@@ -3,7 +3,7 @@ extends Node
 
 var config := ConfigFile.new()
 
-func _init() -> void:
+func _ready() -> void:
 	if Engine.is_editor_hint():
 		set_process(false)
 	

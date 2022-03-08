@@ -18,7 +18,7 @@ func has_steps() -> bool:
 	return len(_stack) != 0
 
 func get_current_dialogue() -> Dialogue:
-	return null if not len(_stack) else DialogueServer.get_dialogue(_stack[-1].did)
+	return null if not len(_stack) else Dialogues.get_dialogue(_stack[-1].did)
 
 func tick():
 	if wait:
@@ -73,11 +73,11 @@ func start(id: String):
 	
 	# go to first flow of dialogue
 	else:
-		var d := DialogueServer.get_dialogue(id)
+		var d := Dialogues.get_dialogue(id)
 		if not d.has_flows():
 			push_error("No flows in '%s'." % id)
 		else:
-			var first = DialogueServer.get_dialogue(id).flows.keys()[0]
+			var first = Dialogues.get_dialogue(id).flows.keys()[0]
 			goto("%s.%s" % [id, first])
 
 func goto(flow: String, clear_stack: bool = true, dia_id: Variant = null) -> bool:
@@ -85,11 +85,11 @@ func goto(flow: String, clear_stack: bool = true, dia_id: Variant = null) -> boo
 	
 	if "." in flow:
 		var p := flow.split(".", true, 1)
-		d = DialogueServer.get_dialogue(p[0])
+		d = Dialogues.get_dialogue(p[0])
 		flow = p[1]
 	
 	elif dia_id:
-		d = DialogueServer.get_dialogue(dia_id)
+		d = Dialogues.get_dialogue(dia_id)
 		
 	elif has_steps():
 		d = get_current_dialogue()
@@ -99,7 +99,7 @@ func goto(flow: String, clear_stack: bool = true, dia_id: Variant = null) -> boo
 		return false
 	
 	var fid := "%s.%s" % [d.id, flow]
-	var lines := DialogueServer.get_flow_lines(fid)
+	var lines := Dialogues.get_flow_lines(fid)
 	
 	if not len(lines):
 		print("Can't find lines for %s" % fid)
@@ -140,7 +140,7 @@ func pop_next_line() -> Dictionary:
 		# 'if' 'elif' 'else' chain
 		if "cond_type" in line.line:
 			if line.line.cond_type == "if":
-				var d := DialogueServer.get_dialogue(line.did)
+				var d := Dialogues.get_dialogue(line.did)
 				for i in len(line.line.tests):
 					var test_line := d.get_line(line.line.tests[i])
 					if StringAction.test(test_line.cond):
@@ -159,7 +159,7 @@ func pop_next_line() -> Dictionary:
 func _pop_next_line() -> Dictionary:
 	if len(_stack):
 		var step: Dictionary = _stack[-1]
-		var dia := DialogueServer.get_dialogue(step.did)
+		var dia := Dialogues.get_dialogue(step.did)
 		var line: Dictionary = dia.get_line(step.lines[step.step])
 		var out := { did=step.did, line=line }
 		

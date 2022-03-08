@@ -207,15 +207,15 @@ config/features=PackedStringArray("4.0", "Vulkan Clustered")
 
 [autoload]
 
-Global="*res://addons/Global.gd"
-State="*res://addons/sooty_engine/State.gd"
-DialogueServer="*res://addons/sooty_engine/DialogueServer.gd"
-SaveManager="*res://addons/saver/SaveManager.gd"
-ModManager="*res://addons/saver/ModManager.gd"
+Global="*res://addons/sooty_engine/autoloads/Global.gd"
+SaveManager="*res://addons/sooty_engine/autoloads/SaveManager.gd"
+ModManager="*res://addons/sooty_engine/autoloads/ModManager.gd"
+State="*res://addons/sooty_engine/autoloads/State.gd"
+Dialogues="*res://addons/sooty_engine/autoloads/Dialogues.gd"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/file_editor/plugin.cfg", "res://addons/tool_button/plugin.cfg")
+enabled=PackedStringArray("res://addons/file_editor/plugin.cfg", "res://addons/sooty_engine/plugin.cfg", "res://addons/tool_button/plugin.cfg")
 
 [input]
 

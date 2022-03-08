@@ -36,7 +36,7 @@ func load_mod(mod: String):
 		var d := Dialogue.new(file)
 		var flows := len(d.flows)
 		print("\t+ %s (%s - %sx flows)" % [file.trim_prefix(mod_path), d.id, flows])
-		DialogueServer.add_dialogue(d)
+		Dialogues.add_dialogue(d)
 	
 	# load state
 	var state_path := mod_path.plus_file("state.json")
@@ -60,7 +60,7 @@ func load_mod(mod: String):
 	
 func op():
 	#print(JSON.new().stringify(State._get_state(), "\t", false))
-	print(DialogueServer.get_dialogue_ids())
+	print(Dialogues.get_dialogue_ids())
 #func _merge_script_parts(a: Array) -> String:
 #	var lines = ["extends GameStateBase"]
 #	var funcs = {}

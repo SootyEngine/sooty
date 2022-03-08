@@ -20,7 +20,7 @@ static func execute(e: String, default = null, d: Dictionary={}):
 
 static func do(s: String) -> Variant:
 	var got = null
-	for a in s.split(";"):
+	for a in s.split(";@"):
 		got = _do(a)
 	return got
 

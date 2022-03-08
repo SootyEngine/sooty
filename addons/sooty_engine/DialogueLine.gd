@@ -12,7 +12,7 @@ var line: int:
 	get: return _data.line
 
 var dialogue: Dialogue:
-	get: return DialogueServer.get_dialogue(_dialogue_id)
+	get: return Dialogues.get_dialogue(_dialogue_id)
 
 var text: String:
 	get: return _data.get("text", "")
@@ -35,7 +35,7 @@ func _get_options(input: Array, output: Array, depth: int):
 		if "flow" in opdata:
 			if opdata.flow == "call":
 				var fid: String = opdata.call
-				var flines := DialogueServer.get_flow_lines(fid)
+				var flines := Dialogues.get_flow_lines(fid)
 				_get_options(flines, output, depth+1)
 		else:
 			output.append(opdata)
