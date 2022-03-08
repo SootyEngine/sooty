@@ -207,6 +207,12 @@ func _parse_tags(tags_string: String):
 		_stack.pop_back()
 
 func _parse_tag(tag: String):
+	# This allows doing: "[{color}]Text[]".format({color=Color.RED})
+	if UString.is_wrapped(tag, "(", ")"):
+		var rgba = UString.unwrap(tag, "(", ")").split_floats(",")
+		_push_color(Color(rgba[0], rgba[1], rgba[2], rgba[3]))
+		return
+	
 	var tag_name: String
 	var tag_info: String
 	

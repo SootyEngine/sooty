@@ -16,18 +16,49 @@ It's been rewritten multiple times, and may again in future.
 	Dialogue without a speaker.
 	
 	john: Dialogue with a speaker.
+	: This text continues with John as the speaker.
+	This text has no speaker.
+	: This text is John again, since he spoke last.
+	"Mysterious Stranger": This name will be presented as is, without checking for a character class.
 	
 	Markdown like *italic*, **bold**, and ***bold italics*** can be used.
+	As well as an [b;cyan;sparkle]Evolved BBCode System[] that aims to minimize typing and clutter.
 	
 	@score += 10 // '@' is for StringActions.
 	
 	@camera shake 10 // StringActions can be used to call object functions.
 	
+	// The following is equivalent to
+	// State.day_of_week = pick({ "monday"=0, "tuesday"=1, "wednesday"=1, "thursday"=1, "friday"=5, "saturday"=10, "sunday"=10 })
+	@day_of_week = pick monday:0 tuesday:1 wednesday:1 thursday:1 friday:5 saturday:10 sunday:10
+	
 	Dialogue with some options.
 		<> Yes. [[@choice = yes]]
 			Dialogue that occurs when 'Yes' is chosen.
+			@score += 20
 		<> No. [[@choice = no]]
+		<> Take me to the options flow. => options_example
 		<> Nevermind.
+	
+	// Conditionals
+	{{score > 10}}
+		Wow, nice score.
+		Keep it up!
+	
+	Wow, nice score. {{score > 10}} // Or on a per line basis.
+	
+	// Match/switch statements.
+	// Start with a '*'.
+	{{*$day_of_week}}
+		{{monday}} Monday funday.
+		{{tuesday}} Tuesday shmusday.
+		{{wednesday}} Wednesday shmednesday.
+		{{thursday}} Thorsday boresday.
+		{{friday}} Friday bye-day.
+		{{saturday}} mary: Saturday caturday.
+			paul: I can't wait for sunday.
+		{{sunday}} paul: It's finally sunday!
+			mary: I prefer saturdays.
 	
 	// Let's go to another node.
 	>> conditionals

@@ -9,17 +9,20 @@ func quest(id: String, action: String, args: Array):
 	print("Called quest(%s)!" % [id, action, args])
 
 func gain(item: String, amount: int = 1, kwargs: Dictionary = {}):
-	player.inventory.gain(item, amount)
+	player.inventory.gain(item, amount, kwargs)
 
 func lose(item: String, amount: int = 1, kwargs: Dictionary = {}):
-	player.inventory.lose(item, amount)
+	player.inventory.lose(item, amount, kwargs)
 
 var score := 1
 var choice := ""
+var day_of_week := "monday"
 
 var player := Character.new({
 	name="Player",
+	color=Color.TOMATO,
 	inventory={
+		slots=equipment_slots,
 		items=[
 			{type="coin", total=12356}
 		]
@@ -28,7 +31,9 @@ var player := Character.new({
 
 var paul := Character.new({
 	name="Paul",
+	color=Color.PLUM,
 	inventory={
+		slots=equipment_slots,
 		items=[
 			{type="coin", total=10}
 		]
@@ -60,3 +65,13 @@ var coin := Item.new({name="Coin"})
 var apple := Item.new({name="Apple"})
 var pear := Item.new({name="Pear"})
 var plump := Item.new({name="Plump"})
+
+# ITEM SLOTS
+var equipment_slots := EquipmentSlots.new({
+	slots={
+		head={},
+		torso={bare=["two_piece"]},
+		legs={bare=["two_piece"]},
+		two_piece={bare=["torso", "legs"]}
+	}
+})

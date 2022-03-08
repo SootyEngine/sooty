@@ -108,7 +108,7 @@ func goto(flow: String, clear_stack: bool = true, dia_id: Variant = null) -> boo
 	if clear_stack:
 		_stack.clear()
 	
-	_stack.append({did=d.id, lines=lines, step=0})
+	_push(d.id, lines)
 	return true
 
 # select an option, adding it's lines to the stack
@@ -120,11 +120,17 @@ func select_option(option: DialogueLine): # step: Dictionary, option: int):
 		StringAction.do(o.action)
 	
 	if "then_goto" in o:
-		_stack.append({did=d.id, lines=o.lines, step=0, goto=o.then_goto})
+		_push(d.id, o.lines, {goto=o.then_goto})
 	else:
-		_stack.append({did=d.id, lines=o.lines, step=0})
+		_push(d.id, o.lines)
 	
 	option_selected.emit(o)
+
+func _push(did: String, lines: Array, extra := {}):
+	var step := { did=did, lines=lines, step=0 }
+	for k in extra:
+		step[k] = extra[k]
+	_stack.append(step)
 
 func pop_next_line() -> Dictionary:
 	var line := _pop_next_line()
@@ -137,15 +143,26 @@ func pop_next_line() -> Dictionary:
 			push_error("Tripped safety.")
 			return {}
 		
-		# 'if' 'elif' 'else' chain
+		prints("<>", line.keys())
 		if "cond_type" in line.line:
+			# 'if' 'elif' 'else' chain
 			if line.line.cond_type == "if":
 				var d := Dialogues.get_dialogue(line.did)
 				for i in len(line.line.tests):
 					var test_line := d.get_line(line.line.tests[i])
 					if StringAction.test(test_line.cond):
-						_stack.append({did=d.id, lines=test_line.lines, step=0})
+						_push(d.id, test_line.lines)
 						break
+			
+			# match chain
+			elif line.line.cond_type == "match":
+				var match_result = StringAction.str_to_var(line.line.cond)
+				for i in len(line.line.cases):
+					if match_result == StringAction.str_to_var(line.line.cases[i]):
+						var d := Dialogues.get_dialogue(line.did)
+						_push(d.id, line.line.case_lines[i])
+						break
+				
 			else:
 				push_error("This should never happen.")
 			

@@ -9,6 +9,8 @@ func _ready() -> void:
 	
 	if config.load("res://config.cfg") != OK:
 		push_error("Couldn't load config.cfg.")
+	else:
+		print("CONFIG", config.get_sections())
 	
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():

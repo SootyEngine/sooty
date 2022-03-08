@@ -129,7 +129,7 @@ static func list_equalingf(n: float = 1.0, size: int = 20) -> Array:
 		out.append(v[i-1]-v[i] if negative else v[i]-v[i-1])
 	return out
 
-static func pick(items):
+static func pick(items):# -> Variant:
 	return items[randi() % len(items)]
 
 static func pick_excluding(items, item: Variant) -> Variant:
@@ -140,10 +140,15 @@ static func pick_excluding(items, item: Variant) -> Variant:
 	return null
 
 static func pick_excluding_all(items, exclude: Array) -> Variant:
+	var safety := 100
 	while true:
 		var picked = pick(items)
-		if not picked in exclude or len(items) <= 1 or len(exclude) <= 1:
+		if not picked in exclude:
 			return picked
+		safety -= 1
+		if safety <= 0:
+			push_error("Tripped safety.")
+			break
 	return null
 
 # picks a random item and removes it from the list or dict.
@@ -220,7 +225,7 @@ static func _get_dict_weight(d:Dictionary) -> float:
 	return total_weight
 
 # pass a dict where keys will be returned and values are weights.
-static func pick_weighted(d:Dictionary, reverse=false, total_weight=null):
+static func pick_weighted(d: Dictionary, reverse := false, total_weight=null):
 	if total_weight == null:
 		total_weight = _get_dict_weight(d)
 	var r:float = randf() * total_weight

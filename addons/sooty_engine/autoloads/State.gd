@@ -22,7 +22,7 @@ func add_mod(path: String):
 
 func _post_init():
 	_default = _get_state()
-	print(JSON.new().stringify(_default, "\t", false))
+#	print(JSON.new().stringify(_default, "\t", false))
 	state_loaded.emit()
 
 func _get(property: StringName):
@@ -34,6 +34,9 @@ func _set(property: StringName, value) -> bool:
 	for m in _mods:
 		if property in m:
 			var old = m[property]
+			if typeof(value) != typeof(old):
+				push_error("Can't set $%s (%s) to %s (%s)." % [property, UObject.get_name_from_type(typeof(old)), value, UObject.get_name_from_type(typeof(value))])
+				return true
 			m[property] = value
 			var new = m[property]
 			if old != new:

@@ -1,8 +1,9 @@
 extends Node
 
 const DIR := "user://saves"
-const PREVIEW_SIZE_DIV_AMOUNT := 3.0
-const SAVE_GROUP := "has_save_state"
+const PREVIEW_SIZE_DIV_AMOUNT := 3.0 # How much to shrink preview image.
+const GROUP_SAVE_STATE := "has_save_state"
+const GROUP_SAVE_INFO := "has_save_info"
 
 func _ready() -> void:
 	var d := Directory.new()
@@ -22,8 +23,14 @@ func get_slot_names() -> PackedStringArray:
 	d.list_dir_end()
 	return out
 
+func get_slot_directory(slot: String) -> String:
+	return DIR.plus_file("slot_" + slot)
+
+func get_slot_info(slot: String) -> Dictionary:
+	return UFile.load_json(get_slot_directory(slot).plus_file("info.json"), {})
+
 func save_to_slot(slot: String):
-	var slot_path := DIR.plus_file("slot_" + slot)
+	var slot_path := get_slot_directory(slot)
 	
 	var d := Directory.new()
 	if not d.dir_exists(slot_path):
@@ -38,13 +45,13 @@ func save_to_slot(slot: String):
 	
 	# state data
 	var state := {}
-	for node in get_tree().get_nodes_in_group("has_save_state"):
+	for node in get_tree().get_nodes_in_group(GROUP_SAVE_STATE):
 		state[node.name] = node.get_save_state()
 	UFile.save_to_resource(slot_path.plus_file("state.res"), state)
 	
 	# save slot info
-	var slot_info := {
-		time=Time.get_datetime_dict_from_system()
-	}
-	UFile.save_json(slot_path.plus_file("slot.json"), slot_info)
+	var slot_info := { time=Time.get_datetime_dict_from_system() }
+	for node in get_tree().get_nodes_in_group(GROUP_SAVE_INFO):
+		UDict.patch(slot_info, node.get_save_info())
+	UFile.save_json(slot_path.plus_file("info.json"), slot_info)
 	

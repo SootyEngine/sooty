@@ -57,8 +57,8 @@ func _parse_file(file: String):
 	for i in len(blocks):
 		blocks[i] = _parse_block(blocks[i])
 	
-#	output(flows)
-#	output(lines)
+	output(flows)
+	output(lines)
 
 func was_file_modified() -> bool:
 	for file in files:
@@ -127,8 +127,8 @@ func _parse_flow(flow: Dictionary) -> Dictionary:
 	return flow
 
 func _parse_lines(line: Dictionary, key: String = "lines"):
-	var list = line.lines
-	line.erase("lines")
+	var list = line[key]
+	line.erase(key)
 	
 	var new_list := []
 	var last_cond := {}
@@ -136,9 +136,45 @@ func _parse_lines(line: Dictionary, key: String = "lines"):
 	for i in len(list):
 		var l = list[i]
 		
+#		if l.text == "%CASE%":
+#			new_list.append(_line_to_index(l))
+#			continue
+		
 		# conditional lines are handled differently
 		if l.text == "" and "cond" in l:
 			var cond: String = l.cond
+			
+			# match statement
+			if cond.begins_with("*"):
+				l.cond_type = "match"
+				l.cond = l.cond.substr(1).strip_edges(true, false)
+				l.cases = []
+				l.case_lines = []
+				for i in len(l.lines):
+					var c = l.lines[i]
+					# It may have another conditional.
+					l.cases.append(c.cond)
+					c.erase("cond")
+					_extract_conditional(c)
+					
+					var case_lines := []
+					# The first line could have text on it, so we'll parse it as a line.
+					if c.text.strip_edges() != "":
+						case_lines.append(_parse_line(c))
+					# Otherwise, we are taking it's children as our own.
+					case_lines.append_array(c.lines)
+					
+					var temp := {lines=case_lines}
+					_parse_lines(temp)
+					l.case_lines.append(temp.lines)
+				
+				l.erase("lines")
+				# Now parse as 
+				new_list.append(_line_to_index(l))
+				UDict.log(l, "MATCH ")
+				continue
+			
+			# if-elif-else chain.
 			if cond.begins_with("elif "):
 				if last_cond_type == "" or last_cond_type == "else":
 					push_error("'elif' must follow an 'if'. Line %s in %s." % [l.line, files.keys()[l.file]])
@@ -179,10 +215,13 @@ func _parse_lines(line: Dictionary, key: String = "lines"):
 			last_cond_type = ""
 			
 			l = _parse_line(l)
+			
+			# property line?
 			if "is_prop_line" in l:
 				if not "properties" in line:
 					line.properties = {}
 				_merge(line.properties, l.properties)
+			
 			else:
 				new_list.append(_line_to_index(l))
 	
@@ -231,8 +270,6 @@ func _parse_option(data: Dictionary) -> Dictionary:
 func _parse_action(data: Dictionary) -> Dictionary:
 	var text: String = data.text.substr(len("@"))
 	data.action = text
-	data.erase("text")
-	data.erase("lines")
 	return data
 
 func _parse_dialogue(data: Dictionary) -> Dictionary:
@@ -243,23 +280,36 @@ func _parse_dialogue(data: Dictionary) -> Dictionary:
 		data.from = p[0].strip_edges()
 		data.text = p[1].strip_edges()
 	
-	if data.lines:
-		# convert to line numbers
+	var options := []
+	var properties := []
+	var new_lines := []
+	for line in data.lines:
+		if "is_prop_line":
+			properties.append(line)
+		elif "option" in line:
+			options.append(line)
+		else:
+			new_lines.append(line)
+	
+	if options:
+		data.options = options
 		_parse_lines(data, "options")
 	
-	data.erase("lines")
+	if properties:
+		pass
+	
+	if new_lines:
+		data.lines = new_lines
+		_parse_lines(data, "lines")
+	
 	return data
 
 func _parse_flow_goto(data: Dictionary) -> Dictionary:
 	_extract_flow_option(data)
-	data.erase("text")
-	data.erase("lines")
 	return data
 
 func _parse_flow_call(data: Dictionary) -> Dictionary:
 	_extract_flow_option(data)
-	data.erase("text")
-	data.erase("lines")
 	return data
 
 func _extract_flow_option(data: Dictionary):

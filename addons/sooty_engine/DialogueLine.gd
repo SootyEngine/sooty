@@ -17,8 +17,8 @@ var dialogue: Dialogue:
 var text: String:
 	get: return _data.get("text", "")
 
-var from: String:
-	get: return _data.get("from", "")
+var from: Variant:
+	get: return _data.get("from", null)
 
 func has_options() -> bool:
 	return "options" in _data
@@ -45,7 +45,7 @@ func get_options(only_passing: bool = false) -> Array[DialogueLine]:
 	
 	if "options" in _data:
 		# recursively select options
-		var lines: Array[int] = _data.options
+		var lines: Array[String] = _data.options
 		var first_pass: Array[Dictionary] = []
 		_get_options(lines, first_pass, 0)
 		

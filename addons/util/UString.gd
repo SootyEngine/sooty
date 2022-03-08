@@ -38,20 +38,33 @@ static func extract(s: String, head: String, tail: String, strip_edges: bool = t
 	else:
 		return [s, ""]
 
+static func is_wrapped(s: String, head: String, tail=null) -> bool:
+	return s.begins_with(head) and s.ends_with(tail if tail else head)
+
+static func unwrap(s: String, head: String, tail=null) -> String:
+	return s.trim_prefix(head).trim_suffix(tail if tail else head)
+
 # 1234567 => 1,234,567
 static func commas(number: Variant) -> String:
-	var string = str(number)
+	var string := str(number)
+	var is_neg := string.begins_with("-")
+	if is_neg:
+		string = string.substr(1)
 	var mod = len(string) % 3
 	var out = ""
 	for i in len(string):
 		if i != 0 and i % 3 == mod:
 			out += ","
 		out += string[i]
-	return out
+	return "-" + out if is_neg else out
 
 const SIZES := {1_000_000_000:"B", 1_000_000:"M", 1_000:"k"}
-static func humanize(value: Variant) -> String:
+static func humanize(value: int) -> String:
+	var is_neg := value < 0
+	if is_neg:
+		value = -value
 	for size in SIZES:
 		if value > size:
-			return "[b]%.2f[]%s" % [(value / float(size)), SIZES[size]]
-	return str(value)
+			var out := "%.2f%s" % [(value / float(size)), SIZES[size]]
+			return "-" + out if is_neg else out
+	return str(-value) if is_neg else str(value)

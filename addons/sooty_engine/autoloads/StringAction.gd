@@ -2,11 +2,34 @@ extends Node
 
 const OPERATOR_ASSIGN := ["=", "+=", "-="]
 
-var pipes := {
+var funcs := {
 	"commas": func(x): return UString.commas(x),
-	"humanize": func(x): return UString.humanize(x)
+	"humanize": func(x): return UString.humanize(x),
+	"pick": _pick_cached
 }
 
+# Cache the pick function so it doesn't give the same option too often.
+# Still random, just not as boring.
+var _pick_cache := {}
+func _pick_cached(x) -> Variant:
+	# if a dictionary? treat as weighted dict
+	if x is Dictionary:
+		return URand.pick_weighted(x)
+	
+	# cache a duplicate to be randomly picked from
+	if not x in _pick_cache:
+		_pick_cache[x] = x.duplicate()
+		_pick_cache[x].shuffle()
+	
+	var got = _pick_cache[x].pop_back()
+	
+	if len(_pick_cache[x]) == 0:
+		_pick_cache[x] = x.duplicate()
+		_pick_cache[x].shuffle()
+	
+	return got
+
+# Test whether a command is true or false.
 func test(condition: String) -> bool:
 	var result = execute(condition, false)
 #	prints("Test '%s' got '%s'." % [condition, result])
@@ -18,8 +41,8 @@ func execute(e: String, default = null, d: Dictionary={}) -> Variant:
 		var p := e.split("|", true, 1)
 		var val = execute(p[0], default, d)
 		var pipe_id := p[1]
-		if pipe_id in pipes:
-			return pipes[pipe_id].call(val)
+		if pipe_id in funcs:
+			return funcs[pipe_id].call(val)
 	
 	else:
 		var expression := Expression.new()
@@ -48,7 +71,7 @@ func _do(s: String) -> Variant:
 			return _do_assign([s.trim_suffix("--"), "-=", "1"])
 	
 	# assignment
-	if len(parts) == 3 and parts[1] in OPERATOR_ASSIGN:
+	if len(parts) > 2 and parts[1] in OPERATOR_ASSIGN:
 		return _do_assign(parts)
 	
 	return _do_function(parts)
@@ -59,9 +82,20 @@ func _do_assign(parts: Array) -> Variant:
 		push_error("No property '%s' in State." % key)
 		return
 	
+	var eval = parts[1]
 	var old_value = State[key]
-	var new_value = _str_to_var(parts[2])
-	match parts[1]:
+	var new_value
+	
+	# simple variable assignment
+	if len(parts) == 3:
+		new_value = str_to_var(parts[2])
+	# call a function assignment
+	else:
+		parts.pop_front() # pop property
+		parts.pop_front() # pop eval
+		new_value = _do_function(parts)
+	
+	match eval:
 		"=": State._set(key, new_value)
 		"+=": State._set(key, old_value + new_value)
 		"-=": State._set(key, old_value - new_value)
@@ -76,10 +110,20 @@ func _do_function(parts: Array) -> Variant:
 			var kv = p.split(":", true, 1)
 			if not len(args) or not args[-1] is Dictionary:
 				args.append({})
-			args[-1][kv[0]] = _str_to_var(kv[1])
+			args[-1][kv[0]] = str_to_var(kv[1])
 		
 		else:
-			args.append(_str_to_var(p))
+			args.append(str_to_var(p))
+	
+	# if the function exists in func, just call that
+	if fname in funcs:
+		match len(args):
+			0: return funcs[fname].call()
+			1: return funcs[fname].call(args[0])
+			2: return funcs[fname].call(args[0], args[1])
+			3: return funcs[fname].call(args[0], args[1], args[2])
+			4: return funcs[fname].call(args[0], args[1], args[2], args[3])
+			5: return funcs[fname].call(args[0], args[1], args[2], args[3], args[4])
 	
 	var gname := fname
 	
@@ -116,7 +160,7 @@ func _split_string(s: String) -> Array:
 			out[-1] += c
 	return out
 
-func _str_to_var(s: String) -> Variant:
+func str_to_var(s: String) -> Variant:
 	# variable, leave unquoted
 	if s.begins_with("$"):
 		var prop := s.substr(1)
@@ -126,6 +170,7 @@ func _str_to_var(s: String) -> Variant:
 			push_error("No property '%s' in State." % prop)
 			return null
 	
+	# string
 	elif s.begins_with('"'):
 		return s.trim_prefix('"').trim_suffix('"')
 	
@@ -133,7 +178,7 @@ func _str_to_var(s: String) -> Variant:
 	elif "," in s:
 		var p = Array(s.split(","))
 		for i in len(p):
-			p[i] = _str_to_var(p[i])
+			p[i] = str_to_var(p[i])
 		return p
 	
 	elif s.is_valid_int():

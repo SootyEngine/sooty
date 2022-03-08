@@ -34,6 +34,11 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/DialogueStack.gd"
 }, {
+"base": "BaseDataClass",
+"class": &"EquipmentSlots",
+"language": &"GDScript",
+"path": "res://simple_visual_novel/data_classes/EquipmentSlots.gd"
+}, {
 "base": "Node",
 "class": &"FE_BaseFile",
 "language": &"GDScript",
@@ -170,6 +175,7 @@ _global_script_class_icons={
 "Dialogue": "",
 "DialogueLine": "",
 "DialogueStack": "",
+"EquipmentSlots": "",
 "FE_BaseFile": "",
 "FE_Directory": "",
 "FE_Editor": "",

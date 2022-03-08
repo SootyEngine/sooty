@@ -6,7 +6,7 @@ var auto_load_mods := false
 var loaded := []
 
 func _init() -> void:
-	add_to_group(SaveManager.SAVE_GROUP)
+	add_to_group(SaveManager.GROUP_SAVE_STATE)
 
 func get_save_state():
 	return { loaded=loaded }
