@@ -5,27 +5,30 @@ class_name Dialogue
 @export var flows := {}
 @export var lines := {}
 @export var errors := []
-@export var path := ""
+@export var files := {}
 @export var last_modified := 0
 
-func _init(p: String):
-	id = p.split("dialogue/", true, 1)[1].rsplit(".")[0]
-	path = p
-	_reload_from_text(UFile.load_text(path))
+func _init(file: String):
+	id = file.split("dialogue/", true, 1)[1].rsplit(".")[0]
+	_parse_file(file)
+
+func patch(file: String):
+	_parse_file(file)
 
 func _reload():
-	var text := UFile.load_text(path)
-	_reload_from_text(text)
-	last_modified = UFile.get_modified_time(path)
-
-func _reload_from_text(text: String):
 	flows.clear()
 	lines.clear()
-	
-	var text_lines := text.split("\n")
+	for file in files:
+		_parse_file(file)
+
+func _parse_file(file: String):
+	files[file] = UFile.get_modified_time(file)
+	var text_lines := UFile.load_text(file).split("\n")
 	var blocks := []
 	var stack := []
 	var i := 0
+	var file_index := files.keys().find(file)
+	
 	for i in len(text_lines):
 		if text_lines[i].strip_edges() == "":
 			continue
@@ -34,7 +37,7 @@ func _reload_from_text(text: String):
 			continue
 		
 		var deep := _count_leading_tabs(text_lines[i])
-		var line := { line=i, text=text_lines[i].strip_edges(), lines=[] }
+		var line := { line=i, file=file_index, text=text_lines[i].strip_edges(), lines=[] }
 		
 		if deep+1 > len(stack):
 			stack.resize(deep+1)
@@ -56,7 +59,10 @@ func _reload_from_text(text: String):
 #	output(lines)
 
 func was_file_modified() -> bool:
-	return path != "" and UFile.get_modified_time(path) != last_modified
+	for file in files:
+		if files[file] != UFile.get_modified_time(file):
+			return true
+	return false
 
 func has_errors() -> bool:
 	return len(errors) != 0
@@ -163,6 +169,7 @@ func _parse_option(data: Dictionary) -> Dictionary:
 	data.flag = text.substr(a+1, b-a-1).strip_edges()
 	
 	_extract_flow_option(data)
+	_extract_action(data)
 	
 	if "goto" in data:
 		data.then_goto = data.goto
@@ -224,6 +231,12 @@ func _extract_flow_option(data: Dictionary):
 		if not "." in data.call:
 			data.call = "%s.%s" % [id, data.call]
 
+func _extract_action(data: Dictionary):
+	var p := _trim_between(data.text, "[[", "]]")
+	data.text = p[0]
+	if p[1] != "":
+		data.action = p[1]
+
 func _extract_comment(data: Dictionary):
 	var text: String = data.text
 	if "//" in text:
@@ -232,34 +245,57 @@ func _extract_comment(data: Dictionary):
 		data.comment = p[1].strip_edges()
 
 func _extract_properties(data: Dictionary):
-	var text: String = data.text
-	if "((" in text:
-		var p := text.split("((", true, 1)
-		data.text = p[0].strip_edges()
-		var properties := {}
-		
-		if "))" in p[1]:
-			p = p[1].split("))", true, 1)
-			data.text += p[1].strip_edges()
-			
-			for prop in p[0].split(" "):
-				if ":" in prop:
-					p = prop.split(":", true, 1)
-					properties[p[0]] = p[1]
-		
-		data.properties = properties
+	var p := _trim_between(data.text, "((", "))")
+	data.text = p[0]
+	if p[1] != "":
+		data.condition = p[1]
+#	var text: String = data.text
+#	if "((" in text:
+#		var p := text.split("((", true, 1)
+#		data.text = p[0].strip_edges()
+#		var properties := {}
+#
+#		if "))" in p[1]:
+#			p = p[1].split("))", true, 1)
+#			data.text += p[1].strip_edges()
+#
+#			for prop in p[0].split(" "):
+#				if ":" in prop:
+#					p = prop.split(":", true, 1)
+#					properties[p[0]] = p[1]
+#
+#		data.properties = properties
 
 func _extract_conditional(data: Dictionary):
-	var text: String = data.text
-	if "{{" in text:
-		var p := text.split("{{", true, 1)
-		data.text = p[0].strip_edges()
-		
-		if "}}" in p[1]:
-			p = p[1].split("}}", true, 1)
-			data.text += p[1].strip_edges()
-			
-			data.condition = p[0]
+	var p := _trim_between(data.text, "{{", "}}")
+	data.text = p[0]
+	if p[1] != "":
+		data.condition = p[1]
+#	if "{{" in text:
+#		var a := text.split("{{", true, 1)
+#
+#		if "}}" in a[1]:
+#			a = a[1].split("}}", true, 1)
+#			data.text += a[1].strip_edges()
+#			data.condition = a[0]
+#
+#		else:
+#			data.text = a[0].strip_edges()
+
+func _trim_between(t: String, head: String, tail: String) -> Array:
+	var a := t.find(head)
+	if a != -1:
+		var b := t.find(tail, a+len(head))
+		if b != -1:
+			var outer := t.substr(0, a).strip_edges(false, true) + t.substr(b+len(tail)).strip_edges(true, false)
+			var inner := t.substr(a+len(head), b)
+			return [outer, inner]
+		else:
+			var outer := t.substr(0, a).strip_edges(false, true)
+			var inner :=  t.substr(a+len(head))
+			return [outer, inner]
+	else:
+		return [t, ""]
 
 func _count_leading_tabs(s: String) -> int:
 	var out := 0

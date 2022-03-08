@@ -13,6 +13,7 @@ func _init():
 
 func _post_init():
 	_default = _get_state()
+	print(JSON.new().stringify(_default, "\t", false))
 
 func _get(property: StringName):
 	for m in _mods:
