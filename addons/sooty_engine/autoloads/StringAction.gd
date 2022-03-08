@@ -1,30 +1,42 @@
-@tool
-extends Resource
-class_name StringAction
+extends Node
 
 const OPERATOR_ASSIGN := ["=", "+=", "-="]
 
-static func test(condition: String) -> bool:
+var pipes := {
+	"commas": func(x): return UString.commas(x),
+	"humanize": func(x): return UString.humanize(x)
+}
+
+func test(condition: String) -> bool:
 	var result = execute(condition, false)
 #	prints("Test '%s' got '%s'." % [condition, result])
 	return true if result else false
 
-static func execute(e: String, default = null, d: Dictionary={}):
-	var expression := Expression.new()
-	if expression.parse(e, PackedStringArray(d.keys())) == OK:
-		var result = expression.execute(d.values(), State, false)
-		if not expression.has_execute_failed():
-			return result
+func execute(e: String, default = null, d: Dictionary={}) -> Variant:
+	# Pipe value through a Callable?
+	if "|" in e:
+		var p := e.split("|", true, 1)
+		var val = execute(p[0], default, d)
+		var pipe_id := p[1]
+		if pipe_id in pipes:
+			return pipes[pipe_id].call(val)
+	
+	else:
+		var expression := Expression.new()
+		if expression.parse(e, PackedStringArray(d.keys())) == OK:
+			var result = expression.execute(d.values(), State, false)
+			if not expression.has_execute_failed():
+				return result
 #		push_error(expression.get_error_text())
 	return default
 
-static func do(s: String) -> Variant:
+func do(s: String) -> Variant:
 	var got = null
 	for a in s.split(";@"):
 		got = _do(a)
 	return got
 
-static func _do(s: String) -> Variant:
+func _do(s: String) -> Variant:
 	var parts := _split_string(s)
 	
 	# assignment
@@ -41,7 +53,7 @@ static func _do(s: String) -> Variant:
 	
 	return _do_function(parts)
 
-static func _do_assign(parts: Array) -> Variant:
+func _do_assign(parts: Array) -> Variant:
 	var key = parts[0]
 	if not key in State:
 		push_error("No property '%s' in State." % key)
@@ -55,7 +67,7 @@ static func _do_assign(parts: Array) -> Variant:
 		"-=": State._set(key, old_value - new_value)
 	return State[key]
 
-static func _do_function(parts: Array) -> Variant:
+func _do_function(parts: Array) -> Variant:
 	var args := []
 	var fname: String = parts.pop_front()
 	
@@ -81,7 +93,7 @@ static func _do_function(parts: Array) -> Variant:
 		out = UObject.call_w_args(node, fname, args)
 	return out
 	
-static func _split_string(s: String) -> Array:
+func _split_string(s: String) -> Array:
 	var out := [""]
 	var in_quotes := false
 	for c in s:
@@ -104,7 +116,7 @@ static func _split_string(s: String) -> Array:
 			out[-1] += c
 	return out
 
-static func _str_to_var(s: String) -> Variant:
+func _str_to_var(s: String) -> Variant:
 	# variable, leave unquoted
 	if s.begins_with("$"):
 		var prop := s.substr(1)

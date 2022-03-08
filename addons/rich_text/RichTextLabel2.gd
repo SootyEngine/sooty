@@ -127,7 +127,7 @@ func _preparse_untagged(btext: String) -> String:
 	
 	return btext
 
-func _parse(btext :String):
+func _parse(btext: String):
 	while TAG_OPENED in btext:
 		var p := btext.split(TAG_OPENED, true, 1)
 		
@@ -159,7 +159,6 @@ func _parse(btext :String):
 		# close old fashioned way
 		elif tag.begins_with("/"):
 			pass
-#			var _err = append_text("[%s]" % tag)
 		
 		else:
 			_parse_opening(tag)
@@ -180,7 +179,8 @@ func _parse_opening(tag: String):
 			_add_text("[%s]" % tag)
 			pop()
 		else:
-			_add_text(str(got))
+#			_add_text(str(got))
+			_parse(str(got))
 		
 		if len(p) == 2:
 			_stack_pop()

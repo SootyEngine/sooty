@@ -2,18 +2,28 @@ extends Node
 
 signal changed(key: String)
 signal changed_from_to(key: String, from: Variant, to: Variant)
+signal state_loaded()
 
 var _default := {}
-var _mods := [load("res://state.gd").new()]
+var _mods := []
 
-func _init():
+func _ready() -> void:
+	add_mod("res://state.gd")
+	_post_init.call_deferred()
+
+func add_mod(path: String):
+	var mod: Node = load(path).new()
+	add_child(mod)
+	_mods = get_children()
+
+#func _init():
 #	print("INITIAL STATE", _default)
 #	print(_get_properties_of_class("Quest"))
-	_post_init.call_deferred()
 
 func _post_init():
 	_default = _get_state()
-#	print(JSON.new().stringify(_default, "\t", false))
+	print(JSON.new().stringify(_default, "\t", false))
+	state_loaded.emit()
 
 func _get(property: StringName):
 	for m in _mods:
@@ -57,11 +67,22 @@ func _get_changed_states() -> Dictionary:
 
 # Collect all properties that extend the type of class.
 # Good for collecting similar types, like Quests, Characters, without needing them to all call a register.
-func _get_properties_of_class(cname: String) -> Dictionary:
+#func _get_all_of_class(cname: String) -> Dictionary:
+#	var out := {}
+#	for prop in get_property_list():
+#		if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and prop.type == TYPE_OBJECT:
+#			var v = self[prop.name]
+#			if UObject.get_class_name(v) == cname:
+#				out[prop.name] = v
+#	return out
+
+func _get_all_of_type(type: Variant) -> Dictionary:
 	var out := {}
-	for prop in get_property_list():
-		if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and prop.type == TYPE_OBJECT:
-			var v = self[prop.name]
-			if UObject.get_class_name(v) == cname:
-				out[prop.name] = v
+	for k in _default:
+		var v = self[k]
+		if v is type:
+			out[k] = v
 	return out
+
+func _has_of_type(id: String, type: Variant) -> bool:
+	return id in _default and self[id] is type

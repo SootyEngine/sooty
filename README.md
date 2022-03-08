@@ -142,6 +142,9 @@ It's been rewritten multiple times, and may again in future.
 	
 	// Include a State variable with '$'. These tags are self closing, but can still fit others.
 	My name is [$strangers_name;b;green_yellow]. What is yours?
+	// Variables can be nested: '$player.stats.wisdom'
+	// Variables can be piped to functions with '|': '$player.coins|commas' will call 'commas(player.coins)'.
+	// Add pipes to StringAction.pipes: StringAction.pipes[id] = my_function
 	
 	// Include StringActions that will be called only when the text comes up.
 	Hey... wait a minute![@camera zoom 1.25;wait] I thought you said... [wait][@camera zoom 1.5;@camera tilt 15]You lied to me!
@@ -174,6 +177,8 @@ It's been rewritten multiple times, and may again in future.
 	@score += 1
 	
 ```
+
+# BBCode
 
 # Modding
 todo: At bootup, show list of discovered mods, with toggles. Save state to config.

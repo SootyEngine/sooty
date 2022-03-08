@@ -10,9 +10,14 @@ config_version=5
 
 _global_script_classes=[{
 "base": "Resource",
+"class": &"BaseDataClass",
+"language": &"GDScript",
+"path": "res://simple_visual_novel/data_classes/BaseDataClass.gd"
+}, {
+"base": "BaseDataClass",
 "class": &"Character",
 "language": &"GDScript",
-"path": "res://addons/character_system/Character.gd"
+"path": "res://simple_visual_novel/data_classes/Character.gd"
 }, {
 "base": "Resource",
 "class": &"Dialogue",
@@ -69,20 +74,20 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/rich_text/FontHelper.gd"
 }, {
-"base": "Resource",
+"base": "BaseDataClass",
 "class": &"Goal",
 "language": &"GDScript",
-"path": "res://addons/quest_system/Goal.gd"
+"path": "res://simple_visual_novel/data_classes/Goal.gd"
 }, {
-"base": "Resource",
+"base": "BaseDataClass",
 "class": &"Inventory",
 "language": &"GDScript",
-"path": "res://addons/inventory_system/Inventory.gd"
+"path": "res://simple_visual_novel/data_classes/Inventory.gd"
 }, {
-"base": "Resource",
+"base": "BaseDataClass",
 "class": &"Item",
 "language": &"GDScript",
-"path": "res://addons/inventory_system/Item.gd"
+"path": "res://simple_visual_novel/data_classes/Item.gd"
 }, {
 "base": "Resource",
 "class": &"Markdown",
@@ -94,10 +99,10 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/file_editor/OptionsMenu.gd"
 }, {
-"base": "Resource",
+"base": "BaseDataClass",
 "class": &"Quest",
 "language": &"GDScript",
-"path": "res://addons/quest_system/Quest.gd"
+"path": "res://simple_visual_novel/data_classes/Quest.gd"
 }, {
 "base": "RichTextLabel2",
 "class": &"RichTextAnimation",
@@ -108,11 +113,6 @@ _global_script_classes=[{
 "class": &"RichTextLabel2",
 "language": &"GDScript",
 "path": "res://addons/rich_text/RichTextLabel2.gd"
-}, {
-"base": "Resource",
-"class": &"StringAction",
-"language": &"GDScript",
-"path": "res://addons/StringAction.gd"
 }, {
 "base": "Resource",
 "class": &"UDebug",
@@ -165,6 +165,7 @@ _global_script_classes=[{
 "path": "res://addons/util/UTime.gd"
 }]
 _global_script_class_icons={
+"BaseDataClass": "",
 "Character": "",
 "Dialogue": "",
 "DialogueLine": "",
@@ -185,7 +186,6 @@ _global_script_class_icons={
 "Quest": "",
 "RichTextAnimation": "",
 "RichTextLabel2": "",
-"StringAction": "",
 "UDebug": "",
 "UDict": "",
 "UError": "",
@@ -212,6 +212,7 @@ SaveManager="*res://addons/sooty_engine/autoloads/SaveManager.gd"
 ModManager="*res://addons/sooty_engine/autoloads/ModManager.gd"
 State="*res://addons/sooty_engine/autoloads/State.gd"
 Dialogues="*res://addons/sooty_engine/autoloads/Dialogues.gd"
+StringAction="*res://addons/sooty_engine/autoloads/StringAction.gd"
 
 [editor_plugins]
 

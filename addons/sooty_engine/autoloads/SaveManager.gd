@@ -2,6 +2,7 @@ extends Node
 
 const DIR := "user://saves"
 const PREVIEW_SIZE_DIV_AMOUNT := 3.0
+const SAVE_GROUP := "has_save_state"
 
 func _ready() -> void:
 	var d := Directory.new()

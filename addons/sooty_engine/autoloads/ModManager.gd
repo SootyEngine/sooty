@@ -5,6 +5,15 @@ const DIR := "user://mods"
 var auto_load_mods := false
 var loaded := []
 
+func _init() -> void:
+	add_to_group(SaveManager.SAVE_GROUP)
+
+func get_save_state():
+	return { loaded=loaded }
+
+func load_save_state(state: Variant):
+	loaded = state.get("loaded", loaded)
+
 func _ready() -> void:
 	var d := Directory.new()
 	if not d.dir_exists(DIR):

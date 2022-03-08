@@ -37,3 +37,21 @@ static func extract(s: String, head: String, tail: String, strip_edges: bool = t
 			return [outer, inner]
 	else:
 		return [s, ""]
+
+# 1234567 => 1,234,567
+static func commas(number: Variant) -> String:
+	var string = str(number)
+	var mod = len(string) % 3
+	var out = ""
+	for i in len(string):
+		if i != 0 and i % 3 == mod:
+			out += ","
+		out += string[i]
+	return out
+
+const SIZES := {1_000_000_000:"B", 1_000_000:"M", 1_000:"k"}
+static func humanize(value: Variant) -> String:
+	for size in SIZES:
+		if value > size:
+			return "[b]%.2f[]%s" % [(value / float(size)), SIZES[size]]
+	return str(value)
