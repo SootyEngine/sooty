@@ -83,7 +83,6 @@ func start(id: String):
 func goto(flow: String, clear_stack: bool = true, dia_id: Variant = null) -> bool:
 	var step := { step=0 }
 	var d: Dialogue
-	var f: Dictionary
 	
 	if "." in flow:
 		var p := flow.split(".", true, 1)
@@ -100,12 +99,15 @@ func goto(flow: String, clear_stack: bool = true, dia_id: Variant = null) -> boo
 		push_error("Call start() before goto().")
 		return false
 	
-	f = d.get_flow(flow)
-	if not len(f):
+	var fid := "%s.%s" % [d.id, flow]
+	var lines := DialogueServer.get_flow_lines(fid)
+	
+	if not len(lines):
+		print("Can't find lines for %s" % fid)
 		return false
 	
 	step.did = d.id
-	step.lines = f.lines
+	step.lines = lines
 	
 	if clear_stack:
 		_stack.clear()
@@ -116,7 +118,7 @@ func goto(flow: String, clear_stack: bool = true, dia_id: Variant = null) -> boo
 # select an option, adding it's lines to the stack
 func select_option(option: DialogueLine): # step: Dictionary, option: int):
 	var d := get_current_dialogue()
-	var o := d.get_line(option.parent._data.options[option.option_index])
+	var o := option._data
 	if "then_goto" in o:
 		_stack.append({did=d.id, lines=o.lines, step=0, goto=o.then_goto})
 	else:

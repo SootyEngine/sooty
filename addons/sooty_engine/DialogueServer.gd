@@ -13,14 +13,12 @@ func get_dialogue_ids() -> Dictionary:
 		out[id] = cache[id].flows.keys()
 	return out
 
-func _ready() -> void:
-	if not Engine.is_editor_hint():
-		var timer := Timer.new()
-		add_child(timer)
-		timer.timeout.connect(_timer)
-		timer.start(CHECK_FILES_EVERY)
-		
-		
+#func _ready() -> void:
+#	if not Engine.is_editor_hint():
+#		var timer := Timer.new()
+#		add_child(timer)
+#		timer.timeout.connect(_timer)
+#		timer.start(CHECK_FILES_EVERY)
 
 func _timer():
 	for d in cache.values():
@@ -29,18 +27,50 @@ func _timer():
 			d._reload()
 			reloaded.emit(d)
 
+const DIR_RES := "res://dialogue"
 func get_dialogue(id: String) -> Dialogue:
 	if not id in cache:
-		var d := Dialogue.new(id)
+		var d := Dialogue.new(DIR_RES.plus_file("%s.soot"))
 		if d.has_errors():
 			push_error("Bad dialogue: %s." % id)
 			return null
 		else:
-			add_dialogue(id, d)
+			add_dialogue(d)
 			return d
 	else:
 		return cache[id]
 
-func add_dialogue(id: String, d: Dialogue):
-	d.id = id
-	cache[id] = d
+func get_flow(flow: String) -> Dictionary:
+	var p := flow.split(".", true, 1)
+	var d := get_dialogue(p[0])
+	return d.get_flow(p[1])
+
+func get_flow_lines(flow: String) -> Array[int]:
+	var p := flow.split(".", true, 1)
+	var d := get_dialogue(p[0])
+	flow = p[1]
+	var out := []
+	# lines in flows begining with
+	if flow.begins_with("*"):
+		flow = flow.trim_prefix("*")
+		for f in d.flows.keys():
+			if f.ends_with(flow):
+				out.append_array(d.get_flow(f).lines)
+	# lines in flows ending with
+	elif flow.ends_with("*"):
+		flow = flow.trim_suffix("*")
+		print("FLOWS ENDING IN ", flow)
+		for f in d.flows.keys():
+			if f.begins_with(flow):
+				print("\t", f)
+				out.append_array(d.get_flow(f).lines)
+	# lines in flow alone
+	else:
+		var f := d.get_flow(flow)
+		print(f)
+		out.append_array(f.lines)
+	
+	return out
+
+func add_dialogue(d: Dialogue):
+	cache[d.id] = d

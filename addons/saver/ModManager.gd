@@ -30,12 +30,11 @@ func load_mod(mod: String):
 	print("Loading Mod: %s" % mod)
 	
 	# load soot
-	for file in UFile.get_files(mod_path, "soot"):
-		var d := Dialogue.new(UFile.load_text(file), false)
-		var id := file.get_file().get_basename()
+	for file in UFile.get_files(mod_path.plus_file("dialogue"), "soot"):
+		var d := Dialogue.new(file)
 		var flows := len(d.flows)
-		print("\t+ %s (%s - %sx flows)" % [file.trim_prefix(mod_path), id, flows])
-		DialogueServer.add_dialogue(id, d)
+		print("\t+ %s (%s - %sx flows)" % [file.trim_prefix(mod_path), d.id, flows])
+		DialogueServer.add_dialogue(d)
 	
 	# load state
 	var state_path := mod_path.plus_file("state.json")

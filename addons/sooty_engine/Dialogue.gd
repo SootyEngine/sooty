@@ -8,12 +8,10 @@ class_name Dialogue
 @export var path := ""
 @export var last_modified := 0
 
-func _init(text: String, is_id: bool = true):
-	if is_id:
-		path = "res://dialogue/%s.soot" % text.replace(".", "/")
-		_reload()
-	else:
-		_reload_from_text(text)
+func _init(p: String):
+	id = p.split("dialogue/", true, 1)[1].rsplit(".")[0]
+	path = p
+	_reload_from_text(UFile.load_text(path))
 
 func _reload():
 	var text := UFile.load_text(path)
@@ -89,6 +87,12 @@ func get_line(line: int) -> Dictionary:
 	push_error("No line '%s' in dialogue '%s'." % [line, id])
 	return {}
 
+func get_lines(lines: Array[int]) -> Array[Dictionary]:
+	var out := []
+	for i in len(lines):
+		out.append(get_line(lines[i]))
+	return out
+
 func to_flow_id(s: String) -> String:
 	var out := ""
 	for c in s.capitalize().to_lower():
@@ -117,6 +121,7 @@ func _parse_flow(flow: Dictionary) -> Dictionary:
 func _parse_lines(line: Dictionary, key: String = "lines"):
 	var list = line.lines
 	line.erase("lines")
+	
 	var new_list := []
 	for i in len(list):
 		var l = _parse_line(list[i])
@@ -126,11 +131,12 @@ func _parse_lines(line: Dictionary, key: String = "lines"):
 			_merge(line.properties, l.properties)
 		else:
 			new_list.append(_line_to_index(l))
+	
 	line[key] = new_list
 
 func _parse_line(data: Dictionary) -> Dictionary:
 	var text = data.text
-	if text.begins_with("<>"): return _parse_option(data)
+	if text.begins_with("<"): return _parse_option(data)
 	if text.begins_with("@"): return _parse_action(data)
 	if text.begins_with(">>"): return _parse_flow_goto(data)
 	if text.begins_with("::"): return _parse_flow_call(data)
@@ -149,7 +155,12 @@ func _parse_line_property(data: Dictionary) -> Dictionary:
 	return data
 	
 func _parse_option(data: Dictionary) -> Dictionary:
-	data.text = data.text.substr(len("<>"))
+	var text: String = data.text
+	var a := text.find("<")
+	var b := text.find(">", a)
+	
+	data.text = text.substr(b+1).strip_edges()
+	data.flag = text.substr(a+1, b-a-1).strip_edges()
 	
 	_extract_flow_option(data)
 	
@@ -178,11 +189,6 @@ func _parse_dialogue(data: Dictionary) -> Dictionary:
 		data.text = p[1].strip_edges()
 	
 	if data.lines:
-		# so options know who their parent line is
-		for i in len(data.lines):
-			data.lines[i].parent = data.line
-			data.lines[i].option_index = i
-		
 		# convert to line numbers
 		_parse_lines(data, "options")
 	
@@ -207,12 +213,16 @@ func _extract_flow_option(data: Dictionary):
 		data.text = p[0].strip_edges()
 		data.flow = "goto"
 		data.goto = p[1].strip_edges()
+		if not "." in data.goto:
+			data.goto = "%s.%s" % [id, data.goto]
 	
 	if "::" in data.text:
 		var p = data.text.split("::", true, 1)
 		data.text = p[0].strip_edges()
 		data.flow = "call"
 		data.call = p[1].strip_edges()
+		if not "." in data.call:
+			data.call = "%s.%s" % [id, data.call]
 
 func _extract_comment(data: Dictionary):
 	var text: String = data.text

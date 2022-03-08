@@ -14,12 +14,6 @@ var line: int:
 var dialogue: Dialogue:
 	get: return DialogueServer.get_dialogue(_dialogue_id)
 
-var parent: DialogueLine:
-	get: return DialogueLine.new(_dialogue_id, dialogue.get_line(_data.parent))
-
-var option_index: int:
-	get: return _data.get("option_index", -1)
-
 var text: String:
 	get: return _data.get("text", "")
 
@@ -29,19 +23,40 @@ var from: String:
 func has_options() -> bool:
 	return "options" in _data
 
-func get_options(only_passing: bool = false) -> Array:
+# recursively go through options
+# checking for ::, which imports options from another flow
+func _get_options(input: Array, output: Array, depth: int):
+	if depth > 4:
+		push_error("Possible loop!?")
+		return
+		
+	for i in len(input):
+		var opdata := dialogue.get_line(input[i])
+		if "flow" in opdata:
+			if opdata.flow == "call":
+				var fid: String = opdata.call
+				var flines := DialogueServer.get_flow_lines(fid)
+				_get_options(flines, output, depth+1)
+		else:
+			output.append(opdata)
+
+func get_options(only_passing: bool = false) -> Array[DialogueLine]:
 	var out := []
 	
 	if "options" in _data:
-		for i in len(_data.options):
-			var line = _data.options[i]
-			var opdata := dialogue.get_line(line)
+		# recursively select options
+		var lines: Array[int] = _data.options
+		var first_pass: Array[Dictionary] = []
+		_get_options(lines, first_pass, 0)
+		
+		# check which ones pass their condition
+		for i in len(first_pass):
+			var opdata := first_pass[i]
 			
 			if only_passing and "condition" in opdata and not StringAction.test(opdata.condition):
 				continue
 			
-			var opline := DialogueLine.new(_dialogue_id, opdata)
-			out.append(opline)
+			out.append(DialogueLine.new(_dialogue_id, opdata))
 	
 	return out
 
