@@ -6,7 +6,7 @@ const OPERATOR_ASSIGN := ["=", "+=", "-="]
 
 static func test(condition: String) -> bool:
 	var result = execute(condition, false)
-	prints("Test '%s' got '%s'." % [condition, result])
+#	prints("Test '%s' got '%s'." % [condition, result])
 	return true if result else false
 
 static func execute(e: String, default = null, d: Dictionary={}):

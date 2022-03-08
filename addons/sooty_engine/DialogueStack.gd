@@ -139,18 +139,13 @@ func pop_next_line() -> Dictionary:
 		
 		# 'if' 'elif' 'else' chain
 		if "cond_type" in line.line:
-#			var do_break := false
 			if line.line.cond_type == "if":
 				var d := DialogueServer.get_dialogue(line.did)
-				var broke := false
 				for i in len(line.line.tests):
 					var test_line := d.get_line(line.line.tests[i])
 					if StringAction.test(test_line.cond):
 						_stack.append({did=d.id, lines=test_line.lines, step=0})
-						broke = true
 						break
-				if broke:
-					break
 			else:
 				push_error("This should never happen.")
 			
@@ -159,7 +154,6 @@ func pop_next_line() -> Dictionary:
 		
 		line = _pop_next_line()
 	
-	print("GOT NEXT LINE ", line)
 	return line
 
 func _pop_next_line() -> Dictionary:
