@@ -11,3 +11,6 @@
 
 # Features
 - Ctrl+Click files for clickable "Table of Content" preview.
+
+- .cfg
+	- Colorize HTML hex strings: color="#ff0000" will be colorized red.

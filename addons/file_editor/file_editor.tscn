@@ -239,34 +239,41 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 20
 
-[node name="chapter_list" type="VBoxContainer" parent="c/c/c/c2/c3"]
+[node name="MarginContainer" type="MarginContainer" parent="c/c/c/c2/c3"]
 offset_right = 203.0
+offset_bottom = 188.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_right = 4
+
+[node name="chapter_list" type="VBoxContainer" parent="c/c/c/c2/c3/MarginContainer"]
+offset_right = 199.0
 offset_bottom = 188.0
 size_flags_vertical = 3
 script = ExtResource( "4_r00tw" )
 
-[node name="title" type="Label" parent="c/c/c/c2/c3/chapter_list"]
+[node name="title" type="Label" parent="c/c/c/c2/c3/MarginContainer/chapter_list"]
 modulate = Color(1, 1, 1, 0.5)
-offset_right = 203.0
+offset_right = 199.0
 offset_bottom = 26.0
-text = "OUTLINE"
+text = "FILE OUTLINE"
 
-[node name="popup" type="PopupMenu" parent="c/c/c/c2/c3/chapter_list"]
+[node name="popup" type="PopupMenu" parent="c/c/c/c2/c3/MarginContainer/chapter_list"]
 item_count = 1
 item_0/text = "asss"
 item_0/id = 0
 
-[node name="filter" type="LineEdit" parent="c/c/c/c2/c3/chapter_list"]
+[node name="filter" type="LineEdit" parent="c/c/c/c2/c3/MarginContainer/chapter_list"]
 offset_top = 30.0
-offset_right = 203.0
+offset_right = 199.0
 offset_bottom = 61.0
 placeholder_text = "Filter"
 clear_button_enabled = true
 flat = true
 
-[node name="list" type="RichTextLabel" parent="c/c/c/c2/c3/chapter_list"]
+[node name="list" type="RichTextLabel" parent="c/c/c/c2/c3/MarginContainer/chapter_list"]
 offset_top = 65.0
-offset_right = 203.0
+offset_right = 199.0
 offset_bottom = 188.0
 size_flags_vertical = 3
 theme_override_fonts/normal_font = ExtResource( "4_fmosd" )
@@ -275,21 +282,27 @@ text = "*none*"
 meta_underlined = false
 autowrap_mode = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="c/c/c/c2/c3"]
+[node name="MarginContainer2" type="MarginContainer" parent="c/c/c/c2/c3"]
 offset_top = 208.0
 offset_right = 203.0
 offset_bottom = 396.0
 size_flags_vertical = 3
+theme_override_constants/margin_right = 4
 
-[node name="title" type="Label" parent="c/c/c/c2/c3/VBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="c/c/c/c2/c3/MarginContainer2"]
+offset_right = 199.0
+offset_bottom = 188.0
+size_flags_vertical = 3
+
+[node name="title" type="Label" parent="c/c/c/c2/c3/MarginContainer2/VBoxContainer"]
 modulate = Color(1, 1, 1, 0.5)
-offset_right = 203.0
+offset_right = 199.0
 offset_bottom = 26.0
-text = "TAGS"
+text = "GLOBAL TAGS"
 
-[node name="tags_list" type="RichTextLabel" parent="c/c/c/c2/c3/VBoxContainer"]
+[node name="tags_list" type="RichTextLabel" parent="c/c/c/c2/c3/MarginContainer2/VBoxContainer"]
 offset_top = 30.0
-offset_right = 203.0
+offset_right = 199.0
 offset_bottom = 188.0
 size_flags_vertical = 3
 text = "*none*"

@@ -20,6 +20,7 @@ func _process(delta: float) -> void:
 		get_tree().reload_current_scene()
 		
 	elif Input.is_action_just_pressed("quick_save"):
+		return
 		SaveManager.save_to_slot("test")
 #		var file_path = "user://quick_save.scn"
 #		var scene = PackedScene.new()
@@ -30,9 +31,10 @@ func _process(delta: float) -> void:
 #		print("Quick saved to: %s." % file_path)
 		
 	elif Input.is_action_just_pressed("quick_load"):
-		var file_path := "user://quick_save.scn"
-		get_tree().change_scene_to(load(file_path))
-		await get_tree().process_frame
-		State._load_state(get_tree().current_scene.get_meta("STATE"))
-		print("Quick loaded from: %s." % file_path)
-		print("S", get_tree().get_first_node_in_group("sooty_stack").stack._stack)
+		return
+#		var file_path := "user://quick_save.scn"
+#		get_tree().change_scene_to(load(file_path))
+#		await get_tree().process_frame
+#		State._load_state(get_tree().current_scene.get_meta("STATE"))
+#		print("Quick loaded from: %s." % file_path)
+#		print("S", get_tree().get_first_node_in_group("sooty_stack").stack._stack)

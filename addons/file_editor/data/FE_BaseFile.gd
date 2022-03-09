@@ -19,6 +19,7 @@ var base_name: String:
 
 func _init(p: String):
 	path = p
+	print("FILE: %s, FN: %s, BN: %s " % [path, file_name, base_name])
 	var f = p.get_file()
 	if f:
 		set_name(f.replace(".", "--"))

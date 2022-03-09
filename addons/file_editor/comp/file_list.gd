@@ -69,10 +69,16 @@ var DARK := Color(.5, .5, .5, .5).to_html(false)
 var YELL := Color.ORANGE.to_html(false)
 
 func _draw_dir(dir: FE_Directory):
+	var is_root := dir.get_parent() is FE_Files
+	var dir_name := dir.path if is_root else dir.file_name
 	if dir.open_in_file_list:
-		list.append_text("[color=#%s]▼[/color][color=#%s]%s[/color][color=#%s]｢[/color]%s[color=#%s]｣[/color]" % [DARK, YELL, FOLDER_OPENED, DARK, dir.file_name, DARK])
+		var icon := "@"+FOLDER_OPENED if is_root else FOLDER_OPENED
+		var c_name = YELL if is_root else Color.WHITE
+		list.append_text("[color=#%s]▼[/color][color=#%s]%s[/color][color=#%s]｢[/color][color=#%s]%s[/color][color=#%s]｣[/color]" % [DARK, YELL, icon, DARK, c_name, dir_name, DARK])
 	else:
-		list.append_text("[color=#%s]▶[/color][color=#%s]%s[/color][color=#%s]｢[/color]%s[color=#%s]｣[/color]" % [DARK, YELL, FOLDER_CLOSED, DARK, dir.file_name, DARK])
+		var icon := "@"+FOLDER_OPENED if is_root else FOLDER_CLOSED
+		var c_name = YELL if is_root else Color.WHITE
+		list.append_text("[color=#%s]▶[/color][color=#%s]%s[/color][color=#%s]｢[/color][color=#%s]%s[/color][color=#%s]｣[/color]" % [DARK, YELL, icon, DARK, c_name, dir_name, DARK])
 
 func _draw_file(file: FE_File):
 	var n = file.file_name.rsplit(".", true, 1)

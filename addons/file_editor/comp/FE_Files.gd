@@ -35,6 +35,7 @@ func _ready() -> void:
 		show_file_extension[e] = not EXTENSIONS[e].start_hidden
 	
 	open_dir.call_deferred("res://")
+	open_dir.call_deferred("user://mods")
 
 func set_setting(property: String, value):
 	var last = FE_Util.get_nested(self, property)

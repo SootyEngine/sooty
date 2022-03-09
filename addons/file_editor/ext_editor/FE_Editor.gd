@@ -43,6 +43,9 @@ func _init_settings():
 	gutters_draw_fold_gutter = true
 	line_folding = true
 	
+	add_gutter(0)
+	set_gutter_type(0, TextEdit.GUTTER_TYPE_STRING)
+	
 	add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 #	add_theme_color_override("background_color", Color.TRANSPARENT)
 	
@@ -120,11 +123,28 @@ func goto(line: int):
 		set_caret_line(line)
 		set_line_as_center_visible(line)
 
+func clear_gutters():
+	for i in get_line_count():
+		set_line_as_breakpoint(i, false)
+		set_line_background_color(i, Color.TRANSPARENT)
+		set_line_gutter_text(i, 0, "")
+
 func _save_file():
+	clear_gutters()
+	file.errors.clear()
+	
 	if is_unsaved():
-		file.save(text)
-		last_saved_text = text
-		_update_title()
+		if not file.save(text):
+			print("ERRORS", file.errors)
+			
+			for e in file.errors:
+				set_line_as_breakpoint(e[0], true)
+				set_line_gutter_text(e[0]-1, 0, e[1])
+				set_line_background_color(e[0], Color.TOMATO)
+			
+		else:
+			last_saved_text = text
+			_update_title()
 
 func _save_file_and_close():
 	_save_file()

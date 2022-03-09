@@ -49,11 +49,24 @@ func find_chapter_line(id: String) -> int:
 			return line
 	return -1
 
-func save(text: String):
+func get_errors(text: String) -> Array:
+	return []
+
+var errors := []
+
+func save(text: String) -> bool:
+	errors = get_errors(text)
+	
+	if len(errors):
+		return false
+	
 	if FE_Util.save_text(path, text):
 		reload()
+		return true
+	
 	else:
 		push_error("Failed saving %s." % path)
+		return false
 
 func open(line: int=-1):
 	var tab := editors.open(self)
