@@ -1,0 +1,224 @@
+[gd_scene load_steps=26 format=3 uid="uid://diracd0fg1m3i"]
+
+[ext_resource type="Script" path="res://simple_vn/ui/ui_dialogue.gd" id="1_hu8k5"]
+[ext_resource type="Shader" path="res://simple_vn/ui/ui_gradient_blur.gdshader" id="2_4t8do"]
+[ext_resource type="Texture2D" uid="uid://c0ulhumxuf8un" path="res://simple_vn/ui/ui_dialogue_bg.tres" id="3_f0whw"]
+[ext_resource type="FontData" uid="uid://by1aqauhysmgf" path="res://fonts/robotomono/robotomono-r.ttf" id="4_gvvir"]
+[ext_resource type="FontData" uid="uid://dhlm735o5phw0" path="res://fonts/unifont/unifont-13.0.01.ttf" id="5_g81ma"]
+[ext_resource type="FontData" uid="uid://dfus0kvrbquox" path="res://fonts/unifont/unifont_upper-13.0.01.ttf" id="6_rj7td"]
+[ext_resource type="FontData" uid="uid://dq2imiejh1ci5" path="res://fonts/robotomono/robotomono-bi.ttf" id="7_qpc1f"]
+[ext_resource type="FontData" uid="uid://dw0hrbje7waa2" path="res://fonts/robotomono/robotomono-i.ttf" id="8_4jxrw"]
+[ext_resource type="FontData" uid="uid://5hcq4bx4kalo" path="res://fonts/robotomono/robotomono-b.ttf" id="9_6uyrg"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="10_mndt7"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextAnimation.gd" id="11_wjgcf"]
+[ext_resource type="Script" path="res://simple_vn/ui/ui_option.gd" id="12_1aj7b"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_l4evs"]
+shader = ExtResource( "2_4t8do" )
+
+[sub_resource type="Font" id="Font_5i673"]
+data/0 = ExtResource( "4_gvvir" )
+data/1 = ExtResource( "5_g81ma" )
+data/2 = ExtResource( "6_rj7td" )
+
+[sub_resource type="Font" id="Font_gisa2"]
+data/0 = ExtResource( "7_qpc1f" )
+data/1 = ExtResource( "5_g81ma" )
+data/2 = ExtResource( "6_rj7td" )
+
+[sub_resource type="Font" id="Font_hqlyk"]
+data/0 = ExtResource( "8_4jxrw" )
+data/1 = ExtResource( "5_g81ma" )
+data/2 = ExtResource( "6_rj7td" )
+
+[sub_resource type="Font" id="Font_ls8kb"]
+data/0 = ExtResource( "9_6uyrg" )
+data/1 = ExtResource( "5_g81ma" )
+data/2 = ExtResource( "6_rj7td" )
+
+[sub_resource type="Font" id="Font_bbo5b"]
+data/0 = ExtResource( "4_gvvir" )
+data/1 = ExtResource( "5_g81ma" )
+data/2 = ExtResource( "6_rj7td" )
+
+[sub_resource type="Font" id="Font_i0qed"]
+data/0 = ExtResource( "7_qpc1f" )
+data/1 = ExtResource( "5_g81ma" )
+data/2 = ExtResource( "6_rj7td" )
+
+[sub_resource type="Font" id="Font_34s0u"]
+data/0 = ExtResource( "8_4jxrw" )
+data/1 = ExtResource( "5_g81ma" )
+data/2 = ExtResource( "6_rj7td" )
+
+[sub_resource type="Font" id="Font_k7w1d"]
+data/0 = ExtResource( "9_6uyrg" )
+data/1 = ExtResource( "5_g81ma" )
+data/2 = ExtResource( "6_rj7td" )
+
+[sub_resource type="Font" id="Font_bwp8q"]
+data/0 = ExtResource( "4_gvvir" )
+data/1 = ExtResource( "5_g81ma" )
+data/2 = ExtResource( "6_rj7td" )
+
+[sub_resource type="Font" id="Font_ptker"]
+data/0 = ExtResource( "7_qpc1f" )
+data/1 = ExtResource( "5_g81ma" )
+data/2 = ExtResource( "6_rj7td" )
+
+[sub_resource type="Font" id="Font_oav2f"]
+data/0 = ExtResource( "8_4jxrw" )
+data/1 = ExtResource( "5_g81ma" )
+data/2 = ExtResource( "6_rj7td" )
+
+[sub_resource type="Font" id="Font_ncn7d"]
+data/0 = ExtResource( "9_6uyrg" )
+data/1 = ExtResource( "5_g81ma" )
+data/2 = ExtResource( "6_rj7td" )
+
+[node name="dialogue" type="Control"]
+rect_min_size = Vector2(0, 120)
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 3
+script = ExtResource( "1_hu8k5" )
+__meta__ = {
+"_edit_group_": true,
+"_edit_layout_mode": 1,
+"_edit_use_custom_anchors": false
+}
+_from = NodePath("MarginContainer/c/from")
+_text = NodePath("MarginContainer/c/text")
+_options = NodePath("MarginContainer/c/options")
+_option = NodePath("MarginContainer/c/options/c/c/option")
+_option_container = NodePath("MarginContainer/c/options/c/c")
+
+[node name="backing" type="TextureRect" parent="."]
+material = SubResource( "ShaderMaterial_l4evs" )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( "3_f0whw" )
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_right = 240
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_left = 240
+theme_override_constants/margin_bottom = 16
+
+[node name="c" type="VBoxContainer" parent="MarginContainer"]
+offset_left = 240.0
+offset_top = 8.0
+offset_right = 784.0
+offset_bottom = 104.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+__meta__ = {
+"_edit_layout_mode": 1,
+"_edit_use_custom_anchors": false
+}
+
+[node name="from" type="RichTextLabel" parent="MarginContainer/c"]
+offset_right = 544.0
+size_flags_horizontal = 3
+theme_override_fonts/mono_font = SubResource( "Font_5i673" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_gisa2" )
+theme_override_fonts/italics_font = SubResource( "Font_hqlyk" )
+theme_override_fonts/bold_font = SubResource( "Font_ls8kb" )
+theme_override_fonts/normal_font = SubResource( "Font_5i673" )
+fit_content_height = true
+script = ExtResource( "10_mndt7" )
+effects_mode = 0
+font = "robotomono"
+
+[node name="@@64447" type="VScrollBar" parent="MarginContainer/c/from"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+max_value = 0.0
+step = 1.0
+
+[node name="text" type="RichTextLabel" parent="MarginContainer/c"]
+offset_top = 4.0
+offset_right = 544.0
+offset_bottom = 4.0
+size_flags_horizontal = 3
+theme_override_fonts/mono_font = SubResource( "Font_bbo5b" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_i0qed" )
+theme_override_fonts/italics_font = SubResource( "Font_34s0u" )
+theme_override_fonts/bold_font = SubResource( "Font_k7w1d" )
+theme_override_fonts/normal_font = SubResource( "Font_bbo5b" )
+fit_content_height = true
+script = ExtResource( "11_wjgcf" )
+font = "robotomono"
+fade_speed = 5.0
+_triggers = {}
+_alpha_real = []
+_alpha_goal = []
+
+[node name="@@64448" type="VScrollBar" parent="MarginContainer/c/text"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+max_value = 0.0
+step = 1.0
+
+[node name="options" type="Control" parent="MarginContainer/c"]
+offset_top = 8.0
+offset_right = 544.0
+offset_bottom = 96.0
+size_flags_vertical = 3
+__meta__ = {
+"_edit_layout_mode": 0,
+"_edit_use_custom_anchors": false
+}
+
+[node name="c" type="MarginContainer" parent="MarginContainer/c/options"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="c" type="VBoxContainer" parent="MarginContainer/c/options/c"]
+offset_right = 544.0
+offset_bottom = 88.0
+__meta__ = {
+"_edit_layout_mode": 0,
+"_edit_use_custom_anchors": false
+}
+
+[node name="option" type="Button" parent="MarginContainer/c/options/c/c"]
+offset_right = 544.0
+offset_bottom = 31.0
+flat = true
+script = ExtResource( "12_1aj7b" )
+
+[node name="back" type="ColorRect" parent="MarginContainer/c/options/c/c/option"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.192157)
+
+[node name="text" type="RichTextLabel" parent="MarginContainer/c/options/c/c/option"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_fonts/mono_font = SubResource( "Font_bwp8q" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_ptker" )
+theme_override_fonts/italics_font = SubResource( "Font_oav2f" )
+theme_override_fonts/bold_font = SubResource( "Font_ncn7d" )
+theme_override_fonts/normal_font = SubResource( "Font_bwp8q" )
+script = ExtResource( "10_mndt7" )
+bbcode = "clicky"
+alignment = 1
+font = "robotomono"
+
+[node name="@@64449" type="VScrollBar" parent="MarginContainer/c/options/c/c/option/text"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+max_value = 0.0
+step = 1.0

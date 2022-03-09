@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=3 uid="uid://b4d2exwnv7tc"]
+
+[ext_resource type="Texture2D" uid="uid://dir3venpmgtoa" path="res://simple_vn_assets/bgs/uncle mugen school classroom 01.webp" id="1_71qv4"]
+[ext_resource type="PackedScene" uid="uid://dqk1spwfe8o2f" path="res://simple_vn_assets/blur.tscn" id="2_2p42g"]
+
+[node name="class_room" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="bg" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( "1_71qv4" )
+ignore_texture_size = true
+stretch_mode = 6
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="blur" parent="." instance=ExtResource( "2_2p42g" )]
+grow_horizontal = 2
+grow_vertical = 2
+__meta__ = {
+"_edit_layout_mode": 1,
+"_edit_use_custom_anchors": false
+}
+power = 2.0

@@ -12,12 +12,12 @@ _global_script_classes=[{
 "base": "BaseDataClass",
 "class": &"Achievement",
 "language": &"GDScript",
-"path": "res://simple_visual_novel/data_classes/Achievement.gd"
+"path": "res://simple_vn/data_classes/Achievement.gd"
 }, {
 "base": "Resource",
 "class": &"BaseDataClass",
 "language": &"GDScript",
-"path": "res://simple_visual_novel/data_classes/BaseDataClass.gd"
+"path": "res://simple_vn/data_classes/BaseDataClass.gd"
 }, {
 "base": "Node",
 "class": &"BaseState",
@@ -27,12 +27,17 @@ _global_script_classes=[{
 "base": "BaseDataClass",
 "class": &"Character",
 "language": &"GDScript",
-"path": "res://simple_visual_novel/data_classes/Character.gd"
+"path": "res://simple_vn/data_classes/Character.gd"
+}, {
+"base": "ConfigFile",
+"class": &"Config",
+"language": &"GDScript",
+"path": "res://addons/Config.gd"
 }, {
 "base": "BaseDataClass",
 "class": &"DateTime",
 "language": &"GDScript",
-"path": "res://simple_visual_novel/data_classes/DateTime.gd"
+"path": "res://simple_vn/data_classes/DateTime.gd"
 }, {
 "base": "Resource",
 "class": &"Dialogue",
@@ -52,7 +57,7 @@ _global_script_classes=[{
 "base": "BaseDataClass",
 "class": &"EquipmentSlots",
 "language": &"GDScript",
-"path": "res://simple_visual_novel/data_classes/EquipmentSlots.gd"
+"path": "res://simple_vn/data_classes/EquipmentSlots.gd"
 }, {
 "base": "Node",
 "class": &"FE_BaseFile",
@@ -84,6 +89,11 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/file_editor/comp/FE_Files.gd"
 }, {
+"base": "FE_Directory",
+"class": &"FE_TopDirectory",
+"language": &"GDScript",
+"path": "res://addons/file_editor/data/FE_TopDirectory.gd"
+}, {
 "base": "Resource",
 "class": &"FE_Util",
 "language": &"GDScript",
@@ -97,17 +107,17 @@ _global_script_classes=[{
 "base": "BaseDataClass",
 "class": &"Goal",
 "language": &"GDScript",
-"path": "res://simple_visual_novel/data_classes/Goal.gd"
+"path": "res://simple_vn/data_classes/Goal.gd"
 }, {
 "base": "BaseDataClass",
 "class": &"Inventory",
 "language": &"GDScript",
-"path": "res://simple_visual_novel/data_classes/Inventory.gd"
+"path": "res://simple_vn/data_classes/Inventory.gd"
 }, {
 "base": "BaseDataClass",
 "class": &"Item",
 "language": &"GDScript",
-"path": "res://simple_visual_novel/data_classes/Item.gd"
+"path": "res://simple_vn/data_classes/Item.gd"
 }, {
 "base": "Resource",
 "class": &"Markdown",
@@ -122,7 +132,7 @@ _global_script_classes=[{
 "base": "BaseDataClass",
 "class": &"Quest",
 "language": &"GDScript",
-"path": "res://simple_visual_novel/data_classes/Quest.gd"
+"path": "res://simple_vn/data_classes/Quest.gd"
 }, {
 "base": "RichTextLabel2",
 "class": &"RichTextAnimation",
@@ -133,6 +143,11 @@ _global_script_classes=[{
 "class": &"RichTextLabel2",
 "language": &"GDScript",
 "path": "res://addons/rich_text/RichTextLabel2.gd"
+}, {
+"base": "Sprite2D",
+"class": &"Sprite2DAnimations",
+"language": &"GDScript",
+"path": "res://simple_vn_assets/chars/Sprite2DAnimations.gd"
 }, {
 "base": "Resource",
 "class": &"UDebug",
@@ -183,12 +198,18 @@ _global_script_classes=[{
 "class": &"UTime",
 "language": &"GDScript",
 "path": "res://addons/util/UTime.gd"
+}, {
+"base": "Resource",
+"class": &"UTween",
+"language": &"GDScript",
+"path": "res://addons/util/UTween.gd"
 }]
 _global_script_class_icons={
 "Achievement": "",
 "BaseDataClass": "",
 "BaseState": "",
 "Character": "",
+"Config": "",
 "DateTime": "",
 "Dialogue": "",
 "DialogueLine": "",
@@ -200,6 +221,7 @@ _global_script_class_icons={
 "FE_Editors": "",
 "FE_File": "",
 "FE_Files": "",
+"FE_TopDirectory": "",
 "FE_Util": "",
 "FontHelper": "",
 "Goal": "",
@@ -210,6 +232,7 @@ _global_script_class_icons={
 "Quest": "",
 "RichTextAnimation": "",
 "RichTextLabel2": "",
+"Sprite2DAnimations": "",
 "UDebug": "",
 "UDict": "",
 "UError": "",
@@ -219,13 +242,14 @@ _global_script_class_icons={
 "UObject": "",
 "URand": "",
 "UString": "",
-"UTime": ""
+"UTime": "",
+"UTween": ""
 }
 
 [application]
 
 config/name="sooty_engine"
-run/main_scene="res://sooty_tester.tscn"
+run/main_scene="res://simple_vn/dialogue_runner.tscn"
 config/icon="res://icon.png"
 config/features=PackedStringArray("4.0", "Vulkan Clustered")
 

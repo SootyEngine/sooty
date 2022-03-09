@@ -1,16 +1,11 @@
 @tool
 extends Node
 
-var config := ConfigFile.new()
+@onready var config := Config.new("res://config.cfg")
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		set_process(false)
-	
-	if config.load("res://config.cfg") != OK:
-		push_error("Couldn't load config.cfg.")
-	else:
-		print("CONFIG", config.get_sections())
 	
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():

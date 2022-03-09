@@ -387,7 +387,7 @@ static func lerp_rand(a, b):
 # noise
 #
 
-const TIME_SCALE:float = 1.0 / 60.0
+const TIME_SCALE:float = 1.0 / 120.0
 static func _time(time_scale:float) -> float:
 	return Time.get_ticks_msec() * TIME_SCALE * time_scale
 

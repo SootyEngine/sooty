@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://unt2ku5n8pd2"]
+
+[ext_resource type="PackedScene" path="res://simple_vn_assets/bgs/class_room.tscn" id="1_4hh5g"]
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="class_room" parent="." instance=ExtResource( "1_4hh5g" )]
+size_flags_horizontal = 3
+size_flags_vertical = 3

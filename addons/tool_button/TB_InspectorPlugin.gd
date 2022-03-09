@@ -3,20 +3,11 @@ extends EditorInspectorPlugin
 var InspectorToolButton = preload("res://addons/tool_button/TB_Button.gd")
 var pluginref
 
-#var _object:Object
-#var _cache_methods:Dictionary = {}
-#var _cache_selected:Dictionary = {}
-
 func _init(p):
 	pluginref = p
 
 func _can_handle(object) -> bool:
 	return true
-
-#func _can_handle(object):
-#	_object = object
-#	_cache_methods[object] = _collect_methods(object)
-#	return _cache_methods[object] or object.has_method("_get_tool_buttons")
 
 # buttons defined in _get_tool_buttons show at the top
 func _parse_begin(object: Object) -> void:

@@ -60,7 +60,7 @@ func _ready() -> void:
 func _reload_config():
 	if Global.config.has_section("rich_text_colors"):
 		for key in Global.config.get_section_keys("rich_text_colors"):
-			_shortcuts[key] = Color(Global.config.get_value("rich_text_colors", key))
+			_shortcuts[key] = Global.config.get_color("rich_text_colors", key, Color.WHITE)
 	
 	if Global.config.has_section("rich_text_shortcuts"):
 		for key in Global.config.get_section_keys("rich_text_shortcuts"):

@@ -48,7 +48,7 @@ enum {
 @export var _triggers := {}
 @export var _alpha_real: Array[float] = []
 @export var _alpha_goal: Array[float] = []
-@export var _command_head: String = "!"
+@export var _advance_finished := false
 
 func is_finished() -> bool:
 	return progress == 0 if fade_out else progress == 1.0
@@ -64,10 +64,10 @@ func set_bbcode(btext: String):
 	_skip = false
 	_wait = 0.0
 	_pace = 1.0
+	_advance_finished = false
 	progress = 0.0
 	effect_time = 0.0
 	visible_character = -1
-	
 	super.set_bbcode(btext)
 	
 	var l := get_total_character_count()
@@ -85,6 +85,7 @@ func advance():
 func finish():
 	_triggers.clear()
 	_wait = 0.0
+	_advance_finished = true
 	set_progress(1.0)
 
 func _preparse(btext: String) -> String:
@@ -208,6 +209,9 @@ func _process(delta: float) -> void:
 	
 	else:
 		var fs := delta * fade_speed
+		
+		if _advance_finished:
+			fs *= 4.0
 		
 		for i in get_total_character_count():
 			if _alpha_real[i] > _alpha_goal[i]:

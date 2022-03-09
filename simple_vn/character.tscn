@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3]
 
-[ext_resource type="Script" path="res://simple_visual_novel/character.gd" id="1_wo8qt"]
+[ext_resource type="Script" path="res://simple_vn/character.gd" id="1_wo8qt"]
 
 [sub_resource type="Animation" id="Animation_3fn5u"]
 length = 0.001

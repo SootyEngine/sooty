@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://simple_visual_novel/background.gd" id="1_g5dcr"]
+[ext_resource type="Script" path="res://simple_vn/background.gd" id="1_g5dcr"]
 [ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="1_gwwve"]
-[ext_resource type="Script" path="res://simple_visual_novel/camera.gd" id="2_mrx06"]
+[ext_resource type="Script" path="res://simple_vn/camera.gd" id="2_mrx06"]
 
 [node name="scene2" type="Control"]
 anchor_right = 1.0
