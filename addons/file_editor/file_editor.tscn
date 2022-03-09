@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://ccai0oqbtflfi"]
+[gd_scene load_steps=17 format=3 uid="uid://ccai0oqbtflfi"]
 
 [ext_resource type="Script" path="res://addons/file_editor/comp/menu_top.gd" id="2_2e6gq"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/confirmation_dialog.gd" id="2_ou848"]
@@ -11,7 +11,6 @@
 [ext_resource type="Script" path="res://addons/file_editor/comp/menu_text_input.gd" id="5_xlouk"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/drag_file.gd" id="6_mfpeu"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/FE_Editors.gd" id="8_pt73u"]
-[ext_resource type="Texture2D" uid="uid://bc32mdikn2rpq" path="res://addons/file_editor/resources/cross.png" id="9_l6u8t"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/tab_test.gd" id="11_1l8rr"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1gems"]
@@ -23,8 +22,6 @@ border_width_bottom = 4
 
 [sub_resource type="Theme" id="Theme_42bqx"]
 VScrollBar/styles/scroll = SubResource( "StyleBoxFlat_1gems" )
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_pqw1h"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mr5r7"]
 
@@ -212,8 +209,6 @@ theme_override_colors/font_disabled_color = Color(1, 1, 1, 0)
 theme_override_colors/font_selected_color = Color(1, 1, 1, 0)
 theme_override_colors/font_unselected_color = Color(1, 1, 1, 0)
 theme_override_constants/hseparation = 24
-theme_override_icons/close = ExtResource( "9_l6u8t" )
-theme_override_styles/button_highlight = SubResource( "StyleBoxEmpty_pqw1h" )
 theme_override_styles/tab_selected = SubResource( "StyleBoxEmpty_mr5r7" )
 theme_override_styles/tab_unselected = SubResource( "StyleBoxEmpty_fuis2" )
 tab_alignment = 0

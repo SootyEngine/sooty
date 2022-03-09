@@ -52,7 +52,7 @@ func _show_popup(meta: Variant):
 	else:
 		popup.add_options(OP_DIR)
 
-func _clicked(file: FE_BaseFile):
+func _clicked(file: Variant):
 	if Input.is_key_pressed(KEY_CTRL):
 		file.open_in_file_list = not file.open_in_file_list
 		items_updated()
