@@ -1,9 +1,11 @@
 extends "res://addons/sooty_engine/autoloads/base_state.gd"
 
+func _init() -> void:
+	add_to_group(SaveManager.GROUP_SAVE_STATE)
+
 func _ready() -> void:
 	super._ready()
-	add_mod("res://state.gd")
+	install("res://state.gd")
 
-func add_mod(path: String):
-	var mod: Node = load(path).new()
-	add_child(mod)
+func get_save_state() -> Dictionary:
+	return _get_changed_states()

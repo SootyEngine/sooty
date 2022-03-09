@@ -8,7 +8,7 @@ func _enter_tree() -> void:
 	add_autoload_singleton("State", "res://addons/sooty_engine/autoloads/State.gd")
 	add_autoload_singleton("StringAction", "res://addons/sooty_engine/autoloads/StringAction.gd")
 	add_autoload_singleton("Dialogues", "res://addons/sooty_engine/autoloads/Dialogues.gd")
-	add_autoload_singleton("Persistent", "res://persistent.gd")
+	add_autoload_singleton("Persistent", "res://addons/sooty_engine/autoloads/Persistent.gd")
 
 func _exit_tree() -> void:
 	remove_autoload_singleton("Global")

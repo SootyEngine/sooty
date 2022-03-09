@@ -1,4 +1,4 @@
-extends "res://addons/sooty_engine/autoloads/base_state.gd"
+extends Node
 
 var a_winner := Achievement.new({
 	name="The Winner",

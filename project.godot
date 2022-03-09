@@ -237,7 +237,7 @@ ModManager="*res://addons/sooty_engine/autoloads/ModManager.gd"
 State="*res://addons/sooty_engine/autoloads/State.gd"
 StringAction="*res://addons/sooty_engine/autoloads/StringAction.gd"
 Dialogues="*res://addons/sooty_engine/autoloads/Dialogues.gd"
-Persistent="*res://persistent.gd"
+Persistent="*res://addons/sooty_engine/autoloads/Persistent.gd"
 
 [editor_plugins]
 

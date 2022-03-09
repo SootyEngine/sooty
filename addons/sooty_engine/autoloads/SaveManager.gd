@@ -5,7 +5,6 @@ const PREVIEW_SIZE_DIV_AMOUNT := 3.0 # How much to shrink preview image.
 
 const GROUP_SAVE_STATE := "has_save_state"
 const GROUP_SAVE_INFO := "has_save_info"
-const GROUP_SAVE_PERSISTENT := "has_persistent_state"
 
 func _ready() -> void:
 	var d := Directory.new()

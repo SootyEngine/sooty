@@ -12,6 +12,10 @@ func _ready() -> void:
 	child_entered_tree.connect(_child_added)
 	_post_init.call_deferred()
 
+func install(path: String):
+	var mod: Node = load(path).new()
+	add_child(mod)
+
 func _post_init():
 	_default = _get_state()
 	UDict.log(_default)

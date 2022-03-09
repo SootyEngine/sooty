@@ -219,3 +219,7 @@ It's been rewritten multiple times, and may again in future.
 todo: At bootup, show list of discovered mods, with toggles. Save state to config.
 	After clicking accept, selected mods are loaded.
 	Need to reboot to uninstall mods.
+
+# Persistent Data
+
+## Achievements
