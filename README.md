@@ -44,6 +44,10 @@ It's been rewritten multiple times, and may again in future.
 	{{score > 10}}
 		Wow, nice score.
 		Keep it up!
+	{{elif score == 0}}
+		@score += 20
+	{{else}}
+		Yeesh, negative points?
 	
 	Wow, nice score. {{score > 10}} // Or on a per line basis.
 	

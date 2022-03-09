@@ -6,6 +6,9 @@ extends Node
 @export var _pausers := []
 var speaker_cache := []
 
+var dt := DateTime.new()
+
+
 func _init() -> void:
 	add_to_group("flow_manager")
 	add_to_group("sa:printer")
@@ -30,6 +33,7 @@ func remove_pauser(n: Node):
 			stack.wait = false
 
 func _process(_delta: float) -> void:
+#	print(dt)
 	stack.tick()
 
 const _printer_ARGS := [""]
