@@ -11,6 +11,42 @@ A dialogue engine for Godot4.
 # Script
 It's been rewritten multiple times, and may again in future.
 ```
+=== the_morning
+	// BBCode evolved.
+	// The following tag:
+	// 1. Gets State.time.weekday.
+	// 2. Pipes it to lowercase(x).
+	// 3. Wraps it in bold [b]x[/b].
+	// 4. Wraps it in color [color=#00bfff]x[/color].
+	It's [$time.weekday|lowercase;b;deep_sky_blue] morning.
+	
+	// Line's can be conditionals, wrapped in {{x}}.
+	player: I need to find a job. {{time.is_weekend and not has_job}}
+	
+	// Here is a 'match' statement like Godots.
+	// They must start with *.
+	{{*$time.weekday}}
+		{{SATURDAY}} The weekend has just begun!
+		{{SUNDAY}} I need to make the most of it.
+		{{MONDAY}} Sigh.
+		{{TUESDAY}} At least it's not monday.
+		{{WEDNESDAY}} Humpday.
+		{{THURSDAY}} The whole vibe shifts on thursday.
+		{{FRIDAY}} Woo baby! It's friday!
+	
+	// @ is an action line.
+	// It can assign: @score += 20
+	// It can call functions, like you see below.
+	// And it can message groups:
+	//  - @actor fade 0.5 tint:blue    // Calls actor("fade", 0.5, {"tint":"blue"}) in every node in group "sa:actor".
+	//  - @actor.fade 0.5 tint:blue    // Calls fade(0.5, {"tint":"blue"}) in every node in group "sa:actor".
+	@time.goto_next_day()
+	
+	>> start
+```
+
+
+```
 // A comment.
 === start
 	Dialogue without a speaker.

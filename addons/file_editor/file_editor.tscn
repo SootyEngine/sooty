@@ -201,6 +201,9 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 0
 script = ExtResource( "8_pt73u" )
+_meta_panel = NodePath("editor_meta")
+_error_label = NodePath("editor_meta/errors")
+_meta_label = NodePath("editor_meta/meta")
 
 [node name="tab_bar" type="TabBar" parent="c/c/c/c2/c/editors"]
 offset_right = 603.0
@@ -218,13 +221,36 @@ script = ExtResource( "11_1l8rr" )
 
 [node name="editor_parent" type="MarginContainer" parent="c/c/c/c2/c/editors"]
 offset_right = 603.0
-offset_bottom = 396.0
+offset_bottom = 373.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_top = 0
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_bottom = 0
+
+[node name="editor_meta" type="HBoxContainer" parent="c/c/c/c2/c/editors"]
+offset_top = 373.0
+offset_right = 603.0
+offset_bottom = 396.0
+
+[node name="errors" type="RichTextLabel" parent="c/c/c/c2/c/editors/editor_meta"]
+offset_right = 299.0
+offset_bottom = 23.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "ERR: 0"
+fit_content_height = true
+
+[node name="meta" type="RichTextLabel" parent="c/c/c/c2/c/editors/editor_meta"]
+offset_left = 303.0
+offset_right = 603.0
+offset_bottom = 23.0
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "1:0"
+fit_content_height = true
 
 [node name="c3" type="VSplitContainer" parent="c/c/c/c2"]
 offset_left = 615.0

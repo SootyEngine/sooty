@@ -17,6 +17,12 @@ func lose(item: String, amount: int = 1, kwargs: Dictionary = {}):
 var score := 1
 var choice := ""
 var day_of_week := "monday"
+var time := DateTime.new({weekday="sat"})
+
+var school_boy := Character.new({
+	name="School Boy",
+	color=Color.AQUAMARINE
+})
 
 var player := Character.new({
 	name="Player",

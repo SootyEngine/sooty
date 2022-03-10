@@ -16,13 +16,16 @@ func get_dialogue_ids() -> Dictionary:
 func _ready() -> void:
 	if load_all_on_startup:
 		for file in UFile.get_files("res://dialogue", ".soot"):
-			var d := Dialogue.new(file)
-			cache[d.id] = d
+			add_dialogue(Dialogue.new(file))
 	
+	# timer chat checks if any files were modified.
 	var timer := Timer.new()
 	add_child(timer)
 	timer.timeout.connect(_timer)
 	timer.start(CHECK_FILES_EVERY)
+
+func add_dialogue(d: Dialogue):
+	cache[d.id] = d
 
 func _timer():
 	for d in cache.values():
@@ -44,37 +47,6 @@ func get_dialogue(id: String) -> Dialogue:
 	else:
 		return cache[id]
 
-func get_flow(flow: String) -> Dictionary:
-	var p := flow.split(".", true, 1)
-	var d := get_dialogue(p[0])
-	return d.get_flow(p[1])
-
 func get_flow_lines(flow: String) -> Array[String]:
 	var p := flow.split(".", true, 1)
-	var d := get_dialogue(p[0])
-	flow = p[1]
-	var out := []
-	# lines in flows begining with
-	if flow.begins_with("*"):
-		flow = flow.trim_prefix("*")
-		for f in d.flows.keys():
-			if f.ends_with(flow):
-				out.append_array(d.get_flow(f).lines)
-	# lines in flows ending with
-	elif flow.ends_with("*"):
-		flow = flow.trim_suffix("*")
-		print("FLOWS ENDING IN ", flow)
-		for f in d.flows.keys():
-			if f.begins_with(flow):
-				print("\t", f)
-				out.append_array(d.get_flow(f).lines)
-	# lines in flow alone
-	else:
-		var f := d.get_flow(flow)
-		print(f)
-		out.append_array(f.lines)
-	
-	return out
-
-func add_dialogue(d: Dialogue):
-	cache[d.id] = d
+	return get_dialogue(p[0]).get_flow_lines(p[1])

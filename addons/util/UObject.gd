@@ -108,6 +108,35 @@ static func call_w_args(obj: Object, method: String, in_args: Array = []) -> Var
 	var got = obj.callv(method, out)
 	return got
 
+# find second last dictionary/object in a nested structure
+static func get_penultimate(d: Variant, path: Array) -> Variant:
+	var o = d
+	for i in len(path)-1:
+		if path[i] in o:
+			o = o[path[i]]
+		else:
+			return null
+	return o
+
+static func has_at(d: Variant, path: Array) -> bool:
+	var o = get_penultimate(d, path)
+	return o and path[-1] in o
+
+static func try_set_at(d: Variant, path: Array, value: Variant) -> bool:
+	var o = get_penultimate(d, path)
+	if o and path[-1] in o:
+		o[path[-1]] = value
+		return true
+	else:
+		return false
+
+static func try_get_at(d: Variant, path: Array, default: Variant = null) -> Variant:
+	var o = get_penultimate(d, path)
+	if o and path[-1] in o:
+		return o[path[-1]]
+	else:
+		return default
+
 static func get_method_arg_info(obj: Object, meth: String) -> Dictionary:
 	return get_methods(obj).get(meth, {})
 

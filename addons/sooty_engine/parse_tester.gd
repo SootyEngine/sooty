@@ -36,16 +36,6 @@ func _action(a: String):
 	print("ACTION ", a)
 
 func _run():
-#	print(EvalHelper.new().parse('ok.who_cares who $cares 1,false,ok,4 dmg:10 str:20,30 quest:true'))
-#	print(EvalHelper.new().parse('score++'))
-#	print(EvalHelper.new().parse('score += 20'))
-#	print(EvalHelper.parse("ok who cares not me"))
-	pass
-
-func _parse_test():
-	var d := Dialogue.new(test_string, false)
-	print("F L O W S")
-	print(JSON.new().stringify(d.flows, "\t", false))
-	print("L I N E S")
-	print(JSON.new().stringify(d.lines, "\t", false))
-
+#	print(UString.find_either("one it >> happens @happens :: who cares >> what about.", [">>", "@", "::"]))
+#	UDict.log(get_trailing_tokens("one it >> happens @happens :: who cares >> what about.", [">>", "@", "::"]))
+	DialogueParser.parse("res://dialogue/test.soot")

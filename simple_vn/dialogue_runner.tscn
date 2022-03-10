@@ -4,19 +4,13 @@
 [ext_resource type="Script" path="res://simple_vn/ui/ui_flow_manager.gd" id="2_qpxpa"]
 [ext_resource type="PackedScene" uid="uid://diracd0fg1m3i" path="res://simple_vn/ui/ui_dialogue.tscn" id="3_kyvc4"]
 
-[node name="dialogue_runner" type="CanvasLayer"]
-follow_viewport_enable = true
+[node name="dialogue_runner" type="Node"]
 script = ExtResource( "1_deyhw" )
 
 [node name="scene" type="Node" parent="."]
 
-[node name="flow_manager" type="Control" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="flow_manager" type="CanvasLayer" parent="."]
 script = ExtResource( "2_qpxpa" )
-__meta__ = {
-"_edit_lock_": true
-}
 
 [node name="bottom" parent="flow_manager" instance=ExtResource( "3_kyvc4" )]
 anchor_left = 0.5

@@ -5,7 +5,11 @@ const OPERATOR_ASSIGN := ["=", "+=", "-="]
 var funcs := {
 	"commas": func(x): return UString.commas(x),
 	"humanize": func(x): return UString.humanize(x),
-	"pick": _pick_cached
+	"pick": _pick_cached,
+	
+	"capitalize": func(x): return str(x).capitalize(), 
+	"lowercase": func(x): return str(x).to_lower(),
+	"uppercase": func(x): return str(x).to_upper(),
 }
 
 # Cache the pick function so it doesn't give the same option too often.
@@ -60,6 +64,9 @@ func do(s: String) -> Variant:
 	return got
 
 func _do(s: String) -> Variant:
+	if "(":
+		return execute(s)
+	
 	var parts := _split_string(s)
 	
 	# assignment

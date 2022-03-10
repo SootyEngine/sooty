@@ -23,42 +23,17 @@ func _reload():
 
 func _parse_file(file: String):
 	files[file] = UFile.get_modified_time(file)
-	var text_lines := UFile.load_text(file).split("\n")
-	if text_lines[0].strip_edges() == "IGNORE":
-		return
-	var blocks := []
-	var stack := []
-	var i := 0
-	var file_index := files.keys().find(file)
+	var memory_before = OS.get_static_memory_usage()
+	var data := DialogueParser.parse(file)
+	UDict.merge(flows, data.flows)
+	UDict.merge(lines, data.lines)
+#	UDict.log(out_flows)
+#	UDict.log(out_lines)
+	var memory_used = OS.get_static_memory_usage() - memory_before
+	prints(file, UFile.get_file_size_humanized(file), String.humanize_size(memory_used))
 	
-	for i in len(text_lines):
-		if text_lines[i].strip_edges() == "":
-			continue
-		
-		if text_lines[i].strip_edges(true, false).begins_with("//"):
-			continue
-		
-		var deep := _count_leading_tabs(text_lines[i])
-		var line := { file=file_index, line=i, text=text_lines[i].strip_edges(), lines=[] }
-		
-		if deep+1 > len(stack):
-			stack.resize(deep+1)
-		
-		_extract_comment(line)
-		_extract_conditional(line)
-		_extract_properties(line)
-		stack[deep] = line
-		
-		if deep == 0:
-			blocks.append(line)
-		else:
-			stack[deep-1].lines.append(line)
-	
-	for i in len(blocks):
-		blocks[i] = _parse_block(blocks[i])
-	
-	output(flows)
-	output(lines)
+	UFile.save_json("res://dialogue_debug/%s.flows.json" % [id], flows, true)
+	UFile.save_json("res://dialogue_debug/%s.lines.json" % [id], lines, true)
 
 func was_file_modified() -> bool:
 	for file in files:
@@ -73,8 +48,27 @@ func has_flows() -> bool:
 	return len(flows) != 0
 
 func has_flow(flow: String) -> bool:
-	flow = to_flow_id(flow)
-	return flow in flows
+	return to_flow_id(flow) in flows
+
+func get_flow_lines(flow: String) -> Array[String]:
+	var out := []
+	# lines in flows begining with
+	if flow.begins_with("*"):
+		flow = flow.trim_prefix("*")
+		for f in flows.keys():
+			if f.ends_with(flow):
+				out.append_array(get_flow(f).then)
+	# lines in flows ending with
+	elif flow.ends_with("*"):
+		flow = flow.trim_suffix("*")
+		for f in flows.keys():
+			if f.begins_with(flow):
+				out.append_array(get_flow(f).then)
+	# lines in flow alone
+	else:
+		var f := get_flow(flow)
+		out.append_array(f.then)
+	return out
 
 func get_flow(flow: String) -> Dictionary:
 	flow = to_flow_id(flow)
@@ -109,275 +103,3 @@ func to_flow_id(s: String) -> String:
 		elif out != "" and out[-1] != "_":
 			out += "_"
 	return out
-
-func _line_to_index(line: Dictionary) -> String:
-	var index: String = "%s-%s" % [line.file, line.line]
-	lines[index] = line
-	return index
-
-func _parse_block(block: Dictionary) -> Dictionary:
-	var text: String = block.text
-	if text.begins_with("==="): return _parse_flow(block)
-	return block
-
-func _parse_flow(flow: Dictionary) -> Dictionary:
-	flow.text = flow.text.split(" ", true, 1)[-1]
-	_parse_lines(flow)
-	flows[to_flow_id(flow.text)] = flow
-	return flow
-
-func _parse_lines(line: Dictionary, key: String = "lines"):
-	var list = line[key]
-	line.erase(key)
-	
-	var new_list := []
-	var last_cond := {}
-	var last_cond_type := ""
-	for i in len(list):
-		var l = list[i]
-		
-#		if l.text == "%CASE%":
-#			new_list.append(_line_to_index(l))
-#			continue
-		
-		# conditional lines are handled differently
-		if l.text == "" and "cond" in l:
-			var cond: String = l.cond
-			
-			# match statement
-			if cond.begins_with("*"):
-				l.cond_type = "match"
-				l.cond = l.cond.substr(1).strip_edges(true, false)
-				l.cases = []
-				l.case_lines = []
-				for i in len(l.lines):
-					var c = l.lines[i]
-					# It may have another conditional.
-					l.cases.append(c.cond)
-					c.erase("cond")
-					_extract_conditional(c)
-					
-					var case_lines := []
-					# The first line could have text on it, so we'll parse it as a line.
-					if c.text.strip_edges() != "":
-						case_lines.append(_parse_line(c))
-					# Otherwise, we are taking it's children as our own.
-					case_lines.append_array(c.lines)
-					
-					var temp := {lines=case_lines}
-					_parse_lines(temp)
-					l.case_lines.append(temp.lines)
-				
-				l.erase("lines")
-				# Now parse as 
-				new_list.append(_line_to_index(l))
-				UDict.log(l, "MATCH ")
-				continue
-			
-			# if-elif-else chain.
-			if cond.begins_with("elif "):
-				if last_cond_type == "" or last_cond_type == "else":
-					push_error("'elif' must follow an 'if'. Line %s in %s." % [l.line, files.keys()[l.file]])
-					continue
-				last_cond_type = "elif"
-				l.cond_type = "elif"
-				l.cond = l.cond.substr(len("elif")).strip_edges(true, false)
-			elif cond.begins_with("else"):
-				if last_cond_type == "":
-					push_error("'else' must follow an 'if' or 'elif'. Line %s in %s." % [l.line, files.keys()[l.file]])
-					continue
-				last_cond_type = "else"
-				l.cond_type = "else"
-				l.cond = "true"
-			elif cond.begins_with("if "):
-				last_cond_type = "if"
-				l.cond_type = "if"
-				l.cond = l.cond.substr(len("if")).strip_edges(true, false)
-			else:
-				last_cond_type = "if"
-				l.cond_type = "if"
-			
-			l.erase("text")
-			_parse_lines(l)
-			
-			if l.cond_type == "if":
-				var index := _line_to_index(l)
-				l.tests = [index]
-				last_cond = l
-				new_list.append(index)
-			
-			# add 'elif' and 'else' to 'if' line, instead of main flow lines.
-			else:
-				var index := _line_to_index(l)
-				last_cond.tests.append(index)
-			
-		else:
-			last_cond_type = ""
-			
-			l = _parse_line(l)
-			
-			# property line?
-			if "is_prop_line" in l:
-				if not "properties" in line:
-					line.properties = {}
-				_merge(line.properties, l.properties)
-			
-			else:
-				new_list.append(_line_to_index(l))
-	
-	line[key] = new_list
-
-func _parse_line(data: Dictionary) -> Dictionary:
-	var text = data.text
-	if text.begins_with("<"): return _parse_option(data)
-	if text.begins_with("@"): return _parse_action(data)
-	if text.begins_with(">>"): return _parse_flow_goto(data)
-	if text.begins_with("::"): return _parse_flow_call(data)
-	if text.begins_with("|"): return _parse_line_property(data)
-	return _parse_dialogue(data)
-
-func _parse_line_property(data: Dictionary) -> Dictionary:
-	var properties := {}
-	for prop in data.text.substr(2).split(" "):
-		var p = prop.split(":", true, 1)
-		properties[p[0]] = p[1]
-	
-	data.properties = properties
-	data.is_prop_line = true
-	
-	return data
-	
-func _parse_option(data: Dictionary) -> Dictionary:
-	var text: String = data.text
-	var a := text.find("<")
-	var b := text.find(">", a)
-	
-	data.text = text.substr(b+1).strip_edges()
-	data.flag = text.substr(a+1, b-a-1).strip_edges()
-	
-	_extract_flow_option(data)
-	_extract_action(data)
-	
-	if "goto" in data:
-		data.then_goto = data.goto
-		data.erase("goto")
-	
-	if data.lines:
-		_parse_lines(data)
-	
-	return data
-
-func _parse_action(data: Dictionary) -> Dictionary:
-	var text: String = data.text.substr(len("@"))
-	data.action = text
-	return data
-
-func _parse_dialogue(data: Dictionary) -> Dictionary:
-	var text: String = data.text
-	
-	if ":" in text:
-		var p := text.split(":", true, 1)
-		data.from = p[0].strip_edges()
-		data.text = p[1].strip_edges()
-	
-	var options := []
-	var properties := []
-	var new_lines := []
-	for line in data.lines:
-		if "is_prop_line":
-			properties.append(line)
-		elif "option" in line:
-			options.append(line)
-		else:
-			new_lines.append(line)
-	
-	if options:
-		data.options = options
-		_parse_lines(data, "options")
-	
-	if properties:
-		pass
-	
-	if new_lines:
-		data.lines = new_lines
-		_parse_lines(data, "lines")
-	
-	return data
-
-func _parse_flow_goto(data: Dictionary) -> Dictionary:
-	_extract_flow_option(data)
-	return data
-
-func _parse_flow_call(data: Dictionary) -> Dictionary:
-	_extract_flow_option(data)
-	return data
-
-func _extract_flow_option(data: Dictionary):
-	if ">>" in data.text:
-		var p = data.text.rsplit(">>", true, 1)
-		data.text = p[0].strip_edges()
-		data.flow = "goto"
-		data.goto = p[1].strip_edges()
-		if not "." in data.goto:
-			data.goto = "%s.%s" % [id, data.goto]
-	
-	if "::" in data.text:
-		var p = data.text.split("::", true, 1)
-		data.text = p[0].strip_edges()
-		data.flow = "call"
-		data.call = p[1].strip_edges()
-		if not "." in data.call:
-			data.call = "%s.%s" % [id, data.call]
-
-func _extract_action(data: Dictionary):
-	var p := UString.extract(data.text, "[[", "]]")
-	data.text = p[0]
-	if p[1] != "":
-		data.action = p[1]
-
-func _extract_comment(data: Dictionary):
-	var text: String = data.text
-	if "//" in text:
-		var p := text.rsplit("//", true, 1)
-		data.text = p[0].strip_edges(false, true)
-		data.comment = p[1].strip_edges()
-
-func _extract_properties(data: Dictionary):
-	var p := UString.extract(data.text, "((", "))")
-	data.text = p[0]
-	if p[1] != "":
-		var properties := {}
-		for prop in p[1].split(" "):
-			if ":" in prop:
-				p = prop.split(":", true, 1)
-				properties[p[0]] = p[1]
-		data.properties = properties
-
-func _extract_conditional(data: Dictionary):
-	var p := UString.extract(data.text, "{{", "}}")
-	data.text = p[0]
-	if p[1] != "":
-		data.cond = p[1]
-
-func _count_leading_tabs(s: String) -> int:
-	var out := 0
-	for c in s:
-		match c:
-			"\t": out += 4
-			" ": out += 1
-			_: break
-	out /= 4
-	return out
-
-func _merge(target: Dictionary, patch: Dictionary) -> Dictionary:
-	for k in patch:
-		target[k] = patch[k]
-	return target
-
-func _remove_comments(lines: PackedStringArray) -> PackedStringArray:
-	for i in len(lines):
-		lines[i] = lines[i].rsplit("\\", true, 1)[0]
-	return lines
-
-func output(data):
-	print(JSON.new().stringify(data, "\t", false))

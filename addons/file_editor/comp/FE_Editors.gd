@@ -12,6 +12,13 @@ enum { R_SAVE, R_CLOSE_CURRENT, R_SETTINGS_CHANGED, R_CLOSE_TEMPORARY }
 signal current_editor_changed()
 signal request(request: int)
 
+@export var _meta_panel: NodePath
+@export var _error_label: NodePath
+@export var _meta_label: NodePath
+@onready var meta_panel: Control = get_node(_meta_panel)  
+@onready var error_label: Control = get_node(_error_label)  
+@onready var meta_label: Control = get_node(_meta_label)  
+
 @export var word_wrap := false
 @export var font_size := 16:
 	set(e): font_size = clampi(e, FONT_SIZE_MIN, FONT_SIZE_MAX)

@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://duke0fj4v5l5g"]
+
+[ext_resource type="PackedScene" uid="uid://c6vhwwh02guep" path="res://simple_vn_assets/bgs/class_room.tscn" id="1_di2mh"]
+[ext_resource type="PackedScene" uid="uid://bik6jjs7efrg3" path="res://simple_vn_assets/chars/school_boy.tscn" id="2_sg1bl"]
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="class_room" parent="." instance=ExtResource( "1_di2mh" )]
+
+[node name="school_boy" parent="." instance=ExtResource( "2_sg1bl" )]
+position = Vector2(793, 608)

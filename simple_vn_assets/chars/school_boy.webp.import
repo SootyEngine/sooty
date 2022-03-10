@@ -2,20 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dkmem6ya8papc"
-path="res://.godot/imported/20201108_boy.png-c90c67d180a03456a34a4f0801daf5b3.ctex"
+uid="uid://cfo0wwg3qvcie"
+path="res://.godot/imported/school_boy.webp-5d6ac242b681cba8ab0f0566db5e47c4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://simple_vn_assets/chars/20201108_boy.png"
-dest_files=["res://.godot/imported/20201108_boy.png-c90c67d180a03456a34a4f0801daf5b3.ctex"]
+source_file="res://simple_vn_assets/chars/school_boy.webp"
+dest_files=["res://.godot/imported/school_boy.webp-5d6ac242b681cba8ab0f0566db5e47c4.ctex"]
 
 [params]
 
-compress/mode=4
+compress/mode=0
 compress/lossy_quality=0.7
 compress/hdr_compression=1
 compress/bptc_ldr=0

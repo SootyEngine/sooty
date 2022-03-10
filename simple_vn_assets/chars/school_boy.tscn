@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://bik6jjs7efrg3"]
+
+[ext_resource type="Script" path="res://simple_vn_assets/chars/simple_actor.gd" id="1_xgkms"]
+[ext_resource type="Texture2D" uid="uid://cfo0wwg3qvcie" path="res://simple_vn_assets/chars/school_boy.webp" id="2_730bk"]
+[ext_resource type="Script" path="res://simple_vn_assets/chars/Sprite2DAnimations.gd" id="3_eh7hb"]
+
+[node name="school_boy" type="Node2D"]
+script = ExtResource( "1_xgkms" )
+
+[node name="sprite" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0)
+texture = ExtResource( "2_730bk" )
+offset = Vector2(0, -300)
+script = ExtResource( "3_eh7hb" )

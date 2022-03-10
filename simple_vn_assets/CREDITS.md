@@ -10,6 +10,8 @@
 > Blockquotes are very handy in email to emulate reply text.
 > This line is ***part*** of **the** same *quote*.
 
+A <!-- comment is here --> okay.
+
 Emphasis, aka italics, with *asterisks* or _underscores_.
 
 ---

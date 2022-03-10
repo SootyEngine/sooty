@@ -38,6 +38,26 @@ static func extract(s: String, head: String, tail: String, strip_edges: bool = t
 	else:
 		return [s, ""]
 
+static func find_either(s: String, items: Array, from := 0) -> Array:
+	var n := INF
+	var first := ""
+	for item in items:
+		var i := s.find(item, from)
+		if i != -1 and i < n:
+			n = i
+			first = item
+	return [first, n]
+
+static func split_on_next(s: String, items: Array) -> Array:
+	var f := find_either(s, items)
+	var token: String = f[0]
+	if token == "":
+		return ["", "", s]
+	var p := s.split(token, true, 1)
+	var token_str: String = p[0].strip_edges(false, true)
+	var left_over: String = "" if len(p) == 1 else p[1].strip_edges(true, false)
+	return [token, token_str, left_over]
+
 static func is_wrapped(s: String, head: String, tail=null) -> bool:
 	return s.begins_with(head) and s.ends_with(tail if tail else head)
 

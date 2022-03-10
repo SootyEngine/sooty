@@ -2,6 +2,7 @@
 extends Resource
 class_name DialogueStack
 
+
 signal started()
 signal finished()
 signal tick_started()
@@ -49,16 +50,12 @@ func tick():
 		if not len(line):
 			break
 		
-		if "action" in line.line:
-			on_action.emit(line.line.action)
-		elif "goto" in line.line:
-			goto(line.line.goto, true, line.did)
-		elif "call" in line.line:
-			goto(line.line.call, false, line.did)
-		elif "text" in line.line:
-			on_line.emit(DialogueLine.new(line.did, line.line))
-		else:
-			print("Huh? ", line)
+		match line.line.type:
+			"action": on_action.emit(line.line.action)
+			"goto": goto(line.line.goto, true)
+			"call": goto(line.line.call, false)
+			"text": on_line.emit(DialogueLine.new(line.did, line.line))
+			_: print("Huh? ", line.line.keys(), line.line)
 	
 	tick_finished.emit()
 	
@@ -80,16 +77,13 @@ func start(id: String):
 			var first = Dialogues.get_dialogue(id).flows.keys()[0]
 			goto("%s.%s" % [id, first])
 
-func goto(flow: String, clear_stack: bool = true, dia_id: Variant = null) -> bool:
+func goto(flow: String, clear_stack: bool = true) -> bool:
 	var d: Dialogue
 	
 	if "." in flow:
 		var p := flow.split(".", true, 1)
 		d = Dialogues.get_dialogue(p[0])
 		flow = p[1]
-	
-	elif dia_id:
-		d = Dialogues.get_dialogue(dia_id)
 		
 	elif has_steps():
 		d = get_current_dialogue()
@@ -98,11 +92,17 @@ func goto(flow: String, clear_stack: bool = true, dia_id: Variant = null) -> boo
 		push_error("Call start() before goto().")
 		return false
 	
-	var fid := "%s.%s" % [d.id, flow]
-	var lines := Dialogues.get_flow_lines(fid)
+#	if not Dialogues.has(d.id):
+#		push_error("No dialogue %s." % d.id)
+#		return false
 	
+	if not d.has_flow(flow):
+		push_error("No flow '%s' in '%s'." % [flow, d.id])
+		return false
+	
+	var lines := d.get_flow_lines(flow)
 	if not len(lines):
-		print("Can't find lines for %s" % fid)
+		print("Can't find lines for %s." % flow)
 		return false
 	
 	if clear_stack:
@@ -119,10 +119,7 @@ func select_option(option: DialogueLine): # step: Dictionary, option: int):
 	if "action" in o:
 		StringAction.do(o.action)
 	
-	if "then_goto" in o:
-		_push(d.id, o.lines, {goto=o.then_goto})
-	else:
-		_push(d.id, o.lines)
+	_push(d.id, o.lines)
 	
 	option_selected.emit(o)
 
@@ -133,60 +130,64 @@ func _push(did: String, lines: Array, extra := {}):
 	_stack.append(step)
 
 func pop_next_line() -> Dictionary:
-	var line := _pop_next_line()
+	var did_line := _pop_next_line()
+	var did: String = did_line.did
+	var line: Dictionary = did_line.line
 	
 	# only show lines that pass a test
 	var safety := 100
-	while len(line) and "cond" in line.line:
+	while len(line) and ("cond" in line or line.type in ["if", "match"]):
 		safety -= 1
 		if safety <= 0:
 			push_error("Tripped safety.")
 			return {}
 		
-		prints("<>", line.keys())
-		if "cond_type" in line.line:
-			# 'if' 'elif' 'else' chain
-			if line.line.cond_type == "if":
-				var d := Dialogues.get_dialogue(line.did)
-				for i in len(line.line.tests):
-					var test_line := d.get_line(line.line.tests[i])
-					if StringAction.test(test_line.cond):
-						_push(d.id, test_line.lines)
-						break
-			
-			# match chain
-			elif line.line.cond_type == "match":
-				var match_result = StringAction.str_to_var(line.line.cond)
-				for i in len(line.line.cases):
-					if match_result == StringAction.str_to_var(line.line.cases[i]):
-						var d := Dialogues.get_dialogue(line.did)
-						_push(d.id, line.line.case_lines[i])
-						break
-				
-			else:
-				push_error("This should never happen.")
-			
-		elif StringAction.test(line.line.cond):
+		# 'if' 'elif' 'else' chain
+		if line.type == "if":
+			var d := Dialogues.get_dialogue(did)
+			for i in len(line.line.tests):
+				var test_line := d.get_line(line.tests[i])
+				if StringAction.test(test_line.cond):
+					_push(d.id, test_line.lines)
+					break
+		
+		# match chain
+		elif line.type == "match":
+			var match_result = StringAction.str_to_var(line.match)
+#			print("MATCH:")
+			for i in len(line.cases):
+				var got = StringAction.str_to_var(line.cases[i])
+#				print("\tCASE %s: '%s' -> %s == %s (%s)" % [i, line.cases[i], got, match_result, match_result == got])
+				if match_result == got:
+					_push(did, line.case_lines[i])
+					break
+		
+		elif "cond" in line and StringAction.test(line.cond):
 			break
 		
-		line = _pop_next_line()
+		did_line = _pop_next_line()
+		did = did_line.did
+		line = did_line.line
 	
-	return line
+	return did_line
 
 func _pop_next_line() -> Dictionary:
 	if len(_stack):
 		var step: Dictionary = _stack[-1]
-		var dia := Dialogues.get_dialogue(step.did)
-		var line: Dictionary = dia.get_line(step.lines[step.step])
+		
+		if not len(step.lines):
+			push_error("Shouldn't happen.")
+			_stack.pop_back()
+			return {}
+		
+		var dilg := Dialogues.get_dialogue(step.did)
+		var line: Dictionary = dilg.get_line(step.lines[step.step])
 		var out := { did=step.did, line=line }
 		
 		step.step += 1
 		
 		if step.step >= len(step.lines):
 			_stack.pop_back()
-			
-			if "goto" in step:
-				goto(step.goto)
 		
 		return out
 	

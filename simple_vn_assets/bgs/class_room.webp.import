@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dir3venpmgtoa"
-path="res://.godot/imported/uncle mugen school classroom 01.webp-4150b33f449b3857d07e07ee0b324eb4.ctex"
+path="res://.godot/imported/class_room.webp-df52d54fdd15c3779cacd3e8496828dc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://simple_vn_assets/bgs/uncle mugen school classroom 01.webp"
-dest_files=["res://.godot/imported/uncle mugen school classroom 01.webp-4150b33f449b3857d07e07ee0b324eb4.ctex"]
+source_file="res://simple_vn_assets/bgs/class_room.webp"
+dest_files=["res://.godot/imported/class_room.webp-df52d54fdd15c3779cacd3e8496828dc.ctex"]
 
 [params]
 

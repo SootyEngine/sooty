@@ -33,6 +33,17 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 			out[i] = { color=C_SYMBOL }
 			out[d+1] = { color=C_NORMAL }
 	
+	if "<!--" in text:
+		var i := text.find("<!--")
+		out[i] = { color=C_COMMENT.darkened(.25) }
+		out[i+len("<!--")] = { color=C_COMMENT }
+		
+		var j := text.find("-->", i+len("<!--"))
+		if j != -1:
+			out[j] = { color=C_COMMENT.darkened(.25) }
+			out[j+len("-->")] = { color=clr }
+		return out
+	
 	if stripped.begins_with(">"):
 		var i := len(text) - len(stripped)
 		out[i] = { color=C_INT.darkened(.33) }

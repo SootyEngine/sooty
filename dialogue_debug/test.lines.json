@@ -1,0 +1,78 @@
+{
+	"0!8": {
+		"type": "text",
+		"text": "Today is [$time.weekday|lowercase;b;deep_sky_blue]."
+	},
+	"0!13": {
+		"type": "text",
+		"text": "The weekend has just begun!"
+	},
+	"0!14": {
+		"type": "text",
+		"text": "I need to make the most of it."
+	},
+	"0!15": {
+		"type": "text",
+		"text": "Sigh."
+	},
+	"0!16": {
+		"type": "text",
+		"text": "At least it's not monday."
+	},
+	"0!17": {
+		"type": "text",
+		"text": "Humpday."
+	},
+	"0!18": {
+		"type": "text",
+		"text": "The whole vibe shifts on thursday."
+	},
+	"0!19": {
+		"type": "text",
+		"text": "Woo baby! It's friday!"
+	},
+	"0!12": {
+		"type": "match",
+		"match": "$time.weekday",
+		"cases": [
+			"SATURDAY",
+			"SUNDAY",
+			"MONDAY",
+			"TUESDAY",
+			"WEDNESDAY",
+			"THURSDAY",
+			"FRIDAY"
+		],
+		"case_lines": [
+			[
+				"0!13"
+			],
+			[
+				"0!14"
+			],
+			[
+				"0!15"
+			],
+			[
+				"0!16"
+			],
+			[
+				"0!17"
+			],
+			[
+				"0!18"
+			],
+			[
+				"0!19"
+			]
+		]
+	},
+	"0!27": {
+		"type": "action",
+		"action": "time.goto_next_day()"
+	},
+	"0!29": {
+		"type": "goto",
+		"goto": "test.start"
+	}
+}

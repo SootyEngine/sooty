@@ -18,7 +18,7 @@ func install(path: String):
 
 func _post_init():
 	_default = _get_state()
-	UDict.log(_default)
+#	UDict.log(_default)
 	state_loaded.emit()
 
 func _child_added(_n: Node):
@@ -46,19 +46,25 @@ func _get_state() -> Dictionary:
 	return out
 
 func _get(property: StringName):
+	var path := str(property).split(".")
+	property = path[-1]
 	for m in _children:
-		if property in m:
-			return m[property]
+		var o = UObject.get_penultimate(m, path)
+		if property in o:
+			return o[property]
 
 func _set(property: StringName, value) -> bool:
+	var path := str(property).split(".")
+	property = path[-1]
 	for m in _children:
-		if property in m:
-			var old = m[property]
+		var o = UObject.get_penultimate(m, path)
+		if property in o:
+			var old = o[property]
 			if typeof(value) != typeof(old):
 				push_error("Can't set $%s (%s) to %s (%s)." % [property, UObject.get_name_from_type(typeof(old)), value, UObject.get_name_from_type(typeof(value))])
 				return true
-			m[property] = value
-			var new = m[property]
+			o[property] = value
+			var new = o[property]
 			if old != new:
 				changed.emit(property)
 				changed_from_to.emit(property, old, new)

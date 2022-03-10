@@ -16,67 +16,67 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_l4evs"]
 shader = ExtResource( "2_4t8do" )
 
-[sub_resource type="Font" id="Font_5i673"]
+[sub_resource type="Font" id="Font_kv6c6"]
 data/0 = ExtResource( "4_gvvir" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_gisa2"]
+[sub_resource type="Font" id="Font_oamv6"]
 data/0 = ExtResource( "7_qpc1f" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_hqlyk"]
+[sub_resource type="Font" id="Font_q16ky"]
 data/0 = ExtResource( "8_4jxrw" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_ls8kb"]
+[sub_resource type="Font" id="Font_bqywn"]
 data/0 = ExtResource( "9_6uyrg" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_bbo5b"]
+[sub_resource type="Font" id="Font_bc3lh"]
 data/0 = ExtResource( "4_gvvir" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_i0qed"]
+[sub_resource type="Font" id="Font_8moss"]
 data/0 = ExtResource( "7_qpc1f" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_34s0u"]
+[sub_resource type="Font" id="Font_m5efd"]
 data/0 = ExtResource( "8_4jxrw" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_k7w1d"]
+[sub_resource type="Font" id="Font_24hpo"]
 data/0 = ExtResource( "9_6uyrg" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_bwp8q"]
+[sub_resource type="Font" id="Font_vdgmn"]
 data/0 = ExtResource( "4_gvvir" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_ptker"]
+[sub_resource type="Font" id="Font_nw2jx"]
 data/0 = ExtResource( "7_qpc1f" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_oav2f"]
+[sub_resource type="Font" id="Font_10t2c"]
 data/0 = ExtResource( "8_4jxrw" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_ncn7d"]
+[sub_resource type="Font" id="Font_w5fnn"]
 data/0 = ExtResource( "9_6uyrg" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[node name="dialogue" type="Control"]
+[node name="dialogue" type="VBoxContainer"]
 rect_min_size = Vector2(0, 120)
 anchor_top = 1.0
 anchor_right = 1.0
@@ -86,9 +86,7 @@ grow_vertical = 0
 size_flags_horizontal = 3
 script = ExtResource( "1_hu8k5" )
 __meta__ = {
-"_edit_group_": true,
-"_edit_layout_mode": 1,
-"_edit_use_custom_anchors": false
+"_edit_group_": true
 }
 _from = NodePath("MarginContainer/c/from")
 _text = NodePath("MarginContainer/c/text")
@@ -96,27 +94,33 @@ _options = NodePath("MarginContainer/c/options")
 _option = NodePath("MarginContainer/c/options/c/c/option")
 _option_container = NodePath("MarginContainer/c/options/c/c")
 
-[node name="backing" type="TextureRect" parent="."]
+[node name="backing" type="Sprite2D" parent="."]
 material = SubResource( "ShaderMaterial_l4evs" )
-anchor_right = 1.0
-anchor_bottom = 1.0
 texture = ExtResource( "3_f0whw" )
+centered = false
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
+offset_right = 1024.0
+offset_bottom = 63.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/margin_right = 240
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_left = 240
 theme_override_constants/margin_bottom = 16
+__meta__ = {
+"_edit_layout_mode": 1,
+"_edit_use_custom_anchors": false
+}
 
 [node name="c" type="VBoxContainer" parent="MarginContainer"]
 offset_left = 240.0
 offset_top = 8.0
 offset_right = 784.0
-offset_bottom = 104.0
+offset_bottom = 47.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_vertical = 3
 alignment = 1
 __meta__ = {
 "_edit_layout_mode": 1,
@@ -126,11 +130,11 @@ __meta__ = {
 [node name="from" type="RichTextLabel" parent="MarginContainer/c"]
 offset_right = 544.0
 size_flags_horizontal = 3
-theme_override_fonts/mono_font = SubResource( "Font_5i673" )
-theme_override_fonts/bold_italics_font = SubResource( "Font_gisa2" )
-theme_override_fonts/italics_font = SubResource( "Font_hqlyk" )
-theme_override_fonts/bold_font = SubResource( "Font_ls8kb" )
-theme_override_fonts/normal_font = SubResource( "Font_5i673" )
+theme_override_fonts/mono_font = SubResource( "Font_kv6c6" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_oamv6" )
+theme_override_fonts/italics_font = SubResource( "Font_q16ky" )
+theme_override_fonts/bold_font = SubResource( "Font_bqywn" )
+theme_override_fonts/normal_font = SubResource( "Font_kv6c6" )
 fit_content_height = true
 script = ExtResource( "10_mndt7" )
 effects_mode = 0
@@ -148,15 +152,16 @@ offset_top = 4.0
 offset_right = 544.0
 offset_bottom = 4.0
 size_flags_horizontal = 3
-theme_override_fonts/mono_font = SubResource( "Font_bbo5b" )
-theme_override_fonts/bold_italics_font = SubResource( "Font_i0qed" )
-theme_override_fonts/italics_font = SubResource( "Font_34s0u" )
-theme_override_fonts/bold_font = SubResource( "Font_k7w1d" )
-theme_override_fonts/normal_font = SubResource( "Font_bbo5b" )
+theme_override_fonts/mono_font = SubResource( "Font_bc3lh" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_8moss" )
+theme_override_fonts/italics_font = SubResource( "Font_m5efd" )
+theme_override_fonts/bold_font = SubResource( "Font_24hpo" )
+theme_override_fonts/normal_font = SubResource( "Font_bc3lh" )
 fit_content_height = true
 script = ExtResource( "11_wjgcf" )
 font = "robotomono"
 fade_speed = 5.0
+effect_time = 13.9256
 _triggers = {}
 _alpha_real = []
 _alpha_goal = []
@@ -168,23 +173,20 @@ anchor_bottom = 1.0
 max_value = 0.0
 step = 1.0
 
-[node name="options" type="Control" parent="MarginContainer/c"]
+[node name="options" type="VBoxContainer" parent="MarginContainer/c"]
 offset_top = 8.0
 offset_right = 544.0
-offset_bottom = 96.0
+offset_bottom = 39.0
 size_flags_vertical = 3
-__meta__ = {
-"_edit_layout_mode": 0,
-"_edit_use_custom_anchors": false
-}
 
 [node name="c" type="MarginContainer" parent="MarginContainer/c/options"]
-anchor_right = 1.0
-anchor_bottom = 1.0
+offset_right = 544.0
+offset_bottom = 31.0
 
 [node name="c" type="VBoxContainer" parent="MarginContainer/c/options/c"]
 offset_right = 544.0
-offset_bottom = 88.0
+offset_bottom = 31.0
+size_flags_vertical = 3
 __meta__ = {
 "_edit_layout_mode": 0,
 "_edit_use_custom_anchors": false
@@ -197,26 +199,44 @@ flat = true
 script = ExtResource( "12_1aj7b" )
 
 [node name="back" type="ColorRect" parent="MarginContainer/c/options/c/c/option"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 color = Color(0, 0, 0, 0.192157)
 
-[node name="text" type="RichTextLabel" parent="MarginContainer/c/options/c/c/option"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/c/options/c/c/option"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_left = 8
+
+[node name="text" type="RichTextLabel" parent="MarginContainer/c/options/c/c/option/MarginContainer"]
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 536.0
+offset_bottom = 31.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
-theme_override_fonts/mono_font = SubResource( "Font_bwp8q" )
-theme_override_fonts/bold_italics_font = SubResource( "Font_ptker" )
-theme_override_fonts/italics_font = SubResource( "Font_oav2f" )
-theme_override_fonts/bold_font = SubResource( "Font_ncn7d" )
-theme_override_fonts/normal_font = SubResource( "Font_bwp8q" )
+theme_override_fonts/mono_font = SubResource( "Font_vdgmn" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_nw2jx" )
+theme_override_fonts/italics_font = SubResource( "Font_10t2c" )
+theme_override_fonts/bold_font = SubResource( "Font_w5fnn" )
+theme_override_fonts/normal_font = SubResource( "Font_vdgmn" )
+bbcode_enabled = true
+fit_content_height = true
 script = ExtResource( "10_mndt7" )
+__meta__ = {
+"_edit_layout_mode": 1,
+"_edit_use_custom_anchors": false
+}
 bbcode = "clicky"
 alignment = 1
 font = "robotomono"
 
-[node name="@@64449" type="VScrollBar" parent="MarginContainer/c/options/c/c/option/text"]
+[node name="@@64449" type="VScrollBar" parent="MarginContainer/c/options/c/c/option/MarginContainer/text"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0

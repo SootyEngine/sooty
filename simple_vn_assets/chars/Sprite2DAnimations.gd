@@ -2,8 +2,10 @@
 extends Sprite2D
 class_name Sprite2DAnimations
 
+@export var start_hidden := true
+
 @export var tint := Color.WHITE
-@export var unit := 64
+@export var unit := 32
 @export var default_scale := Vector2.ONE
 @export var current_zoom := 1.0:
 	set = set_zoom
@@ -57,29 +59,34 @@ func _get_tool_buttons():
 
 var active: Tween
 
+func _init() -> void:
+	if Engine.is_editor_hint() and start_hidden:
+		modulate = Color.TRANSPARENT
+
 func fade_in():
 	var t := _create()
+	modulate = Color.TRANSPARENT
 	_add_color(t, Color.WHITE)
 
 func fade_out():
 	var t := _create()
 	_add_color(t, Color.TRANSPARENT)
 
-func from_left(dur := 0.5):
+func from_left():
 	var t := _create().set_parallel()
 	modulate = Color.TRANSPARENT
 	current_shift = Vector2(unit * 6, 0)
 	_add_color(t, Color.WHITE, {ease=Tween.EASE_OUT})
 	_add_shift(t, 0, 0, {ease=Tween.EASE_OUT, trans=Tween.TRANS_QUINT})
 
-func from_right(dur := 0.5):
+func from_right():
 	var t := _create().set_parallel()
 	modulate = Color.TRANSPARENT
 	current_shift = Vector2(unit * -6, 0)
 	_add_color(t, Color.WHITE, {ease=Tween.EASE_OUT})
 	_add_shift(t, 0, 0, {ease=Tween.EASE_OUT, trans=Tween.TRANS_QUINT})
 
-func from_top(dur := 0.5):
+func from_top():
 	var t := _create().set_parallel()
 	modulate = Color.TRANSPARENT
 	current_shift = Vector2(0, unit * -6)

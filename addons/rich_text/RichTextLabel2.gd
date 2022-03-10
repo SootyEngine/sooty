@@ -30,6 +30,8 @@ enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
 @export var color: Color = Color.WHITE
 @export var font: String = "":
 	set = set_font
+@export var size: int = 16:
+	get: return get_theme_default_font_size()
 @export var outline_mode: Outline = Outline.DARKEN
 @export var outline_colored := 0
 @export_range(0.0, 1.0) var outline_adjust := 0.5

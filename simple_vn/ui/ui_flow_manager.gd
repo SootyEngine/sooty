@@ -2,7 +2,7 @@ extends Node
 
 @export var stack: Resource = DialogueStack.new()
 
-@export var _printer := "bottom"
+@export var _caption := "bottom"
 @export var _pausers := []
 var speaker_cache := []
 
@@ -11,7 +11,7 @@ var dt := DateTime.new()
 
 func _init() -> void:
 	add_to_group("flow_manager")
-	add_to_group("sa:printer")
+	add_to_group("sa:caption")
 	add_to_group("sa:wait")
 
 #func is_pauser(n: Node) -> bool:
@@ -27,18 +27,15 @@ func add_pauser(n: Node) -> bool:
 
 func remove_pauser(n: Node):
 	if n in _pausers:
-#		n.remove_from_group("pauser")
 		_pausers.erase(n)
 		if not len(_pausers):
 			stack.wait = false
 
 func _process(_delta: float) -> void:
-#	print(dt)
 	stack.tick()
 
-const _printer_ARGS := [""]
-func printer(id: String):
-	_printer = id
+func caption(id: String):
+	_caption = id
 
 const _wait_ARGS := [""]
 func wait(time: float):
@@ -65,8 +62,6 @@ func _on_finished():
 	speaker_cache.clear()
 
 func _on_text(d: DialogueLine):
-	print("FROM ", d.from)
-	
 	var from = d.from
 	if from == null:
 		pass
@@ -85,7 +80,7 @@ func _on_text(d: DialogueLine):
 			else:
 				from = str(State[from])
 	
-	get_node(_printer).show_line(d, from)
+	get_node(_caption).show_line(d, from)
 
 func _on_action(s: String):
 	StringAction.do(s)
