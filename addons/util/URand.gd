@@ -392,15 +392,15 @@ static func _time(time_scale:float) -> float:
 	return Time.get_ticks_msec() * TIME_SCALE * time_scale
 
 # about -0.5 - 0.5
-static func noise(x:float) -> float:
+static func noise(x: float) -> float:
 	var X = _floori(x) & 0xff
 	x -= floor(x)
 	return lerp(_grad(_perm[X], x), _grad(_perm[X+1.0], x-1.0), _fade(x))
 
-static func noise_animated(s:float=0.0, time_scale:float=1.0) -> float:
+static func noise_animated(s := 0.125, time_scale := 1.0) -> float:
 	return noise(s + _time(time_scale))
 
-static func noise_animated_lerp(a, b, s:float=0.0, time_scale:float=1.0) -> float:
+static func noise_animated_lerp(a, b, s := 0.0, time_scale := 1.0) -> float:
 	return lerp(a, b, noise_animated(s, time_scale) + .5)
 
 static func noise_v2(s: Vector2) -> Vector2:
@@ -445,10 +445,11 @@ static func fbm_v2(s:Vector2, octaves:int=2) -> Vector2:
 static func fbm_v3(s:Vector3, octaves:int=2) -> Vector3:
 	return Vector3(fbm(s.x, octaves), fbm(s.y, octaves), fbm(s.z, octaves))
 
-static func fbm_animated_v2(s:Vector2=Vector2(1,2), octaves:int=2, time_scale:float=1.0) -> Vector2:
-	return fbm_v2(s + Vector2.ONE * _time(time_scale), octaves)
+static func fbm_animated_v2(s := Vector2(1,2), time_scale := 1.0, octaves := 2) -> Vector2:
+	var t = _time(time_scale)
+	return fbm_v2(s + Vector2(t, -t), octaves)
 
-static func fbm_animated_v3(s:Vector3=Vector3(1,2,3), octaves:int=2, time_scale:float=1.0) -> Vector3:
+static func fbm_animated_v3(s := Vector3(1,2,3), time_scale := 1.0, octaves := 2) -> Vector3:
 	return fbm_v3(s + Vector3.ONE * _time(time_scale), octaves)
 
 static func _noise2(x:float, y:float) -> float:

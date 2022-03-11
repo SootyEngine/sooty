@@ -23,17 +23,15 @@ func _reload():
 
 func _parse_file(file: String):
 	files[file] = UFile.get_modified_time(file)
-	var memory_before = OS.get_static_memory_usage()
+	
 	var data := DialogueParser.parse(file)
 	UDict.merge(flows, data.flows)
 	UDict.merge(lines, data.lines)
 #	UDict.log(out_flows)
 #	UDict.log(out_lines)
-	var memory_used = OS.get_static_memory_usage() - memory_before
-	prints(file, UFile.get_file_size_humanized(file), String.humanize_size(memory_used))
 	
-	UFile.save_json("res://dialogue_debug/%s.flows.json" % [id], flows, true)
-	UFile.save_json("res://dialogue_debug/%s.lines.json" % [id], lines, true)
+#	UFile.save_json("res://dialogue_debug/%s.flows.json" % [id], flows, true)
+#	UFile.save_json("res://dialogue_debug/%s.lines.json" % [id], lines, true)
 
 func was_file_modified() -> bool:
 	for file in files:

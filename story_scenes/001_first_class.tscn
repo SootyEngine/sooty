@@ -1,13 +1,41 @@
-[gd_scene load_steps=3 format=3 uid="uid://duke0fj4v5l5g"]
+[gd_scene load_steps=5 format=3 uid="uid://duke0fj4v5l5g"]
 
 [ext_resource type="PackedScene" uid="uid://c6vhwwh02guep" path="res://simple_vn_assets/bgs/class_room.tscn" id="1_di2mh"]
 [ext_resource type="PackedScene" uid="uid://bik6jjs7efrg3" path="res://simple_vn_assets/chars/school_boy.tscn" id="2_sg1bl"]
+[ext_resource type="Script" path="res://simple_vn/camera.gd" id="3_spa5i"]
+[ext_resource type="Script" path="res://simple_vn_assets/camera_target.gd" id="4_bty5g"]
 
-[node name="Control" type="Control"]
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="first_class" type="ParallaxBackground"]
 
 [node name="class_room" parent="." instance=ExtResource( "1_di2mh" )]
+position = Vector2(-531, -345)
+motion_scale = Vector2(-0.5, -0.5)
 
 [node name="school_boy" parent="." instance=ExtResource( "2_sg1bl" )]
-position = Vector2(793, 608)
+position = Vector2(317, 315)
+motion_scale = Vector2(2, 2)
+
+[node name="face_1" type="Node2D" parent="school_boy"]
+position = Vector2(-3, -444)
+script = ExtResource( "4_bty5g" )
+
+[node name="school_boy2" parent="." instance=ExtResource( "2_sg1bl" )]
+position = Vector2(-343, 317)
+motion_scale = Vector2(2, 2)
+
+[node name="face_2" type="Node2D" parent="school_boy2"]
+position = Vector2(-2, -448)
+script = ExtResource( "4_bty5g" )
+
+[node name="school_boy3" parent="." instance=ExtResource( "2_sg1bl" )]
+position = Vector2(-10, 312)
+motion_scale = Vector2(3, 3)
+
+[node name="camera" type="Camera2D" parent="."]
+modulate = Color(0, 0, 0, 0.0862745)
+rotating = true
+current = true
+script = ExtResource( "3_spa5i" )
+_zoom = 4.0
+noise_scale = 1.0
+noise_aspect = Vector2(1, 0.5)

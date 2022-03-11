@@ -4,7 +4,10 @@ extends Node2D
 
 func _init() -> void:
 	add_to_group("sa:anim")
-
+	
+func _ready() -> void:
+	$sprite.fade_in()
+	
 func anim(char_id: String, action: String, args := []):
 	prints("ANIM ", char_id, action, args)
 	

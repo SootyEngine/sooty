@@ -60,7 +60,7 @@ func _get_tool_buttons():
 var active: Tween
 
 func _init() -> void:
-	if Engine.is_editor_hint() and start_hidden:
+	if not Engine.is_editor_hint() and start_hidden:
 		modulate = Color.TRANSPARENT
 
 func fade_in():

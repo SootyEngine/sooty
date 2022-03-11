@@ -15,8 +15,11 @@ func get_dialogue_ids() -> Dictionary:
 
 func _ready() -> void:
 	if load_all_on_startup:
+		var memory_before = OS.get_static_memory_usage()
 		for file in UFile.get_files("res://dialogue", ".soot"):
 			add_dialogue(Dialogue.new(file))
+		var memory_used = OS.get_static_memory_usage() - memory_before
+		prints("Dialogues:", String.humanize_size(memory_used))
 	
 	# timer chat checks if any files were modified.
 	var timer := Timer.new()

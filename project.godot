@@ -179,6 +179,11 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/util/UFlag.gd"
 }, {
+"base": "Resource",
+"class": &"UGroup",
+"language": &"GDScript",
+"path": "res://addons/util/UGroup.gd"
+}, {
 "base": "RefCounted",
 "class": &"UList",
 "language": &"GDScript",
@@ -208,6 +213,11 @@ _global_script_classes=[{
 "class": &"UTween",
 "language": &"GDScript",
 "path": "res://addons/util/UTween.gd"
+}, {
+"base": "Resource",
+"class": &"UTween2D",
+"language": &"GDScript",
+"path": "res://addons/util/UTween2D.gd"
 }]
 _global_script_class_icons={
 "Achievement": "",
@@ -244,12 +254,14 @@ _global_script_class_icons={
 "UError": "",
 "UFile": "",
 "UFlag": "",
+"UGroup": "",
 "UList": "",
 "UObject": "",
 "URand": "",
 "UString": "",
 "UTime": "",
-"UTween": ""
+"UTween": "",
+"UTween2D": ""
 }
 
 [application]
