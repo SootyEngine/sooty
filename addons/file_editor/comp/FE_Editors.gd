@@ -1,3 +1,4 @@
+@tool
 extends Container
 class_name FE_Editors
 
@@ -38,6 +39,9 @@ func _ready() -> void:
 func has_editors() -> bool:
 	return $editor_parent.get_child_count() > 0
 
+func get_editors():
+	return $editor_parent.get_children()
+
 func _tab_changed(_x=null):
 	current_editor_changed.emit()
 
@@ -53,8 +57,8 @@ func _process(delta: float) -> void:
 	else:
 		set_process(false)
 
-func _input(e: InputEvent) -> void:
-	if e is InputEventKey:
+func _unhandled_input(e: InputEvent) -> void:
+	if owner.visible and e is InputEventKey:
 		if e.pressed:
 			if e.ctrl_pressed:
 				match e.keycode:
@@ -83,6 +87,7 @@ func _create_editor(file: FE_File) -> FE_Editor:
 	
 	out.set_syntax_highlighter(_create_highlighter(file))
 	$editor_parent.add_child(out)
+	out.set_owner(owner)
 	return out
 
 func _create_highlighter(file: FE_File) -> SyntaxHighlighter:

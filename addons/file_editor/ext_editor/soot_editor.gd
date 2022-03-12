@@ -1,3 +1,4 @@
+@tool
 extends FE_Editor
 
 var flows_opened := true

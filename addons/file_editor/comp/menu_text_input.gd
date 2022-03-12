@@ -1,3 +1,4 @@
+@tool
 extends Control
 
 @onready var label: Label = $c/label

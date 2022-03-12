@@ -1,3 +1,4 @@
+@tool
 extends CodeHighlighter
 
 # operators
@@ -59,14 +60,14 @@ func _h_comment(raw: String, out: Dictionary):
 				out.erase(k)
 		
 		# tags
-		var open := false
-		for j in range(i+len(S_COMMENT), len(raw)):
-			if raw[j] == "#":
-				open = true
-				out[j+1] = { color=C_FE_TAG }
-			elif raw[j] == " " and open:
-				open = false
-				out[j] = { color=C_COMMENT }
+#		var open := false
+#		for j in range(i+len(S_COMMENT), len(raw)):
+#			if raw[j] == "#":
+#				open = true
+#				out[j+1] = { color=C_FE_TAG }
+#			elif raw[j] == " " and open:
+#				open = false
+#				out[j] = { color=C_COMMENT }
 
 func _h_action(raw: String, from: int, to: int, out: Dictionary):
 	var c := raw.find(S_ACTION, from)

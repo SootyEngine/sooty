@@ -1,3 +1,4 @@
+@tool
 extends Control
 
 func _ready() -> void:

@@ -1,5 +1,6 @@
+@tool
 extends PopupMenu
-class_name OptionsMenu
+class_name FE_OptionsMenu
 
 var _popups := {}
 var _options := []

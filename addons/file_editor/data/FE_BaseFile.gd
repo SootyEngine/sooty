@@ -1,3 +1,4 @@
+@tool
 extends Node
 class_name FE_BaseFile
 
@@ -9,7 +10,7 @@ var last_modified := -1
 var open_in_file_list := false
 
 var editors: FE_Editors:
-	get: return get_tree().get_first_node_in_group("fe_editors")
+	get: return owner.editors
 
 var file_name: String:
 	get: return path.get_file()
@@ -17,9 +18,11 @@ var file_name: String:
 var base_name: String:
 	get: return path.get_file().rsplit(".", true, 1)[0]
 
+func get_popup_options() -> Array:
+	return []
+
 func _init(p: String):
 	path = p
-	print("FILE: %s, FN: %s, BN: %s " % [path, file_name, base_name])
 	var f = p.get_file()
 	if f:
 		set_name(f.replace(".", "--"))

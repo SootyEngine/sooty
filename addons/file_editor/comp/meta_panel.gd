@@ -1,3 +1,4 @@
+@tool
 extends Control
 
 @onready var shortcut_toggle:Shortcut = FE_Util.str_to_shortcut("ctrl+m")

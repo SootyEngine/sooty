@@ -1,3 +1,4 @@
+@tool
 extends FE_BaseFile
 class_name FE_Directory
 
@@ -5,6 +6,23 @@ class_name FE_Directory
 
 func _ready() -> void:
 	open_in_file_list = true
+
+func get_popup_options() -> Array:
+	return [
+		{text="New File"},
+		{type="---"},
+		{text="Remove"},
+		{type="---"},
+		{text="Tint/Yellow"},
+		{text="Tint/Red"},
+		{text="Tint/Blue"},
+		{text="Tint/Green"},
+		
+		{text="Sort/Name A-Z"},
+		{text="Sort/Name Z-A"},
+		{text="Sort/Size <"},
+		{text="Sort/Size >"},
+	]
 
 func is_empty() -> bool:
 	for file in get_children():
@@ -37,3 +55,17 @@ func get_file(path: String) -> Node:
 		if child.path == path:
 			return child
 	return null
+
+func sort():
+	var dirs := []
+	var files := []
+	for file in get_children():
+		if file is FE_Directory:
+			dirs.append(file)
+		else:
+			files.append(file)
+	dirs.sort_custom(func(a, b): return a.file_name < b.file_name)
+	files.sort_custom(func(a, b): return a.file_name < b.file_name)
+	var all := dirs + files
+	for i in len(all):
+		move_child(all[i], i)

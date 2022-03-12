@@ -1,5 +1,6 @@
-[gd_scene load_steps=17 format=3 uid="uid://ccai0oqbtflfi"]
+[gd_scene load_steps=19 format=3 uid="uid://b2po2hcbr0dwk"]
 
+[ext_resource type="Script" path="res://addons/file_editor/comp/FE_Main.gd" id="1_ye7uv"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/menu_top.gd" id="2_2e6gq"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/confirmation_dialog.gd" id="2_ou848"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/file_dialog.gd" id="2_xi4e3"]
@@ -9,9 +10,10 @@
 [ext_resource type="Script" path="res://addons/file_editor/comp/chapter_list.gd" id="4_r00tw"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/meta_panel.gd" id="4_td4f3"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/menu_text_input.gd" id="5_xlouk"]
+[ext_resource type="Script" path="res://addons/file_editor/FE_OptionsMenu.gd" id="6_gx06r"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/drag_file.gd" id="6_mfpeu"]
 [ext_resource type="Script" path="res://addons/file_editor/comp/FE_Editors.gd" id="8_pt73u"]
-[ext_resource type="Script" path="res://addons/file_editor/comp/tab_test.gd" id="11_1l8rr"]
+[ext_resource type="Script" path="res://addons/file_editor/comp/editor_tabs.gd" id="11_ylho7"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1gems"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
@@ -30,14 +32,33 @@ VScrollBar/styles/scroll = SubResource( "StyleBoxFlat_1gems" )
 [node name="file_editor" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource( "1_ye7uv" )
+_files = NodePath("files")
+_editors = NodePath("c/c/c/c2/c/editors")
+_confirmation_dialogue = NodePath("confirmation_dialog")
+_file_dialogue = NodePath("file_dialog")
 
-[node name="files" type="Node" parent="." groups=["fe_files"]]
+[node name="files" type="Node" parent="."]
 script = ExtResource( "2_ynr54" )
+show_file_extension = {
+"cfg": true,
+"csv": false,
+"gd": false,
+"ini": true,
+"json": true,
+"md": true,
+"soot": true,
+"tres": false,
+"txt": false,
+"yaml": true
+}
 
-[node name="confirmation_dialog" type="ConfirmationDialog" parent="." groups=["fe_confirmation_dialog"]]
+[node name="confirmation_dialog" type="ConfirmationDialog" parent="."]
 script = ExtResource( "2_ou848" )
 
-[node name="file_dialog" type="FileDialog" parent="." groups=["fe_file_dialog"]]
+[node name="file_dialog" type="FileDialog" parent="."]
 script = ExtResource( "2_xi4e3" )
 
 [node name="c" type="VBoxContainer" parent="."]
@@ -54,12 +75,26 @@ _l_version = NodePath("version")
 offset_right = 35.0
 offset_bottom = 31.0
 text = "File"
+item_count = 2
+popup/item_0/text = "Set Folder"
+popup/item_0/id = 0
+popup/item_1/text = "Add Folder"
+popup/item_1/id = 1
 
 [node name="edit" type="MenuButton" parent="c/menu_top"]
 offset_left = 39.0
 offset_right = 77.0
 offset_bottom = 31.0
 text = "Edit"
+item_count = 4
+popup/item_0/text = "Undo"
+popup/item_0/id = 0
+popup/item_1/text = "Redo"
+popup/item_1/id = 1
+popup/item_2/text = "Zoom"
+popup/item_2/id = 2
+popup/item_3/text = "Unzoom"
+popup/item_3/id = 3
 
 [node name="view" type="MenuButton" parent="c/menu_top"]
 offset_left = 81.0
@@ -67,20 +102,25 @@ offset_right = 126.0
 offset_bottom = 31.0
 text = "View
 "
+item_count = 2
+popup/item_0/text = "Directories"
+popup/item_0/id = 0
+popup/item_1/text = "Files"
+popup/item_1/id = 1
 
 [node name="space" type="Control" parent="c/menu_top"]
 offset_left = 130.0
-offset_right = 968.0
+offset_right = 959.0
 offset_bottom = 31.0
 size_flags_horizontal = 3
 
 [node name="version" type="Label" parent="c/menu_top"]
 modulate = Color(1, 1, 1, 0.25)
-offset_left = 972.0
+offset_left = 963.0
 offset_top = 2.0
 offset_right = 1004.0
 offset_bottom = 28.0
-text = "v1.0"
+text = "v1.12"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -95,60 +135,66 @@ offset_top = 35.0
 offset_right = 1024.0
 offset_bottom = 600.0
 size_flags_vertical = 3
-split_offset = 120
+split_offset = 100
 
 [node name="c" type="HSplitContainer" parent="c/c"]
 offset_right = 1024.0
-offset_bottom = 396.0
+offset_bottom = 565.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 split_offset = 120
 
 [node name="c" type="MarginContainer" parent="c/c/c"]
-offset_right = 194.0
-offset_bottom = 396.0
+offset_right = 191.0
+offset_bottom = 565.0
+size_flags_vertical = 3
 theme_override_constants/margin_left = 4
 
 [node name="file_list" type="VBoxContainer" parent="c/c/c/c"]
 offset_left = 4.0
-offset_right = 194.0
-offset_bottom = 396.0
+offset_right = 191.0
+offset_bottom = 565.0
 script = ExtResource( "3_5namj" )
+_popup = NodePath("popup")
+_filter = NodePath("filter")
+_list = NodePath("list")
 
 [node name="title" type="Label" parent="c/c/c/c/file_list"]
+visible = false
 modulate = Color(1, 1, 1, 0.5)
 offset_right = 190.0
 offset_bottom = 26.0
 text = "FOLDERS"
 
 [node name="popup" type="PopupMenu" parent="c/c/c/c/file_list"]
+script = ExtResource( "6_gx06r" )
 
 [node name="filter" type="LineEdit" parent="c/c/c/c/file_list"]
-offset_top = 30.0
-offset_right = 190.0
-offset_bottom = 61.0
+offset_right = 187.0
+offset_bottom = 31.0
 size_flags_horizontal = 3
 placeholder_text = "Filter"
 clear_button_enabled = true
 flat = true
 
 [node name="list" type="RichTextLabel" parent="c/c/c/c/file_list"]
-offset_top = 65.0
-offset_right = 190.0
-offset_bottom = 368.0
+offset_top = 35.0
+offset_right = 187.0
+offset_bottom = 565.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_fonts/normal_font = ExtResource( "4_fmosd" )
 bbcode_enabled = true
-text = "asd"
+text = "..."
 meta_underlined = false
 autowrap_mode = 0
 
 [node name="drag_object" type="ColorRect" parent="c/c/c/c/file_list"]
+visible = false
 rect_min_size = Vector2(0, 24)
-offset_top = 372.0
+offset_top = -31.0
 offset_right = 190.0
-offset_bottom = 396.0
+offset_bottom = -7.0
 color = Color(0, 0, 0, 1)
 script = ExtResource( "6_mfpeu" )
 
@@ -159,27 +205,27 @@ text = "file"
 fit_content_height = true
 
 [node name="c2" type="HSplitContainer" parent="c/c/c"]
-offset_left = 206.0
+offset_left = 203.0
 offset_right = 1024.0
-offset_bottom = 396.0
+offset_bottom = 565.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 split_offset = 200
 
 [node name="c" type="VBoxContainer" parent="c/c/c/c2"]
-offset_right = 603.0
-offset_bottom = 396.0
+offset_right = 604.0
+offset_bottom = 565.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="menu_text_input" type="PanelContainer" parent="c/c/c/c2/c" groups=["fe_text_input"]]
+[node name="menu_text_input" type="PanelContainer" parent="c/c/c/c2/c"]
 visible = false
-offset_right = 606.0
+offset_right = 603.0
 offset_bottom = 31.0
 script = ExtResource( "5_xlouk" )
 
 [node name="c" type="HBoxContainer" parent="c/c/c/c2/c/menu_text_input"]
-offset_right = 606.0
+offset_right = 603.0
 offset_bottom = 31.0
 
 [node name="label" type="Label" parent="c/c/c/c2/c/menu_text_input/c"]
@@ -190,13 +236,13 @@ text = "New Name:"
 
 [node name="input" type="LineEdit" parent="c/c/c/c2/c/menu_text_input/c"]
 offset_left = 94.0
-offset_right = 606.0
+offset_right = 603.0
 offset_bottom = 31.0
 size_flags_horizontal = 3
 
-[node name="editors" type="VBoxContainer" parent="c/c/c/c2/c" groups=["fe_editors"]]
-offset_right = 603.0
-offset_bottom = 396.0
+[node name="editors" type="VBoxContainer" parent="c/c/c/c2/c"]
+offset_right = 604.0
+offset_bottom = 565.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 0
@@ -206,7 +252,7 @@ _error_label = NodePath("editor_meta/errors")
 _meta_label = NodePath("editor_meta/meta")
 
 [node name="tab_bar" type="TabBar" parent="c/c/c/c2/c/editors"]
-offset_right = 603.0
+offset_right = 604.0
 theme = SubResource( "Theme_42bqx" )
 theme_override_colors/font_disabled_color = Color(1, 1, 1, 0)
 theme_override_colors/font_selected_color = Color(1, 1, 1, 0)
@@ -217,11 +263,11 @@ theme_override_styles/tab_unselected = SubResource( "StyleBoxEmpty_fuis2" )
 tab_alignment = 0
 tab_close_display_policy = 2
 drag_to_rearrange_enabled = true
-script = ExtResource( "11_1l8rr" )
+script = ExtResource( "11_ylho7" )
 
 [node name="editor_parent" type="MarginContainer" parent="c/c/c/c2/c/editors"]
-offset_right = 603.0
-offset_bottom = 373.0
+offset_right = 604.0
+offset_bottom = 542.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/margin_right = 0
@@ -230,12 +276,12 @@ theme_override_constants/margin_left = 0
 theme_override_constants/margin_bottom = 0
 
 [node name="editor_meta" type="HBoxContainer" parent="c/c/c/c2/c/editors"]
-offset_top = 373.0
-offset_right = 603.0
-offset_bottom = 396.0
+offset_top = 542.0
+offset_right = 604.0
+offset_bottom = 565.0
 
 [node name="errors" type="RichTextLabel" parent="c/c/c/c2/c/editors/editor_meta"]
-offset_right = 299.0
+offset_right = 300.0
 offset_bottom = 23.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -244,8 +290,8 @@ text = "ERR: 0"
 fit_content_height = true
 
 [node name="meta" type="RichTextLabel" parent="c/c/c/c2/c/editors/editor_meta"]
-offset_left = 303.0
-offset_right = 603.0
+offset_left = 304.0
+offset_right = 604.0
 offset_bottom = 23.0
 size_flags_horizontal = 3
 bbcode_enabled = true
@@ -253,27 +299,31 @@ text = "1:0"
 fit_content_height = true
 
 [node name="c3" type="VSplitContainer" parent="c/c/c/c2"]
-offset_left = 615.0
-offset_right = 818.0
-offset_bottom = 396.0
+offset_left = 616.0
+offset_right = 821.0
+offset_bottom = 565.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 20
 
 [node name="MarginContainer" type="MarginContainer" parent="c/c/c/c2/c3"]
-offset_right = 203.0
-offset_bottom = 188.0
+offset_right = 205.0
+offset_bottom = 272.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/margin_right = 4
 
 [node name="chapter_list" type="VBoxContainer" parent="c/c/c/c2/c3/MarginContainer"]
-offset_right = 199.0
-offset_bottom = 188.0
+offset_right = 201.0
+offset_bottom = 272.0
 size_flags_vertical = 3
 script = ExtResource( "4_r00tw" )
+_popup = NodePath("popup")
+_filter = NodePath("filter")
+_list = NodePath("list")
 
 [node name="title" type="Label" parent="c/c/c/c2/c3/MarginContainer/chapter_list"]
+visible = false
 modulate = Color(1, 1, 1, 0.5)
 offset_right = 199.0
 offset_bottom = 26.0
@@ -283,19 +333,19 @@ text = "FILE OUTLINE"
 item_count = 1
 item_0/text = "asss"
 item_0/id = 0
+script = ExtResource( "6_gx06r" )
 
 [node name="filter" type="LineEdit" parent="c/c/c/c2/c3/MarginContainer/chapter_list"]
-offset_top = 30.0
-offset_right = 199.0
-offset_bottom = 61.0
+offset_right = 201.0
+offset_bottom = 31.0
 placeholder_text = "Filter"
 clear_button_enabled = true
 flat = true
 
 [node name="list" type="RichTextLabel" parent="c/c/c/c2/c3/MarginContainer/chapter_list"]
-offset_top = 65.0
-offset_right = 199.0
-offset_bottom = 188.0
+offset_top = 35.0
+offset_right = 201.0
+offset_bottom = 272.0
 size_flags_vertical = 3
 theme_override_fonts/normal_font = ExtResource( "4_fmosd" )
 bbcode_enabled = true
@@ -304,32 +354,33 @@ meta_underlined = false
 autowrap_mode = 0
 
 [node name="MarginContainer2" type="MarginContainer" parent="c/c/c/c2/c3"]
-offset_top = 208.0
-offset_right = 203.0
-offset_bottom = 396.0
+offset_top = 292.0
+offset_right = 205.0
+offset_bottom = 565.0
 size_flags_vertical = 3
 theme_override_constants/margin_right = 4
 
 [node name="VBoxContainer" type="VBoxContainer" parent="c/c/c/c2/c3/MarginContainer2"]
-offset_right = 199.0
-offset_bottom = 188.0
+offset_right = 201.0
+offset_bottom = 273.0
 size_flags_vertical = 3
 
 [node name="title" type="Label" parent="c/c/c/c2/c3/MarginContainer2/VBoxContainer"]
+visible = false
 modulate = Color(1, 1, 1, 0.5)
-offset_right = 199.0
+offset_right = 201.0
 offset_bottom = 26.0
 text = "GLOBAL TAGS"
 
 [node name="tags_list" type="RichTextLabel" parent="c/c/c/c2/c3/MarginContainer2/VBoxContainer"]
-offset_top = 30.0
-offset_right = 199.0
-offset_bottom = 188.0
+offset_right = 201.0
+offset_bottom = 273.0
 size_flags_vertical = 3
 text = "*none*"
 
 [node name="meta_panels" type="TabContainer" parent="c/c"]
-offset_top = 408.0
+visible = false
+offset_top = 388.0
 offset_right = 1024.0
 offset_bottom = 565.0
 size_flags_vertical = 3
@@ -343,11 +394,11 @@ offset_top = 31.0
 
 [node name="console_output" type="RichTextLabel" parent="c/c/meta_panels/console"]
 offset_right = 1024.0
-offset_bottom = 91.0
+offset_bottom = 111.0
 size_flags_vertical = 3
 text = "> okay"
 
 [node name="console_input" type="LineEdit" parent="c/c/meta_panels/console"]
-offset_top = 95.0
+offset_top = 115.0
 offset_right = 1024.0
-offset_bottom = 126.0
+offset_bottom = 146.0

@@ -1,17 +1,21 @@
 {
-	"0!3": {
+	"0!2": {
 		"type": "text",
 		"text": "I have [$score|plural \"a point\" \"%s points\" \"no points\";b;tomato]."
 	},
+	"0!3": {
+		"type": "text",
+		"text": "I've [$score|test never always] wanted more."
+	},
 	"0!4": {
 		"type": "text",
-		"text": "I've [$score|test always never] wanted more."
+		"text": "asd"
 	},
-	"0!6": {
+	"0!5": {
 		"type": "action",
 		"action": "score++"
 	},
-	"0!7": {
+	"0!6": {
 		"type": "goto",
 		"goto": "test.start"
 	},

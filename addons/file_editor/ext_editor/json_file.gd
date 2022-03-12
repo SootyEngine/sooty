@@ -1,3 +1,4 @@
+@tool
 extends FE_File
 
 func get_errors(text: String) -> Array:

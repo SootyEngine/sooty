@@ -1,3 +1,4 @@
+@tool
 extends "res://addons/file_editor/ext_editor/base_highlighter.gd"
 
 func _get_line_syntax_highlighting(line: int) -> Dictionary:

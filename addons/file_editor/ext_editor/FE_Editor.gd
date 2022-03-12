@@ -1,3 +1,4 @@
+@tool
 extends CodeEdit
 class_name FE_Editor
 
@@ -5,7 +6,7 @@ signal title_changed()
 signal tint_changed()
 
 var editors: FE_Editors:
-	get: return get_tree().get_first_node_in_group("fe_editors")
+	get: return owner.editors
 
 var title: String = "":
 	set(t):
@@ -61,6 +62,9 @@ func _popup_pressed_id(id: int):
 	pass
 
 func _ready() -> void:
+	_ready_deferred.call_deferred()
+
+func _ready_deferred():
 	text = FE_Util.load_text(file.path)
 	last_saved_text = text
 	
@@ -73,12 +77,14 @@ func _ready() -> void:
 	_update_title()
 	clear_undo_history()
 	add_theme_font_override("font", preload("res://fonts/robotomono/robotomono_r.tres"))
+	add_theme_font_size_override("font_size", 14)
 	update_settings()
 	
 	for node in get_children(true):
 		if node is HScrollBar or node is VScrollBar:
-			var s: StyleBoxFlat = node.get_theme_stylebox("scroll")
-			s.bg_color.a = .125
+			var s = node.get_theme_stylebox("scroll")
+			if "bg_color" in s:
+				s.bg_color.a = .125
 
 func _text_changed():
 	if is_temporary:
@@ -165,7 +171,7 @@ func update_settings():
 
 func try_close():
 	if is_unsaved():
-		var d := get_tree().get_first_node_in_group("fe_confirmation_dialog")
+		var d: ConfirmationDialog = owner.confirmation_dialogue
 		d.setup("There are unedited changes.", _save_file_and_close)
 	else:
 		_close()
@@ -176,7 +182,7 @@ func _get_menu_options() -> Array:
 #func _show_menu():
 #	var options := _get_menu_options()
 #	if len(options):
-#		var popup := OptionsMenu.new()
+#		var popup := FE_OptionsMenu.new()
 #		popup.remove_on_hide = true
 #		add_child(popup)
 #		popup.add_options(options)
@@ -201,11 +207,15 @@ func _clicked():
 		fold_line(l)
 
 func _input(e: InputEvent) -> void:
+	if not owner.visible:
+		return
 	if e is InputEventMouseButton and not e.pressed and e.ctrl_pressed:
 		if get_global_rect().has_point(get_global_mouse_position()):
 			_clicked()
 
 func _unhandled_key_input(e: InputEvent) -> void:
+	if not owner.visible:
+		return
 	if e is InputEventKey and e.pressed:
 		if e.ctrl_pressed:
 			match e.keycode:

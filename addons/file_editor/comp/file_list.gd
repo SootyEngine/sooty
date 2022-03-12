@@ -1,44 +1,27 @@
+@tool
 extends "res://addons/file_editor/comp/base_filtered_list.gd"
 
 const FOLDER_CLOSED := "🗀" # not visible in Godot.
 const FOLDER_OPENED := "🗁" # not visible in Godot.
 
-var files: FE_Files:
-	get: return get_tree().get_first_node_in_group("fe_files")
-
-var editors: FE_Editors:
-	get: return get_tree().get_first_node_in_group("fe_editors")
-
-var OP_FILE := [
-	{text="Rename"},
-]
-
-var OP_DIR := [
-	{text="New File"},
-	{type="---"},
-	{text="Remove"},
-	{type="---"},
-	{text="Tint Yellow"},
-	{text="Tint Red"},
-	{text="Tint Blue"},
-	{text="Tint Green"},
-]
-
 func _ready() -> void:
 	super._ready()
 	msg_no_items = "No folder opened"
+	_ready_deferred.call_deferred()
+
+func _ready_deferred():
 	files.files_updated.connect(_refresh)
 	files.settings_changed.connect(_refresh)
 	editors.current_editor_changed.connect(_refresh)
 
 func _refresh():
-	_files_updated()
+	items_updated()
 
-func _files_updated():
+func _process(delta: float) -> void:
 	items.clear()
 	for dir in files.get_children():
 		_scan_dir(files, dir, items, 0)
-	items_updated()
+	super._process(delta)
 
 func _hover_started(meta: Variant):
 	super._hover_started(meta)
@@ -47,10 +30,7 @@ func _hover_started(meta: Variant):
 
 func _show_popup(meta: Variant):
 	popup.clear()
-	if meta is FE_File:
-		popup.add_options(OP_FILE)
-	else:
-		popup.add_options(OP_DIR)
+	popup.add_options(meta.get_popup_options())
 
 func _clicked(file: Variant):
 	if Input.is_key_pressed(KEY_CTRL):
@@ -82,7 +62,13 @@ func _draw_dir(dir: FE_Directory):
 
 func _draw_file(file: FE_File):
 	var n = file.file_name.rsplit(".", true, 1)
+	var ext: Dictionary = files.EXTENSIONS[n[1]]
+	
 	if file.is_open():
+		list.push_color(ext.get("tint", DARK))
+		list.append_text(ext.get("unicode", "🗎"))
+		list.pop()
+		
 		if file.is_current():
 			list.push_outline_size(4)
 			list.push_outline_color(Color.YELLOW_GREEN.lightened(.25))
@@ -96,6 +82,10 @@ func _draw_file(file: FE_File):
 		list.pop()
 		list.pop()
 	else:
+		list.push_color(DARK)
+		list.append_text(ext.get("unicode", "🗎"))
+		list.pop()
+		
 		list.append_text(n[0])
 	
 	list.push_color(DARK)
@@ -107,7 +97,7 @@ func _post_draw_item(item: Dictionary):
 		for line in item.meta.chapters:
 			var chapter = item.meta.chapters[line]
 			_push_item(
-				tab.repeat(item.deep) + " [color=#%s]%s%s[/color]" % [DARK, tab.repeat(chapter.deep-1), chapter.name],
+				TAB.repeat(item.deep) + " [color=#%s]%s%s[/color]" % [DARK, TAB.repeat(chapter.deep-1), chapter.name],
 				item.meta.open.bind(line))
 
 func _show_files(dir: FE_Directory) -> bool:
@@ -126,6 +116,7 @@ func _scan_dir(files: FE_Files, dir: FE_Directory, parent: Array, indent: int):
 	
 	for file in dir.get_children():
 		if not files.is_visible(file):
+#			print("HIDE ", file.path)
 			continue
 			
 		if file is FE_File:

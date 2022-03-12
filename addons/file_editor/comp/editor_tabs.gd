@@ -1,3 +1,4 @@
+@tool
 extends TabBar
 
 signal current_changed()
@@ -15,11 +16,8 @@ func _ready() -> void:
 	_tab_parent.child_entered_tree.connect(_child_added)
 	_tab_parent.child_exited_tree.connect(_child_removed)
 	
-#	for i in 4:
-#		var tab := CodeEdit.new()
-#		tab.set_name("😋Tab_%s%s" % [i, ["st", "nd", "rd", "th"][i]])
-#		tab.set_text(str(i).repeat(i+1))
-#		_tab_parent.add_child(tab)
+	while tab_count:
+		remove_tab(0)
 	
 	active_tab_rearranged.connect(_active_tab_rearranged)
 #	tab_button_pressed(tab: int)
@@ -83,7 +81,9 @@ func _draw() -> void:
 	for i in tab_count:
 		var r := get_tab_rect(i)
 		var t := get_tab_title(i)
-		var c := _tab_parent.get_child(i)
+		var c := null if i >= _tab_parent.get_child_count() else _tab_parent.get_child(i)
+		if c == null:
+			continue
 		if i < o or r.position.x < last_x:
 			c.visible = false
 			continue

@@ -1,3 +1,4 @@
+@tool
 extends Control
 
 @export_node_path(Label) var _l_version:NodePath
@@ -8,21 +9,28 @@ func _ready() -> void:
 	_init_popups.call_deferred()
 
 func _init_version():
+	var main: FE_Main = owner
+	var is_plugin := main.is_plugin_hint()
 	var path := "res://addons/file_editor/plugin.cfg"
 	var conf := FE_Util.load_cfg(path)
-	l_version.set_text("v%s" % conf.get_value("plugin", "version", "?.?"))
+	if is_plugin:
+		l_version.set_text("P v%s" % conf.get_value("plugin", "version", "?.?"))
+	else:
+		l_version.set_text("v%s" % conf.get_value("plugin", "version", "?.?"))
 
 func _init_popups():
-	var file_dialog: FileDialog = get_tree().get_first_node_in_group("fe_file_dialog")
-	var f = $file.get_popup()
-	f.set_script(OptionsMenu)
+	var file_dialog: FileDialog = owner.file_dialogue
+	var f: PopupMenu = $file.get_popup()
+	f.clear()
+	f.set_script(FE_OptionsMenu)
 	f.add_options([
 		{ text="Set Folder", call=file_dialog.set_folder },
 		{ text="Add Folder", call=file_dialog.set_folder },
 	])
 	
-	var e = $edit.get_popup()
-	e.set_script(OptionsMenu)
+	var e: PopupMenu = $edit.get_popup()
+	e.clear()
+	e.set_script(FE_OptionsMenu)
 	e.add_options([
 		{ text="Undo", shortcut="ctrl+z" },
 		{ text="Redo", shortcut="ctrl+shift+z" },
@@ -30,10 +38,11 @@ func _init_popups():
 		{ text="Unzoom", shortcut="ctrl+minus" },
 	])
 	
-	var files: FE_Files = get_tree().get_first_node_in_group("fe_files")
+	var files: FE_Files = owner.files
 	
-	var v = $view.get_popup()
-	v.set_script(OptionsMenu)
+	var v: PopupMenu = $view.get_popup()
+	v.clear()
+	v.set_script(FE_OptionsMenu)
 	v.add_options([
 		{ text="Directories/Empty", call=func(x): files.set_setting("show_dir_empty", x), check=files.get.bind("show_dir_empty") },
 		{ text="Directories/Hidden", call=func(x): files.set_setting("show_dir_hidden", x), check=files.get.bind("show_dir_hidden") },

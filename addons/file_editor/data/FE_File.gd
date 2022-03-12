@@ -1,11 +1,17 @@
+@tool
 extends FE_BaseFile
 class_name FE_File
 
 var extension: String:
-	get: return path.get_file().split(".", true, 1)[-1]
+	get: return path.get_extension()
 
 var chapters := {}
 var tags := {}
+
+func get_popup_options() -> Array:
+	return [
+		{text="Rename"},
+	]
 
 func reload():
 	super.reload()

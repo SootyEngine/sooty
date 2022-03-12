@@ -1,20 +1,38 @@
+@tool
 extends Control
 
-@onready var popup: PopupMenu = $popup
-@onready var filter: LineEdit = $filter
-@onready var list: RichTextLabel = $list
+@export var _popup: NodePath
+@export var _filter: NodePath
+@export var _list: NodePath
+@onready var popup: PopupMenu = get_node(_popup)
+@onready var filter: LineEdit = get_node(_filter)
+@onready var list: RichTextLabel = get_node(_list)
 
+var fe_main: FE_Main:
+	get: return owner
+
+var files: FE_Files:
+	get: return fe_main.files
+
+var editors: FE_Editors:
+	get: return fe_main.editors
+
+const TAB := "  "
 var msg_no_items := "No Items"
 var filter_text := ""
 var items := []
-var tab := "  "
 var hovered = null
 
 func _ready() -> void:
 	filter.text_changed.connect(_filter_changed)
 	list.meta_hover_ended.connect(_hover_ended)
 	list.meta_hover_started.connect(_hover_started)
-	popup.set_script(OptionsMenu)
+	popup.set_script(FE_OptionsMenu)
+	if owner.is_plugin_hint():
+		filter.flat = false
+	
+	for f in ["bold_font_size", "italics_font_size", "bold_italics_font_size", "normal_font_size", "mono_font_size"]:
+		list.add_theme_font_size_override(f, 14)
 
 func set_hint(text: String):
 	list.hint_tooltip = text
@@ -59,6 +77,10 @@ func items_updated():
 	set_process(true)
 
 func _process(_delta: float) -> void:
+	if not fe_main.is_plugin_hint() and Engine.is_editor_hint():
+		set_process(false)
+		return
+	
 	list.clear()
 	if items:
 		for item in items:
@@ -93,7 +115,7 @@ func _draw_item(item: Dictionary):
 	if item.show or _has_visible_child(item):
 		list.push_meta(item.meta)
 		if "deep" in item:
-			list.add_text(tab.repeat(item.deep))
+			list.add_text(TAB.repeat(item.deep))
 		if "draw" in item:
 			item.draw.call()
 		else:

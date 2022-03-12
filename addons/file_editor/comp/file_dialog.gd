@@ -1,9 +1,13 @@
+@tool
 extends FileDialog
 
 var FILTERS: PackedStringArray
 
 func _ready() -> void:
-	var fm: FE_Files = get_tree().get_first_node_in_group("fe_files")
+	_setup.call_deferred()
+
+func _setup():
+	var fm: FE_Files = owner.files
 	var a := []
 	for e in fm.EXTENSIONS:
 		a.append("*.%s ; %s" % [e, fm.EXTENSIONS[e].name])

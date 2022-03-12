@@ -1,3 +1,4 @@
+@tool
 extends FE_Editor
 
 func update_settings():

@@ -1,3 +1,4 @@
+@tool
 extends Node
 class_name FE_Files
 
@@ -10,11 +11,11 @@ signal settings_changed()
 
 var EXTENSIONS := {
 	"md": { name="MarkDown", start_hidden=false },
-	"json": { name="JSON", start_hidden=false },
-	"yaml": { name="YAML", start_hidden=false },
-	"ini": { name="INI File", start_hidden=false },
-	"cfg": { name="Config File", start_hidden=false },
-	"soot": { name="Sooty Dialogue", start_hidden=false },
+	"json": { name="JSON", start_hidden=false, unicode="⚙" },
+	"yaml": { name="YAML", start_hidden=false, unicode="⚙" },
+	"ini": { name="INI File", start_hidden=false, unicode="⚙" },
+	"cfg": { name="Config File", start_hidden=false, unicode="⚙" },
+	"soot": { name="Sooty Dialogue", start_hidden=false, unicode="💬", tint=Color.DEEP_SKY_BLUE },
 #	"rpy": { name="Ren'py Script", start_hidden=true },
 	"txt": { name="Text File", start_hidden=true },
 	"gd": { name="GDScript", start_hidden=true },
@@ -31,11 +32,15 @@ var EXTENSIONS := {
 @export var show_file_extension := {}
 
 func _ready() -> void:
+	_ready_deferred.call_deferred()
+
+func _ready_deferred():
 	for e in EXTENSIONS:
 		show_file_extension[e] = not EXTENSIONS[e].start_hidden
 	
-	open_dir.call_deferred("res://")
-	open_dir.call_deferred("user://mods")
+	if not Engine.is_editor_hint() or owner.is_plugin_hint():
+		open_dir.call_deferred("res://")
+		open_dir.call_deferred("user://mods")
 
 func set_setting(property: String, value):
 	var last = FE_Util.get_nested(self, property)
@@ -97,12 +102,13 @@ func _is_dir_empty(dir: FE_Directory) -> bool:
 func _is_file_visible(file: FE_File) -> bool:
 	var fname := file.file_name
 	if not show_file_hidden and fname.begins_with("."):
+		prints("Hiding invisible", file.path)
 		return false
 	
 	var ext := file.extension
 	if not ext in show_file_extension or not show_file_extension[ext]:
 		return false
-
+	
 	return true
 
 func has_file(path: String) -> bool:
@@ -114,6 +120,8 @@ func has_file(path: String) -> bool:
 func open_dir(path: String):
 	if not has_file(path):
 		_add_file(self, path, true)
+	else:
+		print("Already opened: ", path)
 
 func _refresh_dir(d: FE_Directory):
 	var dir := Directory.new()
@@ -132,13 +140,11 @@ func _refresh_dir(d: FE_Directory):
 			var path := d.path.plus_file(fname)
 			
 			if dir.current_is_dir():
-#				if is_dir_allowed(fname, path):
 				new_files[path] = true
 			else:
-#				if is_file_allowed(fname):
 				if fname.get_extension() in EXTENSIONS:
 					new_files[path] = false
-			
+					
 			fname = dir.get_next()
 		
 		# check for files removed
@@ -156,20 +162,25 @@ func _refresh_dir(d: FE_Directory):
 				_add_file(d, path, new_files[path])
 		
 #		print(JSON.new().stringify(d.get_json(), "\t", false))
+	d.sort()
 
 func _add_file(parent: Node, path: String, is_dir: bool):
 	var file: FE_BaseFile
 	if is_dir:
+#		print("DIR: ", path)
 		file = FE_Directory.new(path)
 	else:
+#		print("\t", path)
 		var extension := path.get_file().split(".", true, 1)[-1]
 		var script_path := PATH_FILE % extension
+		# Does a custom file wrapper exist?
 		if File.new().file_exists(script_path):
 			file = load(script_path).new(path)
 		else:
 			file = FE_File.new(path)
 	file.modified.connect(_file_modified.bind(file))
 	parent.add_child(file)
+	file.set_owner(owner)
 	_file_modified.call_deferred(file)
 
 func _file_modified(file: FE_BaseFile):
