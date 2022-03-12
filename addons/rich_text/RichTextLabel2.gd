@@ -16,6 +16,7 @@ enum {
 	T_CODE,
 	T_TABBLE, T_CELL,
 	T_EFFECT,
+	T_PIPE,
 	T_FLAG_CAP, T_FLAG_UPPER, T_FLAG_LOWER
 }
 
@@ -31,7 +32,13 @@ enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
 @export var font: String = "":
 	set = set_font
 @export var size: int = 16:
-	get: return get_theme_default_font_size()
+	set(x):
+		size = x
+		add_theme_font_size_override("bold_font_size", size)
+		add_theme_font_size_override("bold_italics_font_size", size)
+		add_theme_font_size_override("italics_font_size", size)
+		add_theme_font_size_override("mono_font_size", size)
+		add_theme_font_size_override("normal_font_size", size)
 @export var outline_mode: Outline = Outline.DARKEN
 @export var outline_colored := 0
 @export_range(0.0, 1.0) var outline_adjust := 0.5
@@ -81,7 +88,8 @@ func set_bbcode(btext: String):
 	_state = {
 		color = color,
 		align = alignment,
-		opened = {}
+		opened = {},
+		pipes = []
 	}
 	_parse(_preparse(btext))
 
@@ -209,10 +217,15 @@ func _parse_tags(tags_string: String):
 		_stack.pop_back()
 
 func _parse_tag(tag: String):
-	# This allows doing: "[{color}]Text[]".format({color=Color.RED})
+	# COLOR. This allows doing: "[{color}]Text[]".format({color=Color.RED})
 	if UString.is_wrapped(tag, "(", ")"):
 		var rgba = UString.unwrap(tag, "(", ")").split_floats(",")
 		_push_color(Color(rgba[0], rgba[1], rgba[2], rgba[3]))
+		return
+	
+	# PIPE.
+	if tag.begins_with("|"):
+		_push_pipe(tag.substr(1))
 		return
 	
 	var tag_name: String
@@ -303,8 +316,12 @@ func _parse_tag_unused(tag: String, _info: String, _raw: String) -> bool:
 	
 	return false
 
-func _add_text(t :String):
+func _add_text(t: String):
 #	if _state.get("condition", true):
+	for pipe in _state.pipes:
+		var got = StringAction.pipe(t, pipe)
+		prints("PIPED (%s) WITH (%s) ANDGOT (%s)" % [t, pipe, got])
+		t = str(got)
 	add_text(t)
 
 func _push_bold():
@@ -336,7 +353,7 @@ func _pop_paragraph(data):
 	_state.align = data
 	pop()
 
-func _push_effect(effect :String, info :String):
+func _push_effect(effect: String, info: String):
 	if effects_mode == EffectsMode.OFF:
 		return
 	
@@ -347,7 +364,14 @@ func _push_effect(effect :String, info :String):
 	_stack_push(T_EFFECT, effect)
 	append_text(("[%s]" % effect) if info == "" else ("[%s %s]" % [effect, info]))
 
-func _push_color(clr :Color):
+func _push_pipe(pipe: String):
+	_stack_push(T_PIPE)
+	_state.pipes.append(pipe)
+
+func _pop_pipe():
+	_state.pipes.pop_back()
+
+func _push_color(clr: Color):
 	_stack_push(T_COLOR, _state.color)
 	_state.color = clr
 	push_color(clr)
@@ -383,6 +407,7 @@ func _stack_pop():
 			match type:
 				T_COLOR: _pop_color(data)
 				T_PARAGRAPH: _pop_paragraph(data)
+				T_PIPE: _pop_pipe()
 				T_CONDITION: _state.erase("condition")
 				T_NONE, _:
 					if not nopop:

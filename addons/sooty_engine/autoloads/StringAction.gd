@@ -2,20 +2,45 @@ extends Node
 
 const OPERATOR_ASSIGN := ["=", "+=", "-="]
 
-var funcs := {
+var pipes := {
 	"commas": func(x): return UString.commas(x),
 	"humanize": func(x): return UString.humanize(x),
-	"pick": _pick_cached,
+	"plural": func(x, one:="%s", more:="%s's", none:="%s's"): return UString.plural(x, one, more, none),
+	"ordinal": func(x): return UString.ordinal(x),
+	
+	"pick": _pipe_pick,
+	"test": _pipe_test,
+	"stutter": _pipe_stutter,
 	
 	"capitalize": func(x): return str(x).capitalize(), 
 	"lowercase": func(x): return str(x).to_lower(),
 	"uppercase": func(x): return str(x).to_upper(),
 }
 
+func pipe(value: Variant, pipe: String) -> Variant:
+	var args := split_string(pipe)
+	var fname = args.pop_front()
+	if fname in pipes:
+		# convert args to strings.
+		for i in len(args):
+			args[i] = str_to_var(args[i])
+		return UObject.call_callable(pipes[fname], [value] + args)
+	return value
+
+static func _pipe_test(s: Variant, ontrue := "yes", onfalse := "no") -> String:
+	return ontrue if s else onfalse
+
+static func _pipe_stutter(s) -> String:
+	var parts := str(s).split(" ")
+	for i in len(parts):
+		if len(parts[i]) > 2:
+			parts[i] = parts[i].substr(0, 1 if randf()>.5 else 2) + "-" + parts[i].to_lower()
+	return " ".join(parts)
+
 # Cache the pick function so it doesn't give the same option too often.
 # Still random, just not as boring.
 var _pick_cache := {}
-func _pick_cached(x) -> Variant:
+func _pipe_pick(x) -> Variant:
 	# if a dictionary? treat as weighted dict
 	if x is Dictionary:
 		return URand.pick_weighted(x)
@@ -42,11 +67,9 @@ func test(condition: String) -> bool:
 func execute(e: String, default = null, d: Dictionary={}) -> Variant:
 	# Pipe value through a Callable?
 	if "|" in e:
-		var p := e.split("|", true, 1)
+		var p := e.rsplit("|", true, 1)
 		var val = execute(p[0], default, d)
-		var pipe_id := p[1]
-		if pipe_id in funcs:
-			return funcs[pipe_id].call(val)
+		return pipe(val, p[1])
 	
 	else:
 		var expression := Expression.new()
@@ -64,11 +87,10 @@ func do(s: String) -> Variant:
 	return got
 
 func _do(s: String) -> Variant:
-	if "(":
+	if "(" in s:
 		return execute(s)
 	
-	var parts := _split_string(s)
-	
+	var parts := split_string(s)
 	# assignment
 	if len(parts) == 1:
 		if s.ends_with("++"):
@@ -123,14 +145,8 @@ func _do_function(parts: Array) -> Variant:
 			args.append(str_to_var(p))
 	
 	# if the function exists in func, just call that
-	if fname in funcs:
-		match len(args):
-			0: return funcs[fname].call()
-			1: return funcs[fname].call(args[0])
-			2: return funcs[fname].call(args[0], args[1])
-			3: return funcs[fname].call(args[0], args[1], args[2])
-			4: return funcs[fname].call(args[0], args[1], args[2], args[3])
-			5: return funcs[fname].call(args[0], args[1], args[2], args[3], args[4])
+	if fname in pipes:
+		return UObject.call_callable(pipes[fname], args)
 	
 	var gname := fname
 	
@@ -140,11 +156,12 @@ func _do_function(parts: Array) -> Variant:
 		fname = p[1]
 	
 	var out = null
-	for node in Global.get_tree().get_nodes_in_group("sa:%s" % gname):
+	var group := "sa:%s" % gname
+	for node in Global.get_tree().get_nodes_in_group(group):
 		out = UObject.call_w_args(node, fname, args)
 	return out
 	
-func _split_string(s: String) -> Array:
+static func split_string(s: String) -> Array:
 	var out := [""]
 	var in_quotes := false
 	for c in s:

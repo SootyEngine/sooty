@@ -1,0 +1,34 @@
+[gd_scene load_steps=7 format=3 uid="uid://qpvcn266pfud"]
+
+[ext_resource type="Shader" path="res://tunnel.gdshader" id="1_r12a0"]
+
+[sub_resource type="OpenSimplexNoise" id="OpenSimplexNoise_eeeho"]
+
+[sub_resource type="NoiseTexture" id="NoiseTexture_ceno8"]
+seamless = true
+noise = SubResource( "OpenSimplexNoise_eeeho" )
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4cp54"]
+shader = ExtResource( "1_r12a0" )
+shader_param/scale = null
+shader_param/ss1 = null
+shader_param/ss2 = null
+shader_param/density = null
+shader_param/noise = SubResource( "NoiseTexture_ceno8" )
+
+[sub_resource type="Gradient" id="Gradient_gwobq"]
+offsets = PackedFloat32Array(0.311983, 0.617769, 0.735537)
+colors = PackedColorArray(0.960784, 0.94902, 1, 0, 0.960181, 0.950431, 1, 0.898876, 0.960113, 0.950589, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_raxer"]
+gradient = SubResource( "Gradient_gwobq" )
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0, 0)
+
+[node name="Sprite2D" type="Sprite2D"]
+texture_repeat = 2
+material = SubResource( "ShaderMaterial_4cp54" )
+position = Vector2(-15, -43)
+scale = Vector2(15.9063, 9.1875)
+texture = SubResource( "GradientTexture2D_raxer" )

@@ -8,19 +8,14 @@ var speaker_cache := []
 
 var dt := DateTime.new()
 
-
 func _init() -> void:
 	add_to_group("flow_manager")
 	add_to_group("sa:caption")
 	add_to_group("sa:wait")
 
-#func is_pauser(n: Node) -> bool:
-#	return n in _pausers
-
 func add_pauser(n: Node) -> bool:
 	if not n in _pausers:
 		stack.wait = true
-#		n.add_to_group("pauser", true)
 		_pausers.append(n)
 		return true
 	return false

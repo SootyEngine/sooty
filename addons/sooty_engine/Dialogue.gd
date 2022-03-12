@@ -30,8 +30,8 @@ func _parse_file(file: String):
 #	UDict.log(out_flows)
 #	UDict.log(out_lines)
 	
-#	UFile.save_json("res://dialogue_debug/%s.flows.json" % [id], flows, true)
-#	UFile.save_json("res://dialogue_debug/%s.lines.json" % [id], lines, true)
+	UFile.save_json("res://dialogue_debug/%s.flows.json" % [id], flows, true)
+	UFile.save_json("res://dialogue_debug/%s.lines.json" % [id], lines, true)
 
 func was_file_modified() -> bool:
 	for file in files:

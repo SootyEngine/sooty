@@ -8,7 +8,7 @@
 [node name="first_class" type="ParallaxBackground"]
 
 [node name="class_room" parent="." instance=ExtResource( "1_di2mh" )]
-position = Vector2(-531, -345)
+position = Vector2(-593, -356)
 motion_scale = Vector2(-0.5, -0.5)
 
 [node name="school_boy" parent="." instance=ExtResource( "2_sg1bl" )]

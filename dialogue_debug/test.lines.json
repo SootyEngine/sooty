@@ -1,37 +1,53 @@
 {
-	"0!8": {
+	"0!3": {
 		"type": "text",
-		"text": "Today is [$time.weekday|lowercase;b;deep_sky_blue]."
+		"text": "I have [$score|plural \"a point\" \"%s points\" \"no points\";b;tomato]."
 	},
-	"0!13": {
+	"0!4": {
+		"type": "text",
+		"text": "I've [$score|test always never] wanted more."
+	},
+	"0!6": {
+		"type": "action",
+		"action": "score++"
+	},
+	"0!7": {
+		"type": "goto",
+		"goto": "test.start"
+	},
+	"0!20": {
+		"type": "text",
+		"text": "Today is [$time.weekday|lowercase;b;deep_sky_blue] the."
+	},
+	"0!25": {
 		"type": "text",
 		"text": "The weekend has just begun!"
 	},
-	"0!14": {
+	"0!26": {
 		"type": "text",
 		"text": "I need to make the most of it."
 	},
-	"0!15": {
+	"0!27": {
 		"type": "text",
 		"text": "Sigh."
 	},
-	"0!16": {
+	"0!28": {
 		"type": "text",
 		"text": "At least it's not monday."
 	},
-	"0!17": {
+	"0!29": {
 		"type": "text",
 		"text": "Humpday."
 	},
-	"0!18": {
+	"0!30": {
 		"type": "text",
 		"text": "The whole vibe shifts on thursday."
 	},
-	"0!19": {
+	"0!31": {
 		"type": "text",
 		"text": "Woo baby! It's friday!"
 	},
-	"0!12": {
+	"0!24": {
 		"type": "match",
 		"match": "$time.weekday",
 		"cases": [
@@ -45,33 +61,33 @@
 		],
 		"case_lines": [
 			[
-				"0!13"
+				"0!25"
 			],
 			[
-				"0!14"
+				"0!26"
 			],
 			[
-				"0!15"
+				"0!27"
 			],
 			[
-				"0!16"
+				"0!28"
 			],
 			[
-				"0!17"
+				"0!29"
 			],
 			[
-				"0!18"
+				"0!30"
 			],
 			[
-				"0!19"
+				"0!31"
 			]
 		]
 	},
-	"0!27": {
+	"0!39": {
 		"type": "action",
 		"action": "time.goto_next_day()"
 	},
-	"0!29": {
+	"0!41": {
 		"type": "goto",
 		"goto": "test.start"
 	}

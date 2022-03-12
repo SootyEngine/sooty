@@ -33,12 +33,12 @@ func tick():
 		_started = false
 		finished.emit()
 	
-	var safety := 100
 	if has_steps() and not wait:
 		tick_started.emit()
 	else:
 		return
 	
+	var safety := 100
 	while has_steps() and not wait:
 		safety -= 1
 		if safety <= 0:
@@ -50,6 +50,7 @@ func tick():
 		if not len(line):
 			break
 		
+		print(line.line)
 		match line.line.type:
 			"action": on_action.emit(line.line.action)
 			"goto": goto(line.line.goto, true)
@@ -115,12 +116,7 @@ func goto(flow: String, clear_stack: bool = true) -> bool:
 func select_option(option: DialogueLine): # step: Dictionary, option: int):
 	var d := get_current_dialogue()
 	var o := option._data
-	
-	if "action" in o:
-		StringAction.do(o.action)
-	
 	_push(d.id, o.lines)
-	
 	option_selected.emit(o)
 
 func _push(did: String, lines: Array, extra := {}):

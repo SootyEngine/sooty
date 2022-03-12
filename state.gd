@@ -14,7 +14,7 @@ func gain(item: String, amount: int = 1, kwargs: Dictionary = {}):
 func lose(item: String, amount: int = 1, kwargs: Dictionary = {}):
 	player.inventory.lose(item, amount, kwargs)
 
-var score := 1
+var score := 0
 var choice := ""
 var day_of_week := "monday"
 var time := DateTime.new({weekday="sat"})

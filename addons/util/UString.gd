@@ -88,3 +88,12 @@ static func humanize(value: int) -> String:
 			var out := "%.2f%s" % [(value / float(size)), SIZES[size]]
 			return "-" + out if is_neg else out
 	return str(-value) if is_neg else str(value)
+
+static func plural(x: Variant, one := "%s", more = "%s's", none := "%s's") -> String:
+	var out := none if int(x) == 0 else one if int(x) == 1 else more
+	return out % x if "%s" in out else out
+
+static func ordinal(n: Variant, one := "%sst", two := "%snd", three := "%srd", other := "%sth") -> String:
+	n = n.to_int()
+	var ord = {1: one, 2: two, 3: three}.get(n if n % 100 < 20 else n % 10, other)
+	return ord % str(n) if "%s" in ord else ord

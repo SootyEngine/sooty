@@ -7,8 +7,8 @@
 [node name="class_room" type="ParallaxLayer"]
 
 [node name="bg" type="Sprite2D" parent="."]
-position = Vector2(512, 300)
-scale = Vector2(1.1, 1.1)
+position = Vector2(508.5, 327)
+scale = Vector2(1.38574, 1.24421)
 texture = ExtResource( "1_xknx2" )
 script = ExtResource( "2_efxkp" )
 

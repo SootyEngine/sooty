@@ -58,6 +58,19 @@ static func patch(target: Variant, patch: Dictionary) -> int:
 			push_error("Couldn't find '%s' in %s." % [k, target])
 	return lines_changed
 
+static func call_callable(c: Callable, args: Array) -> Variant:
+	match len(args):
+		0: return c.call()
+		1: return c.call(args[0])
+		2: return c.call(args[0], args[1])
+		3: return c.call(args[0], args[1], args[2])
+		4: return c.call(args[0], args[1], args[2], args[3])
+		5: return c.call(args[0], args[1], args[2], args[3], args[4])
+		6: return c.call(args[0], args[1], args[2], args[3], args[4], args[5])
+		_:
+			push_error("NOT IMPLEMENTED.")
+			return null
+
 # Properly divides an array as arguments for a function. Like python.
 static func call_w_args(obj: Object, method: String, in_args: Array = []) -> Variant:
 	if not obj.has_method(method):

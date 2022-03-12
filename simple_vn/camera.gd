@@ -42,8 +42,10 @@ func set_target(id: String):
 	if target:
 		position = target.pos - Global.window_size * .5
 
+@export var draw_thirds := true
+
 func _draw() -> void:
-	if Engine.is_editor_hint():
+	if Engine.is_editor_hint() and draw_thirds:
 		var s: Vector2 = Global.window_size
 		var c := s / 2.0
 		var t := s / 3.0
@@ -72,12 +74,12 @@ func _get_tween():
 func _input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("ui_left"):
 		var t := _get_tween()
-		t.tween_property(self, "position_offset:x", -64.0, 1.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		t.tween_property(self, "position_offset:x", -128.0, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		print("create tween")
 	
 	if Input.is_action_just_pressed("ui_right"):
 		var t := _get_tween()
-		t.tween_property(self, "position_offset:x", 64.0, 1.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		t.tween_property(self, "position_offset:x", 128.0, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		print("create tween")
 	
 	if Input.is_action_just_pressed("ui_down"):
