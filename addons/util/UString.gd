@@ -22,14 +22,35 @@ static func part(s: String, from: int = 0, to = null) -> String:
 		to = len(s) - to
 	return s.substr(from, to-from)
 
+static func is_at(s: String, tag: String, index: int) -> bool:
+	for i in len(tag):
+		if i+index >= len(s) or s[i+index] != tag[i]:
+			return false
+	return true
+
 # Removes a string from between tags, and returns [cleaned string, inner string].
 static func extract(s: String, head: String, tail: String, strip_edges: bool = true) -> Array[String]:
+	if head == "" or tail == "":
+		push_error("Must pass a head and tail.")
+		return []
 	var a := s.find(head)
 	if a != -1:
-		var b := s.find(tail, a+len(head))
-		if b != -1:
-			var outer := part(s, 0, a).strip_edges(false, strip_edges) + part(s, b+len(tail)).strip_edges(strip_edges, false)
-			var inner := part(s, a+len(head), b)
+		var b := a + len(head)
+		var found_at := -1
+		var in_tag := 1
+		while b < len(s):
+			if is_at(s, head, b):
+				in_tag += 1
+			elif is_at(s, tail, b):
+				in_tag -= 1
+				if not in_tag:
+					found_at = b
+					break
+			b += 1
+		
+		if found_at != -1:
+			var outer := part(s, 0, a).strip_edges(false, strip_edges) + part(s, found_at+len(head)).strip_edges(strip_edges, false)
+			var inner := part(s, a+len(head), found_at)
 			return [outer, inner]
 		else:
 			var outer := part(s, 0, a).strip_edges(false, strip_edges)

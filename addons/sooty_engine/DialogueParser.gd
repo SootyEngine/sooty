@@ -5,33 +5,79 @@ class_name DialogueParser
 const DEBUG_KEEP_DICTS := false
 const REWRITE := 6
 
+const S_ACTION := "~"
+
 static func parse(file: String) -> Dictionary:
-	var text_lines := UFile.load_text(file).split("\n")
+	var original_text := UFile.load_text(file)
+	var text_lines := original_text.split("\n")
 	var dict_lines := []
 	
 	# Convert text lines to dict lines.
-	for i in len(text_lines):
-		var stripped := text_lines[i]
+	var i := 0
+	var in_multiline := false
+	var multiline_id := ""
+	var multiline_line := 0
+	var multiline_head := ""
+	var multiline_depth := 0
+	var multiline := []
+	while i < len(text_lines):
+		var uncommented := text_lines[i]
+		var id := ""
+		var line := i
+		
 		# remove comment
-		if "//" in stripped:
-			stripped = stripped.split("//", true, 1)[0]
-		stripped = stripped.strip_edges()
+		if "//" in uncommented:
+			# remove unique id
+			if "//#" in uncommented:
+				var p := uncommented.rsplit("//#", true, 1)
+				uncommented = p[0]
+				id = p[1].strip_edges()
+			
+			uncommented = uncommented.split("//", true, 1)[0]
+		
+		var stripped := uncommented.strip_edges()
+		
+		if '""""' in stripped:
+			in_multiline = not in_multiline
+			if not in_multiline:
+				id = multiline_id
+				line = multiline_line
+				stripped = multiline_head.replace("%TEXT_HERE%", "\n".join(multiline))
+				multiline = []
+			else:
+				multiline_id = id
+				multiline_line = i
+				multiline_head = uncommented.replace('""""', '%TEXT_HERE%').strip_edges()
+				multiline_depth = _count_leading_tabs(text_lines[i])
+				i += 1
+				continue
+		
+		# if part of multline, just collect
+		if in_multiline:
+			multiline.append(uncommented.substr(multiline_depth))
 		
 		# ignore empty lines
-		if len(stripped):
+		elif len(stripped):
 			var did: String = file.get_file().split(".", true, 1)[0]
+			var deep := _count_leading_tabs(text_lines[i])
 			dict_lines.append({
 				did=did,
+				id=id,
 				file=0,
-				line=i,
+				line=line,
 				type="_",
 				text=stripped,
-				deep=_count_leading_tabs(text_lines[i]),
+				deep=deep,
 				tabbed=[]
 			})
+			# unflatten lines.
+			var flat_lines := _extract_flat_lines(dict_lines[-1])
+			dict_lines.append_array(flat_lines)
+		
+		i += 1
 	
 	# Collect tabs, recursively.
-	var i := 0
+	i = 0
 	var new_list := []
 	while i < len(dict_lines):
 		var o = _collect_tabbed(dict_lines, i)
@@ -46,7 +92,60 @@ static func parse(file: String) -> Dictionary:
 				out_flows[new_list[i].text] = new_list[i]
 				_clean(new_list[i], out_lines)
 	
-	return { flows=out_flows, lines=out_lines }
+	# generate unique ids
+	var translations := []
+	for k in out_lines:
+		var step = out_lines[k]
+		match step.type:
+			"text", "option":
+				if step.id == "":
+					step.id = get_uid(out_lines)
+					set_line_uid(text_lines, step.line, step.id)
+				var f = step.get("from", "NONE")
+				var t := Array(step.text.split("\n"))
+				if len(t) != 1:
+					t.push_front('""""')
+					t.push_back('""""')
+				t[0] = "%s: %s" % [f, t[0]]
+				for i in len(t):
+					t[i] = "\t//" + t[i]
+				translations.append("#%s:\n%s\n\t%s: \n" % [step.id, "\n".join(t), f])
+	
+	UFile.save_text(file, "\n".join(text_lines))
+	UFile.save_text(UFile.change_extension(file, "lsoot"), "\n".join(translations))
+	
+	
+	return {
+		original_text=original_text,
+		flows=out_flows,
+		lines=out_lines
+	}
+
+static func set_line_uid(lines: PackedStringArray, line: int, uid: String):
+	if "//#" in lines[line]:
+		var p := lines[line].split("//#", true, 1)
+		lines[line] = p[0].strip_edges(false, true) + " //#%s" % uid
+	else:
+		lines[line] = lines[line] + " //#%s" % uid
+
+static func get_uid(lines: Dictionary, size := 8) -> String:
+	var uid := get_id()
+	var safety := 100
+	while uid in lines:
+		uid = get_id()
+		safety -= 1
+		if safety <= 0:
+			push_error("Should never happen.")
+			break
+	return uid
+
+static func get_id(size := 8) -> String:
+	var dict := "abcdefghijklmnopqrstuvwxyz0123456789"
+	var lenn := len(dict)
+	var out = ""
+	for i in size:
+		out += dict[randi() % lenn]
+	return out
 
 static func _clean_array(lines: Array, all_lines: Dictionary):
 	for i in len(lines):
@@ -61,8 +160,14 @@ static func _clean_nested_array(lines_list: Array, all_lines: Dictionary):
 
 static func _clean(line: Dictionary, all_lines: Dictionary) -> String:
 	var id := "%s!%s" % [line.file, line.line]
+	if "flat" in line:
+		id += "_%s" % [line.flat]
+		line.erase("flat")
+	
 	if not DEBUG_KEEP_DICTS:
-		_erase(line, ["did", "deep", "tabbed", "file", "line"])
+		_erase(line, ["did", "deep", "tabbed"])
+#		_erase(line, ["file", "line"])
+	
 	match line.type:
 		"flow":
 			_clean_array(line.then, all_lines)
@@ -76,7 +181,7 @@ static func _clean(line: Dictionary, all_lines: Dictionary) -> String:
 				_clean_array(line.then, all_lines)
 			else:
 				line.erase("then")
-			_erase(line, ["text"])
+#			_erase(line, ["text"])
 		"goto", "call":
 			_erase(line, ["text"])
 		"text":
@@ -97,7 +202,7 @@ static func _clean(line: Dictionary, all_lines: Dictionary) -> String:
 
 static func _collect_tabbed(dict_lines: Array, i: int) -> Array:
 	var line = dict_lines[i]
-	_extract_properties(line)
+#	_extract_properties(line)
 	i += 1
 	# collect tabbed
 	while i < len(dict_lines) and dict_lines[i].deep > line.deep:
@@ -146,7 +251,7 @@ static func _process_line(line: Dictionary):
 	if t.begins_with("{{"): return _line_as_condition(line)
 	_extract_conditional(line)
 	if t.begins_with("<"): return _line_as_option(line)
-	if t.begins_with("@"): return _line_as_action(line)
+	if t.begins_with(S_ACTION): return _line_as_action(line)
 	if t.begins_with(">>"): return _line_as_goto(line)
 	if t.begins_with("::"): return _line_as_call(line)
 	if t.begins_with("|"): return _line_as_properties(line)
@@ -183,11 +288,11 @@ static func _line_as_condition(line: Dictionary):
 				
 				# treat as an unprocessed line now.
 				# and then add it to the front of it's list.
-				if tabbed_line.text.strip_edges() != "":
-					_erase(tabbed_line, ["cond", "cond_type", "conds", "cond_lines"])
-					tabbed_line.tabbed = []
-					_process_line(tabbed_line)
-					line.case_lines[-1].push_front(tabbed_line)
+#				if tabbed_line.text.strip_edges() != "":
+#					_erase(tabbed_line, ["cond", "cond_type", "conds", "cond_lines"])
+#					tabbed_line.tabbed = []
+#					_process_line(tabbed_line)
+#					line.case_lines[-1].push_front(tabbed_line)
 	
 	if line.cond_type == "if":
 		line.conds = [line.cond]
@@ -239,7 +344,7 @@ static func _add_flow_action(line: Dictionary, type: String, f_action: String):
 	
 static func _line_as_action(line: Dictionary):
 	line.type = "action"
-	line.action = line.text.substr(len("@"))
+	line.action = line.text.substr(len(S_ACTION))
 	
 static func _line_as_properties(line: Dictionary):
 	var properties := {}
@@ -274,16 +379,26 @@ static func _line_as_dialogue(line: Dictionary):
 	if options:
 		line.options = options
 
-static func _extract_properties(line: Dictionary) -> bool:
-	if _extract(line, "((", "))", "prop"):
-		var properties := {}
-		for prop in line.prop.split(" "):
-			if ":" in prop:
-				var p = prop.split(":", true, 1)
-				properties[p[0]] = p[1]
-		line.prop = properties
-		return true
-	return false
+static func _extract_flat_lines(line: Dictionary) -> Array:
+	var out := []
+	if _extract(line, "((", "))", "flat_lines"):
+		var p = line.flat_lines.split(";;")
+		for i in len(p):
+			var id = "%s_%s"%[line.flat, i] if "flat" in line else str(i)
+			var f_line = {
+				file=line.file,
+				line=line.line,
+				deep=line.deep+1,
+				flat=id,
+				type="_",
+				text=p[i].strip_edges(),
+				tabbed=[],
+			}
+			# recursively check.
+			out.append(f_line)
+			out.append_array(_extract_flat_lines(f_line))
+		line.erase("flat_lines")
+	return out
 
 static func _extract_action(line: Dictionary) -> bool:
 	return _extract(line, "[[", "]]", "action")

@@ -228,30 +228,12 @@ static func value_index(d:Dictionary, item) -> int:
 
 # calls a function on every dict
 static func dig(d: Dictionary, call: Callable, reverse: bool = false):
-#	if d is Dictionary:
 	if reverse:
 		call.call(d)
 	
 	for k in d:
-		dig(d[k], call, reverse)
+		if d[k] is Dictionary:
+			dig(d[k], call, reverse)
 	
 	if not reverse:
 		call.call(d)
-	
-#	elif d is Array:
-#		for i in len(d):
-#			dig(d[i], call, reverse)
-#
-#	elif d is Node:
-#		call.call(d)
-#		for i in d.get_child_count():
-#			dig(d.get_child(i), call, reverse)
-	
-	else:
-		push_error("not implemented")
-#
-#static func dig_replace(d: Dictionary, call: Callable):
-#	for k in d:
-#		dig_replace(d[k], call)
-#	return call.call(d)
-

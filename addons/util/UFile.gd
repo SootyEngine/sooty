@@ -61,11 +61,19 @@ static func get_directory_size(directory:String) -> String:
 #	else:
 #		return path
 
-static func replace_extension(path: String, ext: String) -> String:
+static func change_extension(path: String, ext: String) -> String:
 	var parts := path.rsplit("/", true, 1)
 	var fpath := parts[0]
 	var fname := parts[1].split(".", true, 1)[0]
 	return "%s/%s.%s" % [fpath, fname, ext]
+
+static func change_name(path: String, new_name: String) -> String:
+	var parts := path.rsplit("/", true, 1)
+	var fpath := parts[0]
+	var fparts := parts[1].split(".", true, 1)
+	var old_name := fparts[0]
+	var old_ext := fparts[1]
+	return "%s/%s.%s" % [fpath, new_name, old_ext]
 
 static func create_directory(path: String) -> bool:
 	var dir = get_user_dir()

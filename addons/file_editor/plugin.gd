@@ -9,11 +9,17 @@ func _enter_tree() -> void:
 	panel._set_as_plugin()
 	get_editor_interface().get_editor_main_control().add_child(panel)
 	_make_visible(false)
+	
+#	get_editor_interface().get_script_editor().editor_script_changed.connect(_script_changed)
+
+#func _script_changed(s):
+#	print(s)
 
 func _exit_tree() -> void:
+
 	if panel:
 		panel.queue_free()
-
+#
 func _get_plugin_name() -> String:
 	return "Text"
 

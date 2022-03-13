@@ -287,7 +287,7 @@ gdscript/warnings/integer_division=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/file_editor/plugin.cfg", "res://addons/sooty_engine/plugin.cfg", "res://addons/tool_button/plugin.cfg")
+enabled=PackedStringArray("res://addons/sooty_engine/plugin.cfg", "res://addons/tool_button/plugin.cfg")
 
 [input]
 
