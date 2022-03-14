@@ -2,7 +2,7 @@ extends Node
 
 var a_winner := Achievement.new({
 	name="The Winner",
-	desc="Gain 10 prices.",
+	desc="Gain 10 prizes.",
 	goal=10
 })
 
