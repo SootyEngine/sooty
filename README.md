@@ -6,9 +6,9 @@ A dialogue engine for Godot4.
 ![](readme/code_preview.png)
 
 # Features
-- Scripting language.
-- Redesigned BBCode like system with Markdown features.
-- Text animation system.
+- Scripting language with highlighter.
+- `BBCode Evolved®` with Markdown features.
+- Advanced text animation system.
 - Built with modding support in mind.
 - Built with localization in mind.
 
