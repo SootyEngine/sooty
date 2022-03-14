@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://dbwnbm0swycyc"]
+
+[ext_resource type="Script" path="res://simple_vn_assets/fader/fader.gd" id="1_yxog0"]
+
+[node name="fader" type="CanvasLayer"]
+layer = 128
+script = ExtResource( "1_yxog0" )
+
+[node name="backing" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0

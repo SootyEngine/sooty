@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://bhlkm21ucnbda"]
+[gd_scene load_steps=5 format=3 uid="uid://bhlkm21ucnbda"]
 
 [ext_resource type="Script" path="res://simple_vn/dialogue_runner.gd" id="1_deyhw"]
-[ext_resource type="Script" path="res://simple_vn/ui/ui_flow_manager.gd" id="2_qpxpa"]
 [ext_resource type="PackedScene" uid="uid://diracd0fg1m3i" path="res://simple_vn/ui/ui_dialogue.tscn" id="3_kyvc4"]
+[ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="4_n6jin"]
+[ext_resource type="Script" path="res://simple_vn_assets/input_indicator.gd" id="5_s7x7q"]
 
 [node name="dialogue_runner" type="Node"]
 script = ExtResource( "1_deyhw" )
@@ -10,7 +11,6 @@ script = ExtResource( "1_deyhw" )
 [node name="scene" type="Node" parent="."]
 
 [node name="flow_manager" type="CanvasLayer" parent="."]
-script = ExtResource( "2_qpxpa" )
 
 [node name="bottom" parent="flow_manager" instance=ExtResource( "3_kyvc4" )]
 anchor_left = 0.5
@@ -18,3 +18,8 @@ anchor_right = 0.5
 offset_left = -512.0
 offset_top = -120.0
 offset_right = 512.0
+
+[node name="Icon" type="Sprite2D" parent="flow_manager"]
+position = Vector2(78, 552)
+texture = ExtResource( "4_n6jin" )
+script = ExtResource( "5_s7x7q" )

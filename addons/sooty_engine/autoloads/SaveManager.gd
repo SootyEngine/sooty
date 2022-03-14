@@ -2,14 +2,19 @@ extends Node
 
 const DIR := "user://saves"
 const PREVIEW_SIZE_DIV_AMOUNT := 3.0 # How much to shrink preview image.
-
 const GROUP_SAVE_STATE := "has_save_state"
 const GROUP_SAVE_INFO := "has_save_info"
+
+signal request_save(slot: String)
+signal request_load(slot: String)
 
 func _ready() -> void:
 	var d := Directory.new()
 	if not d.dir_exists(DIR):
 		d.make_dir(DIR)
+
+func load_slot(slot: String):
+	pass
 
 func get_slot_names() -> PackedStringArray:
 	var out := PackedStringArray()
@@ -28,7 +33,14 @@ func get_slot_directory(slot: String) -> String:
 	return DIR.plus_file("slot_" + slot)
 
 func get_slot_info(slot: String) -> Dictionary:
-	return UFile.load_json(get_slot_directory(slot).plus_file("info.json"), {})
+	var dir := get_slot_directory(slot)
+	var info = UFile.load_json(dir.plus_file("slot.json"), {})
+	var preview = UFile.load_image(dir.plus_file("preview.png"))
+	info.slot = slot
+	info.preview = preview
+	info.dir_size = UFile.get_directory_size(dir)
+	info.date_time = DateTime.create_from_datetime(info.time)
+	return info
 
 func save_to_slot(slot: String):
 	var slot_path := get_slot_directory(slot)

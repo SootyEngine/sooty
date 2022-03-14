@@ -31,6 +31,7 @@ func add_dialogue(d: Dialogue):
 	cache[d.id] = d
 
 func _timer():
+	return
 	for d in cache.values():
 		if d.was_file_modified():
 			print("Relading dialogue: %s" % d.id)

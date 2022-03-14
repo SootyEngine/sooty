@@ -1,0 +1,16 @@
+{
+	"0!1": {
+		"id": "n8q3jkf7",
+		"file": 0,
+		"line": 1,
+		"type": "text",
+		"text": "Flow ended."
+	},
+	"0!2": {
+		"id": "",
+		"file": 0,
+		"line": 2,
+		"type": "action",
+		"action": "goto main_menu"
+	}
+}

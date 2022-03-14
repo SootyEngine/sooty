@@ -1,0 +1,23 @@
+{
+	"0!1": {
+		"id": "eg4k6d8r",
+		"file": 0,
+		"line": 1,
+		"type": "goto",
+		"goto": "001_start.start"
+	},
+	"0!4": {
+		"id": "n8q3jkf7",
+		"file": 0,
+		"line": 4,
+		"type": "text",
+		"text": "Flow ended."
+	},
+	"0!5": {
+		"id": "",
+		"file": 0,
+		"line": 5,
+		"type": "action",
+		"action": "goto main_menu"
+	}
+}

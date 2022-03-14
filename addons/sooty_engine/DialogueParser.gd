@@ -5,7 +5,13 @@ class_name DialogueParser
 const DEBUG_KEEP_DICTS := false
 const REWRITE := 6
 
+const S_COMMENT := "//"
+const S_LANG_ID := "//#"
 const S_ACTION := "~"
+const S_FLOW := "==="
+const S_FLOW_GOTO := "=>"
+const S_FLOW_CALL := "=="
+const S_PROPERTY_HEAD := "|"
 
 static func parse(file: String) -> Dictionary:
 	var original_text := UFile.load_text(file)
@@ -26,14 +32,14 @@ static func parse(file: String) -> Dictionary:
 		var line := i
 		
 		# remove comment
-		if "//" in uncommented:
+		if S_COMMENT in uncommented:
 			# remove unique id
-			if "//#" in uncommented:
-				var p := uncommented.rsplit("//#", true, 1)
+			if S_LANG_ID in uncommented:
+				var p := uncommented.rsplit(S_LANG_ID, true, 1)
 				uncommented = p[0]
 				id = p[1].strip_edges()
 			
-			uncommented = uncommented.split("//", true, 1)[0]
+			uncommented = uncommented.split(S_COMMENT, true, 1)[0]
 		
 		var stripped := uncommented.strip_edges()
 		
@@ -93,27 +99,28 @@ static func parse(file: String) -> Dictionary:
 				_clean(new_list[i], out_lines)
 	
 	# generate unique ids
-	var translations := []
-	for k in out_lines:
-		var step = out_lines[k]
-		match step.type:
-			"text", "option":
-				if step.id == "":
-					step.id = get_uid(out_lines)
-					set_line_uid(text_lines, step.line, step.id)
-				var f = step.get("from", "NONE")
-				var t := Array(step.text.split("\n"))
-				if len(t) != 1:
-					t.push_front('""""')
-					t.push_back('""""')
-				t[0] = "%s: %s" % [f, t[0]]
-				for i in len(t):
-					t[i] = "\t//" + t[i]
-				translations.append("#%s:\n%s\n\t%s: \n" % [step.id, "\n".join(t), f])
-	
-	UFile.save_text(file, "\n".join(text_lines))
-	UFile.save_text(UFile.change_extension(file, "lsoot"), "\n".join(translations))
-	
+	var GENERATE_TRANSLATIONS := true
+	if GENERATE_TRANSLATIONS:
+		var translations := []
+		for k in out_lines:
+			var step = out_lines[k]
+			match step.type:
+				"text", "option":
+					if step.id == "":
+						step.id = get_uid(out_lines)
+						set_line_uid(text_lines, step.line, step.id)
+					var f = step.get("from", "NONE")
+					var t := Array(step.text.split("\n"))
+					if len(t) != 1:
+						t.push_front('""""')
+						t.push_back('""""')
+					t[0] = "%s: %s" % [f, t[0]]
+					for i in len(t):
+						t[i] = "\t//" + t[i]
+					translations.append("#%s:\n%s\n\t%s: \n" % [step.id, "\n".join(t), f])
+		
+		UFile.save_text(file, "\n".join(text_lines))
+		UFile.save_text(UFile.change_extension(file, "lsoot"), "\n".join(translations))
 	
 	return {
 		original_text=original_text,
@@ -122,8 +129,8 @@ static func parse(file: String) -> Dictionary:
 	}
 
 static func set_line_uid(lines: PackedStringArray, line: int, uid: String):
-	if "//#" in lines[line]:
-		var p := lines[line].split("//#", true, 1)
+	if S_LANG_ID in lines[line]:
+		var p := lines[line].split(S_LANG_ID, true, 1)
 		lines[line] = p[0].strip_edges(false, true) + " //#%s" % uid
 	else:
 		lines[line] = lines[line] + " //#%s" % uid
@@ -140,7 +147,7 @@ static func get_uid(lines: Dictionary, size := 8) -> String:
 	return uid
 
 static func get_id(size := 8) -> String:
-	var dict := "abcdefghijklmnopqrstuvwxyz0123456789"
+	var dict := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	var lenn := len(dict)
 	var out = ""
 	for i in size:
@@ -247,14 +254,14 @@ static func _collect_tabbed(dict_lines: Array, i: int) -> Array:
 
 static func _process_line(line: Dictionary):
 	var t: String = line.text
-	if t.begins_with("==="): return _line_as_flow(line)
+	if t.begins_with(S_FLOW): return _line_as_flow(line)
 	if t.begins_with("{{"): return _line_as_condition(line)
 	_extract_conditional(line)
 	if t.begins_with("<"): return _line_as_option(line)
 	if t.begins_with(S_ACTION): return _line_as_action(line)
-	if t.begins_with(">>"): return _line_as_goto(line)
-	if t.begins_with("::"): return _line_as_call(line)
-	if t.begins_with("|"): return _line_as_properties(line)
+	if t.begins_with(S_FLOW_GOTO): return _line_as_goto(line)
+	if t.begins_with(S_FLOW_CALL): return _line_as_call(line)
+	if t.begins_with(S_PROPERTY_HEAD): return _line_as_properties(line)
 	return _line_as_dialogue(line)
 
 static func _line_as_condition(line: Dictionary):
@@ -315,25 +322,25 @@ static func _line_as_option(line: Dictionary):
 		match li.type:
 			_: lines.append(li)
 	
-	var p := _trailing_tokens(line.text, [">>", "::", "@"])
-	line.text = p[0]
-	for t in p[1]:
-		var token: String = t[0]
-		var t_str: String = t[1]
-		match token:
-			">>": lines.append(_add_flow_action({did=line.did, file=line.file, line=line.line}, "call", t_str))
-			"::": lines.append(_add_flow_action({did=line.did, file=line.file, line=line.line}, "goto", t_str))
-			"@" : lines.append({file=line.file, line=line.line, type="action", action=t_str })
+#	var p := _trailing_tokens(line.text, ["=>", "==", "~"])
+#	line.text = p[0]
+#	for t in p[1]:
+#		var token: String = t[0]
+#		var t_str: String = t[1]
+#		match token:
+#			"=>": lines.append(_add_flow_action({did=line.did, file=line.file, line=line.line}, "call", t_str))
+#			"==": lines.append(_add_flow_action({did=line.did, file=line.file, line=line.line}, "goto", t_str))
+#			"~" : lines.append({file=line.file, line=line.line, type="action", action=t_str })
 	
 	line.then = lines
 
 static func _line_as_goto(line: Dictionary):
-	var p = line.text.rsplit(">>", true, 1)
+	var p = line.text.rsplit(S_FLOW_GOTO, true, 1)
 	line.text = p[0].strip_edges()
 	_add_flow_action(line, "goto", p[1].strip_edges())
 
 static func _line_as_call(line: Dictionary):
-	var p = line.text.split("::", true, 1)
+	var p = line.text.split(S_FLOW_CALL, true, 1)
 	line.text = p[0].strip_edges()
 	_add_flow_action(line, "call", p[1].strip_edges())
 
@@ -386,6 +393,8 @@ static func _extract_flat_lines(line: Dictionary) -> Array:
 		for i in len(p):
 			var id = "%s_%s"%[line.flat, i] if "flat" in line else str(i)
 			var f_line = {
+				id="",
+				did=line.did,
 				file=line.file,
 				line=line.line,
 				deep=line.deep+1,

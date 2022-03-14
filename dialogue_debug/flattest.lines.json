@@ -1,0 +1,140 @@
+{
+	"0!2": {
+		"id": "asd89",
+		"file": 0,
+		"line": 2,
+		"type": "option",
+		"text": "A choice in the matter."
+	},
+	"0!3": {
+		"id": "asdok",
+		"file": 0,
+		"line": 3,
+		"type": "option",
+		"text": "Another choice."
+	},
+	"0!1": {
+		"id": "okay",
+		"file": 0,
+		"line": 1,
+		"type": "text",
+		"text": "Some text.",
+		"options": [
+			"0!2",
+			"0!3"
+		]
+	},
+	"0!6": {
+		"id": "taoj8f25",
+		"file": 0,
+		"line": 6,
+		"type": "option",
+		"text": "Choice without a unique id."
+	},
+	"0!5": {
+		"id": "okikzcb3",
+		"file": 0,
+		"line": 5,
+		"type": "text",
+		"text": "Text without a unique id.",
+		"options": [
+			"0!6"
+		]
+	},
+	"0!8": {
+		"id": "45cemyvr",
+		"file": 0,
+		"line": 8,
+		"type": "text",
+		"text": "Who cares what you think?",
+		"from": "paul"
+	},
+	"0!11_0": {
+		"id": "",
+		"file": 0,
+		"line": 11,
+		"type": "action",
+		"action": "sfx sad_audio"
+	},
+	"0!12_0": {
+		"id": "uN1QVwjZ",
+		"file": 0,
+		"line": 12,
+		"type": "text",
+		"text": "Glad [b]mondays[] over.",
+		"from": "john"
+	},
+	"0!13_0": {
+		"id": "PCdAjWa3",
+		"file": 0,
+		"line": 13,
+		"type": "text",
+		"text": "It's the middle of the week."
+	},
+	"0!15": {
+		"id": "64wc4gdn",
+		"file": 0,
+		"line": 15,
+		"type": "text",
+		"text": "The whole vibe shifts on thursday!",
+		"from": "john"
+	},
+	"0!16_0": {
+		"id": "",
+		"file": 0,
+		"line": 16,
+		"type": "action",
+		"action": "sfx happy_audio"
+	},
+	"0!17": {
+		"id": "j2ecr0z4",
+		"file": 0,
+		"line": 17,
+		"type": "text",
+		"text": "Aw yeah, friday!",
+		"from": "john"
+	},
+	"0!18_0": {
+		"id": "HDRN8rvO",
+		"file": 0,
+		"line": 18,
+		"type": "text",
+		"text": "It's the weekend."
+	},
+	"0!10": {
+		"id": "",
+		"file": 0,
+		"line": 10,
+		"type": "match",
+		"match": "$time.weekday",
+		"cases": [
+			"MONDAY",
+			"TUESDAY",
+			"WEDNESDAY",
+			"THURSDAY",
+			"FRIDAY",
+			"_"
+		],
+		"case_lines": [
+			[
+				"0!11_0"
+			],
+			[
+				"0!12_0"
+			],
+			[
+				"0!13_0"
+			],
+			[
+				"0!15"
+			],
+			[
+				"0!16_0",
+				"0!17"
+			],
+			[
+				"0!18_0"
+			]
+		]
+	}
+}

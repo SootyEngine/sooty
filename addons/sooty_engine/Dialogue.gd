@@ -94,10 +94,11 @@ func get_lines(lines: Array[String]) -> Array[Dictionary]:
 	return out
 
 func to_flow_id(s: String) -> String:
-	var out := ""
-	for c in s.capitalize().to_lower():
-		if c in "abcdefghijklmnopqrstuvwxyz0123456789":
-			out += c
-		elif out != "" and out[-1] != "_":
-			out += "_"
-	return out
+	return s
+#	var out := ""
+#	for c in s.capitalize().to_lower():
+#		if c in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789":
+#			out += c
+#		elif out != "" and out[-1] != "_":
+#			out += "_"
+#	return out

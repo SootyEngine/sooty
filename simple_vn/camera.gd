@@ -105,7 +105,8 @@ func _process(_delta: float) -> void:
 	get_parent().rotation = URand.noise_animated(-position.x, 0.1) * 0.0025 * rotation_noise_scale
 	zoom = Vector2.ONE * (1.0 + zoom_offset + URand.noise_animated(-position.y, 0.1) * .00125 * zoom_noise_scale)
 	offset = noise_offset + shake_offset + position_offset
-	offset += ((get_global_mouse_position() / Global.window_size) - Vector2(.5, .5)) * Vector2(1, 0.125) * 32.0
+	
+	offset += ((get_global_mouse_position() / Global.window_size) - Vector2(.5, .5)) * Vector2(1, 0.125) * 4.0
 	
 func center():
 	if anchor_mode == ANCHOR_MODE_FIXED_TOP_LEFT:

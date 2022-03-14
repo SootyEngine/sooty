@@ -1,0 +1,541 @@
+{
+	"0!2": {
+		"id": "jbpggt5p",
+		"file": 0,
+		"line": 2,
+		"type": "text",
+		"text": "Text without a speaker."
+	},
+	"0!5": {
+		"id": "64yw4j4r",
+		"file": 0,
+		"line": 5,
+		"type": "text",
+		"text": "Text spoken by John.",
+		"from": "john"
+	},
+	"0!6": {
+		"id": "wkgwyrxo",
+		"file": 0,
+		"line": 6,
+		"type": "text",
+		"text": "Text spoken by last speaker, John.",
+		"from": ""
+	},
+	"0!9": {
+		"id": "0ad2gs7e",
+		"file": 0,
+		"line": 9,
+		"type": "text",
+		"text": "Some *italic*, **bold** and ***bold italic*** text."
+	},
+	"0!12": {
+		"id": "t0ndrvgo",
+		"file": 0,
+		"line": 12,
+		"type": "text",
+		"text": "Some [b;tomato]bold red text[] and some [i;deep_sky_blue]italic blue text.[]"
+	},
+	"0!15": {
+		"id": "mgvyozgd",
+		"file": 0,
+		"line": 15,
+		"type": "text",
+		"text": "The current score is [$score;b;cyan]."
+	},
+	"0!18": {
+		"id": "okay",
+		"file": 0,
+		"line": 18,
+		"type": "text",
+		"text": "We can pause[wait] the text."
+	},
+	"0!19": {
+		"id": "1234",
+		"file": 0,
+		"line": 19,
+		"type": "text",
+		"text": "We can hold until the user presses something.[hold] And then show some more text."
+	},
+	"0!20": {
+		"id": "zznmo4uw",
+		"file": 0,
+		"line": 20,
+		"type": "text",
+		"text": "We can [pace=2]speed up the speed of the speaker.[pace=0.25] Or slow it down."
+	},
+	"0!23": {
+		"id": "u3ef49mj",
+		"file": 0,
+		"line": 23,
+		"type": "text",
+		"text": "Actions can be called at a point [~camera zoom 2.0]. Got it?"
+	},
+	"0!24": {
+		"id": "nlajji8c",
+		"file": 0,
+		"line": 24,
+		"type": "text",
+		"text": "Like any other tag [~camera zoom;~camera shake;~$score += 20] you can combine multiple in one."
+	},
+	"0!27": {
+		"id": "llxx9c0e",
+		"file": 0,
+		"line": 27,
+		"type": "text",
+		"text": "You can place *lots* of formatted text in one block.\n\t\t*Tabs*\n\t\t\twill\n\t\t\t\tbe\n\t\t\t\t\tpreserved.\n\nAs will **whitespace**."
+	},
+	"0!37": {
+		"id": "02c8ujhk",
+		"file": 0,
+		"line": 37,
+		"type": "text",
+		"text": "I don't care what [b]they say, it's not happening.\n\n(He turned to look at the shore.)\n\nNot now, not ever.",
+		"cond": "$score > 20",
+		"from": "paul"
+	},
+	"0!46": {
+		"id": "2aojvukh",
+		"file": 0,
+		"line": 46,
+		"type": "goto",
+		"goto": "soot_language_overview.goto_flow"
+	},
+	"0!47": {
+		"id": "a3yscy8s",
+		"file": 0,
+		"line": 47,
+		"type": "call",
+		"call": "soot_language_overview.call_flow"
+	},
+	"0!50": {
+		"id": "",
+		"file": 0,
+		"line": 50,
+		"type": "action",
+		"action": "$score += 20"
+	},
+	"0!51": {
+		"id": "",
+		"file": 0,
+		"line": 51,
+		"type": "action",
+		"action": "$time.day += 1"
+	},
+	"0!53": {
+		"id": "",
+		"file": 0,
+		"line": 53,
+		"type": "action",
+		"action": "$time.goto_next_day"
+	},
+	"0!54": {
+		"id": "",
+		"file": 0,
+		"line": 54,
+		"type": "action",
+		"action": "$player.set_job baker tint:beige pay:12.50"
+	},
+	"0!57": {
+		"id": "",
+		"file": 0,
+		"line": 57,
+		"type": "action",
+		"action": "camera shake $x time:3.0 wait:true x:$y"
+	},
+	"0!58": {
+		"id": "",
+		"file": 0,
+		"line": 58,
+		"type": "action",
+		"action": "camera.shake $x time:3.0 wait:true x:$y"
+	},
+	"0!61": {
+		"id": "q5txeq9k",
+		"file": 0,
+		"line": 61,
+		"type": "text",
+		"text": "Wait a minute, that means[~camera.zoom 1;b;i;~$score += 20] this was a...[~camera.zoom] murder!"
+	},
+	"0!63": {
+		"id": "h7sj4ct7",
+		"file": 0,
+		"line": 63,
+		"type": "text",
+		"text": "Okay [b]Where did it"
+	},
+	"0!66": {
+		"id": "64ffsjep",
+		"file": 0,
+		"line": 66,
+		"type": "text",
+		"text": "Line only shown if condition is met.",
+		"cond": "$score > 20"
+	},
+	"0!69": {
+		"id": "7rpi62d5",
+		"file": 0,
+		"line": 69,
+		"type": "text",
+		"text": "Multiple lines."
+	},
+	"0!70": {
+		"id": "9i0348sb",
+		"file": 0,
+		"line": 70,
+		"type": "text",
+		"text": "Together under one conditional."
+	},
+	"0!72": {
+		"id": "qov5km6w",
+		"file": 0,
+		"line": 72,
+		"type": "text",
+		"text": "Score is ten."
+	},
+	"0!68": {
+		"id": "",
+		"file": 0,
+		"line": 68,
+		"type": "if",
+		"conds": [
+			"$score > 20",
+			"$score == 10"
+		],
+		"cond_lines": [
+			[
+				"0!69",
+				"0!70"
+			],
+			[
+				"0!72"
+			]
+		]
+	},
+	"0!78_0": {
+		"id": "",
+		"file": 0,
+		"line": 78,
+		"type": "action",
+		"action": "sfx sad_audio"
+	},
+	"0!79_0": {
+		"id": "cX74fP8Z",
+		"file": 0,
+		"line": 79,
+		"type": "text",
+		"text": "Glad [b]mondays[] over.",
+		"from": "john"
+	},
+	"0!80_0": {
+		"id": "p195Sw3H",
+		"file": 0,
+		"line": 80,
+		"type": "text",
+		"text": "It's the middle of the week."
+	},
+	"0!82": {
+		"id": "xeqamglx",
+		"file": 0,
+		"line": 82,
+		"type": "text",
+		"text": "The whole vibe shifts on thursday!",
+		"from": "john"
+	},
+	"0!83_0": {
+		"id": "",
+		"file": 0,
+		"line": 83,
+		"type": "action",
+		"action": "sfx happy_audio"
+	},
+	"0!84": {
+		"id": "b81q5fr2",
+		"file": 0,
+		"line": 84,
+		"type": "text",
+		"text": "Aw yeah, friday!",
+		"from": "john"
+	},
+	"0!85_0": {
+		"id": "qLVwOmsy",
+		"file": 0,
+		"line": 85,
+		"type": "text",
+		"text": "It's the weekend."
+	},
+	"0!77": {
+		"id": "",
+		"file": 0,
+		"line": 77,
+		"type": "match",
+		"match": "$time.weekday",
+		"cases": [
+			"MONDAY",
+			"TUESDAY",
+			"WEDNESDAY",
+			"THURSDAY",
+			"FRIDAY",
+			"_"
+		],
+		"case_lines": [
+			[
+				"0!78_0"
+			],
+			[
+				"0!79_0"
+			],
+			[
+				"0!80_0"
+			],
+			[
+				"0!82"
+			],
+			[
+				"0!83_0",
+				"0!84"
+			],
+			[
+				"0!85_0"
+			]
+		]
+	},
+	"0!88_0": {
+		"id": "5VgYZqpg",
+		"file": 0,
+		"line": 88,
+		"type": "text",
+		"text": "Okay, who cares?",
+		"from": "paul"
+	},
+	"0!88_1": {
+		"id": "9LzYif5p",
+		"file": 0,
+		"line": 88,
+		"type": "text",
+		"text": "All that matters to me now.",
+		"from": ""
+	},
+	"0!88": {
+		"id": "7XoYsWhS",
+		"file": 0,
+		"line": 88,
+		"type": "if",
+		"conds": [
+			"$score > 20"
+		],
+		"cond_lines": [
+			[
+				"0!88_0",
+				"0!88_1"
+			]
+		]
+	},
+	"0!91_0_0": {
+		"id": "zES7jnrG",
+		"file": 0,
+		"line": 91,
+		"type": "text",
+		"text": "Woohoo"
+	},
+	"0!91_1_0": {
+		"id": "JiDt97Sn",
+		"file": 0,
+		"line": 91,
+		"type": "text",
+		"text": "score"
+	},
+	"0!91_2_0": {
+		"id": "2BaDgZM9",
+		"file": 0,
+		"line": 91,
+		"type": "text",
+		"text": "Aww man."
+	},
+	"0!91": {
+		"id": "UsCC0X56",
+		"file": 0,
+		"line": 91,
+		"type": "match",
+		"match": "$time.weekday",
+		"cases": [
+			"MONDAY",
+			"TUESDAY",
+			"_"
+		],
+		"case_lines": [
+			[
+				"0!91_0_0"
+			],
+			[
+				"0!91_1_0"
+			],
+			[
+				"0!91_2_0"
+			]
+		]
+	},
+	"0!95_0": {
+		"id": "",
+		"file": 0,
+		"line": 95,
+		"type": "action",
+		"action": "$choice = true"
+	},
+	"0!96": {
+		"id": "kzackpnz",
+		"file": 0,
+		"line": 96,
+		"type": "text",
+		"text": "A line to show after option 1 is chosen."
+	},
+	"0!95": {
+		"id": "v4lr1k88",
+		"file": 0,
+		"line": 95,
+		"type": "option",
+		"text": "Option one.=> flow",
+		"then": [
+			"0!95_0",
+			"0!96"
+		]
+	},
+	"0!97_0": {
+		"id": "",
+		"file": 0,
+		"line": 97,
+		"type": "action",
+		"action": "$score += 10"
+	},
+	"0!97_1": {
+		"id": "",
+		"file": 0,
+		"line": 97,
+		"type": "call",
+		"call": "soot_language_overview.add_to_flow"
+	},
+	"0!97_2": {
+		"id": "",
+		"file": 0,
+		"line": 97,
+		"type": "action",
+		"action": "$score -= 20"
+	},
+	"0!97": {
+		"id": "xkgr6p0p",
+		"file": 0,
+		"line": 97,
+		"type": "option",
+		"text": "Option two.",
+		"then": [
+			"0!97_0",
+			"0!97_1",
+			"0!97_2"
+		]
+	},
+	"0!98": {
+		"id": "zowe5syc",
+		"file": 0,
+		"line": 98,
+		"type": "option",
+		"text": "Option three.",
+		"cond": "$score > 20"
+	},
+	"0!99": {
+		"id": "wjw26m8p",
+		"file": 0,
+		"line": 99,
+		"type": "option",
+		"text": "add_options_from_a_flow",
+		"flag": "++"
+	},
+	"0!100": {
+		"id": "jc0ubr37",
+		"file": 0,
+		"line": 100,
+		"type": "option",
+		"text": "*_flow",
+		"flag": "++"
+	},
+	"0!101": {
+		"id": "5auugqcx",
+		"file": 0,
+		"line": 101,
+		"type": "option",
+		"text": "flow_*",
+		"flag": "++"
+	},
+	"0!94": {
+		"id": "jdwgtt7g",
+		"file": 0,
+		"line": 94,
+		"type": "text",
+		"text": "Text for an options menu.",
+		"options": [
+			"0!95",
+			"0!97",
+			"0!98",
+			"0!99",
+			"0!100",
+			"0!101"
+		]
+	},
+	"0!104_0": {
+		"id": "CVAmq6zy",
+		"file": 0,
+		"line": 104,
+		"type": "option",
+		"text": "West => west"
+	},
+	"0!104_1": {
+		"id": "2jHpMi5B",
+		"file": 0,
+		"line": 104,
+		"type": "option",
+		"text": "East => east",
+		"cond": "$east.unlocked"
+	},
+	"0!104_2": {
+		"id": "nmDFmRqe",
+		"file": 0,
+		"line": 104,
+		"type": "option",
+		"text": "North => north"
+	},
+	"0!104": {
+		"id": "fEuQPUCL",
+		"file": 0,
+		"line": 104,
+		"type": "text",
+		"text": "Where to?",
+		"options": [
+			"0!104_0",
+			"0!104_1",
+			"0!104_2"
+		]
+	},
+	"0!107": {
+		"id": "bcv11knr",
+		"file": 0,
+		"line": 107,
+		"type": "text",
+		"text": "This text should be offset.",
+		"prop": {
+			"tint": "red",
+			"x": "20",
+			"y": "30"
+		}
+	},
+	"0!112": {
+		"id": "3sjsyx0z",
+		"file": 0,
+		"line": 112,
+		"type": "text",
+		"text": "This text should be offset.",
+		"prop": {
+			"x": "20",
+			"y": "30",
+			"tint": "red"
+		}
+	}
+}

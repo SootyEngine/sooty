@@ -37,5 +37,5 @@ rotating = true
 current = true
 script = ExtResource( "3_spa5i" )
 _zoom = 4.0
-noise_scale = 1.0
+noise_scale = 0.25
 noise_aspect = Vector2(1, 0.5)

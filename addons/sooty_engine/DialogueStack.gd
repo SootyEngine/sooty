@@ -14,6 +14,7 @@ signal on_line(text: DialogueLine)
 @export var wait := false
 @export var _started := false
 @export var _stack := []
+@export var _history := []
 
 func has_steps() -> bool:
 	return len(_stack) != 0
@@ -32,6 +33,7 @@ func tick():
 	if _started and not has_steps():
 		_started = false
 		finished.emit()
+		_history.clear()
 	
 	if has_steps() and not wait:
 		tick_started.emit()
@@ -50,7 +52,6 @@ func tick():
 		if not len(line):
 			break
 		
-		print(line.line)
 		match line.line.type:
 			"action": on_action.emit(line.line.action)
 			"goto": goto(line.line.goto, true)
@@ -108,6 +109,8 @@ func goto(flow: String, clear_stack: bool = true) -> bool:
 	
 	if clear_stack:
 		_stack.clear()
+		_history.append("%s.%s" % [d.id, flow])
+		print(_history)
 	
 	_push(d.id, lines)
 	return true

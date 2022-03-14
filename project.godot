@@ -109,6 +109,11 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/file_editor/FE_Util.gd"
 }, {
+"base": "Node",
+"class": &"Fader",
+"language": &"GDScript",
+"path": "res://simple_vn_assets/fader/fader.gd"
+}, {
 "base": "Resource",
 "class": &"FontHelper",
 "language": &"GDScript",
@@ -240,6 +245,7 @@ _global_script_class_icons={
 "FE_Main": "",
 "FE_OptionsMenu": "",
 "FE_Util": "",
+"Fader": "",
 "FontHelper": "",
 "Goal": "",
 "Inventory": "",

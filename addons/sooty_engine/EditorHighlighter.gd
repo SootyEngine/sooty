@@ -156,6 +156,8 @@ func _h_flatline(default: Color, from: int):
 	if i != -1:
 		var j := text.find(S_FLATLINE_END, i+len(S_FLATLINE_START))
 		if j != -1:
+			_c(i+len(S_FLATLINE_START), C_TEXT)
+			
 			var inner := text.substr(i+len(S_FLATLINE_START), j-i-len(S_FLATLINE_START))
 			var off := i+len(S_FLATLINE_START)
 			for part in inner.split(";;"):
@@ -181,7 +183,7 @@ func _h_bbcode(from: int, to: int, default: Color):
 				for tag in inner.split(";"):
 					# colorize action tags
 					if tag.begins_with("~"):
-						_h_action(off+1, off+len(tag))
+						_h_action(off, off+len(tag))
 					# colorize normal tags
 					else:
 						_c(off, C_TAG)
