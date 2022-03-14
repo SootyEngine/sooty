@@ -57,7 +57,7 @@
 		"action": "sfx sad_audio"
 	},
 	"0!12_0": {
-		"id": "uN1QVwjZ",
+		"id": "",
 		"file": 0,
 		"line": 12,
 		"type": "text",
@@ -65,7 +65,7 @@
 		"from": "john"
 	},
 	"0!13_0": {
-		"id": "PCdAjWa3",
+		"id": "",
 		"file": 0,
 		"line": 13,
 		"type": "text",
@@ -95,7 +95,7 @@
 		"from": "john"
 	},
 	"0!18_0": {
-		"id": "HDRN8rvO",
+		"id": "",
 		"file": 0,
 		"line": 18,
 		"type": "text",

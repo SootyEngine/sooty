@@ -1,6 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://qpvcn266pfud"]
+[gd_scene load_steps=7 format=3]
 
-[ext_resource type="Shader" path="res://tunnel.gdshader" id="1_r12a0"]
+[ext_resource type="Shader" path="res://simple_vn_assets/tunnel.gdshader" id="1_r12a0"]
 
 [sub_resource type="OpenSimplexNoise" id="OpenSimplexNoise_eeeho"]
 

@@ -119,7 +119,7 @@ func _set_var_color(i: int, v: String, is_function := false):
 func _h_action(from: int, to: int):
 	_c(from, C_SYMBOL)
 	var inner := text.substr(from+1, to-from-1)
-	var parts := StringAction.split_string(inner)
+	var parts := split_string(inner)
 	var off := from+1
 	for i in len(parts):
 		var part = parts[i]
@@ -184,6 +184,8 @@ func _h_bbcode(from: int, to: int, default: Color):
 					# colorize action tags
 					if tag.begins_with("~"):
 						_h_action(off, off+len(tag))
+					elif tag.begins_with("$"):
+						_set_var_color(off, tag)
 					# colorize normal tags
 					else:
 						_c(off, C_TAG)
@@ -294,3 +296,26 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 				state.erase(k)
 	
 	return state
+
+static func split_string(s: String) -> Array:
+	var out := [""]
+	var in_quotes := false
+	for c in s:
+		if c == '"':
+			if in_quotes:
+				in_quotes = false
+				out[-1] += '"'
+			else:
+				in_quotes = true
+				if out[-1] == "":
+					out[-1] += '"'
+				else:
+					out.append('"')
+		
+		elif c == " " and not in_quotes:
+			if out[-1] != "":
+				out.append("")
+		
+		else:
+			out[-1] += c
+	return out

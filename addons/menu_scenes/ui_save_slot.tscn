@@ -1,7 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://dtalu4pier8jc"]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="1_60yqm"]
-[ext_resource type="Script" path="res://menu_scenes/ui_save_slot.gd" id="1_fmcgh"]
+[ext_resource type="Script" path="res://addons/menu_scenes/ui_save_slot.gd" id="1_fmcgh"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="3_aic4g"]
 
 [node name="save_slot" type="VBoxContainer"]

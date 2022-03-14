@@ -1,9 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://bhlkm21ucnbda"]
+[gd_scene load_steps=5 format=3 uid="uid://c4in2204t1vt5"]
 
-[ext_resource type="Script" path="res://simple_vn/dialogue_runner.gd" id="1_deyhw"]
-[ext_resource type="PackedScene" uid="uid://diracd0fg1m3i" path="res://simple_vn/ui/ui_dialogue.tscn" id="3_kyvc4"]
+[ext_resource type="Script" path="res://addons/simple_vn/dialogue_runner.gd" id="1_deyhw"]
+[ext_resource type="PackedScene" path="res://addons/simple_vn/ui/ui_dialogue.tscn" id="3_kyvc4"]
 [ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="4_n6jin"]
-[ext_resource type="Script" path="res://simple_vn_assets/input_indicator.gd" id="5_s7x7q"]
+[ext_resource type="Script" path="res://addons/simple_vn/input_indicator.gd" id="5_s7x7q"]
 
 [node name="dialogue_runner" type="Node"]
 script = ExtResource( "1_deyhw" )

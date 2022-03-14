@@ -1,9 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://duke0fj4v5l5g"]
+[gd_scene load_steps=4 format=3 uid="uid://dopjd2uitgb3o"]
 
-[ext_resource type="PackedScene" uid="uid://c6vhwwh02guep" path="res://simple_vn_assets/bgs/class_room.tscn" id="1_di2mh"]
-[ext_resource type="PackedScene" uid="uid://bik6jjs7efrg3" path="res://simple_vn_assets/chars/school_boy.tscn" id="2_sg1bl"]
-[ext_resource type="Script" path="res://simple_vn/camera.gd" id="3_spa5i"]
-[ext_resource type="Script" path="res://simple_vn_assets/camera_target.gd" id="4_bty5g"]
+[ext_resource type="PackedScene" path="res://simple_vn_assets/bgs/class_room.tscn" id="1_di2mh"]
+[ext_resource type="PackedScene" path="res://simple_vn_assets/chars/school_boy.tscn" id="2_sg1bl"]
+[ext_resource type="Script" path="res://addons/simple_vn/nodes/camera.gd" id="3_spa5i"]
 
 [node name="first_class" type="ParallaxBackground"]
 
@@ -15,17 +14,9 @@ motion_scale = Vector2(-0.5, -0.5)
 position = Vector2(317, 315)
 motion_scale = Vector2(2, 2)
 
-[node name="face_1" type="Node2D" parent="school_boy"]
-position = Vector2(-3, -444)
-script = ExtResource( "4_bty5g" )
-
 [node name="school_boy2" parent="." instance=ExtResource( "2_sg1bl" )]
 position = Vector2(-343, 317)
 motion_scale = Vector2(2, 2)
-
-[node name="face_2" type="Node2D" parent="school_boy2"]
-position = Vector2(-2, -448)
-script = ExtResource( "4_bty5g" )
 
 [node name="school_boy3" parent="." instance=ExtResource( "2_sg1bl" )]
 position = Vector2(-10, 312)

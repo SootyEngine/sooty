@@ -99,7 +99,7 @@ static func parse(file: String) -> Dictionary:
 				_clean(new_list[i], out_lines)
 	
 	# generate unique ids
-	var GENERATE_TRANSLATIONS := true
+	var GENERATE_TRANSLATIONS := false
 	if GENERATE_TRANSLATIONS:
 		var translations := []
 		for k in out_lines:

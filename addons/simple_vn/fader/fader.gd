@@ -2,7 +2,7 @@ extends Node
 class_name Fader
 
 static func create(callback: Variant, kwargs := {}):
-	var node = load("res://simple_vn_assets/fader/fader.tscn").instantiate()
+	var node = load("res://addons/simple_vn/fader/fader.tscn").instantiate()
 	Global.add_child(node)
 	node.setup(callback, kwargs)
 

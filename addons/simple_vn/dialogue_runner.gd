@@ -28,7 +28,7 @@ func goto(id: String = ""):
 	Fader.create(_goto.bind(id))
 
 func _goto(id: String):
-	get_tree().change_scene("res://menu_scenes/%s.tscn" % id)
+	get_tree().change_scene("res://addons/menu_scenes/ui_%s.tscn" % id)
 
 func scene(id: String):
 	add_pauser(self)
@@ -81,7 +81,6 @@ func wait(time: float):
 	add_pauser(self)
 	get_tree().create_timer(time).timeout.connect(remove_pauser.bind(self))
 
-
 func _on_started():
 	print("STARTED")
 
@@ -89,8 +88,8 @@ func _on_finished():
 	print("FINISHED ", stack._history)
 	print(State._get_changed_states())
 	speaker_cache.clear()
-	if len(stack._history) and stack._history[-1] != "SPECIAL.END":
-		stack.goto("SPECIAL.END")
+	if len(stack._history) and stack._history[-1] != "MAIN.END":
+		stack.goto("MAIN.END")
 
 func _on_text(d: DialogueLine):
 	var from = d.from

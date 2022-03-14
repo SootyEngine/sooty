@@ -220,7 +220,7 @@
 		"action": "sfx sad_audio"
 	},
 	"0!79_0": {
-		"id": "cX74fP8Z",
+		"id": "",
 		"file": 0,
 		"line": 79,
 		"type": "text",
@@ -228,7 +228,7 @@
 		"from": "john"
 	},
 	"0!80_0": {
-		"id": "p195Sw3H",
+		"id": "",
 		"file": 0,
 		"line": 80,
 		"type": "text",
@@ -258,7 +258,7 @@
 		"from": "john"
 	},
 	"0!85_0": {
-		"id": "qLVwOmsy",
+		"id": "",
 		"file": 0,
 		"line": 85,
 		"type": "text",
@@ -301,7 +301,7 @@
 		]
 	},
 	"0!88_0": {
-		"id": "5VgYZqpg",
+		"id": "",
 		"file": 0,
 		"line": 88,
 		"type": "text",
@@ -309,7 +309,7 @@
 		"from": "paul"
 	},
 	"0!88_1": {
-		"id": "9LzYif5p",
+		"id": "",
 		"file": 0,
 		"line": 88,
 		"type": "text",
@@ -317,7 +317,7 @@
 		"from": ""
 	},
 	"0!88": {
-		"id": "7XoYsWhS",
+		"id": "ZAUMttZ5",
 		"file": 0,
 		"line": 88,
 		"type": "if",
@@ -332,28 +332,28 @@
 		]
 	},
 	"0!91_0_0": {
-		"id": "zES7jnrG",
+		"id": "",
 		"file": 0,
 		"line": 91,
 		"type": "text",
 		"text": "Woohoo"
 	},
 	"0!91_1_0": {
-		"id": "JiDt97Sn",
+		"id": "",
 		"file": 0,
 		"line": 91,
 		"type": "text",
 		"text": "score"
 	},
 	"0!91_2_0": {
-		"id": "2BaDgZM9",
+		"id": "",
 		"file": 0,
 		"line": 91,
 		"type": "text",
 		"text": "Aww man."
 	},
 	"0!91": {
-		"id": "UsCC0X56",
+		"id": "fPm2o3XD",
 		"file": 0,
 		"line": 91,
 		"type": "match",
@@ -481,14 +481,14 @@
 		]
 	},
 	"0!104_0": {
-		"id": "CVAmq6zy",
+		"id": "",
 		"file": 0,
 		"line": 104,
 		"type": "option",
 		"text": "West => west"
 	},
 	"0!104_1": {
-		"id": "2jHpMi5B",
+		"id": "",
 		"file": 0,
 		"line": 104,
 		"type": "option",
@@ -496,14 +496,14 @@
 		"cond": "$east.unlocked"
 	},
 	"0!104_2": {
-		"id": "nmDFmRqe",
+		"id": "",
 		"file": 0,
 		"line": 104,
 		"type": "option",
 		"text": "North => north"
 	},
 	"0!104": {
-		"id": "fEuQPUCL",
+		"id": "gWWXVWKm",
 		"file": 0,
 		"line": 104,
 		"type": "text",
