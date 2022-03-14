@@ -168,6 +168,7 @@ func _parse(btext: String):
 		
 		# close old fashioned way
 		elif tag.begins_with("/"):
+			# TODO
 			pass
 		
 		else:
@@ -190,7 +191,10 @@ func _parse_opening(tag: String):
 			pop()
 		else:
 #			_add_text(str(got))
-			_parse(str(got))
+			if got is Object and got.has_method("to_string"):
+				_parse(got.to_string())
+			else:
+				_parse(str(got))
 		
 		if len(p) == 2:
 			_stack_pop()

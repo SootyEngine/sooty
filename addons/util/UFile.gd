@@ -99,7 +99,7 @@ static func remove_directory(path: String) -> bool:
 	
 	return false
 
-static func save_node(path: String, node: Node = null) -> bool:
+static func save_node(path: String, node: Node) -> bool:
 	var packed := PackedScene.new()
 	if not UError.error(packed.pack(node), "Can't save '%s'." % path):
 		if not UError.error(ResourceSaver.save(path, packed, ResourceSaver.FLAG_COMPRESS), "Can't save '%s'." % path):
@@ -107,7 +107,7 @@ static func save_node(path: String, node: Node = null) -> bool:
 	return false
 
 # allows loading external assets if in "user://"
-static func load2(path: String, default: Variant = null) -> Variant:
+static func load2(path: String, default = null) -> Variant:
 	if path.begins_with(get_user_dir()):
 		var type = path.get_extension().to_lower()
 		if type in EXT_IMAGE:
@@ -128,7 +128,7 @@ static func save_image(path:String, image:Image) -> bool:
 		return true
 	return false
 
-static func load_image(path: String, default: ImageTexture = null) -> ImageTexture:
+static func load_image(path: String, default = null) -> ImageTexture:
 	if file_exists(path):
 		var image := Image.new()
 		image.load(path)
@@ -139,7 +139,7 @@ static func load_image(path: String, default: ImageTexture = null) -> ImageTextu
 	push_error("No image at %s" % path)
 	return default
 
-static func load_audio(path: String, default: AudioStream = null) -> AudioStream:
+static func load_audio(path: String, default = null) -> AudioStream:
 	var f := File.new()
 	if f.file_exists(path):
 		var aud:AudioStream
@@ -154,7 +154,7 @@ static func load_audio(path: String, default: AudioStream = null) -> AudioStream
 	return default
 
 # Like JSON, but full serialization support.
-static func save_to_resource(path: String, data: Variant = null) -> bool:
+static func save_to_resource(path: String, data = null) -> bool:
 	var res := Resource.new()
 	res.set_meta("data", data)
 	return not UError.error(ResourceSaver.save(path, res, ResourceSaver.FLAG_COMPRESS), "Can't save to '%s'." % path)
@@ -166,7 +166,7 @@ static func load_from_resource(path: String, default: Variant = null) -> Variant
 		return res.get_meta("data")
 	return default
 
-static func load_json(path: String, default: Variant = null) -> Variant:
+static func load_json(path: String, default = null) -> Variant:
 	var f := File.new()
 	if f.file_exists(path):
 		if not UError.error(f.open(path, File.READ), "Can't open '%s'." % path):

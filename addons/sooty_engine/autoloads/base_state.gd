@@ -14,7 +14,9 @@ func _ready() -> void:
 
 func install(path: String):
 	var mod: Node = load(path).new()
+	mod.set_name(path.get_file().split(".", true, 1)[0])
 	add_child(mod)
+	return mod
 
 func _post_init():
 	_default = _get_state()
@@ -45,13 +47,32 @@ func _get_state() -> Dictionary:
 		UDict.merge(out, UObject.get_state(child), true)
 	return out
 
+func has(property: StringName) -> bool:
+	var path := str(property).split(".")
+	property = path[-1]
+	for m in _children:
+		var o = UObject.get_penultimate(m, path)
+		if o != null and property in o:
+			return true
+	return false
+
+func _get_objects_property(obj: Object) -> String:
+	for k in _default:
+		var o = self[k]
+		if o is Object and o == obj:
+			return k
+	return ""
+
 func _get(property: StringName):
 	var path := str(property).split(".")
 	property = path[-1]
 	for m in _children:
 		var o = UObject.get_penultimate(m, path)
-		if property in o:
-			return o[property]
+		if o != null:
+			if property in o:
+				return o[property]
+			else:
+				push_error("No %s in %s" % [property, o])
 
 func _set(property: StringName, value) -> bool:
 	var path := str(property).split(".")

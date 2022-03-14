@@ -8,9 +8,9 @@ extends Node
 var speaker_cache := []
 
 func _init() -> void:
+	add_to_group("flow_manager")
 	add_to_group("sa:scene")
 	add_to_group("sa:goto")
-	add_to_group("flow_manager")
 	add_to_group("sa:caption")
 	add_to_group("sa:wait")
 
@@ -86,7 +86,10 @@ func _on_started():
 
 func _on_finished():
 	print("FINISHED ", stack._history)
-	print(State._get_changed_states())
+	print("STATE")
+	UDict.log(State._get_state())
+	print("CHANGED STATE")
+	UDict.log(State._get_changed_states())
 	speaker_cache.clear()
 	if len(stack._history) and stack._history[-1] != "MAIN.END":
 		stack.goto("MAIN.END")

@@ -204,6 +204,9 @@ static func _clean(line: Dictionary, all_lines: Dictionary) -> String:
 			_erase(line, ["text", "cond", "cond_type"])
 		_: pass
 	
+	if id in all_lines:
+		var old = all_lines[id]
+		push_error("Line at %s %s replaced with %s" % [id, old, line])
 	all_lines[id] = line
 	return id
 
@@ -322,6 +325,13 @@ static func _line_as_option(line: Dictionary):
 		match li.type:
 			_: lines.append(li)
 	
+	if S_FLOW_GOTO in line.text:
+		var p = line.text.split(S_FLOW_GOTO, true, 1)
+		line.text = p[0].strip_edges()
+		var i = 1000
+		var id = "%s_%s"%[line.flat, i] if "flat" in line else str(i)
+		var fstep = _add_flow_action({did=line.did, file=line.file, line=line.line, flat=id}, "goto", p[1].strip_edges())
+		lines.append(fstep)
 #	var p := _trailing_tokens(line.text, ["=>", "==", "~"])
 #	line.text = p[0]
 #	for t in p[1]:

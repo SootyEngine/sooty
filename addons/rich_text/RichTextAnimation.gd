@@ -130,7 +130,7 @@ func _trigger(type: int, data: Variant):
 		TRIG_SKIP_ENDED: _skip = false
 		_: print("UNKOWN TRIGGER")
 
-func _register_trigger(type: int, data: Variant=null) -> bool:
+func _register_trigger(type: int, data = null) -> bool:
 	var at := get_total_character_count()-1
 	var tr = [type, data]
 	

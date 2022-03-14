@@ -19,7 +19,6 @@ var wait_timer := 0.0
 var hovered := 0:
 	set(h):
 		h = wrapi(h, 0, option_container.get_child_count()-1)
-		prints(h, option_container.get_child_count())
 		if hovered != h:
 			hovered = h
 			var index := 0
@@ -36,12 +35,11 @@ func _ready() -> void:
 	text.nicer_quotes_format = "[w=.5;q;tomato][dim]“[]%s[dim]”[][][w=.5]"
 	text.quote_started.connect(_quote_started)
 	text.quote_ended.connect(_quote_ended)
-	
+	text.faded_in.connect(_done_fading_in)
 	resized.connect(_resized)
 	_resized()
 
 func _resized():
-	print("resized")
 	var ts = $backing.get_texture().get_size()
 	$backing.global_position = get_global_rect().position
 	$backing.scale = get_rect().size / ts
@@ -72,8 +70,10 @@ func _process(delta: float) -> void:
 	elif Input.is_action_just_pressed("ui_down"):
 		hovered += 1
 
+@export var has_options := false
+
 func show_line(d: DialogueLine, who: Variant):
-	get_tree().get_first_node_in_group("flow_manager").add_pauser(self)
+	owner.add_pauser(self)
 	text.set_bbcode(d.text)
 	if who is String:
 		from.visible = true
@@ -81,11 +81,19 @@ func show_line(d: DialogueLine, who: Variant):
 	else:
 		from.visible = false
 	visible = true
+	has_options = false
 	
 	if d.has_options():
+		has_options = true
 		var op := d.get_options()
-		if len(op):
+		var op_passing = op.filter(func(x): return x.passed)
+		if len(op_passing):
 			set_options(op)
+			hide()
+			show()
+
+func _done_fading_in():
+	options.modulate.a = 1.0
 
 func end():
 	get_tree().get_first_node_in_group("flow_manager").remove_pauser(self)
@@ -93,9 +101,10 @@ func end():
 
 func set_options(odata: Array):
 	waiting_for_option = true
-	options.visible = true
 	rect_size.y = 0.0
 	hovered = -1
+	options.visible = true
+	options.modulate.a = 0.0
 	
 	for i in len(odata):
 		var opp := option.duplicate()
@@ -105,12 +114,8 @@ func set_options(odata: Array):
 		opp.pressed.connect(select_option.bind(odata[i]))
 		opp.set_owner(owner)
 	
-#	_update_size.call_deferred()
 	wait_timer = 1.0
 	
-#func _update_size():
-#	rect_size.y = option_container.rect_size.y
-#	rect_position.y = get_viewport_rect().size.y - rect_size.y
 
 func select_option(o: DialogueLine):
 	if wait_timer >= 0:

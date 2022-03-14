@@ -64,7 +64,7 @@ static func count(t: String, c: String) -> int:
 		i += 1
 	return i
 
-static func get_nested(object: Object, property: String, default: Variant = null):
+static func get_nested(object: Object, property: String, default = null):
 	var parts := property.split(".")
 	var out = object
 	

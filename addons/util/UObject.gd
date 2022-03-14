@@ -39,7 +39,7 @@ static func set_state(o: Object, data: Dictionary):
 				_:
 					o[prop.name] = data[prop.name]
 
-static func patch(target: Variant, patch: Dictionary) -> int:
+static func patch(target: Variant, patch: Dictionary, erase_patched := false) -> int:
 	var lines_changed := 0
 	for k in patch:
 		if k in target:
@@ -53,9 +53,12 @@ static func patch(target: Variant, patch: Dictionary) -> int:
 		elif target is Dictionary:
 			target[k] = patch[k]
 			lines_changed += 1
+			if erase_patched:
+				patch.erase(k)
 		
-		else:
+		elif not erase_patched:
 			push_error("Couldn't find '%s' in %s." % [k, target])
+	
 	return lines_changed
 
 static func call_callable(c: Callable, args: Array) -> Variant:
@@ -72,7 +75,18 @@ static func call_callable(c: Callable, args: Array) -> Variant:
 			return null
 
 # Properly divides an array as arguments for a function. Like python.
-static func call_w_args(obj: Object, method: String, in_args: Array = []) -> Variant:
+static func call_w_args(target: Object, method: String, in_args: Array = []) -> Variant:
+	var obj = target
+	
+	if "." in method:
+		var parts := method.split(".")
+		for i in len(parts)-1:
+			if parts[i] in obj:
+				obj = obj[parts[i]]
+			else:
+				push_error("No method '%s(%s)' in %s." % [method, in_args, target])
+		method = parts[-1]
+	
 	if not obj.has_method(method):
 		push_error("No method '%s(%s)' in %s." % [method, in_args, obj])
 		return
@@ -143,7 +157,7 @@ static func try_set_at(d: Variant, path: Array, value: Variant) -> bool:
 	else:
 		return false
 
-static func try_get_at(d: Variant, path: Array, default: Variant = null) -> Variant:
+static func try_get_at(d: Variant, path: Array, default = null) -> Variant:
 	var o = get_penultimate(d, path)
 	if o and path[-1] in o:
 		return o[path[-1]]

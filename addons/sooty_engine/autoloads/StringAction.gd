@@ -1,7 +1,12 @@
 @tool
 extends Node
 
-const OPERATOR_ASSIGN := ["=", "+=", "-="]
+const OP_ASSIGN := ["=", "+=", "-=", "*=", "/="]
+const OP_RELATION := ["==", "!=", ">", "<", ">=", "<="]
+const OP_ARITHMETIC := ["+", "-", "*", "/", "%"]
+const OP_LOGICAL := ["and", "or", "not", "&&", "||", "!"]
+const OP_ALL := OP_ASSIGN + OP_RELATION + OP_ARITHMETIC + OP_LOGICAL
+const BUILT_IN := ["true", "false", "null"]
 
 var pipes := {
 	"commas": func(x): return UString.commas(x),
@@ -61,9 +66,22 @@ func _pipe_pick(x) -> Variant:
 
 # Test whether a command is true or false.
 func test(condition: String) -> bool:
-	var result = execute(condition, false)
-#	prints("Test '%s' got '%s'." % [condition, result])
+	var parts := split_string(condition)
+	for i in len(parts):
+		parts[i] = _str_to_varstr(parts[i])
+	var new_condition = " ".join(parts)
+	var result = execute(new_condition, false)
 	return true if result else false
+
+func _str_to_varstr(s: String):
+	if s.begins_with("$"):
+		s = s.substr(1)
+		var got = State._get(s)
+		return var2str(got)
+	elif s in BUILT_IN or s in OP_ALL:
+		return s
+	else:
+		return var2str(str_to_var(s))
 
 func execute(e: String, default = null, d: Dictionary={}) -> Variant:
 	# Pipe value through a Callable?
@@ -83,7 +101,7 @@ func execute(e: String, default = null, d: Dictionary={}) -> Variant:
 
 func do(s: String) -> Variant:
 	var got = null
-	for a in s.split(";@"):
+	for a in s.split(";~"):
 		got = _do(a)
 	return got
 
@@ -101,20 +119,29 @@ func _do(s: String) -> Variant:
 			return _do_assign([s.trim_suffix("--"), "-=", "1"])
 	
 	# assignment
-	if len(parts) > 2 and parts[1] in OPERATOR_ASSIGN:
+	if len(parts) > 2 and parts[1] in OP_ASSIGN:
 		return _do_assign(parts)
 	
 	return _do_function(parts)
 
 func _do_assign(parts: Array) -> Variant:
 	var key = parts[0]
-	if not key in State:
+	
+	if key.begins_with("$"):
+		key = key.substr(1)
+		# TODO: currently everything on the left side is being treated as a state path.
+		
+	if not State.has(key):
 		push_error("No property '%s' in State." % key)
 		return
 	
 	var eval = parts[1]
-	var old_value = State[key]
+	var old_value = State._get(key)
 	var new_value
+	
+	if old_value is Callable:
+		push_error("'%s' is a function but was treated as a property." % key)
+		return
 	
 	# simple variable assignment
 	if len(parts) == 3:
@@ -129,7 +156,8 @@ func _do_assign(parts: Array) -> Variant:
 		"=": State._set(key, new_value)
 		"+=": State._set(key, old_value + new_value)
 		"-=": State._set(key, old_value - new_value)
-	return State[key]
+	
+	return State._get(key)
 
 func _do_function(parts: Array) -> Variant:
 	var args := []
@@ -145,21 +173,33 @@ func _do_function(parts: Array) -> Variant:
 		else:
 			args.append(str_to_var(p))
 	
-	# if the function exists in func, just call that
-	if fname in pipes:
-		return UObject.call_callable(pipes[fname], args)
-	
-	var gname := fname
-	
-	if "." in fname:
-		var p := fname.split(".", true, 1)
-		gname = p[0]
-		fname = p[1]
-	
 	var out = null
-	var group := "sa:%s" % gname
-	for node in Global.get_tree().get_nodes_in_group(group):
-		out = UObject.call_w_args(node, fname, args)
+	
+	if fname.begins_with("$"):
+		fname = fname.substr(1)
+		
+		out = UObject.call_w_args(State, fname, args)
+		
+	else:
+		# if the function exists in func, just call that
+		if fname in pipes:
+			return UObject.call_callable(pipes[fname], args)
+		
+		var gname := fname
+		
+		if "." in fname:
+			var p := fname.split(".", true, 1)
+			gname = p[0]
+			fname = p[1]
+		
+		
+		var group := "sa:%s" % gname
+		var nodes :=  Global.get_tree().get_nodes_in_group(group)
+		if len(nodes) == 0:
+			push_error("No node for %s" % [[gname, fname, args]])
+		for node in nodes:
+			out = UObject.call_w_args(node, fname, args)
+	
 	return out
 	
 static func split_string(s: String) -> Array:
@@ -188,11 +228,12 @@ static func split_string(s: String) -> Array:
 func str_to_var(s: String) -> Variant:
 	# variable, leave unquoted
 	if s.begins_with("$"):
-		var prop := s.substr(1)
-		if prop in State:
-			return State[s.substr(1)]
+		var key = s.substr(1)
+		if State.has(key):
+			return State._get(key)
+		
 		else:
-			push_error("No property '%s' in State." % prop)
+			push_error("No property '%s' in State." % s)
 			return null
 	
 	# string

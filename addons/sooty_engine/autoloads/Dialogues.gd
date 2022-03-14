@@ -7,6 +7,9 @@ signal reloaded(dialogue: Dialogue)
 var load_all_on_startup := true
 var cache := {}
 
+func has(id: String) -> bool:
+	return id in cache
+	
 func get_dialogue_ids() -> Dictionary:
 	var out := {}
 	for id in cache:
@@ -15,8 +18,13 @@ func get_dialogue_ids() -> Dictionary:
 
 func _ready() -> void:
 	if load_all_on_startup:
+		if not UFile.dir_exists("res://dialogue"):
+			push_error("No res://dialogue folder!")
+			return
 		var memory_before = OS.get_static_memory_usage()
+		print("[Dialogues]")
 		for file in UFile.get_files("res://dialogue", ".soot"):
+			print("\t- ", file)
 			add_dialogue(Dialogue.new(file))
 		var memory_used = OS.get_static_memory_usage() - memory_before
 		prints("Dialogues:", String.humanize_size(memory_used))
@@ -51,6 +59,6 @@ func get_dialogue(id: String) -> Dialogue:
 	else:
 		return cache[id]
 
-func get_flow_lines(flow: String) -> Array[String]:
-	var p := flow.split(".", true, 1)
-	return get_dialogue(p[0]).get_flow_lines(p[1])
+#func get_flow_lines(flow: String) -> Array[String]:
+#	var p := flow.split(".", true, 1)
+#	return get_dialogue(p[0]).get_flow_lines(p[1])

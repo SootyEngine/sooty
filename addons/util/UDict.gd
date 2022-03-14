@@ -5,7 +5,7 @@ class_name UDict
 static func log(d: Variant, msg: String = ""):
 	print(msg, JSON.new().stringify(d, "\t", false))
 
-static func first(d: Dictionary, default: Variant = null) -> Variant:
+static func first(d: Dictionary, default = null) -> Variant:
 	return default if not len(d) else d.values()[0]
 
 static func recycle(target: Dictionary, patch: Dictionary) -> Dictionary:

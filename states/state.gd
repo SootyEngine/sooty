@@ -1,19 +1,5 @@
 extends Node
 
-func _init():
-	add_to_group("sa:quest")
-	add_to_group("sa:gain")
-	add_to_group("sa:lose")
-
-func quest(id: String, action: String, args: Array):
-	print("Called quest(%s)!" % [id, action, args])
-
-func gain(item: String, amount: int = 1, kwargs: Dictionary = {}):
-	player.inventory.gain(item, amount, kwargs)
-
-func lose(item: String, amount: int = 1, kwargs: Dictionary = {}):
-	player.inventory.lose(item, amount, kwargs)
-
 var score := 0
 var choice := ""
 var day_of_week := "monday"
@@ -56,12 +42,13 @@ var mary := Character.new({
 var q_the_winner := Quest.new({
 	name="The Winner",
 	desc="Get the winner before anyone else does.",
-	goals={
-		knife=Goal.new({
-			name="Knife",
-			toll=10
-		})
-	}
+	requires=["q_FindTheKnife", "q_FindTheSpoon"]
+})
+var q_FindTheKnife := Quest.new({
+	name="Find the knife"
+})
+var q_FindTheSpoon := Quest.new({
+	name="Find the spoon"
 })
 
 # ITEMS

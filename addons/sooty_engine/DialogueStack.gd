@@ -79,47 +79,37 @@ func start(id: String):
 			var first = Dialogues.get_dialogue(id).flows.keys()[0]
 			goto("%s.%s" % [id, first])
 
-func goto(flow: String, clear_stack: bool = true) -> bool:
-	var d: Dialogue
+func goto(did_flow: String, clear_stack: bool = true) -> bool:
+	var p := did_flow.split(".", true, 1)
+	var did: String = p[0]
+	var flow: String = p[1]
 	
-	if "." in flow:
-		var p := flow.split(".", true, 1)
-		d = Dialogues.get_dialogue(p[0])
-		flow = p[1]
-		
-	elif has_steps():
-		d = get_current_dialogue()
-	
-	else:
-		push_error("Call start() before goto().")
+	if not Dialogues.has(did):
+		push_error("No dialogue %s." % did)
 		return false
 	
-#	if not Dialogues.has(d.id):
-#		push_error("No dialogue %s." % d.id)
-#		return false
-	
+	var d := Dialogues.get_dialogue(did)
 	if not d.has_flow(flow):
-		push_error("No flow '%s' in '%s'." % [flow, d.id])
+		push_error("No flow '%s' in '%s'." % [flow, did])
 		return false
 	
 	var lines := d.get_flow_lines(flow)
 	if not len(lines):
-		print("Can't find lines for %s." % flow)
+		push_error("Can't find lines for %s." % flow)
 		return false
 	
 	if clear_stack:
 		_stack.clear()
-		_history.append("%s.%s" % [d.id, flow])
-		print(_history)
+		_history.append("%s.%s" % [did, flow])
 	
-	_push(d.id, lines)
+	_push(did, lines)
 	return true
 
 # select an option, adding it's lines to the stack
-func select_option(option: DialogueLine): # step: Dictionary, option: int):
-	var d := get_current_dialogue()
+func select_option(option: DialogueLine):
 	var o := option._data
-	_push(d.id, o.lines)
+	if "then" in o:
+		_push(option._dialogue_id, o.then)
 	option_selected.emit(o)
 
 func _push(did: String, lines: Array, extra := {}):
@@ -144,10 +134,9 @@ func pop_next_line() -> Dictionary:
 		# 'if' 'elif' 'else' chain
 		if line.type == "if":
 			var d := Dialogues.get_dialogue(did)
-			for i in len(line.line.tests):
-				var test_line := d.get_line(line.tests[i])
-				if StringAction.test(test_line.cond):
-					_push(d.id, test_line.lines)
+			for i in len(line.conds):
+				if StringAction.test(line.conds[i]):
+					_push(d.id, line.cond_lines[i])
 					break
 		
 		# match chain

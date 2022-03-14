@@ -30,8 +30,9 @@ func _parse_file(file: String):
 #	UDict.log(out_flows)
 #	UDict.log(out_lines)
 	
-	UFile.save_json("res://dialogue_debug/%s.flows.json" % [id], flows, true)
-	UFile.save_json("res://dialogue_debug/%s.lines.json" % [id], lines, true)
+	if UFile.dir_exists("res://dialogue_debug"):
+		UFile.save_json("res://dialogue_debug/%s.flows.json" % [id], flows, true)
+		UFile.save_json("res://dialogue_debug/%s.lines.json" % [id], lines, true)
 
 func was_file_modified() -> bool:
 	for file in files:
@@ -52,15 +53,15 @@ func get_flow_lines(flow: String) -> Array[String]:
 	var out := []
 	# lines in flows begining with
 	if flow.begins_with("*"):
-		flow = flow.trim_prefix("*")
+		var search = flow.trim_prefix("*")
 		for f in flows.keys():
-			if f.ends_with(flow):
+			if f.ends_with(search):
 				out.append_array(get_flow(f).then)
 	# lines in flows ending with
 	elif flow.ends_with("*"):
-		flow = flow.trim_suffix("*")
+		var search = flow.trim_suffix("*")
 		for f in flows.keys():
-			if f.begins_with(flow):
+			if f.begins_with(search):
 				out.append_array(get_flow(f).then)
 	# lines in flow alone
 	else:

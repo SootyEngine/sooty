@@ -1,25 +1,35 @@
 extends Node
+class_name Pinger
+
+static func ping(msg := {}):
+	Global.get_tree().call_group("notification_manager", "_ping", msg)
 
 @export var prefab: PackedScene
-@export var wait: bool = false
-@export var queue: Array = []
+@export var wait := false
+@export var queue := []
+@export var time_delay := 2.0
+
+func _init():
+	add_to_group("notification_manager")
 
 func _ready() -> void:
-	$Button.pressed.connect(notify)
+	$Button.pressed.connect(_ping)
 
-var index := 0
-func notify(msg: Dictionary = {text="New Notification"}):
-	msg.text += str(index)
-	index += 1
+func _ping(msg := {}):
 	queue.append(msg)
-	
-	if not wait or not $VBoxContainer.get_child_count():
-		_next()
+	_next()
 
 func _next():
-	if len(queue):
+	if len(queue) and not wait:
 		var n: Node = prefab.instantiate()
 		n.tree_exited.connect(_next)
 		$VBoxContainer.add_child(n)
 		$VBoxContainer.move_child(n, 0)
-		n.setup(queue.pop_front())
+		n.setup.call_deferred(queue.pop_front())
+		
+		wait = true
+		get_tree().create_timer(time_delay).timeout.connect(_stop_waiting)
+
+func _stop_waiting():
+	wait = false
+	_next()

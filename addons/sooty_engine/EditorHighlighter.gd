@@ -130,7 +130,7 @@ func _h_conditional(from: int, to: int):
 	var off := from
 	var parts = Array(text.substr(from, to-from+1).split(" "))
 	
-	if parts[0] in ["if", "elif", "else", "match"]:
+	if parts[0] in ["if", "elif", "else", "match", "not"]:
 		var part = parts.pop_front()
 		_c(off, C_SYMBOL)
 		off += len(part)+1
@@ -278,7 +278,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 			_c(a, C_SYMBOL)
 			_c(b, C_SYMBOL, len(S_COND_END))
 			_h_conditional(a+len(S_COND_START), b-1)
-			from = b+len(S_COND_END)
+#			from = b+len(S_COND_END)
 		
 		_h_line(from, to if to>0 else len(text))
 		
