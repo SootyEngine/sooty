@@ -1,0 +1,27 @@
+[gd_scene load_steps=2 format=3 uid="uid://0ij45i15hf08"]
+
+[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="1_isrxw"]
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_right = 340.0
+offset_bottom = 334.0
+color = Color(0, 0, 0, 0.321569)
+__meta__ = {
+"_edit_layout_mode": 0,
+"_edit_use_custom_anchors": false
+}
+
+[node name="RichTextLabel" type="RichTextLabel" parent="ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_font_sizes/mono_font_size = 16
+theme_override_font_sizes/bold_italics_font_size = 16
+theme_override_font_sizes/italics_font_size = 16
+theme_override_font_sizes/bold_font_size = 16
+theme_override_font_sizes/normal_font_size = 16
+script = ExtResource( "1_isrxw" )
+bbcode = "okay [dim] [4 ]who cares?[] not me"
