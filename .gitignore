@@ -1,6 +1,6 @@
 # Godot 4+ specific ignores
 .godot/
-dialogue/
+dialogue_debug/
 
 # Godot-specific ignores
 export.cfg
