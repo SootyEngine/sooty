@@ -28,13 +28,16 @@ Some tags are self closing.
 |---|----|-------|
 |*color_name*|Use any built in Godot color name: `[deep_sky_blue]Blue Text[]` ||
 |(n,n,n,n)|RGBA color. For use with format: `"[%s]text[]" % Color.TEAL`||
+|`dim`|Dims color by 33%.||
+|`lit`|Lightens color by 33%.||
+|`hue` `sat` `val`|Modify hue/sat/val of color.||
 |*number*|Any number will be added/subtracted to the font size.||
 |`wait`|Pause the animation.|`[w]` `[wait]` `[w=2]`|
 |`hold`|Hold animation till user action.|`[h]` `[hold]`|
 |`pace`|Change pace of animation.|`[p]` `[pace]` `[p=2]`|
 |`~action`|Can call any [action](#action) at that point in the animation.||
-|`$property`|Inserts the value of a state.<br>Can be piped to a function. `[$player.coins\|commas]`||
-|`[lb]` `[rb]`|Insert brackets *[]*||
+|`$property`|Inserts the value of a state.<br>Will auto close any style it's wrapped with:<br>`The [$stranger;b;red] looks at you.`<br>Can be piped to a function. `[$player.coins\|commas]`||
+|`lb` `rb`|Insert brackets *[]*||
 
 Along with typical: `b` `i` `bi` `u`
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://c4in2204t1vt5"]
+[gd_scene load_steps=8 format=3 uid="uid://c4in2204t1vt5"]
 
 [ext_resource type="Script" path="res://addons/simple_vn/dialogue_runner.gd" id="1_deyhw"]
 [ext_resource type="PackedScene" uid="uid://cp2drxo6cxr6d" path="res://addons/simple_vn/ui/ui_dialogue.tscn" id="3_kyvc4"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dempu4g1lpwsn" path="res://addons/notifications/ui_notifications.tscn" id="5_fm15x"]
 [ext_resource type="Script" path="res://addons/simple_vn/input_indicator.gd" id="5_s7x7q"]
 [ext_resource type="PackedScene" uid="uid://cks1lnab5po8k" path="res://addons/sys_quests/ui_quest_list.tscn" id="6_p3o3l"]
+[ext_resource type="PackedScene" uid="uid://0ij45i15hf08" path="res://addons/sys_achievements/ui_achievements.tscn" id="7_w5j1t"]
 
 [node name="dialogue_runner" type="Node"]
 script = ExtResource( "1_deyhw" )
@@ -33,3 +34,9 @@ offset_left = 37.0
 offset_top = 58.0
 offset_right = 37.0
 offset_bottom = 58.0
+
+[node name="achievements" parent="." instance=ExtResource( "7_w5j1t" )]
+offset_left = 431.0
+offset_top = 17.0
+offset_right = 431.0
+offset_bottom = 17.0
