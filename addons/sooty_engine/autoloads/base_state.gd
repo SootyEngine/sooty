@@ -56,13 +56,6 @@ func _has(property: StringName) -> bool:
 			return true
 	return false
 
-func _get_objects_property(obj: Object) -> String:
-	for k in _default:
-		var o = self[k]
-		if o is Object and o == obj:
-			return k
-	return ""
-
 func _get(property: StringName):
 	var path := str(property).split(".")
 	property = path[-1]
@@ -93,6 +86,13 @@ func _set(property: StringName, value) -> bool:
 			return true
 	push_error("No property '%s' in State. (Attempted '%s = %s')" % [property, property, value])
 	return true
+
+func _get_objects_property(obj: Object) -> String:
+	for k in _default:
+		var o = self[k]
+		if o is Object and o == obj:
+			return k
+	return ""
 
 func _get_all_of_type(type: Variant) -> Dictionary:
 	var out := {}

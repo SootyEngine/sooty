@@ -324,7 +324,7 @@ func _add_text(t: String):
 #	if _state.get("condition", true):
 	for pipe in _state.pipes:
 		var got = StringAction.pipe(t, pipe)
-		prints("PIPED (%s) WITH (%s) ANDGOT (%s)" % [t, pipe, got])
+#		prints("PIPED (%s) WITH (%s) ANDGOT (%s)" % [t, pipe, got])
 		t = str(got)
 	add_text(t)
 

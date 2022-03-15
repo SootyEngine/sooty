@@ -101,8 +101,6 @@ func execute(e: String, default = null, d: Dictionary={}) -> Variant:
 #		push_error(expression.get_error_text())
 	return default
 
-
-
 func do(s: String) -> Variant:
 	var got = null
 	for a in s.split(";~"):

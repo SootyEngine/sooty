@@ -285,14 +285,14 @@ config/features=PackedStringArray("4.0", "Vulkan Clustered")
 
 [autoload]
 
-Global="*res://addons/sooty_engine/autoloads/Global.gd"
-ModManager="*res://addons/sooty_engine/autoloads/ModManager.gd"
-Dialogues="*res://addons/sooty_engine/autoloads/Dialogues.gd"
 SaveManager="*res://addons/sys_save/autoloads/SaveManager.gd"
 State="*res://addons/sys_state/autoloads/State.gd"
 Persistent="*res://addons/sys_state/autoloads/Persistent.gd"
 StringAction="*res://addons/sys_state/autoloads/StringAction.gd"
 Notify="*res://addons/sys_notifications/autoloads/Notify.gd"
+Global="*res://addons/sooty_engine/autoloads/Global.gd"
+ModManager="*res://addons/sooty_engine/autoloads/ModManager.gd"
+Dialogues="*res://addons/sooty_engine/autoloads/Dialogues.gd"
 
 [debug]
 
