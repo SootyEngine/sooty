@@ -400,9 +400,14 @@ static func _line_as_dialogue(line: Dictionary):
 		line.options = options
 
 static func _find_speaker_split(text: String, from: int) -> int:
+	var in_bbcode := false
 	for i in range(from, len(text)):
-		if text[i] == ":" and (i==0 or text[i-1] != "\\"):
-			return i
+		match text[i]:
+			"[": in_bbcode = true
+			"]": in_bbcode = false
+			":":
+				if not in_bbcode and (i==0 or text[i-1] != "\\"):
+					return i
 	return -1
 
 static func _extract_flat_lines(line: Dictionary) -> Array:

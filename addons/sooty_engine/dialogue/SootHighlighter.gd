@@ -256,9 +256,14 @@ func _h_line(from: int, to: int):
 		_h_bbcode(from, to, C_TEXT)
 
 func _find_speaker_split(from: int) -> int:
+	var in_bbcode := false
 	for i in range(from, len(text)):
-		if text[i] == ":" and (i==0 or text[i-1] != "\\"):
-			return i
+		match text[i]:
+			"[": in_bbcode = true
+			"]": in_bbcode = false
+			":":
+				if not in_bbcode and (i==0 or text[i-1] != "\\"):
+					return i
 	return -1
 
 func _find_speaker_start(from: int) -> int:
