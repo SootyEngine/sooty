@@ -25,10 +25,10 @@ var state := QUEST_NOT_STARTED:
 				match state:
 					QUEST_COMPLETED:
 						msg.type = "Quest Complete"
-						Pinger.ping(msg)
+						Notify.message(msg)
 					QUEST_STARTED:
 						msg.type = "Quest Started"
-						Pinger.ping(msg)
+						Notify.message(msg)
 				
 				Global.message.emit(MSG_STATE_CHANGED, self)
 			
@@ -53,7 +53,7 @@ func _subquest_state_changed(subquest: Quest):
 			type="Quest Goal Complete\n.",
 			prog=get_progress()
 		}
-		Pinger.ping(msg)
+		Notify.message(msg)
 		Global.message.emit(MSG_STATE_CHANGED, self)
 		if get_total_complete_required() >= get_total_required():
 			complete()

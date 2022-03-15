@@ -129,15 +129,15 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/simple_vn/data_classes/Item.gd"
 }, {
+"base": "BaseDataClass",
+"class": &"Level",
+"language": &"GDScript",
+"path": "res://addons/simple_vn/data_classes/Level.gd"
+}, {
 "base": "Resource",
 "class": &"Markdown",
 "language": &"GDScript",
 "path": "res://addons/rich_text/Markdown.gd"
-}, {
-"base": "Node",
-"class": &"Pinger",
-"language": &"GDScript",
-"path": "res://addons/notifications/ui_notifications.gd"
 }, {
 "base": "BaseDataClass",
 "class": &"Quest",
@@ -228,11 +228,6 @@ _global_script_classes=[{
 "class": &"UTween2D",
 "language": &"GDScript",
 "path": "res://addons/util/UTween2D.gd"
-}, {
-"base": "BaseDataClass",
-"class": &"VRange",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/data_classes/VRange.gd"
 }]
 _global_script_class_icons={
 "Achievement": "",
@@ -259,8 +254,8 @@ _global_script_class_icons={
 "FontHelper": "",
 "Inventory": "",
 "Item": "",
+"Level": "",
 "Markdown": "",
-"Pinger": "",
 "Quest": "",
 "Reward": "",
 "RichTextAnimation": "",
@@ -278,8 +273,7 @@ _global_script_class_icons={
 "UString": "",
 "UTime": "",
 "UTween": "",
-"UTween2D": "",
-"VRange": ""
+"UTween2D": ""
 }
 
 [application]
@@ -298,6 +292,7 @@ SaveManager="*res://addons/sys_save/autoloads/SaveManager.gd"
 State="*res://addons/sys_state/autoloads/State.gd"
 Persistent="*res://addons/sys_state/autoloads/Persistent.gd"
 StringAction="*res://addons/sys_state/autoloads/StringAction.gd"
+Notify="*res://addons/sys_notifications/autoloads/Notify.gd"
 
 [debug]
 
@@ -305,7 +300,7 @@ gdscript/warnings/integer_division=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/sooty_engine/plugin.cfg", "res://addons/sys_save/plugin.cfg", "res://addons/sys_state/plugin.cfg", "res://addons/tool_button/plugin.cfg")
+enabled=PackedStringArray("res://addons/sooty_engine/plugin.cfg", "res://addons/sys_notifications/plugin.cfg", "res://addons/sys_save/plugin.cfg", "res://addons/sys_state/plugin.cfg", "res://addons/tool_button/plugin.cfg")
 
 [input]
 

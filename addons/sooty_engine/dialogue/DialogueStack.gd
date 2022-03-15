@@ -142,11 +142,11 @@ func pop_next_line() -> Dictionary:
 		# match chain
 		elif line.type == "match":
 			var match_result = StringAction.str_to_var(line.match)
-#			print("MATCH:")
 			for i in len(line.cases):
-				var got = StringAction.str_to_var(line.cases[i])
+				var case = line.cases[i]
+				var got = StringAction.str_to_var(case)
 #				print("\tCASE %s: '%s' -> %s == %s (%s)" % [i, line.cases[i], got, match_result, match_result == got])
-				if match_result == got or line.cases[i] == "_":
+				if match_result == got or case == "_":
 					_push(did, line.case_lines[i])
 					break
 		

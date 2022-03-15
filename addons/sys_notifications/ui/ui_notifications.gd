@@ -1,19 +1,13 @@
 extends Node
-class_name Pinger
-
-static func ping(msg := {}):
-	Global.get_tree().call_group("notification_manager", "_ping", msg)
 
 @export var prefab: PackedScene
 @export var wait := false
 @export var queue := []
 @export var time_delay := 2.0
 
-func _init():
-	add_to_group("notification_manager")
-
 func _ready() -> void:
 	$Button.pressed.connect(_ping)
+	Notify.notified.connect(_ping)
 
 func _ping(msg := {}):
 	queue.append(msg)

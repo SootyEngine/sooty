@@ -1,7 +1,7 @@
 === START
 	{{*$time.weekday}}
-		{{MONDAY}} Today is monday.
-		{{TUESDAY}} Today is TUESDAY.
+		{{MONDAY}} Today is monday. ((~$q_FindTheKnife.complete))
+		{{TUESDAY}} Today is TUESDAY. ((~$q_FindTheSpoon.complete))
 		{{WEDNESDAY}} Today is WEDNESDAY.
 		{{THURSDAY}} Today is THURSDAY.
 		{{FRIDAY}} Today is FRIDAY.

@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://dempu4g1lpwsn"]
+[gd_scene load_steps=3 format=3 uid="uid://dl2mg14o34fng"]
 
-[ext_resource type="Script" path="res://addons/notifications/ui_notifications.gd" id="1_v2f74"]
-[ext_resource type="PackedScene" uid="uid://dd5icnaraucyh" path="res://addons/notifications/ui_notification.tscn" id="2_7d4v6"]
+[ext_resource type="Script" path="res://addons/sys_notifications/ui/ui_notifications.gd" id="1_v2f74"]
+[ext_resource type="PackedScene" uid="uid://bhqmgfywa0o4y" path="res://addons/sys_notifications/ui/ui_notification.tscn" id="2_7d4v6"]
 
 [node name="notification" type="CanvasLayer"]
 script = ExtResource( "1_v2f74" )

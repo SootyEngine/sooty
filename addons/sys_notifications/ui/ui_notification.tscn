@@ -1,7 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://dd5icnaraucyh"]
+[gd_scene load_steps=6 format=3 uid="uid://bhqmgfywa0o4y"]
 
-[ext_resource type="Script" path="res://addons/notifications/ui_notification.gd" id="1_nagff"]
-[ext_resource type="Texture2D" uid="uid://d387tu5ratkmj" path="res://icon.png" id="1_wxrxi"]
+[ext_resource type="Script" path="res://addons/sys_notifications/ui/ui_notification.gd" id="1_nagff"]
+[ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="1_wxrxi"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="3_g8y6o"]
 
 [sub_resource type="Gradient" id="Gradient_bysfr"]
@@ -81,9 +81,9 @@ size_flags_horizontal = 3
 alignment = 1
 
 [node name="label" type="RichTextLabel" parent="ColorRect/MarginContainer/HBoxContainer2/MarginContainer2/VBoxContainer"]
-offset_top = 20.0
+offset_top = 26.0
 offset_right = 192.0
-offset_bottom = 20.0
+offset_bottom = 26.0
 theme_override_font_sizes/mono_font_size = 16
 theme_override_font_sizes/bold_italics_font_size = 16
 theme_override_font_sizes/italics_font_size = 16
@@ -95,7 +95,7 @@ script = ExtResource( "3_g8y6o" )
 
 [node name="progress" type="ProgressBar" parent="ColorRect/MarginContainer/HBoxContainer2/MarginContainer2/VBoxContainer"]
 rect_min_size = Vector2(0, 16)
-offset_top = 24.0
+offset_top = 30.0
 offset_right = 192.0
-offset_bottom = 51.0
+offset_bottom = 46.0
 percent_visible = false
