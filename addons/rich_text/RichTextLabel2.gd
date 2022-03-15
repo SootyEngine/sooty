@@ -97,6 +97,7 @@ func set_bbcode(btext: String):
 
 func set_font(id: String):
 	font = id
+	return
 	FontHelper.new().set_fonts(self, id)
 
 func uninstall_effects():
@@ -282,16 +283,29 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 	if not _passes_condition(tag, raw):
 		return
 	
+	# color names
 	if tag in _custom_colors:
 		_push_color(_custom_colors[tag])
 		return
 	
+	# font sizes
 	if tag[0].is_valid_int():
 		if "." in tag:
 			_push_font_size(int(_state.font_size * tag.to_float()))
 		else:
 			_push_font_size(int(_state.font_size + tag.to_int()))
 		return
+	
+	# emojis
+	if tag in Emoji.OLDIE:
+		append_text(Emoji.OLDIE[tag])
+		return
+		
+	if tag.begins_with(":") and tag.ends_with(":"):
+		var t := tag.trim_suffix(":").trim_prefix(":")
+		if t in Emoji.NAMES:
+			append_text(Emoji.NAMES[t])
+			return
 	
 	match tag:
 		"b": _push_bold()

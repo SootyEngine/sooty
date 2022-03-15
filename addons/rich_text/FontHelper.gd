@@ -31,15 +31,16 @@ func _get_font(path: String) -> Font:
 
 func _find_variant(id: String, tails: Array) -> String:
 	
-	for tail in tails:
-		var path := DIR.plus_file(id + tail + ".ttf")
-		if file.file_exists(path):
-			return path
-	
-	for tail in tails:
-		var path := DIR.plus_file(id).plus_file(id + tail + ".ttf")
-		if file.file_exists(path):
-			return path
+	for restype in [".tres", ".ttf"]:
+		for tail in tails:
+			var path := DIR.plus_file(id + tail + restype)
+			if file.file_exists(path):
+				return path
+		
+		for tail in tails:
+			var path := DIR.plus_file(id).plus_file(id + tail + restype)
+			if file.file_exists(path):
+				return path
 	
 	return ""
 

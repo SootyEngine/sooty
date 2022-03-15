@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://addons/simple_vn/dialogue_runner.gd" id="1_deyhw"]
 [ext_resource type="PackedScene" uid="uid://cp2drxo6cxr6d" path="res://addons/simple_vn/ui/ui_dialogue.tscn" id="3_kyvc4"]
-[ext_resource type="Texture2D" uid="uid://chbt0445t6jwy" path="res://icon.png" id="4_n6jin"]
+[ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="4_n6jin"]
 [ext_resource type="PackedScene" uid="uid://dl2mg14o34fng" path="res://addons/sys_notifications/ui/ui_notifications.tscn" id="5_fm15x"]
 [ext_resource type="Script" path="res://addons/simple_vn/input_indicator.gd" id="5_s7x7q"]
 [ext_resource type="PackedScene" uid="uid://beeajbnhjflok" path="res://addons/sys_quests/ui/ui_quest_list.tscn" id="6_p3o3l"]

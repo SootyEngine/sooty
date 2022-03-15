@@ -31,6 +31,7 @@ Some tags are self closing.
 |`dim`|Dims color by 33%.||
 |`lit`|Lightens color by 33%.||
 |`hue` `sat` `val`|Modify hue/sat/val of color.||
+|`:emoji_name:` `:)`|Tags wrapped in `::` will use the emoji.<br>Some old fashioned emojis are supported. `[:)]`,||
 |`\|pipe`|Will pipe text through a function.||
 |`$property`|Inserts the value of a state.<br>Will auto close any style it's wrapped with:<br>`The [$stranger;b;red] looks at you.`<br>Can be piped to a function. `[$player.coins\|commas]`||
 |`lb` `rb`|Insert brackets *[]*||
