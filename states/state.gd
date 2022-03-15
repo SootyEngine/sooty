@@ -14,7 +14,7 @@ var player := Character.new({
 	name="Player",
 	color=Color.TOMATO,
 	inventory={
-		slots=equipment_slots,
+		slots="equipment_slots",
 		items=[
 			{type="coin", total=12356}
 		]
@@ -25,7 +25,7 @@ var paul := Character.new({
 	name="Paul",
 	color=Color.PLUM,
 	inventory={
-		slots=equipment_slots,
+		slots="equipment_slots",
 		items=[
 			{type="coin", total=10}
 		]
@@ -42,12 +42,8 @@ var q_the_winner := Quest.new({
 	desc="Get the winner before anyone else does.",
 	requires=["q_FindTheKnife", "q_FindTheSpoon"]
 })
-var q_FindTheKnife := Quest.new({
-	name="Find the knife"
-})
-var q_FindTheSpoon := Quest.new({
-	name="Find the spoon"
-})
+var q_FindTheKnife := Quest.new({goal=true, name="Find the knife"})
+var q_FindTheSpoon := Quest.new({goal=true, name="Find the spoon"})
 
 # ITEMS
 

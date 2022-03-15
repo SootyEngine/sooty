@@ -10,6 +10,7 @@ func _ready() -> void:
 	Notify.notified.connect(_ping)
 
 func _ping(msg := {}):
+	print("GOT PING ", msg)
 	queue.append(msg)
 	_next()
 

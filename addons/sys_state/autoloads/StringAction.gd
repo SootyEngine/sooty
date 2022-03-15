@@ -131,7 +131,7 @@ func _do_assign(parts: Array) -> Variant:
 		key = key.substr(1)
 		# TODO: currently everything on the left side is being treated as a state path.
 		
-	if not State.has(key):
+	if not State._has(key):
 		push_error("No property '%s' in State." % key)
 		return
 	
@@ -229,7 +229,7 @@ func str_to_var(s: String) -> Variant:
 	# variable, leave unquoted
 	if s.begins_with("$"):
 		var key = s.substr(1)
-		if State.has(key):
+		if State._has(key):
 			return State._get(key)
 		
 		else:

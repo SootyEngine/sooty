@@ -11,10 +11,10 @@ func _global_message(msg: String, payload: Variant):
 
 func _ready_deferred():
 	var all_quests := Quest.get_all_quests().values()
-	var s_started := all_quests.filter(func(x): return x.main and x.is_started)
-	var s_completed := all_quests.filter(func(x): return x.main and x.is_completed)
-	var s_unlocked := all_quests.filter(func(x): return x.main and x.is_unlocked)
-	var s_other := all_quests.filter(func(x): return not x.main or (not x.is_started and not x.is_completed and not x.is_unlocked))
+	var s_started := all_quests.filter(func(x): return not x.goal and x.is_started)
+	var s_completed := all_quests.filter(func(x): return not x.goal and x.is_completed)
+	var s_unlocked := all_quests.filter(func(x): return not x.goal and x.is_unlocked)
+	var s_other := all_quests.filter(func(x): return not not x.goal or (not x.is_started and not x.is_completed and not x.is_unlocked))
 	
 	var text := ["[center;i]QUESTS[]"]
 	for part in [

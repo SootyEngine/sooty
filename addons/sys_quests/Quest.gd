@@ -13,14 +13,14 @@ signal state_changed(quest: Quest)
 
 var name := ""
 var desc := ""
-var main := false
+var goal := false
 var state := QUEST_NOT_STARTED:
 	set(x):
 		if state != x:
 			state = x
 			
 			# broadcast state change, if main.
-			if main:
+			if not goal:
 				var msg := { text="[tomato]%s[]" % name }
 				match state:
 					QUEST_COMPLETED:
@@ -29,7 +29,7 @@ var state := QUEST_NOT_STARTED:
 					QUEST_STARTED:
 						msg.type = "Quest Started"
 						Notify.message(msg)
-				
+				print("QUEST MSG ", msg)
 				Global.message.emit(MSG_STATE_CHANGED, self)
 			
 			# alert.
@@ -45,9 +45,9 @@ func _post_init():
 		quest.state_changed.connect(_subquest_state_changed)
 
 func _subquest_state_changed(subquest: Quest):
-	prints(self, main, "SUBQUEST CHANGED", subquest)
+	prints(self, goal, "SUBQUEST CHANGED", subquest)
 	
-	if main:
+	if not goal:
 		var msg := {
 			text="[tomato]%s[]\n%s" % [name, subquest.name],
 			type="Quest Goal Complete\n.",

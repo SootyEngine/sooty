@@ -47,7 +47,7 @@ func _get_state() -> Dictionary:
 		UDict.merge(out, UObject.get_state(child), true)
 	return out
 
-func has(property: StringName) -> bool:
+func _has(property: StringName) -> bool:
 	var path := str(property).split(".")
 	property = path[-1]
 	for m in _children:
