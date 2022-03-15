@@ -1,8 +1,5 @@
 === START
 	
-	{{$LVL > 2}}
-		You've reached the [|ordinal][$LVL][] level.
-	
 	What to boost LVL\: [$LVL] STR\: [$STR] WIS\: [$WIS]?
 		<> LVL. ((~$LVL += 1))
 		<> STR. ((~$STR += 1))
@@ -18,3 +15,6 @@
 //		{{_}} Today is the weekend.
 	~$time.goto_next_day
 	=> START
+
+=== other_node
+	What do you want?

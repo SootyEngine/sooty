@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3]
 
 [ext_resource type="Texture2D" uid="uid://dd6sqh4v0gtdt" path="res://simple_vn_assets/bgs/class.webp" id="1_xknx2"]
-[ext_resource type="PackedScene" path="res://addons/simple_vn/blur/blur.tscn" id="2_djj7r"]
+[ext_resource type="PackedScene" path="res://addons/screen_effects/blur/blur.tscn" id="2_djj7r"]
 [ext_resource type="Script" path="res://simple_vn_assets/bgs/background.gd" id="2_efxkp"]
 
 [node name="class_room" type="ParallaxLayer"]

@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://dopjd2uitgb3o"]
+[gd_scene load_steps=4 format=3 uid="uid://bod1aikhempy2"]
 
 [ext_resource type="PackedScene" path="res://simple_vn_assets/bgs/class_room.tscn" id="1_di2mh"]
 [ext_resource type="PackedScene" path="res://simple_vn_assets/chars/school_boy.tscn" id="2_sg1bl"]
@@ -30,3 +30,4 @@ script = ExtResource( "3_spa5i" )
 _zoom = 4.0
 noise_scale = 0.25
 noise_aspect = Vector2(1, 0.5)
+draw_thirds = false
