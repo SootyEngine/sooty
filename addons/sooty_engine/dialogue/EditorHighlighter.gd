@@ -246,13 +246,26 @@ func _h_line(from: int, to: int):
 	
 	else:
 		# text
-		if ":" in text:
-			var i := text.find(":", from)
-			_c(max(from, text.rfind(" ", i)), C_SPEAKER)
+		var i := _find_speaker_split(from)
+#		if ":" in text:
+		if i != -1:
+			_c(max(from, _find_speaker_start(i)), C_SPEAKER)
 			_c(i, C_SYMBOL, 1)
 			_co(C_TEXT)
 		
 		_h_bbcode(from, to, C_TEXT)
+
+func _find_speaker_split(from: int) -> int:
+	for i in range(from, len(text)):
+		if text[i] == ":" and (i==0 or text[i-1] != "\\"):
+			return i
+	return -1
+
+func _find_speaker_start(from: int) -> int:
+	for i in range(from, -1, -1):
+		if text[i] in "}":
+			return i+1
+	return 0
 
 func _get_line_syntax_highlighting(line: int) -> Dictionary:
 	text = get_text_edit().get_line(line)

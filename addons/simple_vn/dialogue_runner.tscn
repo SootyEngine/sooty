@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://js51r5na5cfp"]
+[gd_scene load_steps=8 format=3 uid="uid://56datv4f345b"]
 
 [ext_resource type="Script" path="res://addons/simple_vn/dialogue_runner.gd" id="1_deyhw"]
 [ext_resource type="PackedScene" uid="uid://cp2drxo6cxr6d" path="res://addons/simple_vn/ui/ui_dialogue.tscn" id="3_kyvc4"]
@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dl2mg14o34fng" path="res://addons/sys_notifications/ui/ui_notifications.tscn" id="5_fm15x"]
 [ext_resource type="Script" path="res://addons/simple_vn/input_indicator.gd" id="5_s7x7q"]
 [ext_resource type="PackedScene" uid="uid://beeajbnhjflok" path="res://addons/sys_quests/ui/ui_quest_list.tscn" id="6_p3o3l"]
-[ext_resource type="PackedScene" uid="uid://0ij45i15hf08" path="res://addons/sys_achievements/ui_achievements.tscn" id="7_uyx5n"]
+[ext_resource type="PackedScene" uid="uid://pd6qker8pist" path="res://addons/sys_achievements/ui/ui_achievements.tscn" id="7_uyx5n"]
 
 [node name="dialogue_runner" type="Node"]
 script = ExtResource( "1_deyhw" )

@@ -35,6 +35,11 @@ var paul := Character.new({
 
 var mary := Character.new({name="Mary"})
 
+var LVL := Level.new({name="Level", max=20})
+var STR := Level.new({name="STR", max=100, notify_modulo=10})
+var WIS := Level.new({name="STR", max=100, notify_modulo=10})
+var CHR := Level.new({name="CHR", max=100, notify_modulo=10})
+
 # QUESTS
 
 var q_the_winner := Quest.new({

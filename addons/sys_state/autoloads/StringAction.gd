@@ -146,18 +146,33 @@ func _do_assign(parts: Array) -> Variant:
 	# simple variable assignment
 	if len(parts) == 3:
 		new_value = str_to_var(parts[2])
+	
 	# call a function assignment
 	else:
 		parts.pop_front() # pop property
 		parts.pop_front() # pop eval
 		new_value = _do_function(parts)
 	
-	match eval:
-		"=": State._set(key, new_value)
-		"+=": State._set(key, old_value + new_value)
-		"-=": State._set(key, old_value - new_value)
-	
-	return State._get(key)
+	if old_value is Object:
+		var target = old_value
+		if not target.has_method("_operator_set") or not target.has_method("_operator_get"):
+			push_error("Object requires _operator_get/_operator_set to do assign. %s" % target)
+			return null
+		
+		match eval:
+			"=": target._operator_set(new_value)
+			"+=": target._operator_set(target._operator_get() + new_value)
+			"-=": target._operator_set(target._operator_get() - new_value)
+		
+		return target._operator_get()
+		
+	else:
+		match eval:
+			"=": State._set(key, new_value)
+			"+=": State._set(key, old_value + new_value)
+			"-=": State._set(key, old_value - new_value)
+		
+		return State._get(key)
 
 func _do_function(parts: Array) -> Variant:
 	var args := []

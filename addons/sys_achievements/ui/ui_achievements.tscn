@@ -1,12 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://0ij45i15hf08"]
+[gd_scene load_steps=3 format=3 uid="uid://pd6qker8pist"]
 
-[ext_resource type="Script" path="res://addons/sys_achievements/ui_achievements.gd" id="1_6qhv7"]
-[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="1_isrxw"]
+[ext_resource type="Script" path="res://addons/sys_achievements/ui/ui_achievements.gd" id="1_ctdqc"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="2_vkn5h"]
 
 [node name="achievements" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource( "1_6qhv7" )
+script = ExtResource( "1_ctdqc" )
 
 [node name="ColorRect" type="ColorRect" parent="."]
 anchor_right = 1.0
@@ -25,4 +25,4 @@ theme_override_font_sizes/bold_italics_font_size = 16
 theme_override_font_sizes/italics_font_size = 16
 theme_override_font_sizes/bold_font_size = 16
 theme_override_font_sizes/normal_font_size = 16
-script = ExtResource( "1_isrxw" )
+script = ExtResource( "2_vkn5h" )

@@ -50,7 +50,7 @@ func _subquest_state_changed(subquest: Quest):
 	if not goal:
 		var msg := {
 			text="[tomato]%s[]\n%s" % [name, subquest.name],
-			type="Quest Goal Complete\n.",
+			type="Goal Complete\n[hide].[]",
 			prog=get_progress()
 		}
 		Notify.message(msg)

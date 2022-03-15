@@ -379,10 +379,11 @@ static func _line_as_flow(line: Dictionary):
 static func _line_as_dialogue(line: Dictionary):
 	var text: String = line.text
 	line.type = "text"
-	if ":" in text:
+	var i := _find_speaker_split(text, 0)
+	if i != -1:
 		var p := text.split(":", true, 1)
-		line.from = p[0].strip_edges()
-		line.text = p[1].strip_edges()
+		line.from = text.substr(0, i).strip_edges() # p[0].strip_edges()
+		line.text = text.substr(i+1, len(text)-i).strip_edges() #p[1].strip_edges()
 	
 	var options := []
 	var lines := []
@@ -395,6 +396,12 @@ static func _line_as_dialogue(line: Dictionary):
 	
 	if options:
 		line.options = options
+
+static func _find_speaker_split(text: String, from: int) -> int:
+	for i in range(from, len(text)):
+		if text[i] == ":" and (i==0 or text[i-1] != "\\"):
+			return i
+	return -1
 
 static func _extract_flat_lines(line: Dictionary) -> Array:
 	var out := []
