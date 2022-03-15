@@ -1,8 +1,8 @@
 extends Node
 class_name BaseState
 
-signal changed(key: String)
-signal changed_from_to(key: String, from: Variant, to: Variant)
+signal changed(key_path: Array)
+signal changed_from_to(key: Array, from: Variant, to: Variant)
 signal state_loaded()
 
 var _default := {}
@@ -80,8 +80,8 @@ func _set(property: StringName, value) -> bool:
 			o[property] = value
 			var new = o[property]
 			if old != new:
-				changed.emit(property)
-				changed_from_to.emit(property, old, new)
+				changed.emit(path)
+				changed_from_to.emit(path, old, new)
 				print("Changed %s to %s from %s." % [property, new, old])
 			return true
 	push_error("No property '%s' in State. (Attempted '%s = %s')" % [property, property, value])

@@ -29,7 +29,6 @@ func to_string() -> String:
 	if format == "":
 		if Global.config.has_section_key("default_formats", "character_name"):
 			var fmt = Global.config.get_value("default_formats", "character_name", "{name}")
-			prints("FORMAT", fmt)
 			return fmt.format(UObject.get_state(self))
 		else:
 			return name
