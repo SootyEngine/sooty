@@ -1,0 +1,31 @@
+{
+	"0!2": {
+		"id": "u2006s45",
+		"file": 0,
+		"line": 2,
+		"type": "text",
+		"text": "Let's check out the class."
+	},
+	"0!4": {
+		"id": "",
+		"file": 0,
+		"line": 4,
+		"type": "action",
+		"action": "scene 001_first_class"
+	},
+	"0!5": {
+		"id": "",
+		"file": 0,
+		"line": 5,
+		"type": "action",
+		"action": "school_boy.anim fade_in"
+	},
+	"0!7": {
+		"id": "j30gkdv5",
+		"file": 0,
+		"line": 7,
+		"type": "text",
+		"text": "Hey kid, *who the hell* are you?",
+		"from": "school_boy"
+	}
+}

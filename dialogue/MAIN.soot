@@ -1,0 +1,20 @@
+=== START
+	
+	What to boost LVL\: [$LVL] STR\: [$STR] WIS\: [$WIS]?
+		<> LVL. ((~$LVL += 1))
+		<> STR. ((~$STR += 1))
+		<> WIS. ((~$WIS += 1))
+		<> Achieve *Winner*. ((~$a_Winner.unlock)) {{not $a_Winner.unlocked}}
+		<> Achieve *Massive Kill*. ((~$a_MassiveKill.unlock)) {{not $a_MassiveKill.unlocked}}
+//	{{*$time.weekday}}
+//		{{MONDAY}} Today is monday. ((~$q_FindTheKnife.complete))
+//		{{TUESDAY}} Today is TUESDAY. ((~$q_FindTheSpoon.complete))
+//		{{WEDNESDAY}} Today is WEDNESDAY.
+//		{{THURSDAY}} Today is THURSDAY.
+//		{{FRIDAY}} Today is FRIDAY.
+//		{{_}} Today is the weekend.
+	~$time.goto_next_day
+	=> START
+
+=== other_node
+	What do you want?

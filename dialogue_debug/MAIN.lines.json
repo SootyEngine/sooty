@@ -1,0 +1,124 @@
+{
+	"0!3_0": {
+		"id": "",
+		"file": 0,
+		"line": 3,
+		"type": "action",
+		"action": "$LVL += 1"
+	},
+	"0!3": {
+		"id": "",
+		"file": 0,
+		"line": 3,
+		"type": "option",
+		"text": "LVL.",
+		"then": [
+			"0!3_0"
+		]
+	},
+	"0!4_0": {
+		"id": "",
+		"file": 0,
+		"line": 4,
+		"type": "action",
+		"action": "$STR += 1"
+	},
+	"0!4": {
+		"id": "",
+		"file": 0,
+		"line": 4,
+		"type": "option",
+		"text": "STR.",
+		"then": [
+			"0!4_0"
+		]
+	},
+	"0!5_0": {
+		"id": "",
+		"file": 0,
+		"line": 5,
+		"type": "action",
+		"action": "$WIS += 1"
+	},
+	"0!5": {
+		"id": "",
+		"file": 0,
+		"line": 5,
+		"type": "option",
+		"text": "WIS.",
+		"then": [
+			"0!5_0"
+		]
+	},
+	"0!6_0": {
+		"id": "",
+		"file": 0,
+		"line": 6,
+		"type": "action",
+		"action": "$a_Winner.unlock"
+	},
+	"0!6": {
+		"id": "",
+		"file": 0,
+		"line": 6,
+		"type": "option",
+		"text": "Achieve *Winner*.",
+		"cond": "not $a_Winner.unlocked",
+		"then": [
+			"0!6_0"
+		]
+	},
+	"0!7_0": {
+		"id": "",
+		"file": 0,
+		"line": 7,
+		"type": "action",
+		"action": "$a_MassiveKill.unlock"
+	},
+	"0!7": {
+		"id": "",
+		"file": 0,
+		"line": 7,
+		"type": "option",
+		"text": "Achieve *Massive Kill*.",
+		"cond": "not $a_MassiveKill.unlocked",
+		"then": [
+			"0!7_0"
+		]
+	},
+	"0!2": {
+		"id": "",
+		"file": 0,
+		"line": 2,
+		"type": "text",
+		"text": "What to boost LVL: [$LVL] STR: [$STR] WIS: [$WIS]?",
+		"options": [
+			"0!3",
+			"0!4",
+			"0!5",
+			"0!6",
+			"0!7"
+		]
+	},
+	"0!15": {
+		"id": "",
+		"file": 0,
+		"line": 15,
+		"type": "action",
+		"action": "$time.goto_next_day"
+	},
+	"0!16": {
+		"id": "",
+		"file": 0,
+		"line": 16,
+		"type": "goto",
+		"goto": "MAIN.START"
+	},
+	"0!19": {
+		"id": "",
+		"file": 0,
+		"line": 19,
+		"type": "text",
+		"text": "What do you want?"
+	}
+}

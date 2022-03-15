@@ -1,0 +1,22 @@
+{
+	"START": {
+		"id": "",
+		"file": 0,
+		"line": 0,
+		"type": "flow",
+		"then": [
+			"0!2",
+			"0!15",
+			"0!16"
+		]
+	},
+	"other_node": {
+		"id": "",
+		"file": 0,
+		"line": 18,
+		"type": "flow",
+		"then": [
+			"0!19"
+		]
+	}
+}
