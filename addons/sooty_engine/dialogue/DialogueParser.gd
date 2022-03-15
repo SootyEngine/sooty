@@ -382,8 +382,10 @@ static func _line_as_dialogue(line: Dictionary):
 	var i := _find_speaker_split(text, 0)
 	if i != -1:
 		var p := text.split(":", true, 1)
-		line.from = text.substr(0, i).strip_edges() # p[0].strip_edges()
-		line.text = text.substr(i+1, len(text)-i).strip_edges() #p[1].strip_edges()
+		line.from = text.substr(0, i).strip_edges().replace("\\:", ":")
+		line.text = text.substr(i+1, len(text)-i).strip_edges()
+	
+	line.text = line.text.replace("\\:", ":")
 	
 	var options := []
 	var lines := []

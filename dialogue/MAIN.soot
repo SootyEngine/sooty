@@ -5,7 +5,7 @@
 	{{$test > 20}} mark: Okay
 
 	What to boost LVL\: [$LVL] STR\: [$STR] WIS\: [$WIS]?
-		<> LVL. ((~$level += 1))
+		<> LVL. ((~$LVL += 1))
 		<> STR. ((~$STR += 1))
 		<> WIS. ((~$WIS += 1))
 //	{{*$time.weekday}}
