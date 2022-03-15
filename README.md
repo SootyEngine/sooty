@@ -48,7 +48,7 @@ So can text: `I have [|commas]1234567[] apples.` -> `I have 1,234,567,apples.`
 ## Shortcuts
 In `config.cfg` you can set shortcuts for complex actions and custom colors:
 
-```
+```cfg
 [rich_text_shortcuts]
 cam1="~camera shake 2.0;~camera zoom 2.0;wait=0.5"
 cam_reset="~camera shake 0.0;~camera zoom 1.0
