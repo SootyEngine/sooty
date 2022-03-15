@@ -12,7 +12,7 @@ _global_script_classes=[{
 "base": "BaseDataClass",
 "class": &"Achievement",
 "language": &"GDScript",
-"path": "res://addons/simple_vn/data_classes/Achievement.gd"
+"path": "res://addons/sys_achievements/Achievement.gd"
 }, {
 "base": "Resource",
 "class": &"BaseDataClass",
@@ -42,22 +42,22 @@ _global_script_classes=[{
 "base": "Resource",
 "class": &"Dialogue",
 "language": &"GDScript",
-"path": "res://addons/sooty_engine/Dialogue.gd"
+"path": "res://addons/sooty_engine/dialogue/Dialogue.gd"
 }, {
 "base": "Resource",
 "class": &"DialogueLine",
 "language": &"GDScript",
-"path": "res://addons/sooty_engine/DialogueLine.gd"
+"path": "res://addons/sooty_engine/dialogue/DialogueLine.gd"
 }, {
 "base": "Resource",
 "class": &"DialogueParser",
 "language": &"GDScript",
-"path": "res://addons/sooty_engine/DialogueParser.gd"
+"path": "res://addons/sooty_engine/dialogue/DialogueParser.gd"
 }, {
 "base": "Resource",
 "class": &"DialogueStack",
 "language": &"GDScript",
-"path": "res://addons/sooty_engine/DialogueStack.gd"
+"path": "res://addons/sooty_engine/dialogue/DialogueStack.gd"
 }, {
 "base": "BaseDataClass",
 "class": &"EquipmentSlots",
@@ -120,11 +120,6 @@ _global_script_classes=[{
 "path": "res://addons/rich_text/FontHelper.gd"
 }, {
 "base": "BaseDataClass",
-"class": &"Goal",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/data_classes/Goal.gd"
-}, {
-"base": "BaseDataClass",
 "class": &"Inventory",
 "language": &"GDScript",
 "path": "res://addons/simple_vn/data_classes/Inventory.gd"
@@ -147,7 +142,7 @@ _global_script_classes=[{
 "base": "BaseDataClass",
 "class": &"Quest",
 "language": &"GDScript",
-"path": "res://addons/simple_vn/data_classes/Quest.gd"
+"path": "res://addons/sys_quests/Quest.gd"
 }, {
 "base": "BaseDataClass",
 "class": &"Reward",
@@ -233,6 +228,11 @@ _global_script_classes=[{
 "class": &"UTween2D",
 "language": &"GDScript",
 "path": "res://addons/util/UTween2D.gd"
+}, {
+"base": "BaseDataClass",
+"class": &"VRange",
+"language": &"GDScript",
+"path": "res://addons/simple_vn/data_classes/VRange.gd"
 }]
 _global_script_class_icons={
 "Achievement": "",
@@ -257,7 +257,6 @@ _global_script_class_icons={
 "FE_Util": "",
 "Fader": "",
 "FontHelper": "",
-"Goal": "",
 "Inventory": "",
 "Item": "",
 "Markdown": "",
@@ -279,7 +278,8 @@ _global_script_class_icons={
 "UString": "",
 "UTime": "",
 "UTween": "",
-"UTween2D": ""
+"UTween2D": "",
+"VRange": ""
 }
 
 [application]
@@ -292,12 +292,12 @@ config/features=PackedStringArray("4.0", "Vulkan Clustered")
 [autoload]
 
 Global="*res://addons/sooty_engine/autoloads/Global.gd"
-SaveManager="*res://addons/sooty_engine/autoloads/SaveManager.gd"
 ModManager="*res://addons/sooty_engine/autoloads/ModManager.gd"
-State="*res://addons/sooty_engine/autoloads/State.gd"
-StringAction="*res://addons/sooty_engine/autoloads/StringAction.gd"
 Dialogues="*res://addons/sooty_engine/autoloads/Dialogues.gd"
-Persistent="*res://addons/sooty_engine/autoloads/Persistent.gd"
+SaveManager="*res://addons/sys_save/autoloads/SaveManager.gd"
+State="*res://addons/sys_state/autoloads/State.gd"
+Persistent="*res://addons/sys_state/autoloads/Persistent.gd"
+StringAction="*res://addons/sys_state/autoloads/StringAction.gd"
 
 [debug]
 
@@ -305,7 +305,7 @@ gdscript/warnings/integer_division=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/sooty_engine/plugin.cfg", "res://addons/tool_button/plugin.cfg")
+enabled=PackedStringArray("res://addons/sooty_engine/plugin.cfg", "res://addons/sys_save/plugin.cfg", "res://addons/sys_state/plugin.cfg", "res://addons/tool_button/plugin.cfg")
 
 [input]
 

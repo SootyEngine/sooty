@@ -9,8 +9,8 @@ anchor_bottom = 1.0
 script = ExtResource( "1_6qhv7" )
 
 [node name="ColorRect" type="ColorRect" parent="."]
-offset_right = 340.0
-offset_bottom = 334.0
+anchor_right = 1.0
+anchor_bottom = 1.0
 color = Color(0, 0, 0, 0.321569)
 __meta__ = {
 "_edit_layout_mode": 0,

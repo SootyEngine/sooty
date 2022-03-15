@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://addons/menu_scenes/ui_save_load.gd" id="1_7wpd6"]
-[ext_resource type="PackedScene" path="res://addons/menu_scenes/ui_save_slot.tscn" id="1_qdd0e"]
+[ext_resource type="Script" path="res://addons/sys_save/ui/ui_save_load.gd" id="1_7wpd6"]
+[ext_resource type="PackedScene" path="res://addons/sys_save/ui/ui_save_slot.tscn" id="1_qdd0e"]
 
 [node name="save_load" type="Control"]
 anchor_right = 1.0
