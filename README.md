@@ -26,7 +26,8 @@ Some tags are self closing.
 |---|----|-------|
 |*color_name*|Use any built in Godot color name: `[deep_sky_blue]Blue Text[]` ||
 |(n,n,n,n)|RGBA color. For use with format: `"[%s]text[]" % Color.TEAL`||
-|*number*|Number will be added/subtracted to the font size: `Speak [i;-4]very quietly[].`||
+|*float*|Multiply current font size: `Speak [i;0.8]very quietly[].`||
+|*int*|Add to current font size: `Speak [i;4]very loudly[].`||
 |`dim`|Dims color by 33%.||
 |`lit`|Lightens color by 33%.||
 |`hue` `sat` `val`|Modify hue/sat/val of color.||
