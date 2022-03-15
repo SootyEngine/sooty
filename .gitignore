@@ -1,6 +1,5 @@
 # Godot 4+ specific ignores
 .godot/
-dialogue_debug/
 
 # Godot-specific ignores
 export.cfg
@@ -12,3 +11,10 @@ export_presets.cfg
 # Mono-specific ignores
 .mono/
 data_*/
+
+# Sooty-specific ignores
+dialogue/
+dialogue_debug/
+states/
+states_persistent/
+story_scenes/
