@@ -14,7 +14,11 @@ func _enter_tree() -> void:
 	if not "soot" in fs:
 		es.set_setting("docks/filesystem/textfile_extensions", fs + ",soot")
 	get_editor_interface().get_script_editor().register_syntax_highlighter(highligher)
-
+	
+	for dir in ["res://states", "res://states_persistent", "res://dialogue", "res://story_scenes"]:
+		if not UFile.dir_exists(dir):
+			UFile.create_dir(dir)
+	
 func _exit_tree() -> void:
 	remove_autoload_singleton("Global")
 	remove_autoload_singleton("ModManager")

@@ -75,7 +75,7 @@ static func change_name(path: String, new_name: String) -> String:
 	var old_ext := fparts[1]
 	return "%s/%s.%s" % [fpath, new_name, old_ext]
 
-static func create_directory(path: String) -> bool:
+static func create_dir(path: String) -> bool:
 	var dir = get_user_dir()
 	if path != dir and path.begins_with(dir):
 		var d := Directory.new()
