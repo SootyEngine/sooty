@@ -42,7 +42,7 @@ Some tags are self closing.
 |`hold`|Hold animation till user action.|`[h]` `[hold]`|
 |`jump`|Jump animation forward. So entire word or phrase can pop in.<br>`I already told you [jump]NO[][w] [jump]MORE[][w] [jump]LEAVING MY THINGS OUT![][w]`
 |`pace`|Change pace of animation.|`[p]` `[pace]` `[p=2]`|
-|`~action`|Call any [action](#action) at that point in the animation.||
+|`~action`|Call any [action](#actions) at that point in the animation.||
 
 Along with typical: `b` `i` `bi` `u`
 
@@ -106,7 +106,7 @@ Modify state variables, and call state functions, with `$`
 ## Operator Overloads
 `StringActions` has basic support for operator overloads.
 
-Look at the *Level* class `Level.gd`:
+Look at the *VStat* class `VStat.gd`:
 ```
 var value = 0
 
@@ -116,7 +116,7 @@ func _operator_get():
 func _operator_set(x):
 	value = x
 ```
-This allows us to do `level += 1` instead of `level.value += 1`
+This allows us to do `stat += 1` instead of `stat.value += 1`
 
 # Conditionals
 ![](readme/ifelse.png)
