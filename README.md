@@ -26,16 +26,23 @@ Some tags are self closing.
 |---|----|-------|
 |*color_name*|Use any built in Godot color name: `[deep_sky_blue]Blue Text[]` ||
 |(n,n,n,n)|RGBA color. For use with format: `"[%s]text[]" % Color.TEAL`||
+|*number*|Number will be added/subtracted to the font size: `Speak [i;-4]very quietly[].`||
 |`dim`|Dims color by 33%.||
 |`lit`|Lightens color by 33%.||
 |`hue` `sat` `val`|Modify hue/sat/val of color.||
-|*number*|Any number will be added/subtracted to the font size.||
-|`wait`|Pause the animation.|`[w]` `[wait]` `[w=2]`|
-|`hold`|Hold animation till user action.|`[h]` `[hold]`|
-|`pace`|Change pace of animation.|`[p]` `[pace]` `[p=2]`|
-|`~action`|Can call any [action](#action) at that point in the animation.||
+|`\|pipe`|Will pipe text through a function.||
 |`$property`|Inserts the value of a state.<br>Will auto close any style it's wrapped with:<br>`The [$stranger;b;red] looks at you.`<br>Can be piped to a function. `[$player.coins\|commas]`||
 |`lb` `rb`|Insert brackets *[]*||
+
+*Animation specific tags.*
+
+|tag|desc|options|
+|---|----|-------|
+|`wait`|Pause the animation.|`[w]` `[wait]` `[w=2]`|
+|`hold`|Hold animation till user action.|`[h]` `[hold]`|
+|`jump`|Jump animation forward. So entire word or phrase can pop in.<br>`I already told you [jump]NO[][w] [jump]MORE[][w] [jump]LEAVING MY THINGS OUT![][w]`
+|`pace`|Change pace of animation.|`[p]` `[pace]` `[p=2]`|
+|`~action`|Call any [action](#action) at that point in the animation.||
 
 Along with typical: `b` `i` `bi` `u`
 
