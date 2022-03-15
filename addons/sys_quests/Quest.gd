@@ -29,7 +29,6 @@ var state := QUEST_NOT_STARTED:
 					QUEST_STARTED:
 						msg.type = "Quest Started"
 						Notify.message(msg)
-				print("QUEST MSG ", msg)
 				Global.message.emit(MSG_STATE_CHANGED, self)
 			
 			# alert.

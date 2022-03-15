@@ -64,8 +64,6 @@ func _get(property: StringName):
 		if o != null:
 			if property in o:
 				return o[property]
-			else:
-				push_error("No %s in %s" % [property, o])
 
 func _set(property: StringName, value) -> bool:
 	var path := str(property).split(".")
@@ -84,7 +82,7 @@ func _set(property: StringName, value) -> bool:
 				changed_from_to.emit(path, old, new)
 				print("Changed %s to %s from %s." % [property, new, old])
 			return true
-	push_error("No property '%s' in State. (Attempted '%s = %s')" % [property, property, value])
+	push_error("No '%s' in State. (Attempted '%s = %s')" % [property, property, value])
 	return true
 
 func _get_objects_property(obj: Object) -> String:

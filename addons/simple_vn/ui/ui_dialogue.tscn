@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://addons/simple_vn/ui/ui_dialogue.gd" id="1_hu8k5"]
 [ext_resource type="Shader" path="res://addons/simple_vn/ui/ui_gradient_blur.gdshader" id="2_4t8do"]
-[ext_resource type="Texture2D" uid="uid://b3shjono5q5qi" path="res://addons/simple_vn/ui/ui_dialogue_bg.tres" id="3_f0whw"]
+[ext_resource type="Texture2D" uid="uid://b158bgif874eg" path="res://addons/simple_vn/ui/ui_dialogue_bg.tres" id="3_f0whw"]
 [ext_resource type="FontData" uid="uid://by1aqauhysmgf" path="res://fonts/robotomono/robotomono-r.ttf" id="4_gvvir"]
 [ext_resource type="FontData" uid="uid://dhlm735o5phw0" path="res://fonts/unifont/unifont-13.0.01.ttf" id="5_g81ma"]
 [ext_resource type="FontData" uid="uid://dfus0kvrbquox" path="res://fonts/unifont/unifont_upper-13.0.01.ttf" id="6_rj7td"]
@@ -16,62 +16,62 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_l4evs"]
 shader = ExtResource( "2_4t8do" )
 
-[sub_resource type="Font" id="Font_hwcgh"]
+[sub_resource type="Font" id="Font_n5h3k"]
 data/0 = ExtResource( "4_gvvir" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_oyre0"]
+[sub_resource type="Font" id="Font_qbebt"]
 data/0 = ExtResource( "7_qpc1f" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_bpk66"]
+[sub_resource type="Font" id="Font_o7owf"]
 data/0 = ExtResource( "8_4jxrw" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_32ocd"]
+[sub_resource type="Font" id="Font_4mcu0"]
 data/0 = ExtResource( "9_6uyrg" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_d1cuc"]
+[sub_resource type="Font" id="Font_gs14m"]
 data/0 = ExtResource( "4_gvvir" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_8fscn"]
+[sub_resource type="Font" id="Font_ibdyc"]
 data/0 = ExtResource( "7_qpc1f" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_fbjed"]
+[sub_resource type="Font" id="Font_q1w8o"]
 data/0 = ExtResource( "8_4jxrw" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_tmxgc"]
+[sub_resource type="Font" id="Font_0get2"]
 data/0 = ExtResource( "9_6uyrg" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_8c8id"]
+[sub_resource type="Font" id="Font_cjede"]
 data/0 = ExtResource( "4_gvvir" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_bk1m5"]
+[sub_resource type="Font" id="Font_ubqmm"]
 data/0 = ExtResource( "7_qpc1f" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_rtgo2"]
+[sub_resource type="Font" id="Font_v0pto"]
 data/0 = ExtResource( "8_4jxrw" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
 
-[sub_resource type="Font" id="Font_onra2"]
+[sub_resource type="Font" id="Font_g2oab"]
 data/0 = ExtResource( "9_6uyrg" )
 data/1 = ExtResource( "5_g81ma" )
 data/2 = ExtResource( "6_rj7td" )
@@ -130,11 +130,11 @@ __meta__ = {
 [node name="from" type="RichTextLabel" parent="MarginContainer/c"]
 offset_right = 544.0
 size_flags_horizontal = 3
-theme_override_fonts/mono_font = SubResource( "Font_hwcgh" )
-theme_override_fonts/bold_italics_font = SubResource( "Font_oyre0" )
-theme_override_fonts/italics_font = SubResource( "Font_bpk66" )
-theme_override_fonts/bold_font = SubResource( "Font_32ocd" )
-theme_override_fonts/normal_font = SubResource( "Font_hwcgh" )
+theme_override_fonts/mono_font = SubResource( "Font_n5h3k" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_qbebt" )
+theme_override_fonts/italics_font = SubResource( "Font_o7owf" )
+theme_override_fonts/bold_font = SubResource( "Font_4mcu0" )
+theme_override_fonts/normal_font = SubResource( "Font_n5h3k" )
 theme_override_font_sizes/mono_font_size = 16
 theme_override_font_sizes/bold_italics_font_size = 16
 theme_override_font_sizes/italics_font_size = 16
@@ -161,11 +161,11 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 0.25)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
 theme_override_constants/outline_size = 8
-theme_override_fonts/mono_font = SubResource( "Font_d1cuc" )
-theme_override_fonts/bold_italics_font = SubResource( "Font_8fscn" )
-theme_override_fonts/italics_font = SubResource( "Font_fbjed" )
-theme_override_fonts/bold_font = SubResource( "Font_tmxgc" )
-theme_override_fonts/normal_font = SubResource( "Font_d1cuc" )
+theme_override_fonts/mono_font = SubResource( "Font_gs14m" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_ibdyc" )
+theme_override_fonts/italics_font = SubResource( "Font_q1w8o" )
+theme_override_fonts/bold_font = SubResource( "Font_0get2" )
+theme_override_fonts/normal_font = SubResource( "Font_gs14m" )
 theme_override_font_sizes/mono_font_size = 24
 theme_override_font_sizes/bold_italics_font_size = 24
 theme_override_font_sizes/italics_font_size = 24
@@ -176,8 +176,9 @@ fit_content_height = true
 script = ExtResource( "11_wjgcf" )
 font = "robotomono"
 size = 24
+play_speed = 60.0
 fade_speed = 5.0
-effect_time = 1786.73
+effect_time = 19.2495
 _triggers = {}
 _alpha_real = []
 _alpha_goal = []
@@ -238,11 +239,11 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.25)
 theme_override_constants/outline_size = 8
-theme_override_fonts/mono_font = SubResource( "Font_8c8id" )
-theme_override_fonts/bold_italics_font = SubResource( "Font_bk1m5" )
-theme_override_fonts/italics_font = SubResource( "Font_rtgo2" )
-theme_override_fonts/bold_font = SubResource( "Font_onra2" )
-theme_override_fonts/normal_font = SubResource( "Font_8c8id" )
+theme_override_fonts/mono_font = SubResource( "Font_cjede" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_ubqmm" )
+theme_override_fonts/italics_font = SubResource( "Font_v0pto" )
+theme_override_fonts/bold_font = SubResource( "Font_g2oab" )
+theme_override_fonts/normal_font = SubResource( "Font_cjede" )
 theme_override_font_sizes/mono_font_size = 24
 theme_override_font_sizes/bold_italics_font_size = 24
 theme_override_font_sizes/italics_font_size = 24

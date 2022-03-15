@@ -14,7 +14,8 @@ var unlocked: bool = false:
 	get: return tick == toll
 	set(x):
 		if unlocked != x:
-			tick = toll if x else 0
+			print("Set unlocked")
+			self.tick = toll if x else 0
 
 var progress: float = 0.0:
 	get: return 0.0 if tick==0 or toll==0 else float(tick) / float(toll)
@@ -32,6 +33,7 @@ var tick := 0:
 						desc
 					]
 				})
+				Global.message.emit(MSG_ACHIEVEMENT_UNLOCKED, self)
 			else:
 				Notify.message({
 					type=MSG_ACHIEVEMENT_PROGRESS,
@@ -41,9 +43,11 @@ var tick := 0:
 					],
 					prog=progress
 				})
+				Global.message.emit(MSG_ACHIEVEMENT_PROGRESS, self)
 
 func gain(amount := 1):
 	tick += amount
 
 func unlock():
+	print("Called unlock")
 	unlocked = true

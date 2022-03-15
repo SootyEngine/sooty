@@ -106,16 +106,17 @@ func _on_text(d: DialogueLine):
 	if from is String:
 		if UString.is_wrapped(from, '"'):
 			from = UString.unwrap(from, '"')
-		elif from in State:
-			var val = State[from]
+		elif State._has(from):
+			var val = State._get(from)
 			if val is Object and val.has_method("to_string"):
 				from = val.to_string()
 			else:
-				from = str(State[from])
+				from = str(val)
 	
 	$flow_manager.get_node(_caption).show_line(d, from)
 
 func _on_action(s: String):
+	print("DO ACTION", s)
 	StringAction.do(s)
 
 func print_pausers():
