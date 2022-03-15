@@ -4,6 +4,7 @@ class_name Character
 var name := ""
 var format := ""
 var gender := ""
+var at := ""
 var color := Color.WHITE
 var inventory := Inventory.new()
 
