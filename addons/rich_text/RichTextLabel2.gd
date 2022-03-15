@@ -14,6 +14,7 @@ enum {
 	T_CONDITION,
 	T_BOLD, T_ITALICS, T_BOLD_ITALICS, T_UNDERLINE, T_STRIKE_THROUGH,
 	T_CODE,
+	T_FONT_SIZE,
 	T_TABBLE, T_CELL,
 	T_EFFECT,
 	T_PIPE,
@@ -88,6 +89,7 @@ func set_bbcode(btext: String):
 	_state = {
 		color = color,
 		align = alignment,
+		font_size = size,
 		opened = {},
 		pipes = []
 	}
@@ -284,6 +286,13 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		_push_color(_custom_colors[tag])
 		return
 	
+	if tag[0].is_valid_int():
+		if "." in tag:
+			_push_font_size(int(_state.font_size * tag.to_float()))
+		else:
+			_push_font_size(int(_state.font_size + tag.to_int()))
+		return
+	
 	match tag:
 		"b": _push_bold()
 		"i": _push_italics()
@@ -375,6 +384,15 @@ func _push_pipe(pipe: String):
 func _pop_pipe():
 	_state.pipes.pop_back()
 
+func _push_font_size(size: int):
+	_stack_push(T_FONT_SIZE, _state.font_size)
+	_state.font_size = size
+	push_font_size(size)
+
+func _pop_font_size(size):
+	_state.font_size = size
+	pop()
+
 func _push_color(clr: Color):
 	_stack_push(T_COLOR, _state.color)
 	_state.color = clr
@@ -412,6 +430,7 @@ func _stack_pop():
 				T_COLOR: _pop_color(data)
 				T_PARAGRAPH: _pop_paragraph(data)
 				T_PIPE: _pop_pipe()
+				T_FONT_SIZE: _pop_font_size(data)
 				T_CONDITION: _state.erase("condition")
 				T_NONE, _:
 					if not nopop:
