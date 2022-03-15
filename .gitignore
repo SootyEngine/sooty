@@ -1,7 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
 
-project.godot
+/project.godot
 
 # Godot-specific ignores
 export.cfg
@@ -15,12 +15,12 @@ export_presets.cfg
 data_*/
 
 # Sooty-specific ignores
-dialogue/
-dialogue_debug/
-states/
-states_persistent/
-story_scenes/
+/dialogue/
+/dialogue_debug/
+/states/
+/states_persistent/
+/story_scenes/
 
-simple_vn_assets/
+/simple_vn_assets/
 
-TODO.md
+/TODO.md
