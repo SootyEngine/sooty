@@ -103,8 +103,12 @@ func execute(e: String, default = null, d: Dictionary={}) -> Variant:
 
 func do(s: String) -> Variant:
 	var got = null
-	for a in s.split(";~"):
-		got = _do(a)
+	for a in s.split(";"):
+		if a.begins_with("~"):
+			got = _do(a.substr(1).strip_edges())
+		elif a.begins_with("=="):
+			push_error("Not implemtned.")
+			pass
 	return got
 
 func _do(s: String) -> Variant:
