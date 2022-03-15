@@ -15,9 +15,10 @@ func _enter_tree() -> void:
 		es.set_setting("docks/filesystem/textfile_extensions", fs + ",soot")
 	get_editor_interface().get_script_editor().register_syntax_highlighter(highligher)
 	
+	var d := Directory.new()
 	for dir in ["res://states", "res://states_persistent", "res://dialogue", "res://story_scenes"]:
-		if not UFile.dir_exists(dir):
-			UFile.create_dir(dir)
+		if not d.dir_exists(dir):
+			d.make_dir(dir)
 	
 func _exit_tree() -> void:
 	remove_autoload_singleton("Global")
