@@ -1,9 +1,4 @@
 === START
-	te: Let's do a speaker.
-	ok\: out of ten nine: and then
-
-	{{$test > 20}} mark: Okay
-
 	What to boost LVL\: [$LVL] STR\: [$STR] WIS\: [$WIS]?
 		<> LVL. ((~$LVL += 1))
 		<> STR. ((~$STR += 1))

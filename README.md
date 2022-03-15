@@ -12,9 +12,7 @@ A dialogue engine for Godot4.
 - Built with modding support in mind.
 - Built with localization in mind.
 
-# Screenshots
-
-## Text and BBCode
+# Text and BBCode
 ![](readme/bbcode.png)
 
 Tags:
@@ -41,7 +39,35 @@ Some tags are self closing.
 
 Along with typical: `b` `i` `bi` `u`
 
-## Actions
+## Pipes
+Values can be piped through functions: `You have [$apples|commas] apples.` -> `You have 1,234,567 apples.`
+
+So can text: `I have [|commas]1234567[] apples.` -> `I have 1,234,567,apples.`
+
+
+## Shortcuts
+In `config.cfg` you can set shortcuts for complex actions and custom colors:
+
+```
+[rich_text_shortcuts]
+cam1="~camera shake 2.0;~camera zoom 2.0;wait=0.5"
+cam_reset="~camera shake 0.0;~camera zoom 1.0
+highlight="cherry;b;u"
+pscore="$player.score|commas;b;greeny;
+
+[rich_text_colors]
+cherry="#FF9053"
+greeny="#BBEE32"
+```
+
+Now use them like any other BBCode.
+
+```
+My score\: [pscore] points.
+john: These [cherry]cherries[] sure look good. [cam1]Wait, these aren't cherries.[cam_reset] They're blueberries.
+```
+
+# Actions
 ![](readme/actions.png)
 
 Starting with a `~` actions can do a number of things.
@@ -70,7 +96,22 @@ Modify state variables, and call state functions, with `$`
 ~$player.damage 10
 ```
 
-## Conditionals
+## Operator Overloads
+`StringActions` has basic support for operator overloads.
+
+Look at the *Level* class `Level.gd`:
+```
+var value = 0
+
+func _operator_get():
+	return value
+
+func _operator_set(x):
+	value = x
+```
+This allows us to do `level += 1` instead of `level.value += 1`
+
+# Conditionals
 ![](readme/ifelse.png)
 
 # Modding
