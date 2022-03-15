@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=3 uid="uid://b4ogq5gmuv2fe"]
+
+[ext_resource type="Script" path="res://addons/sooty_engine/ui/ui_map_gen.gd" id="1_bmqxj"]
+
+[node name="Node2D" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( "1_bmqxj" )
+
+[node name="GraphEdit" type="GraphEdit" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="prefab" type="GraphNode" parent="GraphEdit"]
+offset_right = 200.0
+offset_bottom = 200.0
+mouse_filter = 1
+title = "dasd"
+resizable = true
+slot/0/left_enabled = true
+slot/0/left_type = 0
+slot/0/left_color = Color(1, 1, 1, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 0
+slot/0/right_color = Color(1, 1, 1, 1)
+slot/0/right_icon = null
+__meta__ = {
+"_edit_layout_mode": 0,
+"_edit_use_custom_anchors": false
+}
+
+[node name="goto" type="Label" parent="GraphEdit/prefab"]
+offset_left = 18.0
+offset_top = 42.0
+offset_right = 182.0
+offset_bottom = 68.0
+text = "..."
+horizontal_alignment = 1
+vertical_alignment = 1
