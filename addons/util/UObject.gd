@@ -61,6 +61,12 @@ static func patch(target: Variant, patch: Dictionary, erase_patched := false) ->
 	
 	return lines_changed
 
+static func get_operator_value(v):
+	if v is Object:
+		if v.has_method("_operator_get"):
+			return v._operator_get()
+	return v
+
 static func call_callable(c: Callable, args: Array) -> Variant:
 	match len(args):
 		0: return c.call()

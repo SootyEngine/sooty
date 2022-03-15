@@ -115,6 +115,7 @@ static func plural(x: Variant, one := "%s", more = "%s's", none := "%s's") -> St
 	return out % x if "%s" in out else out
 
 static func ordinal(n: Variant, one := "%sst", two := "%snd", three := "%srd", other := "%sth") -> String:
-	n = n.to_int()
+	if n is String:
+		n = n.to_int()
 	var ord = {1: one, 2: two, 3: three}.get(n if n % 100 < 20 else n % 10, other)
 	return ord % str(n) if "%s" in ord else ord

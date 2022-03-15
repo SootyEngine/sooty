@@ -1,4 +1,8 @@
 === START
+	
+	{{$LVL > 2}}
+		You've reached the [$LVL|ordinal] level.
+	
 	What to boost LVL\: [$LVL] STR\: [$STR] WIS\: [$WIS]?
 		<> LVL. ((~$LVL += 1))
 		<> STR. ((~$STR += 1))

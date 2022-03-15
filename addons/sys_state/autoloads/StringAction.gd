@@ -9,10 +9,10 @@ const OP_ALL := OP_ASSIGN + OP_RELATION + OP_ARITHMETIC + OP_LOGICAL
 const BUILT_IN := ["true", "false", "null"]
 
 var pipes := {
-	"commas": func(x): return UString.commas(x),
-	"humanize": func(x): return UString.humanize(x),
-	"plural": func(x, one:="%s", more:="%s's", none:="%s's"): return UString.plural(x, one, more, none),
-	"ordinal": func(x): return UString.ordinal(x),
+	"commas": func(x): return UString.commas(UObject.get_operator_value(x)),
+	"humanize": func(x): return UString.humanize(UObject.get_operator_value(x)),
+	"plural": func(x, one:="%s", more:="%s's", none:="%s's"): return UString.plural(UObject.get_operator_value(x), one, more, none),
+	"ordinal": func(x): return UString.ordinal(UObject.get_operator_value(x)),
 	
 	"pick": _pipe_pick,
 	"test": _pipe_test,
@@ -66,17 +66,19 @@ func _pipe_pick(x) -> Variant:
 
 # Test whether a command is true or false.
 func test(condition: String) -> bool:
+	# TODO: Don't use execute. Rework to use _operator_get
 	var parts := split_string(condition)
 	for i in len(parts):
-		parts[i] = _str_to_varstr(parts[i])
+		parts[i] = _str_to_test_str(parts[i])
 	var new_condition = " ".join(parts)
 	var result = execute(new_condition, false)
 	return true if result else false
 
-func _str_to_varstr(s: String):
+func _str_to_test_str(s: String):
 	if s.begins_with("$"):
 		s = s.substr(1)
 		var got = State._get(s)
+		got = UObject.get_operator_value(got)
 		return var2str(got)
 	elif s in BUILT_IN or s in OP_ALL:
 		return s
@@ -98,6 +100,8 @@ func execute(e: String, default = null, d: Dictionary={}) -> Variant:
 				return result
 #		push_error(expression.get_error_text())
 	return default
+
+
 
 func do(s: String) -> Variant:
 	var got = null
@@ -206,7 +210,6 @@ func _do_function(parts: Array) -> Variant:
 			var p := fname.split(".", true, 1)
 			gname = p[0]
 			fname = p[1]
-		
 		
 		var group := "sa:%s" % gname
 		var nodes :=  Global.get_tree().get_nodes_in_group(group)
