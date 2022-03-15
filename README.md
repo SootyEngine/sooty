@@ -53,7 +53,7 @@ In `config.cfg` you can set shortcuts for complex actions and custom colors:
 cam1="~camera shake 2.0;~camera zoom 2.0;wait=0.5"
 cam_reset="~camera shake 0.0;~camera zoom 1.0
 highlight="cherry;b;u"
-pscore="$player.score|commas;b;greeny;
+pscore="$player.score|commas;b;greeny
 
 [rich_text_colors]
 cherry="#FF9053"

@@ -35,10 +35,10 @@ var paul := Character.new({
 
 var mary := Character.new({name="Mary"})
 
-var LVL := Level.new({name="Level", max=20})
-var STR := Level.new({name="STR", max=100, notify_modulo=10})
-var WIS := Level.new({name="STR", max=100, notify_modulo=10})
-var CHR := Level.new({name="CHR", max=100, notify_modulo=10})
+var LVL := Level.new({name="Level", color=Color.YELLOW_GREEN, max=20})
+var STR := Level.new({name="STR", color=Color.TOMATO, max=20, notify_every=2})
+var WIS := Level.new({name="WIS", color=Color.AQUA, max=20, notify_every=2})
+var CHR := Level.new({name="CHR", max=20, notify_every=5})
 
 # QUESTS
 
