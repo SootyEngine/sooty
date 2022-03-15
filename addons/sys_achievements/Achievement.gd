@@ -15,14 +15,6 @@ var unlocked: bool = false:
 	set(x):
 		if unlocked != x:
 			tick = toll if x else 0
-			if unlocked:
-				Notify.message({
-					type=MSG_ACHIEVEMENT_UNLOCKED,
-					text=[
-						"[yellow_green]Achieved[] %s" % name,
-						desc
-					]
-				})
 
 var progress: float = 0.0:
 	get: return 0.0 if tick==0 or toll==0 else float(tick) / float(toll)
@@ -33,6 +25,14 @@ var tick := 0:
 		if tick != next:
 			tick = next
 			if unlocked:
+				Notify.message({
+					type=MSG_ACHIEVEMENT_UNLOCKED,
+					text=[
+						"[yellow_green]Achieved[] %s" % name,
+						desc
+					]
+				})
+			else:
 				Notify.message({
 					type=MSG_ACHIEVEMENT_PROGRESS,
 					text=[

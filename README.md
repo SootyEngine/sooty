@@ -114,6 +114,16 @@ This allows us to do `level += 1` instead of `level.value += 1`
 # Conditionals
 ![](readme/ifelse.png)
 
+# States
+The `State` class and `Persistent` are where game properties should be accessed.
+
+`State` loads scripts in `res://states` as node children.  
+`Persistent` loads scripts in `res://states_persistent` as node children.
+
+From `State` you can access anything in `Persistent`: `State.achievement_NiceJob.progress > 0`
+
+All initial values are tracked, and then any value that changes will be saved.
+
 # Modding
 todo: At bootup, show list of discovered mods, with toggles. Save state to config.
 	After clicking accept, selected mods are loaded.
