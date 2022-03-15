@@ -35,10 +35,10 @@ var paul := Character.new({
 
 var mary := Character.new({name="Mary"})
 
-var LVL := Level.new({name="Level", color=Color.YELLOW_GREEN, max=20})
-var STR := Level.new({name="STR", color=Color.TOMATO, max=20, notify_every=2})
-var WIS := Level.new({name="WIS", color=Color.AQUA, max=20, notify_every=2})
-var CHR := Level.new({name="CHR", max=20, notify_every=5})
+var LVL := VStat.new({name="Level", color=Color.YELLOW_GREEN, max=20})
+var STR := VStat.new({name="STR", color=Color.TOMATO, max=20, notify_every=2})
+var WIS := VStat.new({name="WIS", color=Color.AQUA, max=20, notify_every=2})
+var CHR := VStat.new({name="CHR", max=20, notify_every=5})
 
 # QUESTS
 

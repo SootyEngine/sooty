@@ -19,12 +19,17 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/simple_vn/data_classes/BaseDataClass.gd"
 }, {
+"base": "BaseDataClass",
+"class": &"BaseDataClassExtra",
+"language": &"GDScript",
+"path": "res://addons/simple_vn/data_classes/BaseDataClassExtra.gd"
+}, {
 "base": "Node",
 "class": &"BaseState",
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/autoloads/base_state.gd"
 }, {
-"base": "BaseDataClass",
+"base": "BaseDataClassExtra",
 "class": &"Character",
 "language": &"GDScript",
 "path": "res://addons/simple_vn/data_classes/Character.gd"
@@ -124,15 +129,10 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/simple_vn/data_classes/Inventory.gd"
 }, {
-"base": "BaseDataClass",
+"base": "BaseDataClassExtra",
 "class": &"Item",
 "language": &"GDScript",
 "path": "res://addons/simple_vn/data_classes/Item.gd"
-}, {
-"base": "BaseDataClass",
-"class": &"Level",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/data_classes/Level.gd"
 }, {
 "base": "Resource",
 "class": &"Markdown",
@@ -228,10 +228,26 @@ _global_script_classes=[{
 "class": &"UTween2D",
 "language": &"GDScript",
 "path": "res://addons/util/UTween2D.gd"
+}, {
+"base": "BaseDataClass",
+"class": &"VBool",
+"language": &"GDScript",
+"path": "res://addons/simple_vn/data_classes/VBool.gd"
+}, {
+"base": "BaseDataClass",
+"class": &"VEnum",
+"language": &"GDScript",
+"path": "res://addons/simple_vn/data_classes/VEnum.gd"
+}, {
+"base": "BaseDataClass",
+"class": &"VStat",
+"language": &"GDScript",
+"path": "res://addons/simple_vn/data_classes/VStat.gd"
 }]
 _global_script_class_icons={
 "Achievement": "",
 "BaseDataClass": "",
+"BaseDataClassExtra": "",
 "BaseState": "",
 "Character": "",
 "Config": "",
@@ -254,7 +270,6 @@ _global_script_class_icons={
 "FontHelper": "",
 "Inventory": "",
 "Item": "",
-"Level": "",
 "Markdown": "",
 "Quest": "",
 "Reward": "",
@@ -273,7 +288,10 @@ _global_script_class_icons={
 "UString": "",
 "UTime": "",
 "UTween": "",
-"UTween2D": ""
+"UTween2D": "",
+"VBool": "",
+"VEnum": "",
+"VStat": ""
 }
 
 [application]
