@@ -1,7 +1,0 @@
-res://addons/simple_vn/data_classes/Character.gd
-res://addons/simple_vn/data_classes/VBool.gd
-res://addons/simple_vn/data_classes/VEnum.gd
-res://addons/simple_vn/data_classes/VStat.gd
-res://addons/simple_vn/dialogue_runner.tscn
-res://addons/simple_vn/ui/ui_dialogue_bg.tres
-res://addons/sys_state/autoloads/StringAction.gd
