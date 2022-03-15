@@ -1,7 +1,13 @@
 === START
-	Some options.
-		<> Who cares?
-		<> Not me.
+	{{*$time.weekday}}
+		{{MONDAY}} Today is monday.
+		{{TUESDAY}} Today is TUESDAY.
+		{{WEDNESDAY}} Today is WEDNESDAY.
+		{{THURSDAY}} Today is THURSDAY.
+		{{FRIDAY}} Today is FRIDAY.
+		{{_}} Today is the weekend.
+	~$time.goto_next_day
+	=> START
 
 	=> 001_start.start //#eg4k6d8r
 

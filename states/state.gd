@@ -33,9 +33,7 @@ var paul := Character.new({
 	health=12309
 })
 
-var mary := Character.new({
-	name="Mary"
-})
+var mary := Character.new({name="Mary"})
 
 # QUESTS
 

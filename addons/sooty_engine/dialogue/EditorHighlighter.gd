@@ -277,6 +277,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 		if a != -1 and b != -1:
 			_c(a, C_SYMBOL)
 			_c(b, C_SYMBOL, len(S_COND_END))
+			_co(C_TEXT)
 			_h_conditional(a+len(S_COND_START), b-1)
 #			from = b+len(S_COND_END)
 		

@@ -146,7 +146,7 @@ func pop_next_line() -> Dictionary:
 			for i in len(line.cases):
 				var got = StringAction.str_to_var(line.cases[i])
 #				print("\tCASE %s: '%s' -> %s == %s (%s)" % [i, line.cases[i], got, match_result, match_result == got])
-				if match_result == got:
+				if match_result == got or line.cases[i] == "_":
 					_push(did, line.case_lines[i])
 					break
 		

@@ -298,11 +298,11 @@ static func _line_as_condition(line: Dictionary):
 				
 				# treat as an unprocessed line now.
 				# and then add it to the front of it's list.
-#				if tabbed_line.text.strip_edges() != "":
-#					_erase(tabbed_line, ["cond", "cond_type", "conds", "cond_lines"])
-#					tabbed_line.tabbed = []
-#					_process_line(tabbed_line)
-#					line.case_lines[-1].push_front(tabbed_line)
+				if tabbed_line.text.strip_edges() != "":
+					_erase(tabbed_line, ["cond", "cond_type", "conds", "cond_lines"])
+					tabbed_line.tabbed = []
+					_process_line(tabbed_line)
+					line.case_lines[-1].push_front(tabbed_line)
 	
 	if line.cond_type == "if":
 		line.conds = [line.cond]
