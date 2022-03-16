@@ -65,12 +65,12 @@ func _get(property: StringName):
 			if property in o:
 				return o[property]
 
-func _set(property: StringName, value) -> bool:
-	var path := str(property).split(".")
-	property = path[-1]
+func _set(property_path: StringName, value) -> bool:
+	var path := str(property_path).split(".")
+	var property := path[-1]
 	for m in _children:
 		var o = UObject.get_penultimate(m, path)
-		if property in o:
+		if o != null and property in o:
 			var old = o.get(property)
 			if typeof(value) != typeof(old):
 				push_error("Can't set %s (%s) to %s (%s)." % [property, UObject.get_name_from_type(typeof(old)), value, UObject.get_name_from_type(typeof(value))])
@@ -81,7 +81,7 @@ func _set(property: StringName, value) -> bool:
 				changed.emit(path)
 				changed_from_to.emit(path, old, new)
 			return true
-	push_error("No %s in State. (Attempted '%s = %s')" % [property, property, value])
+	push_error("No %s in State. (Attempted '%s = %s')" % [property_path, property, value])
 	return true
 
 func _get_objects_property(obj: Object) -> String:

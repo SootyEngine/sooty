@@ -155,6 +155,8 @@ func _do_assign(parts: Array) -> Variant:
 	
 	# call a function assignment
 	else:
+		assert(false)
+		# TODO: "X + Y" shouldnt be "X(Y)"
 		parts.pop_front() # pop property
 		parts.pop_front() # pop eval
 		new_value = _do_function(parts)
