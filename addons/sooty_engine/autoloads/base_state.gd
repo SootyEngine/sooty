@@ -73,7 +73,7 @@ func _set(property: StringName, value) -> bool:
 		if property in o:
 			var old = o.get(property)
 			if typeof(value) != typeof(old):
-				push_error("Can't set $%s (%s) to %s (%s)." % [property, UObject.get_name_from_type(typeof(old)), value, UObject.get_name_from_type(typeof(value))])
+				push_error("Can't set %s (%s) to %s (%s)." % [property, UObject.get_name_from_type(typeof(old)), value, UObject.get_name_from_type(typeof(value))])
 				return true
 			o.set(property, value)
 			var new = o.get(property)
@@ -81,7 +81,7 @@ func _set(property: StringName, value) -> bool:
 				changed.emit(path)
 				changed_from_to.emit(path, old, new)
 			return true
-	push_error("No '%s' in State. (Attempted '%s = %s')" % [property, property, value])
+	push_error("No %s in State. (Attempted '%s = %s')" % [property, property, value])
 	return true
 
 func _get_objects_property(obj: Object) -> String:

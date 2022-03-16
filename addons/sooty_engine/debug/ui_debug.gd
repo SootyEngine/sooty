@@ -6,7 +6,7 @@ var filter := ""
 func _ready() -> void:
 	$VBoxContainer/HBoxContainer/Button.pressed.connect(_update)
 	$VBoxContainer/HBoxContainer/LineEdit.text_changed.connect(_filter_changed)
-	State.changed_from_to.connect(_update)
+	State.changed_from_to.connect(_changed)
 
 func _changed(property, from, to):
 	print("Changed %s to %s from %s." % [property, to, from])
