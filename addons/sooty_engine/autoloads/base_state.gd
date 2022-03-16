@@ -3,7 +3,7 @@ class_name BaseState
 
 signal changed(key_path: Array)
 signal changed_from_to(key: Array, from: Variant, to: Variant)
-signal state_loaded()
+signal loaded()
 
 var _default := {}
 var _children := []
@@ -21,7 +21,7 @@ func install(path: String):
 func _post_init():
 	_default = _get_state()
 #	UDict.log(_default)
-	state_loaded.emit()
+	loaded.emit()
 
 func _child_added(_n: Node):
 	_children = get_children()
@@ -71,16 +71,15 @@ func _set(property: StringName, value) -> bool:
 	for m in _children:
 		var o = UObject.get_penultimate(m, path)
 		if property in o:
-			var old = o[property]
+			var old = o.get(property)
 			if typeof(value) != typeof(old):
 				push_error("Can't set $%s (%s) to %s (%s)." % [property, UObject.get_name_from_type(typeof(old)), value, UObject.get_name_from_type(typeof(value))])
 				return true
-			o[property] = value
-			var new = o[property]
+			o.set(property, value)
+			var new = o.get(property)
 			if old != new:
 				changed.emit(path)
 				changed_from_to.emit(path, old, new)
-				print("Changed %s to %s from %s." % [property, new, old])
 			return true
 	push_error("No '%s' in State. (Attempted '%s = %s')" % [property, property, value])
 	return true
@@ -95,9 +94,10 @@ func _get_objects_property(obj: Object) -> String:
 func _get_all_of_type(type: Variant) -> Dictionary:
 	var out := {}
 	for k in _default:
-		var v = self[k]
-		if v is type:
-			out[k] = v
+		if _has(k):
+			var v = _get(k)
+			if v is type:
+				out[k] = v
 	return out
 
 func _has_of_type(id: String, type: Variant) -> bool:

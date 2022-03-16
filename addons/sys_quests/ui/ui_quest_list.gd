@@ -18,10 +18,10 @@ func _ready_deferred():
 	
 	var text := ["[center;i]QUESTS[]"]
 	for part in [
-		{text="[deep_sky_blue;b;center]Started[]", list=s_started},
-		{text="[yellow_green;b;center]Completed[]", list=s_completed},
-		{text="[dark_gray;b;center]Unlocked[]", list=s_unlocked},
-		{text="[tomato;b;center]Debug[]", list=s_other}
+		{text="[deep_sky_blue;b]Started[]", list=s_started},
+		{text="[yellow_green;b]Completed[]", list=s_completed},
+		{text="[dark_gray;b]Unlocked[]", list=s_unlocked},
+		{text="[tomato;b]Debug[]", list=s_other}
 	]:
 		text.append(part.text)
 		for quest in part.list:

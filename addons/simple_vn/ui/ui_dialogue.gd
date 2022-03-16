@@ -56,6 +56,9 @@ func _input(_event: InputEvent) -> void:
 			select_option(option_container.get_child(hovered+1).option)
 		
 		else:
+			grab_focus()
+			grab_click_focus()
+			
 			if not text.is_finished():
 				text.advance()
 			else:
@@ -73,6 +76,9 @@ func _process(delta: float) -> void:
 @export var has_options := false
 
 func show_line(d: DialogueLine, who: Variant):
+	grab_focus()
+	grab_click_focus()
+	
 	owner.add_pauser(self)
 	text.set_bbcode(d.text)
 	if who is String:

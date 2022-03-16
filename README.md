@@ -36,6 +36,8 @@ Some tags are self closing.
 |`$property`|Inserts the value of a state.<br>Will auto close any style it's wrapped with:<br>`The [$stranger;b;red] looks at you.`<br>Can be piped to a function. `[$player.coins\|commas]`||
 |`lb` `rb`|Insert brackets *[]*||
 
+Along with typical: `b` `i` `bi` `u`
+
 *Animation specific tags.*
 
 |tag|desc|options|
@@ -46,7 +48,10 @@ Some tags are self closing.
 |`pace`|Change pace of animation.|`[p]` `[pace]` `[p=2]`|
 |`~action`|Call any [action](#actions) at that point in the animation.||
 
-Along with typical: `b` `i` `bi` `u`
+*Custom text effects*<br>**TODO**
+
+Try combining emojis and animations: `Press the [2.0;sin;:arrow_up:;] key!`<br>
+This will double the scale, play the sin wave animation, show the up arrow emoji, and then close.
 
 ## Pipes
 Values can be piped through functions: `You have [$apples|commas] apples.` -> `You have 1,234,567 apples.`
