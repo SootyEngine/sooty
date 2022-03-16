@@ -116,7 +116,6 @@ func _on_text(d: DialogueLine):
 	$flow_manager.get_node(_caption).show_line(d, from)
 
 func _on_action(s: String):
-	print("DO ACTION", s)
 	StringAction.do(s)
 
 func print_pausers():

@@ -101,7 +101,6 @@ func has_requirements() -> bool:
 
 func start(force := false):
 	if force or has_requirements():
-		print("Called start: %s" % self)
 		state = QUEST_STARTED
 	else:
 		print("%s doesn't meet it's requirements." % self)

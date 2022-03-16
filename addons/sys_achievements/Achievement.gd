@@ -49,5 +49,4 @@ func gain(amount := 1):
 	tick += amount
 
 func unlock():
-	print("Called unlock")
 	unlocked = true

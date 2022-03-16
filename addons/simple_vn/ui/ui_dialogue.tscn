@@ -99,7 +99,7 @@ centered = false
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 offset_right = 1024.0
-offset_bottom = 96.0
+offset_bottom = 129.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_right = 240
@@ -115,7 +115,7 @@ __meta__ = {
 offset_left = 240.0
 offset_top = 8.0
 offset_right = 784.0
-offset_bottom = 80.0
+offset_bottom = 113.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
@@ -133,15 +133,17 @@ theme_override_fonts/bold_italics_font = SubResource( "Font_kgja6" )
 theme_override_fonts/italics_font = SubResource( "Font_vjea2" )
 theme_override_fonts/bold_font = SubResource( "Font_p3fvl" )
 theme_override_fonts/normal_font = SubResource( "Font_fervi" )
-theme_override_font_sizes/mono_font_size = 16
-theme_override_font_sizes/bold_italics_font_size = 16
-theme_override_font_sizes/italics_font_size = 16
-theme_override_font_sizes/bold_font_size = 16
-theme_override_font_sizes/normal_font_size = 16
+theme_override_font_sizes/mono_font_size = 64
+theme_override_font_sizes/bold_italics_font_size = 64
+theme_override_font_sizes/italics_font_size = 64
+theme_override_font_sizes/bold_font_size = 64
+theme_override_font_sizes/normal_font_size = 64
+bbcode_enabled = true
 fit_content_height = true
 script = ExtResource( "10_mndt7" )
 effects_mode = 0
 font = "robotomono"
+size = 64
 
 [node name="@@64447" type="VScrollBar" parent="MarginContainer/c/from"]
 visible = false
@@ -153,7 +155,7 @@ step = 1.0
 [node name="text" type="RichTextLabel" parent="MarginContainer/c"]
 offset_top = 4.0
 offset_right = 544.0
-offset_bottom = 37.0
+offset_bottom = 70.0
 size_flags_horizontal = 3
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.25)
 theme_override_constants/shadow_offset_x = 2
@@ -172,17 +174,18 @@ theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 fit_content_height = true
 script = ExtResource( "11_wjgcf" )
-bbcode = "[:anger:] okay"
+bbcode = "[:anger:] okay [:frog:]
+today when it [b;red;0.9]ok[] ni"
 font = "robotomono"
 size = 24
 play_speed = 60.0
 fade_speed = 5.0
 progress = 1.0
-effect_time = 0.975486
-visible_character = 6
+effect_time = 30.089
+visible_character = 28
 _triggers = {}
-_alpha_real = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-_alpha_goal = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+_alpha_real = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+_alpha_goal = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
 [node name="@@64448" type="VScrollBar" parent="MarginContainer/c/text"]
 visible = false
@@ -192,9 +195,9 @@ max_value = 0.0
 step = 1.0
 
 [node name="options" type="VBoxContainer" parent="MarginContainer/c"]
-offset_top = 41.0
+offset_top = 74.0
 offset_right = 544.0
-offset_bottom = 72.0
+offset_bottom = 105.0
 size_flags_vertical = 3
 
 [node name="c" type="MarginContainer" parent="MarginContainer/c/options"]

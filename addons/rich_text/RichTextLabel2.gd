@@ -6,6 +6,8 @@ const DIR_TEXT_EFFECTS := "res://addons/rich_text/text_effects"
 const DIR_TEXT_ANIMATIONS := "res://addons/rich_text/text_animations"
 const TAG_OPENED := "["
 const TAG_CLOSED := "]"
+const MIN_FONT_SIZE := 8
+const MAX_FONT_SIZE := 64
 
 enum {
 	T_NONE,
@@ -34,7 +36,7 @@ enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
 	set = set_font
 @export var size: int = 16:
 	set(x):
-		size = x
+		size = clampi(x, MIN_FONT_SIZE, MAX_FONT_SIZE)
 		add_theme_font_size_override("bold_font_size", size)
 		add_theme_font_size_override("bold_italics_font_size", size)
 		add_theme_font_size_override("italics_font_size", size)
@@ -155,27 +157,17 @@ func _parse(btext: String):
 		
 		# go through all tags
 		var tag := p[0]
-		
+#		print("TAG: ", tag)
 		# close last
-		if tag == "":
-			# if tags weren't closed, redraw the ending.
-			if len(_stack) and not len(_stack[-1]):
-				_add_text("[]")
-			
-			_stack_pop()
-		
-		# close all
-		elif tag == "/":
-			while len(_stack):
-				_stack_pop()
-		
-		# close old fashioned way
-		elif tag.begins_with("/"):
-			# TODO
-			pass
-		
-		else:
-			_parse_opening(tag)
+#		if tag == "":
+#			# if tags weren't closed, redraw the ending.
+#			if len(_stack) and not len(_stack[-1]):
+#				_add_text("[]")
+#
+#			_stack_pop()
+#
+#		else:
+		_parse_opening(tag)
 	
 	if btext:
 		_add_text(btext)
@@ -206,21 +198,48 @@ func _parse_opening(tag: String):
 		_parse_tags(tag)
 
 func _parse_tags(tags_string: String):
-	_stack.append([])
-	
 	# check for shortcuts
 	var p := tags_string.split(";")
 	var tags := []
 	for i in len(p):
-		if p[i] in _shortcuts:
-			tags.append_array(_shortcuts[p[i]].split(";"))
+		var tag = p[i]
+		if tag in _shortcuts:
+			tags.append_array(_shortcuts[tag].split(";"))
 		else:
-			tags.append(p[i])
+			tags.append(tag)
 	
+	var added_stack := false
 	for tag in tags:
-		_parse_tag(tag)
+#		prints("\t[%s]" % tag)
+		# close last
+		if tag == "":
+			if added_stack and not len(_stack[-1]):
+				_stack.pop_back()
+			if len(_stack) and not len(_stack[-1]):
+				_add_text("[]")
+			_stack_pop()
+			added_stack = false
+		
+		# close all
+		elif tag == "/":
+			if added_stack and not len(_stack[-1]):
+				_stack.pop_back()
+			while len(_stack):
+				_stack_pop()
+			added_stack = false
+		
+		# close old fashioned way
+		elif tag.begins_with("/"):
+			# TODO
+			pass
+		
+		else:
+			if not added_stack:
+				added_stack = true
+				_stack.append([])
+			_parse_tag(tag)
 	
-	if not len(_stack[-1]):
+	if added_stack and not len(_stack[-1]):
 		_stack.pop_back()
 
 func _parse_tag(tag: String):
@@ -296,11 +315,11 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 			_push_font_size(int(_state.font_size + tag.to_int()))
 		return
 	
-	# emojis
+	# emoji: old style
 	if tag in Emoji.OLDIE:
 		append_text(Emoji.OLDIE[tag])
 		return
-		
+	# emoji: by name
 	if tag.begins_with(":") and tag.ends_with(":"):
 		var t := tag.trim_suffix(":").trim_prefix(":")
 		if t in Emoji.NAMES:
@@ -398,10 +417,11 @@ func _push_pipe(pipe: String):
 func _pop_pipe():
 	_state.pipes.pop_back()
 
-func _push_font_size(size: int):
+func _push_font_size(s: int):
+	s = clampi(s, MIN_FONT_SIZE, MAX_FONT_SIZE)
 	_stack_push(T_FONT_SIZE, _state.font_size)
-	_state.font_size = size
-	push_font_size(size)
+	_state.font_size = s
+	push_font_size(s)
 
 func _pop_font_size(size):
 	_state.font_size = size
