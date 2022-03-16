@@ -17,7 +17,7 @@ offset_right = 1024.0
 offset_bottom = 31.0
 
 [node name="LineEdit" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
-offset_right = 510.0
+offset_right = 429.0
 offset_bottom = 31.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -25,12 +25,19 @@ placeholder_text = "Filter"
 clear_button_enabled = true
 
 [node name="Button" type="Button" parent="VBoxContainer/HBoxContainer"]
-offset_left = 514.0
-offset_right = 1024.0
+offset_left = 433.0
+offset_right = 863.0
 offset_bottom = 31.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 text = "update"
+
+[node name="CheckButton" type="CheckButton" parent="VBoxContainer/HBoxContainer"]
+offset_left = 867.0
+offset_right = 1024.0
+offset_bottom = 31.0
+button_pressed = true
+text = "Only Modified"
 
 [node name="RichTextLabel" type="RichTextLabel" parent="VBoxContainer"]
 offset_top = 35.0
