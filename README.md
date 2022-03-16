@@ -128,32 +128,44 @@ This allows us to do `stat += 1` instead of `stat.value += 1`
 # Conditionals
 ![](readme/ifelse.png)
 
+
+# Modding
+**TODO**
+At bootup, show list of discovered mods, with toggles. Save state to config.
+After clicking accept, selected mods are loaded.
+May need to reboot to uninstall mods.
+
+# Localization
+**TODO**
+End of line comment of form `//#unique_line_id`<br>
+These can be auto generated.
+
 # States
 The `State` class and `Persistent` are where game properties should be accessed.
 
 `State` loads scripts in `res://states` as node children.  
+- Characters
+- World states
+
 `Persistent` loads scripts in `res://states_persistent` as node children.
+- Achievements
+- Unlockables
 
 From `State` you can access anything in `Persistent`: `State.achievement_NiceJob.progress > 0`
 
 All initial values are tracked, and then any value that changes will be saved.
 
-# Modding
-todo: At bootup, show list of discovered mods, with toggles. Save state to config.
-	After clicking accept, selected mods are loaded.
-	Need to reboot to uninstall mods.
+*WARNING:* Properties across scripts should be unique, as they are accessed on a first name basis.
 
-# Localization
-todo
+```
+# If you do this, only one of these properties will be saved, and accessible through State.
 
-# State and Persistent Data
-Initialize state variables in "res://state.gd".
-- Characters
-- World states
+#characters.gd
+var fields := Character.new({name="Mr. Fields"})
 
-Initialize persistent variables in "res://persistent.gd"
-- Achievements
-- Unlockables
+#locations.gd
+var fields := Location.new({name="The Fields"})
+```
 
 # Exporting
-Make sure to include "*.soot,*.cfg" files when exporting.
+Make sure to include `*.soot,*.cfg` files when exporting.
