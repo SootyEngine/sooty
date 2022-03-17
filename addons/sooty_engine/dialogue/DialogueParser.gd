@@ -7,7 +7,8 @@ const REWRITE := 6
 
 const S_COMMENT := "//"
 const S_LANG_ID := "//#"
-const S_ACTION := "~"
+#const S_ACTION_EVAL := "~"
+#const S_ACTION_SHORTCUT := "@"
 const S_FLOW := "==="
 const S_FLOW_GOTO := "=>"
 const S_FLOW_CALL := "=="
@@ -261,7 +262,8 @@ static func _process_line(line: Dictionary):
 	if t.begins_with("{{"): return _line_as_condition(line)
 	_extract_conditional(line)
 	if t.begins_with("<"): return _line_as_option(line)
-	if t.begins_with(S_ACTION): return _line_as_action(line)
+	if t.begins_with(Sooty.S_ACTION_EVAL): return _line_as_action(line)
+	if t.begins_with(Sooty.S_ACTION_SHORTCUT): return _line_as_action(line)
 	if t.begins_with(S_FLOW_GOTO): return _line_as_goto(line)
 	if t.begins_with(S_FLOW_CALL): return _line_as_call(line)
 	if t.begins_with(S_PROPERTY_HEAD): return _line_as_properties(line)
@@ -361,8 +363,8 @@ static func _add_flow_action(line: Dictionary, type: String, f_action: String):
 	
 static func _line_as_action(line: Dictionary):
 	line.type = "action"
-	line.action = line.text.substr(len(S_ACTION))
-	
+	line.action = line.text.strip_edges()
+
 static func _line_as_properties(line: Dictionary):
 	var properties := {}
 	for prop in line.text.substr(len("|")).split(" "):

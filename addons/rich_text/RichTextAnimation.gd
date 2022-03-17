@@ -2,8 +2,8 @@
 extends RichTextLabel2
 class_name RichTextAnimation
 
-signal command(command: String)
-signal character_shown(index: int)
+signal symbol(command: String)	# triggered when a tag starting with either ~!?@%&* comes up.
+signal character_shown(index: int)	# a single character was made visible. useful for character animation?
 
 signal started()				# animation starts.
 signal paused()					# 'play' is set to false.
@@ -20,10 +20,10 @@ signal quote_started()			# "quote" starts.
 signal quote_ended()			# "quote" ends.
 
 enum {
-	TRIG_NONE = 1000,
+	TRIG_NONE = 1000, # offset because it's built on the enum of the RichTextLabel2 class.
 	TRIG_WAIT, TRIG_PACE, TRIG_HOLD,
 	TRIG_SKIP_STARTED, TRIG_SKIP_ENDED,
-	TRIG_ACTION, TRIG_COMMAND,
+	TRIG_ACTION, TRIG_SYMBOL,
 	TRIG_QUOTE_STARTED, TRIG_QUOTE_ENDED
 }
 
@@ -93,11 +93,9 @@ func _preparse(btext: String) -> String:
 	return final
 
 func _parse_tag_unused(tag: String, info: String, raw: String) -> bool:
-	if raw.begins_with("@"):
-		return _register_trigger(TRIG_ACTION, raw.substr(1))
-	
-	elif raw.begins_with("!"):
-		return _register_trigger(TRIG_COMMAND, raw.substr(1))
+	# the user may want to fire things off, with their own signal.
+	if raw[0] in "~!?@&*":
+		return _register_trigger(TRIG_ACTION, raw)
 	
 	match tag:
 		"skip":
@@ -119,8 +117,8 @@ func _tag_closed(tag: int, data: Variant):
 
 func _trigger(type: int, data: Variant):
 	match type:
-		TRIG_COMMAND: command.emit(data)
-		TRIG_ACTION: StringAction.do(data)
+		TRIG_SYMBOL: symbol.emit(data)
+		TRIG_ACTION: State._eval(data)
 		TRIG_WAIT: _wait += data.get("wait", data.get("w", 1.0))
 		TRIG_HOLD: play = false
 		TRIG_PACE: _pace = data.get("pace", data.get("p", 1.0))

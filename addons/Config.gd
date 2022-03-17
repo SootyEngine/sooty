@@ -1,3 +1,4 @@
+@tool
 extends ConfigFile
 class_name Config
 

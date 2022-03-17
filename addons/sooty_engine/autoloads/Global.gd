@@ -27,6 +27,7 @@ func _get(property: StringName):
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		set_process(false)
+		return
 	
 	if Input.is_action_just_pressed("reload_scene"):
 		get_tree().reload_current_scene()

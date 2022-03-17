@@ -27,6 +27,9 @@ var hovered := 0:
 					op.hovered = index == h
 					index += 1
 
+func _init():
+	add_to_group("caption")
+
 func _ready() -> void:
 	visible = false
 	option.visible = false
@@ -75,23 +78,29 @@ func _process(delta: float) -> void:
 
 @export var has_options := false
 
-func show_line(d: DialogueLine, who: Variant):
+func show_line(payload: Dictionary):
+	if payload.caption != name:
+		return
+	
 	grab_focus()
 	grab_click_focus()
 	
+	var line: DialogueLine = payload.line
+	var whom = payload.from
+	
 	owner.add_pauser(self)
-	text.set_bbcode(d.text)
-	if who is String:
+	text.set_bbcode(line.text)
+	if whom is String:
 		from.visible = true
-		from.set_bbcode(who)
+		from.set_bbcode(whom)
 	else:
 		from.visible = false
 	visible = true
 	has_options = false
 	
-	if d.has_options():
+	if line.has_options():
 		has_options = true
-		var op := d.get_options()
+		var op := line.get_options()
 		var op_passing = op.filter(func(x): return x.passed)
 		if len(op_passing):
 			set_options(op)

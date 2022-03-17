@@ -23,6 +23,15 @@ offset_left = -512.0
 offset_top = -120.0
 offset_right = 512.0
 
+[node name="top" parent="flow_manager" instance=ExtResource( "3_kyvc4" )]
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -341.0
+offset_right = 341.0
+offset_bottom = 162.0
+
 [node name="Icon" type="Sprite2D" parent="flow_manager"]
 position = Vector2(78, 552)
 texture = ExtResource( "4_n6jin" )
@@ -31,6 +40,7 @@ script = ExtResource( "5_s7x7q" )
 [node name="notification" parent="." groups=["notification_manager"] instance=ExtResource( "5_fm15x" )]
 
 [node name="test" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="TabContainer" type="TabContainer" parent="test"]
 anchor_right = 1.0

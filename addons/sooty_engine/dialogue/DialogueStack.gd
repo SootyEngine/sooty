@@ -8,7 +8,6 @@ signal finished()
 signal tick_started()
 signal tick_finished()
 signal option_selected(option: Dictionary)
-signal on_action(action: String)
 signal on_line(text: DialogueLine)
 
 @export var wait := false
@@ -48,12 +47,21 @@ func tick():
 			break
 		
 		var line := pop_next_line()
+		print(line)
 		
 		if not len(line):
 			break
 		
 		match line.line.type:
-			"action": on_action.emit(line.line.action)
+			"action":
+				var act: String = line.line.action
+				if act.begins_with(Sooty.S_ACTION_EVAL):
+					act = act.substr(1).strip_edges()
+					State._eval(act)
+				elif act.begins_with(Sooty.S_ACTION_SHORTCUT):
+					act = act.substr(1).strip_edges()
+					State._eval(Sooty.process_shortcut(act))
+					
 			"goto": goto(line.line.goto, true)
 			"call": goto(line.line.call, false)
 			"text": on_line.emit(DialogueLine.new(line.did, line.line))
@@ -135,22 +143,22 @@ func pop_next_line() -> Dictionary:
 		if line.type == "if":
 			var d := Dialogues.get_dialogue(did)
 			for i in len(line.conds):
-				if StringAction.test(line.conds[i]):
+				if State._test(line.conds[i]):
 					_push(d.id, line.cond_lines[i])
 					break
 		
 		# match chain
 		elif line.type == "match":
-			var match_result = StringAction.str_to_var(line.match)
+			var match_result = State._eval(line.match)
 			for i in len(line.cases):
 				var case = line.cases[i]
-				var got = StringAction.str_to_var(case)
+				var got = State._eval(case)
 #				print("\tCASE %s: '%s' -> %s == %s (%s)" % [i, line.cases[i], got, match_result, match_result == got])
 				if match_result == got or case == "_":
 					_push(did, line.case_lines[i])
 					break
 		
-		elif "cond" in line and StringAction.test(line.cond):
+		elif "cond" in line and State._test(line.cond):
 			break
 		
 		did_line = _pop_next_line()

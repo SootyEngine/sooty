@@ -11,11 +11,11 @@ class_name VBool
 		if value != v:
 			value = v
 			if value and len(on_true):
-				StringAction.do(on_true)
+				_eval(on_true)
 			if not value and len(on_false):
-				StringAction.do(on_false)
+				_eval(on_false)
 			if len(on_changed):
-				StringAction.do(on_changed)
+				_eval(on_changed)
 			print("Toggled")
 
 func _operator_get():

@@ -14,13 +14,14 @@ const C_TEXT := Color.GAINSBORO
 const C_SPEAKER := Color(1, 1, 1, 0.4)#Color(0.0, 1.0, 1.0, 0.5)
 const C_TAG := Color(1, 1, 1, .5)
 const C_SYMBOL := Color(1, 1, 1, 0.25)
+const C_FLAT_LINE := Color(1, 1, 1, 0.5)
 
 const C_PROPERTY := Color(1, 1, 1, .25)
 const C_VAR_BOOL := Color.PALE_GOLDENROD
 const C_VAR_FLOAT := Color.ORANGE
 const C_VAR_INT := Color.ORANGE
 const C_VAR_STR := Color.SANDY_BROWN
-const C_VAR_UNKOWN := Color.PALE_GOLDENROD
+#const C_VAR_UNKOWN := Color.PALE_GOLDENROD
 const C_VAR_CONSTANT := Color.DARK_GRAY
 const C_VAR_STATE_PROPERTY := Color.SPRING_GREEN
 
@@ -29,9 +30,10 @@ const C_FUNCTION := Color.MEDIUM_PURPLE
 const C_COMMENT := Color(1.0, 1.0, 1.0, 0.25)
 const C_FE_TAG := Color.PALE_VIOLET_RED
 const C_ACTION := Color.RED
-const C_ACTION_ASSIGN := Color.PALE_VIOLET_RED
+#const C_ACTION_ASSIGN := Color.PALE_VIOLET_RED
+const C_ACTION_EVAL := Color.SPRING_GREEN
 
-const C_FLOW := Color.GREEN_YELLOW
+const C_FLOW := Color.TOMATO
 const C_FLOW_GOTO := Color.GREEN_YELLOW
 const C_FLOW_CALL := Color.DEEP_SKY_BLUE
 
@@ -43,7 +45,6 @@ const C_OPTION_TEXT := Color.TURQUOISE
 const S_FLOW := "==="
 const S_FLOW_GOTO := "=>"
 const S_FLOW_CALL := "=="
-const S_ACTION := "~"
 const S_COMMENT := "//"
 const S_PROPERTY := "|"
 const S_OPTION_START := "<"
@@ -97,7 +98,7 @@ func _set_var_color(i: int, v: String, is_function := false):
 			_c(i+d+1, C_VAR_STATE_PROPERTY)
 		else:
 			_c(i+1, C_VAR_STATE_PROPERTY)
-	elif is_function:
+	elif v.begins_with("@") or is_function:
 		# only highlight last part
 		var d := v.rfind(".")
 		_c(i, C_FUNCTION.darkened(.4))
@@ -123,8 +124,16 @@ func _h_action(from: int, to: int):
 	var off := from+1
 	for i in len(parts):
 		var part = parts[i]
-		_set_var_color(off, part, i == 0)
+		_set_var_color(off, part, i==0)
 		off += len(part) + 1
+
+func _h_action_expression(from: int, to: int):
+	_c(from, C_SYMBOL)
+	_c(from+1, C_ACTION_EVAL)
+	for i in range(from+1, to):
+		if text[i] in ",.[](){}\"'-+=<>":
+			_c(i, C_ACTION_EVAL.darkened(.5))
+			_c(i+1, C_ACTION_EVAL)
 
 func _h_conditional(from: int, to: int):
 	var off := from
@@ -134,6 +143,9 @@ func _h_conditional(from: int, to: int):
 		var part = parts.pop_front()
 		_c(off, C_SYMBOL)
 		off += len(part)+1
+	
+	_c(off, C_ACTION_EVAL)
+	return
 	
 	var is_assign = len(parts)==3 and parts[1] in OP_ALL
 	var is_match := false
@@ -167,9 +179,9 @@ func _h_flatline(default: Color, from: int):
 				off += len(";;")
 			
 			# opening symbol
-			_c(i, C_SYMBOL, len(S_FLATLINE_START))
+			_c(i, C_FLAT_LINE, len(S_FLATLINE_START))
 			# closing symbol
-			_c(j, C_SYMBOL, len(S_FLATLINE_END))
+			_c(j, C_FLAT_LINE, len(S_FLATLINE_END))
 	return i
 	
 func _h_bbcode(from: int, to: int, default: Color):
@@ -227,8 +239,11 @@ func _h_line(from: int, to: int):
 		_set_var_color(j, text.substr(j))
 	
 	# action
-	elif t.begins_with(S_ACTION):
-		_h_action(text.find(S_ACTION, from), to)
+	elif t.begins_with(Sooty.S_ACTION_SHORTCUT):
+		_h_action(text.find(Sooty.S_ACTION_SHORTCUT, from), to)
+	
+	elif t.begins_with(Sooty.S_ACTION_EVAL):
+		_h_action_expression(text.find(Sooty.S_ACTION_EVAL, from), to)
 	
 	# options
 	elif t.begins_with(S_OPTION_START):

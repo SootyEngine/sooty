@@ -5,6 +5,9 @@ func _init(d := {}):
 	UObject.patch(self, d, true)
 	_post_init.call_deferred()
 
+func _eval(e: String):
+	State._eval(e)
+
 func _post_init():
 	pass
 

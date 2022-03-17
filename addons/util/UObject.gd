@@ -67,7 +67,7 @@ static func get_operator_value(v):
 			return v._operator_get()
 	return v
 
-static func call_callable(c: Callable, args: Array) -> Variant:
+static func callablev(c: Callable, args: Array) -> Variant:
 	match len(args):
 		0: return c.call()
 		1: return c.call(args[0])

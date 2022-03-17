@@ -59,6 +59,25 @@ static func extract(s: String, head: String, tail: String, strip_edges: bool = t
 	else:
 		return [s, ""]
 
+static func replace_between(s: String, head: String, tail: String, call: Callable) -> String:
+	var index := 0
+	while true:
+		index = s.find(head, index)
+		if index == -1: break
+		var b = s.find(tail, index+len(head))
+		if b == -1: break
+		var inner = part(s, index+len(head), b)
+		if head in inner:
+			index += len(head)
+			continue
+		var got = call.call(index, inner)
+		if got:
+			s = part(s, 0, index) + got + part(s, b+len(tail))
+			index += len(got)
+		else:
+			s = part(s, 0, index) + part(s, b+len(tail))
+	return s
+
 static func find_either(s: String, items: Array, from := 0) -> Array:
 	var n := INF
 	var first := ""
@@ -78,6 +97,30 @@ static func split_on_next(s: String, items: Array) -> Array:
 	var token_str: String = p[0].strip_edges(false, true)
 	var left_over: String = "" if len(p) == 1 else p[1].strip_edges(true, false)
 	return [token, token_str, left_over]
+
+# splits a string on spaces, respecting wrapped strings.
+static func split_on_spaces(s: String) -> Array:
+	var out := [""]
+	var in_quotes := false
+	for c in s:
+		if c == '"':
+			if in_quotes:
+				in_quotes = false
+				out[-1] += '"'
+			else:
+				in_quotes = true
+				if out[-1] == "":
+					out[-1] += '"'
+				else:
+					out.append('"')
+		
+		elif c == " " and not in_quotes:
+			if out[-1] != "":
+				out.append("")
+		
+		else:
+			out[-1] += c
+	return out
 
 static func is_wrapped(s: String, head: String, tail=null) -> bool:
 	return s.begins_with(head) and s.ends_with(tail if tail else head)

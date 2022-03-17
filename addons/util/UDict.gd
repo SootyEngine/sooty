@@ -51,11 +51,23 @@ static func append(d:Dictionary, k, v):
 	else:
 		d[k].append(v)
 
-static func count(d:Dictionary, k, v):
+static func count(d: Dictionary, k, v):
 	if not k in d:
 		d[k] = v
 	else:
 		d[k] += v
+
+static func map_keys(d: Dictionary, call: Callable) -> Dictionary:
+	var out := {}
+	for k in d:
+		out[call.call(k)] = d[k]
+	return out
+
+static func map_values(d: Dictionary, call: Callable):
+	var out := {}
+	for k in d:
+		out[k] = call.call(d[k])
+	return out
 
 static func merge_missing(target: Dictionary, patch: Dictionary):
 	for k in patch:

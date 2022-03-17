@@ -3,7 +3,7 @@ extends Node
 @export var stack: Resource = DialogueStack.new()
 
 @export var start := "MAIN.START"
-@export var _caption := "bottom"
+@export var current := "bottom"
 @export var _pausers := []
 var speaker_cache := []
 
@@ -11,17 +11,18 @@ func _init() -> void:
 	add_to_group("flow_manager")
 	add_to_group("sa:scene")
 	add_to_group("sa:goto")
-	add_to_group("sa:caption")
 	add_to_group("sa:wait")
+	
 
 func _ready() -> void:
 	add_pauser(self)
-	Fader.create(null, {anim="in", done=remove_pauser.bind(self)})
+	Fader.create(null, {anim="in", time=.25, done=remove_pauser.bind(self)})
+	
+	Sooty.add_shortcut("caption", "@caption(\"$arg0\")", caption)
 	
 	stack.started.connect(_on_started)
 	stack.finished.connect(_on_finished)
 	stack.on_line.connect(_on_text)
-	stack.on_action.connect(_on_action)
 	_startup.call_deferred()
 
 func goto(id: String = ""):
@@ -74,9 +75,8 @@ func _process(_delta: float) -> void:
 	stack.tick()
 
 func caption(id: String):
-	_caption = id
+	current = id
 
-const _wait_ARGS := [""]
 func wait(time: float):
 	add_pauser(self)
 	get_tree().create_timer(time).timeout.connect(remove_pauser.bind(self))
@@ -94,8 +94,8 @@ func _on_finished():
 	if len(stack._history) and stack._history[-1] != "MAIN.END":
 		stack.goto("MAIN.END")
 
-func _on_text(d: DialogueLine):
-	var from = d.from
+func _on_text(line: DialogueLine):
+	var from = line.from
 	if from == null:
 		pass
 	elif from != "":
@@ -113,10 +113,8 @@ func _on_text(d: DialogueLine):
 			else:
 				from = str(val)
 	
-	$flow_manager.get_node(_caption).show_line(d, from)
-
-func _on_action(s: String):
-	StringAction.do(s)
+	stack.wait = true
+	get_tree().call_group("caption", "show_line", {caption=current, line=line, from=from})
 
 func print_pausers():
 	if len(_pausers):

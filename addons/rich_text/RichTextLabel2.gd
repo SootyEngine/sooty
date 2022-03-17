@@ -178,7 +178,7 @@ func _parse_opening(tag: String):
 		if len(p) == 2:
 			_parse_tags(p[1])
 		
-		var got = StringAction.execute(p[0])
+		var got = State._eval(p[0])
 		if got == null:
 			push_error("BBCode: Couldn't replace '%s'." % p[0])
 			push_bgcolor(Color.RED)
@@ -278,14 +278,14 @@ func _passes_condition(cond: String, raw: String) -> bool:
 	match cond:
 		"if":
 			var test := raw.split(" ", true, 1)[1]
-			_state.condition = StringAction.test(test)
+			_state.condition = State._test(test)
 			_stack_push(T_CONDITION)
 			
 		"elif":
 			prints("ELIF", raw)
 			if "condition" in _state and _state.condition == false:
 				var test := raw.split(" ", true, 1)[1]
-				_state.condition = StringAction.test(test)
+				_state.condition = State._test(test)
 				prints("tested:", test, "got:", _state.condition)
 		
 		"else":
@@ -365,7 +365,7 @@ func _parse_tag_unused(tag: String, _info: String, _raw: String) -> bool:
 func _add_text(t: String):
 #	if _state.get("condition", true):
 	for pipe in _state.pipes:
-		var got = StringAction.pipe(t, pipe)
+		var got = State._pipe(t, pipe)
 #		prints("PIPED (%s) WITH (%s) ANDGOT (%s)" % [t, pipe, got])
 		t = str(got)
 	add_text(t)

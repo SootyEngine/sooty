@@ -28,9 +28,9 @@ const MSG_STAT_MAXXED := "stat_maxxed"
 					prog=progress
 				})
 			if len(on_increase):
-				StringAction.do(on_increase)
+				_eval(on_increase)
 			if len(on_changed):
-				StringAction.do(on_changed)
+				_eval(on_changed)
 
 @export var notify_every := 1 # notify on every change?
 @export var progress := 0.0:

@@ -10,9 +10,9 @@ class_name VEnum
 		if value != v:
 			value = v
 			if value in on_state and len(on_state[value]):
-				StringAction.do(on_state[value])
+				_eval(on_state[value])
 			if len(on_changed):
-				StringAction.do(on_changed)
+				_eval(on_changed)
 			print("Changed State")
 
 func _operator_get():
