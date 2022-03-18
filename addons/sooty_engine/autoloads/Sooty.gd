@@ -19,44 +19,44 @@ const S_ACTION_SHORTCUT := "@"
 #			list[i] = cmd
 #		shortcuts[sh] = list
 #	UDict.log(shortcuts)
-
-var _shrt := {}
+#
+#var _shrt := {}
 
 #func add_shortcut(id: String, shortcut: String, call: Callable):
 #	State._call[id] = call
 #	_shrt[id] = shortcut
 
-func process_shortcut(input: String) -> String:
-	var p := input.split(" ", true, 1)
-	var shortcut: String
-	var sc := "SC_%s" % p[0]
-	
-	if p[0] in _shrt:
-		shortcut = _shrt[p[0]]
-	elif sc in State:
-		shortcut = State[sc]
-	else:
-		push_error("No shortcut '%s'." % p[0])
-		return ""
-	
-	# fix functions
-	shortcut = UString.replace_between(shortcut, "@", "(", func(i,s): return "_call.%s.call(" % s)
-	# fix translations
-	shortcut = UString.replace_between(shortcut, "_(", ")", func(i,s): return "tr(%s)" % s)
-	
-	var args = str_to_args(p[1])
-	
-	var keys := {ARGS=args}
-	for i in len(args):
-		keys["arg%s" % i] = args[i]
-	
-	if args[-1] is Dictionary:
-		keys.KWARGS=args[-1]
-		for k in args[-1]:
-			keys[k] = args[-1][k]
-	
-#	print(keys)
-	return shortcut.format(keys, "$_")
+#func process_shortcut(input: String) -> String:
+#	var p := input.split(" ", true, 1)
+#	var shortcut: String
+#	var sc := "SC_%s" % p[0]
+#
+#	if p[0] in _shrt:
+#		shortcut = _shrt[p[0]]
+#	elif sc in State:
+#		shortcut = State[sc]
+#	else:
+#		push_error("No shortcut '%s'." % p[0])
+#		return ""
+#
+#	# fix functions
+#	shortcut = UString.replace_between(shortcut, "@", "(", func(i,s): return "_call.%s.call(" % s)
+#	# fix translations
+#	shortcut = UString.replace_between(shortcut, "_(", ")", func(i,s): return "tr(%s)" % s)
+#
+#	var args = str_to_args(p[1])
+#
+#	var keys := {ARGS=args}
+#	for i in len(args):
+#		keys["arg%s" % i] = args[i]
+#
+#	if args[-1] is Dictionary:
+#		keys.KWARGS=args[-1]
+#		for k in args[-1]:
+#			keys[k] = args[-1][k]
+#
+##	print(keys)
+#	return shortcut.format(keys, "$_")
 
 func str_to_args(s: String) -> Array:
 	return UString.split_on_spaces(s).map(str_to_var)

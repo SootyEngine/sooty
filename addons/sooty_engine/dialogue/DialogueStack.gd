@@ -52,18 +52,18 @@ func tick():
 			break
 		
 		match line.line.type:
-			"action":
-				var act: String = line.line.action
-				if act.begins_with(Sooty.S_ACTION_EVAL):
-					act = act.substr(1).strip_edges()
-					# scene functions
-					act = UString.replace_between(act, "@", "(", func(i,s): return "current_scene.%s(" % s)
-					# fix translations
-					act = UString.replace_between(act, "_(", ")", func(i,s): return "tr(%s)" % s)
-					State._eval(act)
-				elif act.begins_with(Sooty.S_ACTION_SHORTCUT):
-					act = act.substr(1).strip_edges()
-					State._call(act)
+			"action": State.do(line.line.action)
+#				var act: String = line.line.action
+#				if act.begins_with(Sooty.S_ACTION_EVAL):
+#					act = act.substr(1).strip_edges()
+#					# scene functions
+#					act = UString.replace_between(act, "@", "(", func(i,s): return "current_scene.%s(" % s)
+#					# fix translations
+#					act = UString.replace_between(act, "_(", ")", func(i,s): return "tr(%s)" % s)
+#					State._eval(act)
+#				elif act.begins_with(Sooty.S_ACTION_SHORTCUT):
+#					act = act.substr(1).strip_edges()
+#					State._call(act)
 					
 			"goto": goto(line.line.goto, true)
 			"call": goto(line.line.call, false)

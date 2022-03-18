@@ -1,6 +1,7 @@
 extends Node
 
 var prefab: GraphNode
+@export var font: Font
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -13,50 +14,66 @@ func _ready_deferred():
 	var gotos := []
 	var pos := Vector2.ZERO
 	var graph: GraphEdit = $GraphEdit
+	var clr_gray := Color(.33, .33, .33, 1.0)
 	
-	for did in Dialogues.cache:
-		var d: Dialogue = Dialogues.cache[did]
+	for dialogue_id in Dialogues.cache:
+		var d: Dialogue = Dialogues.cache[dialogue_id]
 		var node: GraphNode = prefab.duplicate()
 		graph.add_child(node)
-		node.rect_size = Vector2.ZERO
-		node.rect_min_size = Vector2.ZERO
+		node.rect_size = Vector2(200.0, 0.0)
+		node.rect_min_size = Vector2(200.0, 0.0)
 		node.visible = true
-		node.name = did
-		node.title = did
+		node.name = dialogue_id
+		node.title = dialogue_id
 		node.position_offset = pos
 		pos.y += 220
 		if pos.y > 220 * 10:
 			pos.y = 0
 			pos.x += 220
 		
-		nodes[did] = node
+		nodes[dialogue_id] = node
+		var slot_index := 0
 		
 		for flow_id in d.flows:
-			var flow_label := Label.new()
+			var flow_line: Dictionary = d.flows[flow_id]
+			var flow_label := Button.new()
+			flow_label.add_theme_font_override("font", font)
 			node.add_child(flow_label)
-			flow_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-			flow_label.text = flow_id
-			flow_label.modulate = Color.DEEP_SKY_BLUE
+			flow_label.flat = true
+			flow_label.text = "⦗%s⦘" % flow_id
+			flow_label.modulate = Color.WHITE
+			flow_label.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			flow_label.pressed.connect(_pressed.bind(d, flow_line.file, flow_line.line))
 			
-			var f_index := node.get_child_count()-1
-			node.set_slot_enabled_left(f_index, true)
-			node.set_slot_color_left(f_index, flow_label.modulate)
-			node.set_meta(flow_id, f_index)
+			node.set_slot_enabled_left(slot_index, true)
+			node.set_slot_color_left(slot_index, clr_gray)
+			node.set_meta(flow_id, slot_index)
+			slot_index += 1
 			
-			for k in d.flows[flow_id].then:
+			for k in flow_line.then:
 				var line = d.lines[k]
 				match line.type:
-					"goto":
-						var goto_label := Label.new()
+					"goto", "call":
+						var goto = line[line.type].split(".", true, 1)
+						var goto_dialogue: String = goto[0]
+						var goto_flow: String = goto[1]
+						var goto_label := Button.new()
+						var clr := Color.YELLOW_GREEN if line.type == "goto" else Color.DEEP_SKY_BLUE
+						if goto_dialogue == dialogue_id:
+							clr = flow_label.modulate
 						node.add_child(goto_label)
-						goto_label.text = line.goto
-						goto_label.modulate = Color(.25, .25, .25, 1.0)
-						goto_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+						goto_label.flat = true
+						goto_label.text = goto_dialogue + (" >" if line.type == "goto" else " =")
+						goto_label.modulate = Color(clr, .5)
+						goto_label.alignment = HORIZONTAL_ALIGNMENT_RIGHT
+						goto_label.pressed.connect(_pressed.bind(d, line.file, line.line))
 						
-						var goto_index := node.get_child_count()-1
-						node.set_slot_enabled_right(goto_index, true)
-						node.set_slot_color_right(goto_index, goto_label.modulate)
-						gotos.append([did, goto_index, line.goto])
+						node.set_slot_enabled_right(slot_index, true)
+						node.set_slot_color_right(slot_index, clr)
+						gotos.append([dialogue_id, slot_index, line[line.type]])
+						slot_index += 1
+		
+		node.move_child(node.get_child(0), node.get_child_count())
 	
 	for g in gotos:
 		var dialogue_from: String = g[0]
@@ -86,3 +103,6 @@ func _ready_deferred():
 	for i in range(1, len(rects)):
 		bound = bound.merge(rects[i])
 	graph.scroll_offset = bound.position - bound.size
+
+func _pressed(dialogue: Dialogue, file: int, line: int):
+	prints("Pressed: ", dialogue.files.keys()[file], line)

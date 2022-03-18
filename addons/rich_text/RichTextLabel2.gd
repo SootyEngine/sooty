@@ -213,7 +213,7 @@ func _parse_tags(tags_string: String):
 #		prints("\t[%s]" % tag)
 		# close last
 		if tag == "":
-			if added_stack and not len(_stack[-1]):
+			if added_stack and len(_stack) and not len(_stack[-1]):
 				_stack.pop_back()
 			if len(_stack) and not len(_stack[-1]):
 				_add_text("[]")
@@ -222,7 +222,7 @@ func _parse_tags(tags_string: String):
 		
 		# close all
 		elif tag == "/":
-			if added_stack and not len(_stack[-1]):
+			if added_stack and len(_stack) and not len(_stack[-1]):
 				_stack.pop_back()
 			while len(_stack):
 				_stack_pop()
@@ -239,7 +239,7 @@ func _parse_tags(tags_string: String):
 				_stack.append([])
 			_parse_tag(tag)
 	
-	if added_stack and not len(_stack[-1]):
+	if added_stack and len(_stack) and not len(_stack[-1]):
 		_stack.pop_back()
 
 func _parse_tag(tag: String):
@@ -308,7 +308,7 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		return
 	
 	# font sizes
-	if tag[0].is_valid_int():
+	if len(tag) and tag[0].is_valid_int():
 		if "." in tag:
 			_push_font_size(int(_state.font_size * tag.to_float()))
 		else:
@@ -477,7 +477,8 @@ func _tag_closed(_tag: int, _data: Variant):
 
 # push a single tag to the last set of tags.
 func _stack_push(item: int = -1, data: Variant = null, nopop: bool = false):
-	_stack[-1].append([item, data, nopop])
+	if len(_stack):
+		_stack[-1].append([item, data, nopop])
 
 func _replace_outside(s: String, head: String, tail: String, fr: Callable) -> String:
 	var parts := []
