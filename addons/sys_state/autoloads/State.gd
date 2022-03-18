@@ -1,6 +1,6 @@
 extends "res://addons/sooty_engine/autoloads/base_state.gd"
 
-var _call := {}
+var _calls := {}
 var _expr := Expression.new()
 
 func _post_init():
@@ -9,8 +9,25 @@ func _post_init():
 		for m in child.get_method_list():
 			var n: String = m.name
 			if n[0] != "_" and not has_method(m.name):
-				_call[n] = child[n]
+				_calls[n] = child[n]
 	super._post_init()
+
+func _call(call: String):
+	var args := Sooty.str_to_args(call)
+	var fname = args.pop_front()
+	# call group node function
+	if "." in fname:
+		var p = fname.split(".", true, 1)
+		Global.call_group_flags(SceneTree.GROUP_CALL_REALTIME, p[0], p[1], args)
+	# call shortcut
+	elif fname in _calls:
+		return UObject.callablev(_calls[fname], args)
+	# call scene function
+	elif get_tree().current_scene.has_method(fname):
+		return get_tree().current_scene.callv(fname, args)
+	# alert user nothing happened
+	else:
+		push_error("No function %s(%s) in State." % [fname, args])
 
 func _eval(expression: String, default = null) -> Variant:
 	if "|" in expression:
@@ -36,7 +53,7 @@ func _pipe(value: Variant, pipes: String) -> Variant:
 		var args = UString.split_on_spaces(pipe)
 		var fname = args.pop_front()
 		if fname in _call:
-			value = UObject.callablev(_call[fname], [value] + args.map(_eval))
+			value = UObject.callablev(_calls[fname], [value] + args.map(_eval))
 		else:
 			push_error("Can't pipe %s. No %s." % [value, fname])
 	return value
@@ -49,6 +66,8 @@ func _has(property: StringName):
 func _get(property: StringName):
 	if Persistent._has(property):
 		return Persistent._get(property)
+	match str(property):
+		"current_scene": return get_tree().current_scene
 	return super._get(property)
 
 func _set(property: StringName, value) -> bool:

@@ -34,8 +34,18 @@ func _process(delta: float) -> void:
 
 func call_group(group: String, fname: String, args := []):
 	match len(args):
-		0: get_tree().call_group(group, fname)
-		1: get_tree().call_group(group, fname, args[0])
-		2: get_tree().call_group(group, fname, args[0], args[1])
-		3: get_tree().call_group(group, fname, args[0], args[1], args[2])
-		4: get_tree().call_group(group, fname, args[0], args[1], args[2], args[3])
+		0: return get_tree().call_group(group, fname)
+		1: return get_tree().call_group(group, fname, args[0])
+		2: return get_tree().call_group(group, fname, args[0], args[1])
+		3: return get_tree().call_group(group, fname, args[0], args[1], args[2])
+		4: return get_tree().call_group(group, fname, args[0], args[1], args[2], args[3])
+		_: push_error("Not implemented.")
+		
+func call_group_flags(flags: int, group: String, fname: String, args := []):
+	match len(args):
+		0: return get_tree().call_group_flags(flags, group, fname)
+		1: return get_tree().call_group_flags(flags, group, fname, args[0])
+		2: return get_tree().call_group_flags(flags, group, fname, args[0], args[1])
+		3: return get_tree().call_group_flags(flags, group, fname, args[0], args[1], args[2])
+		4: return get_tree().call_group_flags(flags, group, fname, args[0], args[1], args[2], args[3])
+		_: push_error("Not implemented.")

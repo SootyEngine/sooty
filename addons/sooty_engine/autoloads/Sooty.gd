@@ -22,9 +22,9 @@ const S_ACTION_SHORTCUT := "@"
 
 var _shrt := {}
 
-func add_shortcut(id: String, shortcut: String, call: Callable):
-	State._call[id] = call
-	_shrt[id] = shortcut
+#func add_shortcut(id: String, shortcut: String, call: Callable):
+#	State._call[id] = call
+#	_shrt[id] = shortcut
 
 func process_shortcut(input: String) -> String:
 	var p := input.split(" ", true, 1)
@@ -44,7 +44,7 @@ func process_shortcut(input: String) -> String:
 	# fix translations
 	shortcut = UString.replace_between(shortcut, "_(", ")", func(i,s): return "tr(%s)" % s)
 	
-	var args = _get_properties(p[1])
+	var args = str_to_args(p[1])
 	
 	var keys := {ARGS=args}
 	for i in len(args):
@@ -58,16 +58,34 @@ func process_shortcut(input: String) -> String:
 #	print(keys)
 	return shortcut.format(keys, "$_")
 
-func _get_properties(s: String) -> Array:
-	var args := []
-	var parts := UString.split_on_spaces(s)
-	for p in parts:
-		if ":" in p:
-			var kv = p.split(":", true, 1)
-			if not len(args) or not args[-1] is Dictionary:
-				args.append({})
-			args[-1][kv[0]] = kv[1]#str_to_var(kv[1])
-		else:
-			args.append(p)# str_to_var(p))
-	return args
+func str_to_args(s: String) -> Array:
+	return UString.split_on_spaces(s).map(str_to_var)
 
+func str_to_var(s: String) -> Variant:
+	match s:
+		"true": return true
+		"false": return false
+		"null": return null
+	# state variable?
+	if s.begins_with("$"):
+		return State._get(s.substr(1))
+	# array or dict?
+	if "," in s:
+		var args := s.split(",")
+		var is_dict := ":" in args[0]
+		var out = {} if is_dict else []
+		for p in args:
+			if ":" in p:
+				var p2 := p.split(":", true, 1)
+				out[p2[0]] = str_to_var(p2[1])
+			else:
+				out.append(str_to_var(p))
+		return out
+	# float?
+	if s.is_valid_float():
+		return s.to_float()
+	# int?
+	if s.is_valid_int():
+		return s.to_int()
+	# must be a string?
+	return s

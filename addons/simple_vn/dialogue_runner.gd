@@ -3,7 +3,6 @@ extends Node
 @export var stack: Resource = DialogueStack.new()
 
 @export var start := "MAIN.START"
-@export var current := "bottom"
 @export var _pausers := []
 var speaker_cache := []
 
@@ -18,7 +17,7 @@ func _ready() -> void:
 	add_pauser(self)
 	Fader.create(null, {anim="in", time=.25, done=remove_pauser.bind(self)})
 	
-	Sooty.add_shortcut("caption", "@caption(\"$arg0\")", caption)
+#	Sooty.add_shortcut("caption", "@caption(\"$arg0\")", caption)
 	
 	stack.started.connect(_on_started)
 	stack.finished.connect(_on_finished)
@@ -53,7 +52,10 @@ func find_scene(id: String) -> PackedScene:
 		if UFile.file_exists(path):
 			return load(path)
 	return null
-	
+
+func scene_function(ass, ok):
+	prints("SCENE FUNC ", ass, ok)
+
 func _startup():
 	if not stack._started:
 		stack.start(start)
@@ -73,9 +75,6 @@ func remove_pauser(n: Node):
 
 func _process(_delta: float) -> void:
 	stack.tick()
-
-func caption(id: String):
-	current = id
 
 func wait(time: float):
 	add_pauser(self)
@@ -114,7 +113,7 @@ func _on_text(line: DialogueLine):
 				from = str(val)
 	
 	stack.wait = true
-	get_tree().call_group("caption", "show_line", {caption=current, line=line, from=from})
+	get_tree().call_group("caption", "show_line", {caption=State.caption_id, line=line, from=from})
 
 func print_pausers():
 	if len(_pausers):

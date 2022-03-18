@@ -2,7 +2,6 @@
 extends Resource
 class_name DialogueStack
 
-
 signal started()
 signal finished()
 signal tick_started()
@@ -57,10 +56,14 @@ func tick():
 				var act: String = line.line.action
 				if act.begins_with(Sooty.S_ACTION_EVAL):
 					act = act.substr(1).strip_edges()
+					# scene functions
+					act = UString.replace_between(act, "@", "(", func(i,s): return "current_scene.%s(" % s)
+					# fix translations
+					act = UString.replace_between(act, "_(", ")", func(i,s): return "tr(%s)" % s)
 					State._eval(act)
 				elif act.begins_with(Sooty.S_ACTION_SHORTCUT):
 					act = act.substr(1).strip_edges()
-					State._eval(Sooty.process_shortcut(act))
+					State._call(act)
 					
 			"goto": goto(line.line.goto, true)
 			"call": goto(line.line.call, false)
