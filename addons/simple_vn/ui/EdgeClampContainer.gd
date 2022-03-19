@@ -17,6 +17,8 @@ func _ready() -> void:
 	resized.connect(_resized)
 
 func _resized():
+	if not is_inside_tree():
+		return
 	
 	match edge:
 		BOTTOM:

@@ -13,7 +13,7 @@ signal tick_started()
 signal tick_finished()
 signal flow_started(id: String)
 signal flow_ended(id: String)
-signal option_selected(option: Dictionary)
+#signal option_selected(option: Dictionary)
 signal on_line(text: DialogueLine)
 
 @export var _break := false
@@ -26,6 +26,12 @@ signal on_line(text: DialogueLine)
 func wait(time := 1.0):
 	_wait = time
 	_break = true
+
+func halt():
+	_break = true
+
+func unhalt():
+	_break = false
 
 func is_active() -> bool:
 	return _active
@@ -132,8 +138,9 @@ func goto(did_flow: String, clear_stack: bool = true) -> bool:
 func select_option(option: DialogueLine):
 	var o := option._data
 	if "then" in o:
+		print("SELECT ", o)
 		_push(option._dialogue_id, "%OPTION%", o.then, STEP_CALL)
-	option_selected.emit(o)
+	unhalt()
 
 func _pop():
 	var last: Dictionary = _stack.pop_back()
@@ -144,8 +151,7 @@ func _pop():
 		flow_ended.emit(last.flow)
 
 func _push(did: String, flow: String, lines: Array, type: int):
-	var step := { did=did, flow=flow, lines=lines, type=type, step=0 }
-	_stack.append(step)
+	_stack.append({ did=did, flow=flow, lines=lines, type=type, step=0 })
 	if type == STEP_GOTO:
 		flow_started.emit(flow)
 

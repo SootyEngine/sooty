@@ -21,9 +21,9 @@ _option_menu = NodePath("../bottom\\main/option_menu")
 
 [node name="bottom\\main" type="VBoxContainer" parent="captions"]
 offset_left = 299.5
-offset_top = -8.0
+offset_top = 569.0
 offset_right = 724.5
-offset_bottom = -8.0
+offset_bottom = 600.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 alignment = 2

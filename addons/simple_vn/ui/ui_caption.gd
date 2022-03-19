@@ -102,19 +102,21 @@ func _show_line(payload: Dictionary):
 		rtl_text.fade_out = false
 	
 	# show choices?
+	_waiting_for_option = false
 	if line.has_options():
 		if option_menu:
 			option_menu._set_line(line)
 			if option_menu.has_options():
 				rtl_text.faded_in.connect(option_menu._show_options, CONNECT_ONESHOT)
-				option_menu.selected.connect(_option_selected, CONNECT_ONESHOT)
+#				option_menu.selected.connect(_option_selected, CONNECT_ONESHOT)
 				_waiting_for_option = true
 		else:
 			push_error("No options_menu setup %s." % [name])
 
-func _option_selected(option: DialogueLine):
-	_waiting_for_option = false
-	print("Selected option ", option)
+#func _option_selected(option: DialogueLine):
+#	_waiting_for_option = false
+#	_hide()
+#
 
 func _draw():
 	draw_rect(Rect2(Vector2.ZERO, rect_size), backing_color)
@@ -133,6 +135,7 @@ func _hide():
 	var tw := _create_tween()
 	tw.tween_property(self, "modulate:a", 0.0, 0.25)
 	tw.tween_callback(set_visible.bind(false))
+	return tw
 
 func _stop_tween():
 	if _tween:
@@ -142,4 +145,6 @@ func _create_tween() -> Tween:
 	if _tween:
 		_tween.stop()
 	_tween = get_tree().create_tween()
+	_tween.bind_node(self)
+	_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	return _tween

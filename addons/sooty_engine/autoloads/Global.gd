@@ -2,6 +2,8 @@
 extends Node
 
 signal message(type: String, payload: Variant)
+signal pre_scene_changed()
+signal scene_changed()
 
 @onready var config := Config.new("res://config.cfg")
 
@@ -24,13 +26,29 @@ func _ready() -> void:
 func _get(property: StringName):
 	ProjectSettings
 
-func _process(delta: float) -> void:
+func _input(event: InputEvent) -> void:
 	if Engine.is_editor_hint():
 		set_process(false)
 		return
 	
-	if Input.is_action_just_pressed("reload_scene"):
+	if event.is_action_pressed("reload_scene"):
 		get_tree().reload_current_scene()
+
+#func change_scene(to: String):
+#	if not File.new().file_exists(to):
+#		push_error("No scene at %s." % to)
+#		return
+#
+#	# remove old scene
+#	var root := get_tree().get_root()
+#	var old: Node = get_tree().current_scene
+#	root.remove_child(old)
+#	old.queue_free()
+#
+#	# add new scene
+#	var new: Node = load(to).instantiate()
+#	root.add_child(new)
+#	get_tree().current_scene = new
 
 func call_group(group: String, fname: String, args := []):
 	match len(args):

@@ -1,7 +1,5 @@
 extends Control
 
-signal selected(option: DialogueLine)
-
 @export var _button_parent: NodePath = ""
 @export var _button_prefab: NodePath = ""
 @export var _selection_indicator: NodePath = ""
@@ -85,11 +83,11 @@ func _select(option: DialogueLine):
 		button_parent.remove_child(button)
 		button.queue_free()
 	
-	DialogueStack.select_option(option)
-	selected.emit(option)
 	visible = false
 	_shown = false
 	_can_select = false
+	
+	DialogueStack.select_option(option)
 
 func _create_tween() -> Tween:
 	if _tween:
