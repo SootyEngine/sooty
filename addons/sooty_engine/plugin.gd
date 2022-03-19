@@ -7,7 +7,6 @@ var highligher = SootHighlighter.new()
 func _enter_tree() -> void:
 	add_autoload_singleton("Sooty", "res://addons/sooty_engine/autoloads/Sooty.gd")
 	add_autoload_singleton("Global", "res://addons/sooty_engine/autoloads/Global.gd")
-	add_autoload_singleton("ModManager", "res://addons/sooty_engine/autoloads/ModManager.gd")
 	add_autoload_singleton("Dialogues", "res://addons/sooty_engine/autoloads/Dialogues.gd")
 	add_autoload_singleton("DialogueStack", "res://addons/sooty_engine/autoloads/DialogueStack.gd")
 	
@@ -25,7 +24,7 @@ func _enter_tree() -> void:
 func _exit_tree() -> void:
 	remove_autoload_singleton("Sooty")
 	remove_autoload_singleton("Global")
-	remove_autoload_singleton("ModManager")
 	remove_autoload_singleton("Dialogues")
+	remove_autoload_singleton("DialogueStack")
 	
 	get_editor_interface().get_script_editor().unregister_syntax_highlighter(highligher)

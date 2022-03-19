@@ -303,21 +303,21 @@ _global_script_class_icons={
 [application]
 
 config/name="sooty_engine"
-run/main_scene="res://addons/simple_vn/dialogue_runner.tscn"
+run/main_scene="res://addons/simple_vn/autoloads/simple_vn.tscn"
 config/icon="res://icon.png"
 config/features=PackedStringArray("4.0", "Vulkan Clustered")
 
 [autoload]
 
-SaveManager="*res://addons/sys_save/autoloads/SaveManager.gd"
 State="*res://addons/sys_state/autoloads/State.gd"
 Sooty="*res://addons/sooty_engine/autoloads/Sooty.gd"
 Persistent="*res://addons/sys_state/autoloads/Persistent.gd"
 Notify="*res://addons/sys_notifications/autoloads/Notify.gd"
 Global="*res://addons/sooty_engine/autoloads/Global.gd"
-ModManager="*res://addons/sooty_engine/autoloads/ModManager.gd"
+ModManager="*res://addons/sys_state/autoloads/Mods.gd"
 Dialogues="*res://addons/sooty_engine/autoloads/Dialogues.gd"
 DialogueStack="*res://addons/sooty_engine/autoloads/DialogueStack.gd"
+SimpleVN="*res://addons/simple_vn/autoloads/simple_vn.tscn"
 
 [debug]
 
@@ -325,7 +325,7 @@ gdscript/warnings/integer_division=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/common_file_highlighters/plugin.cfg", "res://addons/sooty_engine/plugin.cfg", "res://addons/sys_notifications/plugin.cfg", "res://addons/sys_save/plugin.cfg", "res://addons/sys_state/plugin.cfg", "res://addons/tool_button/plugin.cfg")
+enabled=PackedStringArray("res://addons/common_file_highlighters/plugin.cfg", "res://addons/simple_vn/plugin.cfg", "res://addons/sooty_engine/plugin.cfg", "res://addons/sys_notifications/plugin.cfg", "res://addons/sys_state/plugin.cfg", "res://addons/tool_button/plugin.cfg")
 
 [input]
 

@@ -1,0 +1,84 @@
+[gd_scene load_steps=8 format=3 uid="uid://3nkvliqm6y0a"]
+
+[ext_resource type="PackedScene" path="res://addons/simple_vn/ui/ui_caption.tscn" id="1_5fvuj"]
+[ext_resource type="Script" path="res://addons/simple_vn/ui/EdgeClampContainer.gd" id="2_mqxw1"]
+[ext_resource type="PackedScene" uid="uid://m84326jpcicc" path="res://addons/simple_vn/ui/ui_option_menu.tscn" id="3_so0hf"]
+[ext_resource type="PackedScene" uid="uid://dl2mg14o34fng" path="res://addons/sys_notifications/ui/ui_notifications.tscn" id="4_sf4ru"]
+[ext_resource type="PackedScene" uid="uid://dghw2svgan2t1" path="res://addons/sooty_engine/debug/ui_debug.tscn" id="5_ojci6"]
+[ext_resource type="PackedScene" uid="uid://beeajbnhjflok" path="res://addons/sys_quests/ui/ui_quest_list.tscn" id="6_e6odl"]
+[ext_resource type="PackedScene" uid="uid://pd6qker8pist" path="res://addons/sys_achievements/ui/ui_achievements.tscn" id="7_s3pqk"]
+
+[node name="simple_vn" type="Node"]
+
+[node name="captions" type="CanvasLayer" parent="."]
+
+[node name="top" parent="captions" instance=ExtResource( "1_5fvuj" )]
+offset_left = -494.0
+offset_top = -290.0
+offset_right = -14.0
+offset_bottom = -172.0
+_option_menu = NodePath("../bottom\\main/option_menu")
+
+[node name="bottom\\main" type="VBoxContainer" parent="captions"]
+offset_left = 299.5
+offset_top = -8.0
+offset_right = 724.5
+offset_bottom = -8.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 2
+script = ExtResource( "2_mqxw1" )
+margin = 8.0
+
+[node name="bottom" parent="captions/bottom\\main" instance=ExtResource( "1_5fvuj" )]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 230.0
+offset_top = 519.0
+offset_right = 710.0
+offset_bottom = 590.0
+_option_menu = NodePath("../option_menu")
+
+[node name="option_menu" parent="captions/bottom\\main" instance=ExtResource( "3_so0hf" )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_right = 425.0
+offset_bottom = 31.0
+size_flags_horizontal = 3
+
+[node name="notification" parent="." groups=["notification_manager"] instance=ExtResource( "4_sf4ru" )]
+
+[node name="debug" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="TabContainer" type="TabContainer" parent="debug"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -214.0
+
+[node name="debug" parent="debug/TabContainer" instance=ExtResource( "5_ojci6" )]
+offset_top = 31.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="quests" parent="debug/TabContainer" instance=ExtResource( "6_e6odl" )]
+visible = false
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 342.0
+offset_right = 681.0
+offset_bottom = 361.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="achievements" parent="debug/TabContainer" instance=ExtResource( "7_s3pqk" )]
+visible = false
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 685.0
+offset_right = 1024.0
+offset_bottom = 361.0
+size_flags_horizontal = 3
+size_flags_vertical = 3

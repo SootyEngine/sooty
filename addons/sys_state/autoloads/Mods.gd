@@ -2,6 +2,9 @@ extends Node
 
 const DIR := "user://mods"
 
+signal enabled(mod: String)
+signal disabled(mod: String)
+
 var auto_load_mods := false
 var loaded := []
 
@@ -65,59 +68,3 @@ func load_mod(mod: String):
 		if m.has_method("_post_init"):
 			m._post_init()
 	
-	op.call_deferred()
-	
-func op():
-	#print(JSON.new().stringify(State._get_state(), "\t", false))
-	print(Dialogues.get_dialogue_ids())
-#func _merge_script_parts(a: Array) -> String:
-#	var lines = ["extends GameStateBase"]
-#	var funcs = {}
-#	for sp in a:
-#		lines.append_array(sp.lines)
-#
-#		for f in sp.funcs:
-#			var fdata = sp.funcs[f]
-#			if not f in funcs:
-#				funcs[f] = [fdata.head, "\tsuper.%s()" % fdata.id]
-#			funcs[f].append_array(fdata.lines)
-#
-#	for f in funcs:
-#		lines.append_array(funcs[f])
-#
-#	return "\n".join(lines)
-#
-#func _get_script_parts(s: String) -> Dictionary:
-#	var out := {
-#		lines = [],
-#		funcs = {}
-#	}
-#	var last_func := {}
-#	var in_func := false
-#	for line in s.split("\n", false):
-#		if line.begins_with("@tool") or line.begins_with("extends "):
-#			continue
-#
-#		if line.begins_with("func "):
-#			in_func = true
-#			var id := line.split("func ", true, 1)[1].split("(", true, 1)[0]
-#			last_func = {
-#				id = id,
-#				head = line,
-#				lines = []
-#			}
-#			out.funcs[id] = last_func
-#			continue
-#
-#		elif len(line.strip_edges(true, false)) == len(line):
-#			in_func = false
-#
-#		if in_func:
-#			if line.begins_with("\tsuper.%s()" % last_func.id):
-#				continue
-#			else:
-#				last_func.lines.append(line)
-#		else:
-#			out.lines.append(line)
-#
-#	return out

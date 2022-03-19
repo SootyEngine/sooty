@@ -1,4 +1,3 @@
-@tool
 extends "res://addons/sooty_engine/autoloads/base_state.gd"
 
 var _expr := Expression.new()
@@ -89,7 +88,7 @@ func _eval(expression: String, default = null) -> Variant:
 
 func _test(expression: String) -> bool:
 	var got := true if _eval(expression) else false
-	print("_test(%s) == %s" % [expression, got])
+#	print("_test(%s) == %s" % [expression, got])
 	return got
 
 func _pipe(value: Variant, pipes: String) -> Variant:

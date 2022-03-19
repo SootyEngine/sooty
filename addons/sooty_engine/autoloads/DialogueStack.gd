@@ -19,8 +19,13 @@ signal on_line(text: DialogueLine)
 @export var _break := false
 @export var _active := false
 @export var _stack := []
-@export var history := [] # th
-@export var visited := {} # how many times a flow has been visited.
+@export var _wait := 0.0
+#@export var history := [] # th
+#@export var visited := {} # how many times a flow has been visited.
+
+func wait(time := 1.0):
+	_wait = time
+	_break = true
 
 func is_active() -> bool:
 	return _active
@@ -30,6 +35,14 @@ func has_steps() -> bool:
 
 func get_current_dialogue() -> Dialogue:
 	return null if not len(_stack) else Dialogues.get_dialogue(_stack[-1].did)
+
+func _process(delta: float) -> void:
+	if _wait > 0.0:
+		_wait -= delta
+		if _wait <= 0.0:
+			_wait = 0.0
+			_break = false
+	tick()
 
 func tick():
 	if _break:
@@ -42,7 +55,6 @@ func tick():
 	if _active and not has_steps():
 		_active = false
 		finished.emit()
-		history.clear()
 	
 	if has_steps() and not _break:
 		tick_started.emit()
@@ -70,7 +82,7 @@ func tick():
 			_: print("Huh? ", line.line.keys(), line.line)
 	
 	tick_finished.emit()
-	
+
 func start(id: String):
 	if _active:
 		push_warning("Already started.")
@@ -127,10 +139,7 @@ func _pop():
 	var last: Dictionary = _stack.pop_back()
 	if last.type == STEP_GOTO:
 		var id := "%s.%s" % [last.did, last.flow]
-		# add to history
-		history.append(id)
-		# tick number of times visited
-		UDict.tick(visited, id)
+
 		# let everyone know a flow ended
 		flow_ended.emit(last.flow)
 

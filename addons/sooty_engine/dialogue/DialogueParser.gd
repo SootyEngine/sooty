@@ -7,8 +7,6 @@ const REWRITE := 6
 
 const S_COMMENT := "//"
 const S_LANG_ID := "//#"
-#const S_ACTION_EVAL := "~"
-#const S_ACTION_SHORTCUT := "@"
 const S_FLOW := "==="
 const S_FLOW_GOTO := "=>"
 const S_FLOW_CALL := "=="

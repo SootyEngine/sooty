@@ -45,9 +45,22 @@ func _get_method_parent(method: String) -> String:
 	return ""
 
 func _call(method: String, args: Array = [], default = null) -> Variant:
+	if "." in method:
+		var p := method.rsplit(".", true, 1)
+		method = p[1]
+		if p[0] == "scene":
+			return UObject.call_w_args(get_tree().current_scene, method, args)
+		elif _has(p[0]):
+			var target = _get(p[0])
+			return UObject.call_w_args(target, method, args)
+		else:
+			push_error("No property %s in state." % p[0])
+			return default
+	
 	for node in _children:
 		if node.has_method(method):
-			return node.callv(method, args)
+			return UObject.call_w_args(node, method, args)
+#			return node.callv(method, args)
 	return default
 
 func _reset_state():

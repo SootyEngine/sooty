@@ -147,7 +147,7 @@ func _h_conditional(from: int, to: int):
 		var part = parts.pop_front()
 		_c(off, C_SYMBOL)
 		off += len(part)+1
-		if parts[0] == "else":
+		if part == "else":
 			return
 	
 	_c(off, C_ACTION_EVAL)
