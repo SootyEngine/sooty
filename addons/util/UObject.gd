@@ -153,22 +153,23 @@ static func call_w_args(target: Object, method: String, in_args: Array = []) -> 
 	
 	var arg_info := get_method_arg_info(obj, method)
 	var old := in_args.duplicate(true)
+	var new := in_args.duplicate(true)
 	var out := []
 	var kwargs := {}
 	
 	# pop last dictionary, regardless
-	if len(in_args) and in_args[-1] is Dictionary:
+	if len(new) and new[-1] is Dictionary:
 		if "kwargs" in arg_info:
-			kwargs = in_args.pop_back()
+			kwargs = new.pop_back()
 		else:
-			in_args.pop_back()
+			new.pop_back()
 		
 	# add the initial values up front
 	for property in arg_info:
 		if property in ["args", "kwargs"]:
 			break
-		elif len(in_args):
-			var v = in_args.pop_front()
+		elif len(new):
+			var v = new.pop_front()
 #			if arg_info[property].type != typeof(v):
 #				var d = arg_info[property].get("default", null)
 #				push_error("call_w_args: Wrong type '%' (%s) given for '%s'. Using default (%s) instead." % [arg_info[property].type_name, v, property, d ])
@@ -180,8 +181,8 @@ static func call_w_args(target: Object, method: String, in_args: Array = []) -> 
 	
 	# insert the array
 	if "args" in arg_info:
-		if len(in_args):
-			out.append(in_args)
+		if len(new):
+			out.append(new)
 		else:
 			out.append(arg_info.args.get("default", []))
 	
@@ -193,7 +194,7 @@ static func call_w_args(target: Object, method: String, in_args: Array = []) -> 
 #	for i in len(out):
 #		print("\t* %s\t\t%s\t\t%s" % [old[i] if i < len(old) else "??", out[i], arg_info.values()[i]])
 	var got = obj.callv(method, out)
-	prints("CALLV:", method, out, got)
+#	prints("CALLV:", method, out, got)
 	return got
 
 # find second last dictionary/object in a nested structure

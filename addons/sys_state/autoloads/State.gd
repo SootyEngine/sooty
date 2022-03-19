@@ -3,14 +3,41 @@ extends "res://addons/sooty_engine/autoloads/base_state.gd"
 var _expr := Expression.new()
 
 func do(command: String) -> Variant:
-	if command.begins_with("@"):
+	# state method
+	if command.begins_with(Sooty.S_ACTION_STATE):
 		var call = command.substr(1)
 		var args := UString.split_on_spaces(call)
 		var method = args.pop_front()
 		var converted_args := args.map(_str_to_var)
 		return _call(method, converted_args)
 	
-	elif command.begins_with("~"):
+	# group function
+	elif command.begins_with(Sooty.S_ACTION_GROUP):
+		var call = command.substr(1)
+		var args := UString.split_on_spaces(call)
+		var method = args.pop_front()
+		var converted_args := args.map(_str_to_var)
+		var group: String
+		
+		if "." in method:
+			var p = method.split(".", true, 1)
+			group = p[0]
+			method = p[1]
+		else:
+			group = "sa:" + method
+		
+		var nodes := get_tree().get_nodes_in_group(group)
+		if len(nodes):
+			print(group, nodes)
+			for node in nodes:
+				print("\t", node, converted_args)
+				UObject.call_w_args(node, method, converted_args)
+			print("---")
+		else:
+			push_error("No nodes in group %s for %s(%s)." % [group, method, converted_args])
+	
+	# evaluate
+	elif command.begins_with(Sooty.S_ACTION_EVAL):
 		return _eval(command.substr(1))
 	
 	else:

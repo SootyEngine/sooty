@@ -1,6 +1,8 @@
 extends Node
 class_name Fader
 
+const DEFAULT_TIME := 0.25
+
 static func create(callback: Variant, done_callback: Variant = null, kwargs := {}):
 	var node = load("res://addons/simple_vn/fader/fader.tscn").instantiate()
 	Global.add_child(node)
@@ -19,15 +21,16 @@ func setup(callback: Variant, done_callback: Variant = null, kwargs := {}):
 	match kwargs.get("anim", "in_out"):
 		"in":
 			$backing.modulate.a = 1.0
-			t.tween_property($backing, "modulate:a", 0.0, kwargs.get("time", 1.0))
+			t.tween_property($backing, "modulate:a", 0.0, kwargs.get("time", DEFAULT_TIME))
 			if callback is Callable:
 				t.tween_callback(callback)
 		"in_out":
 			$backing.modulate.a = 0.0
-			t.tween_property($backing, "modulate:a", 1.0, kwargs.get("time", 1.0))
+			t.tween_property($backing, "modulate:a", 1.0, kwargs.get("time", DEFAULT_TIME))
 			if callback is Callable:
 				t.tween_callback(callback)
-			t.tween_property($backing, "modulate:a", 0.0, kwargs.get("time", 1.0))
+			t.tween_property($backing, "modulate:a", 0.0, kwargs.get("time", DEFAULT_TIME))
+	
 	t.tween_callback(queue_free)
 	t.tween_callback(get_tree().set_pause.bind(false))
 	

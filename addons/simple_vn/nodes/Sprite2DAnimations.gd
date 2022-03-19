@@ -51,7 +51,7 @@ func _get_tool_buttons():
 	rotate,
 	rotate.bind(10),
 	
-	laugh, sigh,
+	laugh, sigh, talk,
 	
 	shake_yes, shake_no,
 	breath, pant, stop
@@ -102,11 +102,17 @@ func laugh():
 	_add_squash(t.chain())
 	_add_rotate(t)
 
+func talk(dir := 1.1):
+	var t := _create()
+	t.set_parallel()
+	_add_squash(t, dir)
+	_add_squash(t.chain(), 0.0)
+
 func _create(kwargs := {}) -> Tween:
 	if active:
 		active.kill()
 	active = get_tree().create_tween()
-	active.bind_node(self)
+#	active.bind_node(self)
 	if "loop" in kwargs:
 		active.set_loops(kwargs.loop)
 	return active

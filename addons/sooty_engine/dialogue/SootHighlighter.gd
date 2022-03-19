@@ -25,13 +25,11 @@ const C_VAR_STR := Color.SANDY_BROWN
 const C_VAR_CONSTANT := Color.DARK_GRAY
 const C_VAR_STATE_PROPERTY := Color.SPRING_GREEN
 
-const C_FUNCTION := Color.MEDIUM_PURPLE
-
 const C_COMMENT := Color(1.0, 1.0, 1.0, 0.25)
 const C_FE_TAG := Color.PALE_VIOLET_RED
-const C_ACTION := Color.RED
-#const C_ACTION_ASSIGN := Color.PALE_VIOLET_RED
 const C_ACTION_EVAL := Color.SPRING_GREEN
+const C_ACTION_STATE := Color.MEDIUM_PURPLE
+const C_ACTION_GROUP := Color.MEDIUM_AQUAMARINE
 
 const C_FLOW := Color.TOMATO
 const C_FLOW_GOTO := Color.GREEN_YELLOW
@@ -70,7 +68,7 @@ func _c(i: int, clr: Color, offset := 0):
 	index = i
 	_co(clr, offset)
 
-func _set_var_color(i: int, v: String, is_function := false):
+func _set_var_color(i: int, v: String, is_function := false, func_color := C_ACTION_EVAL):
 	if " " in v:
 		var off := i
 		for part in v.split(" "):
@@ -105,11 +103,11 @@ func _set_var_color(i: int, v: String, is_function := false):
 	elif v.begins_with("@") or is_function:
 		# only highlight last part
 		var d := v.rfind(".")
-		_c(i, C_FUNCTION.darkened(.4))
+		_c(i, func_color.darkened(.4))
 		if d != -1:
-			_c(i+d, C_FUNCTION)
+			_c(i+d, func_color)
 		else:
-			_c(i, C_FUNCTION)
+			_c(i, func_color)
 	elif v.is_valid_int():
 		_c(i, C_VAR_INT)
 	elif v.is_valid_float():
@@ -121,14 +119,14 @@ func _set_var_color(i: int, v: String, is_function := false):
 	else:
 		_c(i, C_VAR_STR)
 
-func _h_action(from: int, to: int):
+func _h_action(from: int, to: int, c: Color):
 	_c(from, C_SYMBOL)
 	var inner := text.substr(from+1, to-from-1)
 	var parts := split_string(inner)
 	var off := from+1
 	for i in len(parts):
 		var part = parts[i]
-		_set_var_color(off, part, i==0)
+		_set_var_color(off, part, i==0, c)
 		off += len(part) + 1
 
 func _h_action_expression(from: int, to: int):
@@ -200,9 +198,9 @@ func _h_bbcode(from: int, to: int, default: Color):
 				var off = i + 1
 				for tag in inner.split(";"):
 					# colorize action tags
-					if tag.begins_with("~"):
-						_h_action(off, off+len(tag))
-					elif tag.begins_with("$"):
+					if tag.begins_with(Sooty.S_ACTION_EVAL):
+						_h_action(off, off+len(tag), C_ACTION_EVAL)
+					elif tag.begins_with(Sooty.S_ACTION_SHORTCUT):
 						_set_var_color(off, tag)
 					# colorize normal tags
 					else:
@@ -245,8 +243,11 @@ func _h_line(from: int, to: int):
 		_set_var_color(j, text.substr(j))
 	
 	# action
-	elif t.begins_with(Sooty.S_ACTION_SHORTCUT):
-		_h_action(text.find(Sooty.S_ACTION_SHORTCUT, from), to)
+	elif t.begins_with(Sooty.S_ACTION_STATE):
+		_h_action(text.find(Sooty.S_ACTION_STATE, from), to, C_ACTION_STATE)
+	
+	elif t.begins_with(Sooty.S_ACTION_GROUP):
+		_h_action(text.find(Sooty.S_ACTION_GROUP, from), to, C_ACTION_GROUP)
 	
 	elif t.begins_with(Sooty.S_ACTION_EVAL):
 		_h_action_expression(text.find(Sooty.S_ACTION_EVAL, from), to)

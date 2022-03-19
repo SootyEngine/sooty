@@ -19,6 +19,8 @@ var shake_offset := Vector2.ZERO
 
 var position_offset := Vector2.ZERO
 
+@export var draw_thirds := true
+
 func _init() -> void:
 	add_to_group("sa:camera")
 
@@ -41,8 +43,6 @@ func set_target(id: String):
 	var target := UGroup.get_first_where("camera_target", {name=id})
 	if target:
 		position = target.pos - Global.window_size * .5
-
-@export var draw_thirds := true
 
 func _draw() -> void:
 	if Engine.is_editor_hint() and draw_thirds:
@@ -69,28 +69,14 @@ func _get_tween():
 	if tween:
 		tween.stop()
 	tween = get_tree().create_tween()
+	tween.bind_node(self)
 	return tween
 
-func _input(event: InputEvent) -> void:
-	if Input.is_action_just_pressed("ui_left"):
-		var t := _get_tween()
-		t.tween_property(self, "position_offset:x", -128.0, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		print("create tween")
-	
-	if Input.is_action_just_pressed("ui_right"):
-		var t := _get_tween()
-		t.tween_property(self, "position_offset:x", 128.0, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		print("create tween")
-	
-	if Input.is_action_just_pressed("ui_down"):
-		var t := _get_tween()
-		t.tween_property(self, "position_offset:x", 0.0, 1.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		print("create tween")
-	
-	if Input.is_action_just_pressed("ui_up"):
-		var t := _get_tween()
-		t.tween_property(self, "zoom_offset", 0.0 if zoom_offset != 0.0 else randf_range(-.5, .5), 1.0).set_trans(Tween.TRANS_BACK)
-		print("create tween")
+func pan(x := 0.0, y := 0.0):
+	var t := _get_tween()
+	t.tween_property(self, "position_offset", Vector2(x, y), 0.5)\
+		.set_trans(Tween.TRANS_BACK)\
+		.set_ease(Tween.EASE_OUT)
 
 func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():

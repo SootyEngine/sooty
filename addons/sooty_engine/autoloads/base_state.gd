@@ -12,6 +12,9 @@ func _ready() -> void:
 	child_entered_tree.connect(_child_added)
 	_post_init.call_deferred()
 
+func reset():
+	_load_state(_default)
+
 func install_all(path: String):
 	print("[%s]" % path.get_file().capitalize())
 	for script_path in UFile.get_files(path, ".gd"):
