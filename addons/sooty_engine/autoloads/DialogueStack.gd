@@ -143,6 +143,7 @@ func _push(did: String, flow: String, lines: Array, type: int):
 func pop_next_line() -> Dictionary:
 	var did_line := _pop_next_line()
 	var did: String = did_line.did
+	var flow: String = did_line.flow
 	var line: Dictionary = did_line.line
 	
 	# only show lines that pass a test
@@ -158,7 +159,7 @@ func pop_next_line() -> Dictionary:
 			var d := Dialogues.get_dialogue(did)
 			for i in len(line.conds):
 				if State._test(line.conds[i]):
-					_push(d.id, did_line.flow, line.cond_lines[i], STEP_CALL)
+					_push(d.id, flow, line.cond_lines[i], STEP_CALL)
 					break
 		
 		# match chain
@@ -169,7 +170,7 @@ func pop_next_line() -> Dictionary:
 				var got = State._eval(case)
 #				print("\tCASE %s: '%s' -> %s == %s (%s)" % [i, line.cases[i], got, match_result, match_result == got])
 				if match_result == got or case == "_":
-					_push(did, did_line.flow, line.case_lines[i], STEP_CALL)
+					_push(did, flow, line.case_lines[i], STEP_CALL)
 					break
 		
 		elif "cond" in line and State._test(line.cond):
@@ -177,6 +178,7 @@ func pop_next_line() -> Dictionary:
 		
 		did_line = _pop_next_line()
 		did = did_line.did
+		flow = did_line.flow
 		line = did_line.line
 	
 	return did_line
@@ -184,15 +186,9 @@ func pop_next_line() -> Dictionary:
 func _pop_next_line() -> Dictionary:
 	if len(_stack):
 		var step: Dictionary = _stack[-1]
-		
-		if not len(step.lines):
-			push_error("Shouldn't happen.")
-			_pop()
-			return {}
-		
 		var dilg := Dialogues.get_dialogue(step.did)
 		var line: Dictionary = dilg.get_line(step.lines[step.step])
-		var out := { did=step.did, line=line }
+		var out := { did=step.did, flow=step.flow, line=line }
 		
 		step.step += 1
 		

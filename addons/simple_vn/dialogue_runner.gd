@@ -27,7 +27,7 @@ func _state_changed(property: String):
 			wait(0.5)
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("continue"):
+	if event.is_action_pressed("advance"):
 		var waiting_for := []
 		_caption_msg("advance", waiting_for)
 		if len(waiting_for):

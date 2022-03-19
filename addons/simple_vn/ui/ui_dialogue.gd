@@ -54,7 +54,7 @@ func _quote_ended():
 	print("QUOTE ENDED")
 
 func _input(_event: InputEvent) -> void:
-	if visible and Input.is_action_just_pressed("continue"):
+	if visible and Input.is_action_just_pressed("advance"):
 		if waiting_for_option:
 			select_option(option_container.get_child(hovered+1).option)
 		

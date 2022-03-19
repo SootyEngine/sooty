@@ -17,7 +17,7 @@ var _options_passing: Array
 
 var hovered := 0:
 	set(h):
-		h = wrapi(h, 0, button_parent.get_child_count())
+		h = clampi(h, 0, button_parent.get_child_count()-1)
 		if hovered != h:
 			hovered = h
 			
@@ -25,10 +25,7 @@ var hovered := 0:
 				var n: Control = button_parent.get_child(i)
 				n.hovered = i == h
 		
-		var n: Control = button_parent.get_child(hovered)
-		if n:
-			selection_indicator.position.x = n.rect_position.x + 14
-			selection_indicator.position.y = n.rect_position.y + 16
+		_fix_indicator_position.call_deferred()
 
 func _ready() -> void:
 	visible = false
@@ -40,7 +37,7 @@ func _input(event: InputEvent) -> void:
 			hovered -= 1
 		elif event.is_action_pressed("ui_down"):
 			hovered += 1
-		elif event.is_action_pressed("continue"):
+		elif event.is_action_pressed("advance") and _can_select:
 			_select(_options[hovered])
 
 func has_options() -> bool:
@@ -54,16 +51,16 @@ func _set_line(line: DialogueLine):
 		_options = []
 		_options_passing = []
 	
-	_can_select = false
 	_shown = true
 	visible = true
 	modulate.a = 0.0
-	get_tree().create_timer(0.5).timeout.connect(set.bind("_can_select", true))
+	_can_select = false
 	_create_options()
 
 func _show_options():
 	modulate.a = 1.0
-	
+	get_tree().create_timer(0.5).timeout.connect(set.bind("_can_select", true))
+
 func _create_options():
 	rect_size.y = 0.0
 	
@@ -99,3 +96,9 @@ func _create_tween() -> Tween:
 		_tween.stop()
 	_tween = get_tree().create_tween()
 	return _tween
+
+func _fix_indicator_position():
+		var n: Control = button_parent.get_child(hovered)
+		if n:
+			selection_indicator.position.x = n.rect_position.x + 14
+			selection_indicator.position.y = n.rect_position.y + 16

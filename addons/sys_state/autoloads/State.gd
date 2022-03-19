@@ -88,7 +88,9 @@ func _eval(expression: String, default = null) -> Variant:
 	return default
 
 func _test(expression: String) -> bool:
-	return true if _eval(expression) else false
+	var got := true if _eval(expression) else false
+	print("_test(%s) == %s" % [expression, got])
+	return got
 
 func _pipe(value: Variant, pipes: String) -> Variant:
 	for pipe in pipes.split("|"):

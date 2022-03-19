@@ -40,8 +40,7 @@ func _caption(id: String, msg_type: String, payload: Variant):
 	if id == "*" or id == name:
 		match msg_type:
 			"show_line":
-				_can_skip = false
-				get_tree().create_timer(0.5).timeout.connect(set.bind("_can_skip", true))
+				_delay_action()
 				
 				if not shown:
 					shown = true
@@ -60,12 +59,20 @@ func _caption(id: String, msg_type: String, payload: Variant):
 					elif rtl_text.can_advance():
 						payload.append(self)
 						rtl_text.advance()
+						_delay_action()
+					elif _waiting_for_option:
+						print("Waiting for options")
+						payload.append(self)
 					else:
 						_hide_eventually()
 			
 			"hide":
 				if shown:
 					_hide_eventually()
+
+func _delay_action():
+	_can_skip = false
+	get_tree().create_timer(0.25).timeout.connect(set.bind("_can_skip", true))
 
 func set_show_indicator(s):
 	if show_indicator != s:
