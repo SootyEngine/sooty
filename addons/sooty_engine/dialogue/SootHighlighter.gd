@@ -47,8 +47,12 @@ const S_FLOW_GOTO := "=>"
 const S_FLOW_CALL := "=="
 const S_COMMENT := "//"
 const S_PROPERTY := "|"
-const S_OPTION_START := "<"
-const S_OPTION_END := ">"
+const S_OPTION := "- "
+const S_OPTION_ADD := "+ "
+#const S_OPTION_START := "<"
+#const S_OPTION_END := ">"
+const S_PROP_START := "[["
+const S_PROP_END := "]]"
 const S_FLATLINE_START := "(("
 const S_FLATLINE_END := "))"
 const S_COND_START := "{{"
@@ -246,14 +250,20 @@ func _h_line(from: int, to: int):
 		_h_action_expression(text.find(Sooty.S_ACTION_EVAL, from), to)
 	
 	# options
-	elif t.begins_with(S_OPTION_START):
-		var s := text.find(S_OPTION_START)
-		var e := text.find(S_OPTION_END)
+#	elif t.begins_with(S_OPTION_START):
+#		var s := text.find(S_OPTION_START)
+#		var e := text.find(S_OPTION_END)
+#		_c(s, C_SYMBOL, 1)
+#		_c(s+1, C_OPTION_FLAG)
+#		_c(e, C_SYMBOL, 1)
+#		_co(C_OPTION_TEXT)
+#		_h_bbcode(e+1, to, C_OPTION_TEXT)
+#		_h_flow()
+	elif t.begins_with(S_OPTION):
+		var s := text.find(S_OPTION)
 		_c(s, C_SYMBOL, 1)
-		_c(s+1, C_OPTION_FLAG)
-		_c(e, C_SYMBOL, 1)
-		_co(C_OPTION_TEXT)
-		_h_bbcode(e+1, to, C_OPTION_TEXT)
+		_c(s+1, C_OPTION_TEXT)
+		_h_bbcode(s+1, to, C_OPTION_TEXT)
 		_h_flow()
 	
 	elif t.begins_with(S_FLOW_GOTO) or t.begins_with(S_FLOW_CALL):

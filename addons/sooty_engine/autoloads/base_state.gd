@@ -1,8 +1,8 @@
 extends Node
 class_name BaseState
 
-signal changed(key_path: Array)
-signal changed_from_to(key: Array, from: Variant, to: Variant)
+signal changed(property: String)
+signal changed_from_to(property: String, from: Variant, to: Variant)
 signal loaded()
 
 var _default := {}
@@ -11,6 +11,12 @@ var _children := []
 func _ready() -> void:
 	child_entered_tree.connect(_child_added)
 	_post_init.call_deferred()
+
+func install_all(path: String):
+	print("[%s]" % path.get_file().capitalize())
+	for script_path in UFile.get_files(path, ".gd"):
+		var mod = install(script_path)
+		print("\t- ", script_path.trim_prefix(path + "/"))
 
 func install(path: String):
 	var mod: Node = load(path).new()
@@ -25,6 +31,24 @@ func _post_init():
 
 func _child_added(_n: Node):
 	_children = get_children()
+
+func _has_method(method: String) -> bool:
+	for node in _children:
+		if node.has_method(method):
+			return true
+	return false
+
+func _get_method_parent(method: String) -> String:
+	for node in _children:
+		if node.has_method(method):
+			return node.name
+	return ""
+
+func _call(method: String, args: Array = [], default = null) -> Variant:
+	for node in _children:
+		if node.has_method(method):
+			return node.callv(method, args)
+	return default
 
 func _reset_state():
 	UObject.set_state(self, _default)
@@ -78,8 +102,8 @@ func _set(property_path: StringName, value) -> bool:
 			o.set(property, value)
 			var new = o.get(property)
 			if old != new:
-				changed.emit(path)
-				changed_from_to.emit(path, old, new)
+				changed.emit(property_path)
+				changed_from_to.emit(property_path, old, new)
 			return true
 	push_error("No %s in State. (Attempted '%s = %s')" % [property_path, property, value])
 	return true

@@ -193,6 +193,7 @@ static func call_w_args(target: Object, method: String, in_args: Array = []) -> 
 #	for i in len(out):
 #		print("\t* %s\t\t%s\t\t%s" % [old[i] if i < len(old) else "??", out[i], arg_info.values()[i]])
 	var got = obj.callv(method, out)
+	prints("CALLV:", method, out, got)
 	return got
 
 # find second last dictionary/object in a nested structure

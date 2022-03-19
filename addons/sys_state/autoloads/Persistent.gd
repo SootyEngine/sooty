@@ -5,10 +5,7 @@ const SAVE_PATH := "user://persistent.res"
 
 func _ready() -> void:
 	super._ready()
-	print("[Persistent States]")
-	for script_path in UFile.get_files("res://states_persistent", ".gd"):
-		var mod = install(script_path)
-		print("\t- ", script_path)
+	install_all("res://states_persistent")
 
 func _post_init():
 	super._post_init()

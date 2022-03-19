@@ -5,34 +5,46 @@ extends Node
 @export var start := "MAIN.START"
 @export var _pausers := []
 var speaker_cache := []
+var _wait_time := 0.0
 
 func _init() -> void:
 	add_to_group("flow_manager")
-	add_to_group("sa:scene")
-	add_to_group("sa:goto")
-	add_to_group("sa:wait")
-	
+
+func wait(t := 1.0):
+	_wait_time = t
+	stack._break = true
 
 func _ready() -> void:
-	add_pauser(self)
-	Fader.create(null, {anim="in", time=.25, done=remove_pauser.bind(self)})
-	
-#	Sooty.add_shortcut("caption", "@caption(\"$arg0\")", caption)
-	
+	wait(0.25)
+	Fader.create(null, {anim="in", time=.25})
+	State.changed.connect(_state_changed)
 	stack.started.connect(_on_started)
 	stack.finished.connect(_on_finished)
 	stack.on_line.connect(_on_text)
 	_startup.call_deferred()
+
+func _state_changed(property: String):
+	match property:
+		"caption_at":
+			_caption_msg("hide")
+			wait(0.5)
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("continue"):
+		var waiting_for := []
+		_caption_msg("advance", waiting_for)
+		if len(waiting_for):
+#			print("WAITING FOR ", waiting_for)
+			pass
+		else:
+			_caption_msg("hide")
+			stack._break = false
 
 func goto(id: String = ""):
 	Fader.create(_goto.bind(id))
 
 func _goto(id: String):
 	get_tree().change_scene("res://addons/menu_scenes/ui_%s.tscn" % id)
-
-func scene(id: String):
-	add_pauser(self)
-	Fader.create(_scene.bind(id), {done=remove_pauser.bind(self)})
 
 func _scene(id: String):
 	# remove previous scenes
@@ -53,41 +65,27 @@ func find_scene(id: String) -> PackedScene:
 			return load(path)
 	return null
 
-func scene_function(ass, ok):
-	prints("SCENE FUNC ", ass, ok)
-
 func _startup():
 	if not stack._started:
 		stack.start(start)
 
-func add_pauser(n: Node) -> bool:
-	if not n in _pausers:
-		stack.wait = true
-		_pausers.append(n)
-		return true
-	return false
-
-func remove_pauser(n: Node):
-	if n in _pausers:
-		_pausers.erase(n)
-		if not len(_pausers):
-			stack.wait = false
-
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if _wait_time > 0.0:
+		_wait_time -= delta
+		if _wait_time <= 0.0:
+			_wait_time = 0.0
+			stack._break = false
+	
 	stack.tick()
-
-func wait(time: float):
-	add_pauser(self)
-	get_tree().create_timer(time).timeout.connect(remove_pauser.bind(self))
 
 func _on_started():
 	print("STARTED")
 
 func _on_finished():
 	print("FINISHED ", stack._history)
-	print("STATE")
+	print("=== STATE ===")
 	UDict.log(State._get_state())
-	print("CHANGED STATE")
+	print("=== CHANGED STATE ===")
 	UDict.log(State._get_changed_states())
 	speaker_cache.clear()
 	if len(stack._history) and stack._history[-1] != "MAIN.END":
@@ -112,8 +110,11 @@ func _on_text(line: DialogueLine):
 			else:
 				from = str(val)
 	
-	stack.wait = true
-	get_tree().call_group("caption", "show_line", {caption=State.caption_id, line=line, from=from})
+	stack._break = true
+	_caption_msg("show_line", {from=from, line=line})
+
+func _caption_msg(msg_type: String, msg: Variant = null):
+	Global.call_group_flags(SceneTree.GROUP_CALL_REALTIME, "caption", "_caption", [State.caption_at, msg_type, msg])
 
 func print_pausers():
 	if len(_pausers):

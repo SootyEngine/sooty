@@ -9,7 +9,7 @@ signal tick_finished()
 signal option_selected(option: Dictionary)
 signal on_line(text: DialogueLine)
 
-@export var wait := false
+@export var _break := false
 @export var _started := false
 @export var _stack := []
 @export var _history := []
@@ -21,7 +21,7 @@ func get_current_dialogue() -> Dialogue:
 	return null if not len(_stack) else Dialogues.get_dialogue(_stack[-1].did)
 
 func tick():
-	if wait:
+	if _break:
 		return
 	
 	if not _started and has_steps():
@@ -33,20 +33,20 @@ func tick():
 		finished.emit()
 		_history.clear()
 	
-	if has_steps() and not wait:
+	if has_steps() and not _break:
 		tick_started.emit()
 	else:
 		return
 	
 	var safety := 100
-	while has_steps() and not wait:
+	while has_steps() and not _break:
 		safety -= 1
 		if safety <= 0:
 			print("Tripped safety!", safety)
 			break
 		
 		var line := pop_next_line()
-		print(line)
+#		print(line)
 		
 		if not len(line):
 			break

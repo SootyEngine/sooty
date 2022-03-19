@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3 uid="uid://56datv4f345b"]
 
 [ext_resource type="Script" path="res://addons/simple_vn/dialogue_runner.gd" id="1_deyhw"]
-[ext_resource type="PackedScene" uid="uid://cp2drxo6cxr6d" path="res://addons/simple_vn/ui/ui_dialogue.tscn" id="3_kyvc4"]
+[ext_resource type="PackedScene" uid="uid://c1roy5ftu7mrg" path="res://addons/simple_vn/nodes/caption.tscn" id="2_lox42"]
 [ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="4_n6jin"]
 [ext_resource type="PackedScene" uid="uid://dl2mg14o34fng" path="res://addons/sys_notifications/ui/ui_notifications.tscn" id="5_fm15x"]
 [ext_resource type="Script" path="res://addons/simple_vn/input_indicator.gd" id="5_s7x7q"]
@@ -16,21 +16,19 @@ script = ExtResource( "1_deyhw" )
 
 [node name="flow_manager" type="CanvasLayer" parent="."]
 
-[node name="bottom" parent="flow_manager" instance=ExtResource( "3_kyvc4" )]
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -512.0
-offset_top = -120.0
-offset_right = 512.0
+[node name="bottom" parent="flow_manager" instance=ExtResource( "2_lox42" )]
+visible = false
+offset_left = -114.0
+offset_top = 162.0
+offset_right = 366.0
+offset_bottom = 280.0
 
-[node name="top" parent="flow_manager" instance=ExtResource( "3_kyvc4" )]
-anchor_left = 0.5
-anchor_top = 0.0
-anchor_right = 0.5
-anchor_bottom = 0.0
-offset_left = -341.0
-offset_right = 341.0
-offset_bottom = 162.0
+[node name="top" parent="flow_manager" instance=ExtResource( "2_lox42" )]
+visible = false
+offset_left = -494.0
+offset_top = -290.0
+offset_right = -14.0
+offset_bottom = -172.0
 
 [node name="Icon" type="Sprite2D" parent="flow_manager"]
 position = Vector2(78, 552)

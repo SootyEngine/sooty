@@ -24,7 +24,7 @@ func _ready() -> void:
 		var memory_before = OS.get_static_memory_usage()
 		print("[Dialogues]")
 		for file in UFile.get_files("res://dialogue", ".soot"):
-			print("\t- ", file)
+			print("\t- ", file.trim_prefix("res://dialogue/"))
 			add_dialogue(Dialogue.new(file))
 		var memory_used = OS.get_static_memory_usage() - memory_before
 		prints("Dialogues:", String.humanize_size(memory_used))

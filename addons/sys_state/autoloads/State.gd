@@ -1,41 +1,52 @@
+@tool
 extends "res://addons/sooty_engine/autoloads/base_state.gd"
 
-var _C := {}
 var _expr := Expression.new()
-
-func _post_init():
-	# collect state functions in a dict, so all can access them.
-	for child in _children:
-		for m in child.get_method_list():
-			var n: String = m.name
-			if n[0] != "_" and not has_method(m.name):
-				_C[n] = child[n]
-	super._post_init()
 
 func do(command: String) -> Variant:
 	if command.begins_with("@"):
-		return _call(command.substr(1))
+		var call = command.substr(1)
+		var args := UString.split_on_spaces(call)
+		var method = args.pop_front()
+		var converted_args := args.map(_str_to_var)
+		return _call(method, converted_args)
+	
 	elif command.begins_with("~"):
 		return _eval(command.substr(1))
+	
 	else:
 		return _eval(command)
 
-func _call(call: String):
-	var args := Sooty.str_to_args(call)
-	var fname = args.pop_front()
-	# call group node function
-	if "." in fname:
-		var p = fname.split(".", true, 1)
-		Global.call_group_flags(SceneTree.GROUP_CALL_REALTIME, p[0], p[1], args)
-	# call shortcut
-	elif fname in _C:
-		return UObject.callablev(_C[fname], args)
-	# call scene function
-	elif get_tree().current_scene.has_method(fname):
-		return get_tree().current_scene.callv(fname, args)
-	# alert user nothing happened
-	else:
-		push_error("No function %s(%s) in State." % [fname, args])
+func _str_to_var(s: String) -> Variant:
+	match s:
+		"true": return true
+		"false": return false
+		"null": return null
+	# state variable?
+	if s.begins_with("$"):
+		return _get(s.substr(1))
+	# array or dict?
+	if "," in s or ":" in s:
+		var args := s.split(",")
+		var is_dict := ":" in args[0]
+		var out = {} if is_dict else []
+		for arg in args:
+			if ":" in arg:
+				var kv := arg.split(":", true, 1)
+				var key := kv[0]
+				var val = _str_to_var(kv[1])
+				out[key] = val
+			else:
+				out.append(_str_to_var(arg))
+		return out
+	# float?
+	if s.is_valid_float():
+		return s.to_float()
+	# int?
+	if s.is_valid_int():
+		return s.to_int()
+	# must be a string?
+	return s
 
 func _eval(expression: String, default = null) -> Variant:
 	# assignments?
@@ -43,16 +54,16 @@ func _eval(expression: String, default = null) -> Variant:
 		if op in expression:
 			var p := expression.split(op, true, 1)
 			var property := p[0].strip_edges()
-			if State._has(property):
-				var old_val = State._get(property)
+			if _has(property):
+				var old_val = _get(property)
 				var new_val = _eval(p[1].strip_edges())
 				match op:
-					" = ": State._set(property, new_val)
-					" += ": State._set(property, old_val + new_val)
-					" -= ": State._set(property, old_val - new_val)
-					" *= ": State._set(property, old_val * new_val)
-					" /= ": State._set(property, old_val / new_val)
-				return State._get(property)
+					" = ": _set(property, new_val)
+					" += ": _set(property, old_val + new_val)
+					" -= ": _set(property, old_val - new_val)
+					" *= ": _set(property, old_val * new_val)
+					" /= ": _set(property, old_val / new_val)
+				return _get(property)
 			else:
 				push_error("No property '%s' in State." % property)
 				return default
@@ -69,7 +80,7 @@ func _eval(expression: String, default = null) -> Variant:
 	if _expr.parse(global, []) != OK:
 		push_error(_expr.get_error_text())
 	else:
-		var result = _expr.execute([], State, false)
+		var result = _expr.execute([], self, false)
 		if _expr.has_execute_failed():
 			push_error("_eval(\"%s\") failed: %s." % [global, _expr.get_error_text()])
 		else:
@@ -82,11 +93,11 @@ func _test(expression: String) -> bool:
 func _pipe(value: Variant, pipes: String) -> Variant:
 	for pipe in pipes.split("|"):
 		var args = UString.split_on_spaces(pipe)
-		var fname = args.pop_front()
-		if fname in _C:
-			value = UObject.callablev(_C[fname], [value] + args.map(_eval))
+		var method = args.pop_front()
+		if _has_method(method):
+			value = _call(method, [value] + args.map(_eval))
 		else:
-			push_error("Can't pipe %s. No %s." % [value, fname])
+			push_error("Can't pipe %s. No %s." % [value, method])
 	return value
 
 func _has(property: StringName):
@@ -108,10 +119,7 @@ func _set(property: StringName, value) -> bool:
 
 func _ready() -> void:
 	super._ready()
-	print("[States]")
-	for script_path in UFile.get_files("res://states", ".gd"):
-		var mod = install(script_path)
-		print("\t- ", script_path)
+	install_all("res://states")
 
 func get_save_state() -> Dictionary:
 	return _get_changed_states()
@@ -145,7 +153,8 @@ func _globalize_functions(t: String) -> String:
 				elif "." in method_name or method_name in UObject.GLOBAL_SCOPE_METHODS:
 					out += "%s(" % method_name
 				else:
-					out += "_C.%s.call(" % method_name
+					var parent = _get_method_parent(method_name)
+					out += "get_node(\"%s\").%s(" % [parent, method_name]
 				out += UString.part(t, k+1+len(method_name), j)
 				i = j + 1
 				continue

@@ -76,6 +76,9 @@ func set_bbcode(btext: String):
 	_alpha_real.fill(0.0)
 	_alpha_goal.fill(0.0)
 
+func can_advance() -> bool:
+	return not play or not is_finished()
+
 func advance():
 	if not play:
 		play = true
