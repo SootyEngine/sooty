@@ -11,14 +11,17 @@ extends Control
 @onready var rtl_text: RichTextAnimation = get_node(_rtl_text) 
 @onready var indicator: TextureRect = get_node(_indicator)
 
+# optional choice menu this caption will use
+@export var _option_menu: NodePath = ""
+@onready var option_menu: Node = get_node(_option_menu)
+var _waiting_for_option := false
+
+var _can_skip := true
 var _tween: Tween
 var _tween_indicator: Tween
 
 var show_indicator := false:
 	set = set_show_indicator
-
-func _init() -> void:
-	add_to_group("caption")
 
 func _ready() -> void:
 	rtl_from.clear()
@@ -37,6 +40,9 @@ func _caption(id: String, msg_type: String, payload: Variant):
 	if id == "*" or id == name:
 		match msg_type:
 			"show_line":
+				_can_skip = false
+				get_tree().create_timer(0.5).timeout.connect(set.bind("_can_skip", true))
+				
 				if not shown:
 					shown = true
 					visible = true
@@ -49,7 +55,9 @@ func _caption(id: String, msg_type: String, payload: Variant):
 			
 			"advance":
 				if shown:
-					if rtl_text.can_advance():
+					if not _can_skip:
+						payload.append(self)
+					elif rtl_text.can_advance():
 						payload.append(self)
 						rtl_text.advance()
 					else:
@@ -61,6 +69,8 @@ func _caption(id: String, msg_type: String, payload: Variant):
 
 func set_show_indicator(s):
 	if show_indicator != s:
+		if s and _waiting_for_option:
+			return
 		show_indicator = s
 		if _tween_indicator:
 			_tween_indicator.stop()
@@ -83,6 +93,21 @@ func _show_line(payload: Dictionary):
 		rtl_from.visible = false
 		rtl_text.set_bbcode(line.text)
 		rtl_text.fade_out = false
+	
+	# show choices?
+	if line.has_options():
+		if option_menu:
+			option_menu._set_line(line)
+			if option_menu.has_options():
+				rtl_text.faded_in.connect(option_menu._show_options, CONNECT_ONESHOT)
+				option_menu.selected.connect(_option_selected, CONNECT_ONESHOT)
+				_waiting_for_option = true
+		else:
+			push_error("No options_menu setup %s." % [name])
+
+func _option_selected(option: DialogueLine):
+	_waiting_for_option = false
+	print("Selected option ", option)
 
 func _draw():
 	draw_rect(Rect2(Vector2.ZERO, rect_size), backing_color)

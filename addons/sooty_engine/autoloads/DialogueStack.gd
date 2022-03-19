@@ -1,18 +1,29 @@
 @tool
-extends Resource
-class_name DialogueStack
+extends Node
+
+const MAX_STEPS_PER_TICK := 20
+enum {
+	STEP_GOTO,
+	STEP_CALL
+}
 
 signal started()
 signal finished()
 signal tick_started()
 signal tick_finished()
+signal flow_started(id: String)
+signal flow_ended(id: String)
 signal option_selected(option: Dictionary)
 signal on_line(text: DialogueLine)
 
 @export var _break := false
-@export var _started := false
+@export var _active := false
 @export var _stack := []
-@export var _history := []
+@export var history := [] # th
+@export var visited := {} # how many times a flow has been visited.
+
+func is_active() -> bool:
+	return _active
 
 func has_steps() -> bool:
 	return len(_stack) != 0
@@ -24,21 +35,21 @@ func tick():
 	if _break:
 		return
 	
-	if not _started and has_steps():
-		_started = true
+	if not _active and has_steps():
+		_active = true
 		started.emit()
 	
-	if _started and not has_steps():
-		_started = false
+	if _active and not has_steps():
+		_active = false
 		finished.emit()
-		_history.clear()
+		history.clear()
 	
 	if has_steps() and not _break:
 		tick_started.emit()
 	else:
 		return
 	
-	var safety := 100
+	var safety := MAX_STEPS_PER_TICK
 	while has_steps() and not _break:
 		safety -= 1
 		if safety <= 0:
@@ -53,18 +64,6 @@ func tick():
 		
 		match line.line.type:
 			"action": State.do(line.line.action)
-#				var act: String = line.line.action
-#				if act.begins_with(Sooty.S_ACTION_EVAL):
-#					act = act.substr(1).strip_edges()
-#					# scene functions
-#					act = UString.replace_between(act, "@", "(", func(i,s): return "current_scene.%s(" % s)
-#					# fix translations
-#					act = UString.replace_between(act, "_(", ")", func(i,s): return "tr(%s)" % s)
-#					State._eval(act)
-#				elif act.begins_with(Sooty.S_ACTION_SHORTCUT):
-#					act = act.substr(1).strip_edges()
-#					State._call(act)
-					
 			"goto": goto(line.line.goto, true)
 			"call": goto(line.line.call, false)
 			"text": on_line.emit(DialogueLine.new(line.did, line.line))
@@ -73,7 +72,7 @@ func tick():
 	tick_finished.emit()
 	
 func start(id: String):
-	if _started:
+	if _active:
 		push_warning("Already started.")
 		return
 	
@@ -109,25 +108,37 @@ func goto(did_flow: String, clear_stack: bool = true) -> bool:
 		push_error("Can't find lines for %s." % flow)
 		return false
 	
+	# if the stack is cleared, it means this was a "goto" not a "call"
 	if clear_stack:
-		_stack.clear()
-		_history.append("%s.%s" % [did, flow])
+		while len(_stack):
+			_pop()
 	
-	_push(did, lines)
+	_push(did, flow, lines, STEP_GOTO if clear_stack else STEP_CALL)
 	return true
 
 # select an option, adding it's lines to the stack
 func select_option(option: DialogueLine):
 	var o := option._data
 	if "then" in o:
-		_push(option._dialogue_id, o.then)
+		_push(option._dialogue_id, "%OPTION%", o.then, STEP_CALL)
 	option_selected.emit(o)
 
-func _push(did: String, lines: Array, extra := {}):
-	var step := { did=did, lines=lines, step=0 }
-	for k in extra:
-		step[k] = extra[k]
+func _pop():
+	var last: Dictionary = _stack.pop_back()
+	if last.type == STEP_GOTO:
+		var id := "%s.%s" % [last.did, last.flow]
+		# add to history
+		history.append(id)
+		# tick number of times visited
+		UDict.tick(visited, id)
+		# let everyone know a flow ended
+		flow_ended.emit(last.flow)
+
+func _push(did: String, flow: String, lines: Array, type: int):
+	var step := { did=did, flow=flow, lines=lines, type=type, step=0 }
 	_stack.append(step)
+	if type == STEP_GOTO:
+		flow_started.emit(flow)
 
 func pop_next_line() -> Dictionary:
 	var did_line := _pop_next_line()
@@ -147,7 +158,7 @@ func pop_next_line() -> Dictionary:
 			var d := Dialogues.get_dialogue(did)
 			for i in len(line.conds):
 				if State._test(line.conds[i]):
-					_push(d.id, line.cond_lines[i])
+					_push(d.id, did_line.flow, line.cond_lines[i], STEP_CALL)
 					break
 		
 		# match chain
@@ -158,7 +169,7 @@ func pop_next_line() -> Dictionary:
 				var got = State._eval(case)
 #				print("\tCASE %s: '%s' -> %s == %s (%s)" % [i, line.cases[i], got, match_result, match_result == got])
 				if match_result == got or case == "_":
-					_push(did, line.case_lines[i])
+					_push(did, did_line.flow, line.case_lines[i], STEP_CALL)
 					break
 		
 		elif "cond" in line and State._test(line.cond):
@@ -176,7 +187,7 @@ func _pop_next_line() -> Dictionary:
 		
 		if not len(step.lines):
 			push_error("Shouldn't happen.")
-			_stack.pop_back()
+			_pop()
 			return {}
 		
 		var dilg := Dialogues.get_dialogue(step.did)
@@ -186,7 +197,7 @@ func _pop_next_line() -> Dictionary:
 		step.step += 1
 		
 		if step.step >= len(step.lines):
-			_stack.pop_back()
+			_pop()
 		
 		return out
 	

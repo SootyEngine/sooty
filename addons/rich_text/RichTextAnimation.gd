@@ -178,20 +178,20 @@ func set_progress(p:float):
 	# emit signals
 	if last_visible_character < visible_character:
 		if visible_character == 0:
-			emit_signal("started")
-	
+			started.emit()
+		
 		for i in range(last_visible_character, visible_character):
-			emit_signal("character_shown", i)
-	
+			character_shown.emit(i)
+		
 		if visible_character == get_total_character_count():
-			emit_signal("ended")
+			ended.emit()
 	
 	if fade_out:
 		if progress == 0.0:
-			emit_signal("faded_out")
+			faded_out.emit()
 	else:
 		if progress == 1.0:
-			emit_signal("faded_in")
+			faded_in.emit()
 
 func _process(delta: float) -> void:
 	if play:

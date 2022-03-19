@@ -9,6 +9,7 @@ func _enter_tree() -> void:
 	add_autoload_singleton("Global", "res://addons/sooty_engine/autoloads/Global.gd")
 	add_autoload_singleton("ModManager", "res://addons/sooty_engine/autoloads/ModManager.gd")
 	add_autoload_singleton("Dialogues", "res://addons/sooty_engine/autoloads/Dialogues.gd")
+	add_autoload_singleton("DialogueStack", "res://addons/sooty_engine/autoloads/DialogueStack.gd")
 	
 	var es: EditorSettings = get_editor_interface().get_editor_settings()
 	var fs = es.get_setting("docks/filesystem/textfile_extensions")

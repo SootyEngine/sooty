@@ -1,8 +1,11 @@
 extends Button
 
-@onready var label: RichTextLabel2 = $MarginContainer/text
+@export var _label: NodePath
+@onready var label: RichTextLabel2 = get_node(_label)
 
-var option: DialogueLine
+var option: DialogueLine:
+	set = set_option
+
 var hovered := false:
 	set(h):
 		if h != hovered:

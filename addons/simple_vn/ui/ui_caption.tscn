@@ -1,0 +1,93 @@
+[gd_scene load_steps=6 format=3 uid="uid://6s0pmi3ayfbt"]
+
+[ext_resource type="Script" path="res://addons/simple_vn/ui/ui_caption.gd" id="1_me3hd"]
+[ext_resource type="Script" path="res://VBoxCenterer.gd" id="2_osifk"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="2_w06q7"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextAnimation.gd" id="3_es7ai"]
+[ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="4_3n06j"]
+
+[node name="caption" type="MarginContainer" groups=["caption"]]
+rect_min_size = Vector2(480, 60)
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -263.0
+offset_top = -30.0
+offset_right = 217.0
+offset_bottom = 103.0
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_left = 8
+script = ExtResource( "1_me3hd" )
+_rtl_from = NodePath("CenterContainer/labels/from")
+_rtl_text = NodePath("CenterContainer/labels/text")
+_indicator = NodePath("CenterContainer/labels/indicator")
+_option_menu = NodePath("")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+offset_left = 8.0
+offset_right = 472.0
+offset_bottom = 133.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="labels" type="VBoxContainer" parent="CenterContainer"]
+rect_min_size = Vector2(460, 0)
+offset_left = 2.0
+offset_top = 48.0
+offset_right = 462.0
+offset_bottom = 84.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 1
+
+[node name="center" type="Control" parent="CenterContainer/labels"]
+offset_right = 460.0
+script = ExtResource( "2_osifk" )
+
+[node name="from" type="RichTextLabel" parent="CenterContainer/labels"]
+offset_top = 4.0
+offset_right = 460.0
+offset_bottom = 4.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+fit_content_height = true
+script = ExtResource( "2_w06q7" )
+bbcode = "[dim;dim]\\[[]From[dim;dim]\\][]"
+
+[node name="text" type="RichTextLabel" parent="CenterContainer/labels"]
+offset_top = 8.0
+offset_right = 460.0
+offset_bottom = 8.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_font_sizes/mono_font_size = 16
+theme_override_font_sizes/bold_italics_font_size = 16
+theme_override_font_sizes/italics_font_size = 16
+theme_override_font_sizes/bold_font_size = 16
+theme_override_font_sizes/normal_font_size = 16
+bbcode_enabled = true
+fit_content_height = true
+script = ExtResource( "3_es7ai" )
+bbcode = "[dim;dim]\"[]Text[dim;dim]\"[]"
+effect_time = 522.023
+_triggers = {}
+_alpha_real = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+_alpha_goal = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+[node name="indicator" type="TextureRect" parent="CenterContainer/labels"]
+modulate = Color(1, 1, 1, 0)
+rect_min_size = Vector2(24, 24)
+offset_left = 218.0
+offset_top = 12.0
+offset_right = 242.0
+offset_bottom = 36.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource( "4_3n06j" )
+ignore_texture_size = true
+stretch_mode = 4
+__meta__ = {
+"_edit_layout_mode": 0,
+"_edit_use_custom_anchors": false
+}

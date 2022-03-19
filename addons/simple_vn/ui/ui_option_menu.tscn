@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3 uid="uid://m84326jpcicc"]
+
+[ext_resource type="Script" path="res://addons/simple_vn/ui/ui_option_menu.gd" id="1_n6x5v"]
+[ext_resource type="PackedScene" uid="uid://c8dw7qvxvuwbu" path="res://addons/simple_vn/ui/ui_option_button.tscn" id="2_pmvbe"]
+[ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="3_42ycn"]
+
+[node name="options" type="MarginContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( "1_n6x5v" )
+_button_parent = NodePath("MarginContainer/parent")
+_button_prefab = NodePath("MarginContainer/parent/option")
+_selection_indicator = NodePath("selection_indicator")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+offset_right = 1024.0
+offset_bottom = 600.0
+theme_override_constants/margin_left = 32
+
+[node name="parent" type="VBoxContainer" parent="MarginContainer"]
+offset_left = 32.0
+offset_right = 1024.0
+offset_bottom = 600.0
+alignment = 2
+
+[node name="option" parent="MarginContainer/parent" instance=ExtResource( "2_pmvbe" )]
+offset_top = 569.0
+offset_right = 992.0
+offset_bottom = 600.0
+
+[node name="selection_indicator" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource( "3_42ycn" )

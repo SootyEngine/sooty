@@ -183,8 +183,6 @@ static func _clean(line: Dictionary, all_lines: Dictionary) -> String:
 			return id
 		
 		"option":
-			if not len(line.flag):
-				line.erase("flag")
 			if line.then:
 				_clean_array(line.then, all_lines)
 			else:
@@ -261,7 +259,7 @@ static func _process_line(line: Dictionary):
 	if t.begins_with(S_FLOW): return _line_as_flow(line)
 	if t.begins_with("{{"): return _line_as_condition(line)
 	_extract_conditional(line)
-	if t.begins_with("<"): return _line_as_option(line)
+	if t.begins_with("- "): return _line_as_option(line)
 	if t.begins_with(Sooty.S_ACTION_EVAL): return _line_as_action(line)
 	if t.begins_with(Sooty.S_ACTION_SHORTCUT): return _line_as_action(line)
 	if t.begins_with(S_FLOW_GOTO): return _line_as_goto(line)
@@ -312,12 +310,10 @@ static func _line_as_condition(line: Dictionary):
 
 static func _line_as_option(line: Dictionary):
 	var t: String = line.text
-	var a := t.find("<")
-	var b := t.find(">", a)
+	var a := t.find("-")
 	
 	line.type = "option"
-	line.text = t.substr(b+1).strip_edges()
-	line.flag = t.substr(a+1, b-a-1).strip_edges()
+	line.text = t.substr(a+1).strip_edges()
 	
 	_extract_action(line)
 	

@@ -1,8 +1,8 @@
-[gd_scene load_steps=27 format=3 uid="uid://cp2drxo6cxr6d"]
+[gd_scene load_steps=27 format=3]
 
 [ext_resource type="Script" path="res://addons/simple_vn/ui/ui_dialogue.gd" id="1_hu8k5"]
 [ext_resource type="Shader" path="res://addons/simple_vn/ui/ui_gradient_blur.gdshader" id="2_4t8do"]
-[ext_resource type="Texture2D" uid="uid://b158bgif874eg" path="res://addons/simple_vn/ui/ui_dialogue_bg.tres" id="3_f0whw"]
+[ext_resource type="Texture2D" uid="uid://l5m5g1x88xki" path="res://addons/simple_vn/ui/ui_dialogue_bg.tres" id="3_f0whw"]
 [ext_resource type="FontData" uid="uid://by1aqauhysmgf" path="res://fonts/robotomono/robotomono-r.ttf" id="4_gvvir"]
 [ext_resource type="FontData" uid="uid://dhlm735o5phw0" path="res://fonts/unifont/unifont-13.0.01.ttf" id="5_g81ma"]
 [ext_resource type="FontData" uid="uid://dfus0kvrbquox" path="res://fonts/unifont/unifont_upper-13.0.01.ttf" id="6_rj7td"]
@@ -12,7 +12,7 @@
 [ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="10_mndt7"]
 [ext_resource type="Font" uid="uid://b4g61a4hgqqak" path="res://fonts/robotomono/robotomono_r.tres" id="11_1t7ce"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextAnimation.gd" id="11_wjgcf"]
-[ext_resource type="Script" path="res://addons/simple_vn/ui/ui_option.gd" id="12_1aj7b"]
+[ext_resource type="Script" path="res://addons/simple_vn/ui/ui_option_button.gd" id="12_1aj7b"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_l4evs"]
 shader = ExtResource( "2_4t8do" )
@@ -181,12 +181,9 @@ font = "robotomono"
 size = 24
 play_speed = 60.0
 fade_speed = 5.0
-progress = 1.0
-effect_time = 70.7385
-visible_character = 28
 _triggers = {}
-_alpha_real = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-_alpha_goal = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+_alpha_real = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+_alpha_goal = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 [node name="@@64448" type="VScrollBar" parent="MarginContainer/c/text"]
 visible = false

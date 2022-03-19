@@ -1,8 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://56datv4f345b"]
+[gd_scene load_steps=11 format=3 uid="uid://daa0fqyoywkkq"]
 
 [ext_resource type="Script" path="res://addons/simple_vn/dialogue_runner.gd" id="1_deyhw"]
-[ext_resource type="PackedScene" uid="uid://c1roy5ftu7mrg" path="res://addons/simple_vn/nodes/caption.tscn" id="2_lox42"]
+[ext_resource type="PackedScene" uid="uid://6s0pmi3ayfbt" path="res://addons/simple_vn/ui/ui_caption.tscn" id="2_lox42"]
+[ext_resource type="PackedScene" uid="uid://m84326jpcicc" path="res://addons/simple_vn/ui/ui_option_menu.tscn" id="3_rdpnm"]
 [ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="4_n6jin"]
+[ext_resource type="Script" path="res://EdgeClampContainer.gd" id="5_54pot"]
 [ext_resource type="PackedScene" uid="uid://dl2mg14o34fng" path="res://addons/sys_notifications/ui/ui_notifications.tscn" id="5_fm15x"]
 [ext_resource type="Script" path="res://addons/simple_vn/input_indicator.gd" id="5_s7x7q"]
 [ext_resource type="PackedScene" uid="uid://beeajbnhjflok" path="res://addons/sys_quests/ui/ui_quest_list.tscn" id="6_p3o3l"]
@@ -16,24 +18,48 @@ script = ExtResource( "1_deyhw" )
 
 [node name="flow_manager" type="CanvasLayer" parent="."]
 
-[node name="bottom" parent="flow_manager" instance=ExtResource( "2_lox42" )]
-visible = false
-offset_left = -114.0
-offset_top = 162.0
-offset_right = 366.0
-offset_bottom = 280.0
-
 [node name="top" parent="flow_manager" instance=ExtResource( "2_lox42" )]
 visible = false
 offset_left = -494.0
 offset_top = -290.0
 offset_right = -14.0
 offset_bottom = -172.0
+_option_menu = NodePath("../VBoxContainer/option_menu")
 
 [node name="Icon" type="Sprite2D" parent="flow_manager"]
 position = Vector2(78, 552)
 texture = ExtResource( "4_n6jin" )
 script = ExtResource( "5_s7x7q" )
+
+[node name="VBoxContainer" type="VBoxContainer" parent="flow_manager"]
+offset_left = 299.5
+offset_top = -8.0
+offset_right = 724.5
+offset_bottom = -8.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 2
+script = ExtResource( "5_54pot" )
+margin = 8.0
+
+[node name="bottom" parent="flow_manager/VBoxContainer" instance=ExtResource( "2_lox42" )]
+visible = false
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 230.0
+offset_top = 519.0
+offset_right = 710.0
+offset_bottom = 590.0
+_option_menu = NodePath("../option_menu")
+
+[node name="option_menu" parent="flow_manager/VBoxContainer" instance=ExtResource( "3_rdpnm" )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_right = 425.0
+offset_bottom = 31.0
+size_flags_horizontal = 3
 
 [node name="notification" parent="." groups=["notification_manager"] instance=ExtResource( "5_fm15x" )]
 

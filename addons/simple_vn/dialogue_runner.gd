@@ -1,9 +1,6 @@
 extends Node
 
-@export var stack: Resource = DialogueStack.new()
-
 @export var start := "MAIN.START"
-@export var _pausers := []
 var speaker_cache := []
 var _wait_time := 0.0
 
@@ -12,15 +9,15 @@ func _init() -> void:
 
 func wait(t := 1.0):
 	_wait_time = t
-	stack._break = true
+	DialogueStack._break = true
 
 func _ready() -> void:
 	wait(0.25)
 	Fader.create(null, {anim="in", time=.25})
 	State.changed.connect(_state_changed)
-	stack.started.connect(_on_started)
-	stack.finished.connect(_on_finished)
-	stack.on_line.connect(_on_text)
+	DialogueStack.started.connect(_on_started)
+	DialogueStack.finished.connect(_on_finished)
+	DialogueStack.on_line.connect(_on_text)
 	_startup.call_deferred()
 
 func _state_changed(property: String):
@@ -38,7 +35,7 @@ func _input(event: InputEvent) -> void:
 			pass
 		else:
 			_caption_msg("hide")
-			stack._break = false
+			DialogueStack._break = false
 
 func goto(id: String = ""):
 	Fader.create(_goto.bind(id))
@@ -66,30 +63,30 @@ func find_scene(id: String) -> PackedScene:
 	return null
 
 func _startup():
-	if not stack._started:
-		stack.start(start)
+	if not DialogueStack.is_active():
+		DialogueStack.start(start)
 
 func _process(delta: float) -> void:
 	if _wait_time > 0.0:
 		_wait_time -= delta
 		if _wait_time <= 0.0:
 			_wait_time = 0.0
-			stack._break = false
+			DialogueStack._break = false
 	
-	stack.tick()
+	DialogueStack.tick()
 
 func _on_started():
 	print("STARTED")
 
 func _on_finished():
-	print("FINISHED ", stack._history)
+	print("FINISHED ", DialogueStack._history)
 	print("=== STATE ===")
 	UDict.log(State._get_state())
 	print("=== CHANGED STATE ===")
 	UDict.log(State._get_changed_states())
 	speaker_cache.clear()
-	if len(stack._history) and stack._history[-1] != "MAIN.END":
-		stack.goto("MAIN.END")
+	if len(DialogueStack.history) and DialogueStack.history[-1] != "MAIN.END":
+		DialogueStack.goto("MAIN.END")
 
 func _on_text(line: DialogueLine):
 	var from = line.from
@@ -110,14 +107,8 @@ func _on_text(line: DialogueLine):
 			else:
 				from = str(val)
 	
-	stack._break = true
+	DialogueStack._break = true
 	_caption_msg("show_line", {from=from, line=line})
 
 func _caption_msg(msg_type: String, msg: Variant = null):
 	Global.call_group_flags(SceneTree.GROUP_CALL_REALTIME, "caption", "_caption", [State.caption_at, msg_type, msg])
-
-func print_pausers():
-	if len(_pausers):
-		print("WAITING FOR:")
-		for item in _pausers:
-			print("\t", item)
