@@ -33,9 +33,19 @@ func _text_submitted(t: String):
 	history_index = len(history)
 	add_line(LineType.INPUT, t)
 	_set_input("")
+	
 	if t[0] in "~@$":
 		var got = State.do(t)
 		add_line(LineType.RESULT, str(got))
+	else:
+		var parts := UString.split_on_spaces(t)
+		match parts[0]:
+			"list": _list(State._get_all_of_class(parts[1]))
+
+func _list(item):
+	if item is Dictionary:
+		for k in item:
+			add_line(LineType.RESULT, "%s: %s" % [k, item[k]])
 
 func add_line(type: LineType, text: String):
 	var s = get_stack()[-1]
@@ -56,7 +66,7 @@ func redraw():
 			LineType.ERROR: output.push_color(Color.RED)
 			LineType.WARNING: output.push_color(Color.YELLOW)
 #			LineType.WARNING: output.push_color(Color.AQUAMARINE)
-			LineType.RESULT: output.push_color(Color.AQUAMARINE)
+			LineType.RESULT: output.push_color(Color.CORNFLOWER_BLUE)
 		output.append_text(line[1])
 		match line[0]:
 			LineType.ERROR: output.pop()

@@ -10,6 +10,11 @@ config_version=5
 
 _global_script_classes=[{
 "base": "Node",
+"class": &"Achieve",
+"language": &"GDScript",
+"path": "res://states/achieve.gd"
+}, {
+"base": "Node",
 "class": &"BaseState",
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/autoloads/base_state.gd"
@@ -175,6 +180,7 @@ _global_script_classes=[{
 "path": "res://addons/util/UTween2D.gd"
 }]
 _global_script_class_icons={
+"Achieve": "",
 "BaseState": "",
 "Config": "",
 "Dialogue": "",

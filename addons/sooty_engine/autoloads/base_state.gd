@@ -23,10 +23,13 @@ func _install_mods(dirs: Array):
 	for dir in dirs:
 		var head = dir.plus_file(subdir)
 		for script_path in UFile.get_files(head, ".gd"):
-			Mods._print_file(script_path)
 			var mod: Node = load(script_path).new()
-			mod.set_name(script_path.get_file().split(".", true, 1)[0])
-			add_child(mod)
+			if mod is Node:
+				Mods._print_file(script_path)
+				mod.set_name(script_path.get_file().split(".", true, 1)[0])
+				add_child(mod)
+			else:
+				push_error("States must be node. Can't load %s." % script_path)
 
 func reset():
 	_load_state(_default)
@@ -138,10 +141,17 @@ func _get_objects_property(obj: Object) -> String:
 func _get_all_of_type(type: Variant) -> Dictionary:
 	var out := {}
 	for k in _default:
-		if _has(k):
-			var v = _get(k)
-			if v is type:
-				out[k] = v
+		var v = _get(k)
+		if v is type:
+			out[k] = v
+	return out
+
+func _get_all_of_class(classname: String) -> Dictionary:
+	var out := {}
+	for k in _default:
+		var v = _get(k)
+		if v is Object and v.get_class() == classname:
+			out[k] = v
 	return out
 
 func _has_of_type(id: String, type: Variant) -> bool:
