@@ -136,10 +136,13 @@ All state data (main and mods) is loaded at once. Internally, the main data is t
 ## Folders
 On `_init`, an autoload should call `Mods.install_mod(directory)`.
 Inside that directory can be directories for:
-- `dialogues/`: `*.soot`
-- `states/`: `*.gd`
-- `states_persistent/`: `*gd`
-- `scenes/`: `.tscn` `.scn`
+
+|Folder|File type(s)|Desc|
+|:-----|-----------:|:---|
+|`dialogues/`| `*.soot`|Dialogue files.|
+|`states/`| `*.gd`|Node scripts contain state data.|
+|`states_persistent/`| `*gd`|Node scripts containing persistent state data.|
+|`scenes/`| `.tscn` `.scn`|Scenes accessed by name.|
 
 
 # Localization
