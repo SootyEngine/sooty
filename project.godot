@@ -9,65 +9,35 @@
 config_version=5
 
 _global_script_classes=[{
-"base": "BaseDataClass",
-"class": &"Achievement",
-"language": &"GDScript",
-"path": "res://addons/sys_achievements/Achievement.gd"
-}, {
-"base": "Resource",
-"class": &"BaseDataClass",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/objects/BaseDataClass.gd"
-}, {
-"base": "BaseDataClass",
-"class": &"BaseDataClassExtra",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/objects/BaseDataClassExtra.gd"
-}, {
 "base": "Node",
 "class": &"BaseState",
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/autoloads/base_state.gd"
 }, {
-"base": "BaseDataClassExtra",
-"class": &"Character",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/objects/Character.gd"
-}, {
 "base": "ConfigFile",
 "class": &"Config",
 "language": &"GDScript",
-"path": "res://addons/Config.gd"
-}, {
-"base": "BaseDataClass",
-"class": &"DateTime",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/objects/DateTime.gd"
+"path": "res://addons/util/Config.gd"
 }, {
 "base": "Resource",
 "class": &"Dialogue",
 "language": &"GDScript",
-"path": "res://addons/sooty_engine/dialogue/Dialogue.gd"
+"path": "res://addons/sooty_engine/soot/Dialogue.gd"
 }, {
 "base": "Resource",
 "class": &"DialogueLine",
 "language": &"GDScript",
-"path": "res://addons/sooty_engine/dialogue/DialogueLine.gd"
+"path": "res://addons/sooty_engine/soot/DialogueLine.gd"
 }, {
 "base": "Resource",
 "class": &"DialogueParser",
 "language": &"GDScript",
-"path": "res://addons/sooty_engine/dialogue/DialogueParser.gd"
+"path": "res://addons/sooty_engine/soot/DialogueParser.gd"
 }, {
 "base": "RefCounted",
 "class": &"Emoji",
 "language": &"GDScript",
 "path": "res://addons/rich_text/Emoji.gd"
-}, {
-"base": "BaseDataClass",
-"class": &"EquipmentSlots",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/objects/EquipmentSlots.gd"
 }, {
 "base": "Node",
 "class": &"FE_BaseFile",
@@ -114,30 +84,10 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/file_editor/FE_Util.gd"
 }, {
-"base": "Node",
-"class": &"Fader",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/fader/fader.gd"
-}, {
 "base": "Resource",
 "class": &"FontHelper",
 "language": &"GDScript",
 "path": "res://addons/rich_text/FontHelper.gd"
-}, {
-"base": "BaseDataClass",
-"class": &"Inventory",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/objects/Inventory.gd"
-}, {
-"base": "BaseDataClassExtra",
-"class": &"Item",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/objects/Item.gd"
-}, {
-"base": "BaseDataClassExtra",
-"class": &"Location",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/objects/Location.gd"
 }, {
 "base": "Resource",
 "class": &"Markdown",
@@ -147,17 +97,7 @@ _global_script_classes=[{
 "base": "Resource",
 "class": &"PropList",
 "language": &"GDScript",
-"path": "res://addons/PropList.gd"
-}, {
-"base": "BaseDataClass",
-"class": &"Quest",
-"language": &"GDScript",
-"path": "res://addons/sys_quests/Quest.gd"
-}, {
-"base": "BaseDataClass",
-"class": &"Reward",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/objects/Reward.gd"
+"path": "res://addons/util/PropList.gd"
 }, {
 "base": "RichTextLabel2",
 "class": &"RichTextAnimation",
@@ -168,16 +108,6 @@ _global_script_classes=[{
 "class": &"RichTextLabel2",
 "language": &"GDScript",
 "path": "res://addons/rich_text/RichTextLabel2.gd"
-}, {
-"base": "Sprite2D",
-"class": &"Sprite2DAnimations",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/nodes/Sprite2DAnimations.gd"
-}, {
-"base": "Resource",
-"class": &"SpriteTransitions",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/shaders/SpriteTransition.gd"
 }, {
 "base": "Resource",
 "class": &"UDebug",
@@ -243,35 +173,14 @@ _global_script_classes=[{
 "class": &"UTween2D",
 "language": &"GDScript",
 "path": "res://addons/util/UTween2D.gd"
-}, {
-"base": "BaseDataClass",
-"class": &"VBool",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/objects/VBool.gd"
-}, {
-"base": "BaseDataClass",
-"class": &"VEnum",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/objects/VEnum.gd"
-}, {
-"base": "BaseDataClass",
-"class": &"VStat",
-"language": &"GDScript",
-"path": "res://addons/simple_vn/objects/VStat.gd"
 }]
 _global_script_class_icons={
-"Achievement": "",
-"BaseDataClass": "",
-"BaseDataClassExtra": "",
 "BaseState": "",
-"Character": "",
 "Config": "",
-"DateTime": "",
 "Dialogue": "",
 "DialogueLine": "",
 "DialogueParser": "",
 "Emoji": "",
-"EquipmentSlots": "",
 "FE_BaseFile": "",
 "FE_Directory": "",
 "FE_Editor": "",
@@ -281,19 +190,11 @@ _global_script_class_icons={
 "FE_Main": "",
 "FE_OptionsMenu": "",
 "FE_Util": "",
-"Fader": "",
 "FontHelper": "",
-"Inventory": "",
-"Item": "",
-"Location": "",
 "Markdown": "",
 "PropList": "",
-"Quest": "",
-"Reward": "",
 "RichTextAnimation": "",
 "RichTextLabel2": "",
-"Sprite2DAnimations": "",
-"SpriteTransitions": "",
 "UDebug": "",
 "UDict": "",
 "UError": "",
@@ -306,16 +207,13 @@ _global_script_class_icons={
 "UString": "",
 "UTime": "",
 "UTween": "",
-"UTween2D": "",
-"VBool": "",
-"VEnum": "",
-"VStat": ""
+"UTween2D": ""
 }
 
 [application]
 
 config/name="sooty_engine"
-run/main_scene="res://scenes/main_menu.tscn"
+run/main_scene="res://main.tscn"
 config/icon="res://icon.png"
 config/features=PackedStringArray("4.0", "Vulkan Clustered")
 
@@ -323,14 +221,13 @@ config/features=PackedStringArray("4.0", "Vulkan Clustered")
 
 Sooty="*res://addons/sooty_engine/autoloads/Sooty.gd"
 Saver="*res://addons/sys_state/autoloads/Saver.gd"
-Mods="*res://addons/sys_state/autoloads/Mods.gd"
-State="*res://addons/sys_state/autoloads/State.gd"
-Persistent="*res://addons/sys_state/autoloads/Persistent.gd"
+Mods="*res://addons/sooty_engine/autoloads/Mods.gd"
+State="*res://addons/sooty_engine/autoloads/State.gd"
+Persistent="*res://addons/sooty_engine/autoloads/Persistent.gd"
 Notify="*res://addons/sys_notifications/autoloads/Notify.gd"
 Global="*res://addons/sooty_engine/autoloads/Global.gd"
 Dialogues="*res://addons/sooty_engine/autoloads/Dialogues.gd"
 DialogueStack="*res://addons/sooty_engine/autoloads/DialogueStack.gd"
-SimpleVN="*res://addons/simple_vn/autoloads/simple_vn.tscn"
 
 [debug]
 
@@ -338,7 +235,7 @@ gdscript/warnings/integer_division=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/common_file_highlighters/plugin.cfg", "res://addons/simple_vn/plugin.cfg", "res://addons/sooty_engine/plugin.cfg", "res://addons/sys_notifications/plugin.cfg", "res://addons/sys_state/plugin.cfg", "res://addons/tool_button/plugin.cfg")
+enabled=PackedStringArray("res://addons/common_file_highlighters/plugin.cfg", "res://addons/sooty_engine/plugin.cfg", "res://addons/tool_button/plugin.cfg")
 
 [input]
 

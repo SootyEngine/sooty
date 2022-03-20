@@ -1,0 +1,105 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://addons/sooty_engine/ui/ui_console.gd" id="1_uuj7a"]
+[ext_resource type="Shader" path="res://addons/sooty_engine/ui/screen_blur.gdshader" id="2_d20gb"]
+[ext_resource type="FontData" path="res://fonts/robotomono/robotomono-r.ttf" id="2_yhjr7"]
+[ext_resource type="FontData" path="res://fonts/unifont/unifont-13.0.01.ttf" id="3_wrwqb"]
+[ext_resource type="FontData" path="res://fonts/unifont/unifont_upper-13.0.01.ttf" id="4_8erui"]
+[ext_resource type="FontData" path="res://fonts/robotomono/robotomono-bi.ttf" id="5_aex24"]
+[ext_resource type="FontData" path="res://fonts/robotomono/robotomono-i.ttf" id="6_ry1w2"]
+[ext_resource type="FontData" path="res://fonts/robotomono/robotomono-b.ttf" id="7_3ejrb"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="8_7k2fj"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rhy81"]
+shader = ExtResource( "2_d20gb" )
+shader_param/blur = null
+
+[sub_resource type="Font" id="Font_mdd4c"]
+data/0 = ExtResource( "2_yhjr7" )
+data/1 = ExtResource( "3_wrwqb" )
+data/2 = ExtResource( "4_8erui" )
+
+[sub_resource type="Font" id="Font_tvn3y"]
+data/0 = ExtResource( "5_aex24" )
+data/1 = ExtResource( "3_wrwqb" )
+data/2 = ExtResource( "4_8erui" )
+
+[sub_resource type="Font" id="Font_86gj5"]
+data/0 = ExtResource( "6_ry1w2" )
+data/1 = ExtResource( "3_wrwqb" )
+data/2 = ExtResource( "4_8erui" )
+
+[sub_resource type="Font" id="Font_pccd4"]
+data/0 = ExtResource( "7_3ejrb" )
+data/1 = ExtResource( "3_wrwqb" )
+data/2 = ExtResource( "4_8erui" )
+
+[node name="console" type="CanvasLayer"]
+script = ExtResource( "1_uuj7a" )
+
+[node name="backing" type="ColorRect" parent="."]
+material = SubResource( "ShaderMaterial_rhy81" )
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.25)
+
+[node name="c" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="c" type="HBoxContainer" parent="c"]
+offset_right = 1024.0
+offset_bottom = 565.0
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="output" type="RichTextLabel" parent="c/c"]
+offset_right = 876.0
+offset_bottom = 565.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_fonts/mono_font = SubResource( "Font_mdd4c" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_tvn3y" )
+theme_override_fonts/italics_font = SubResource( "Font_86gj5" )
+theme_override_fonts/bold_font = SubResource( "Font_pccd4" )
+theme_override_fonts/normal_font = SubResource( "Font_mdd4c" )
+script = ExtResource( "8_7k2fj" )
+font = "robotomono"
+
+[node name="c" type="VBoxContainer" parent="c/c"]
+offset_left = 880.0
+offset_right = 1024.0
+offset_bottom = 565.0
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="CheckBox" type="CheckBox" parent="c/c/c"]
+offset_right = 144.0
+offset_bottom = 31.0
+mouse_filter = 2
+text = "show errors"
+
+[node name="CheckBox2" type="CheckBox" parent="c/c/c"]
+offset_top = 35.0
+offset_right = 144.0
+offset_bottom = 66.0
+mouse_filter = 2
+text = "show warnings"
+
+[node name="CheckBox3" type="CheckBox" parent="c/c/c"]
+offset_top = 70.0
+offset_right = 144.0
+offset_bottom = 101.0
+mouse_filter = 2
+text = "show log"
+
+[node name="input" type="LineEdit" parent="c"]
+offset_top = 569.0
+offset_right = 1024.0
+offset_bottom = 600.0
+mouse_filter = 2
+placeholder_text = "Input"
+clear_button_enabled = true
