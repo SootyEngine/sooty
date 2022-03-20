@@ -128,7 +128,7 @@ func _trigger(type: int, data: Variant):
 		TRIG_QUOTE_ENDED: quote_ended.emit()
 		TRIG_SKIP_STARTED: _skip = true
 		TRIG_SKIP_ENDED: _skip = false
-		_: print("UNKOWN TRIGGER")
+		_: push_warning("UNKOWN TRIGGER")
 
 func _register_trigger(type: int, data = null) -> bool:
 	var at := get_total_character_count()-1

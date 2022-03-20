@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3 uid="uid://bod1aikhempy2"]
+
+[ext_resource type="PackedScene" path="res://simple_vn_assets/bgs/class_room.tscn" id="1_di2mh"]
+[ext_resource type="PackedScene" uid="uid://c40r02kdpkn42" path="res://simple_vn_assets/chars/school_boy.tscn" id="2_sg1bl"]
+[ext_resource type="Script" path="res://addons/simple_vn/camera.gd" id="3_8avwo"]
+
+[node name="first_class" type="ParallaxBackground"]
+
+[node name="class_room" parent="." instance=ExtResource( "1_di2mh" )]
+position = Vector2(-593, -356)
+motion_scale = Vector2(-0.5, -0.5)
+
+[node name="school_boy" parent="." groups=["john", "school_boy"] instance=ExtResource( "2_sg1bl" )]
+position = Vector2(317, 315)
+motion_scale = Vector2(1.5, 1.5)
+
+[node name="school_boy2" parent="." groups=["paul", "school_boy"] instance=ExtResource( "2_sg1bl" )]
+position = Vector2(-343, 317)
+motion_scale = Vector2(1.5, 1.5)
+
+[node name="school_boy3" parent="." groups=["chris", "school_boy"] instance=ExtResource( "2_sg1bl" )]
+position = Vector2(-10, 312)
+motion_scale = Vector2(2, 2)
+
+[node name="camera" type="Camera2D" parent="." groups=["camera"]]
+modulate = Color(0, 0, 0, 0.0862745)
+rotating = true
+current = true
+script = ExtResource( "3_8avwo" )

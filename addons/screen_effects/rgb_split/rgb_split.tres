@@ -1,8 +1,0 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3]
-
-[ext_resource type="Shader" path="res://addons/screen_effects/rgb_split/rgb_split.gdshader" id="1_q6wbl"]
-
-[resource]
-shader = ExtResource( "1_q6wbl" )
-shader_param/dist = 2.0
-shader_param/blur = 0.5

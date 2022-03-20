@@ -4,8 +4,29 @@ const CHECK_FILES_EVERY := 1
 
 signal reloaded(dialogue: Dialogue)
 
-var load_all_on_startup := true
 var cache := {}
+
+func _init() -> void:
+	Mods.install.connect(_install_mods)
+
+func _install_mods(dirs: Array):
+	var memory_before = OS.get_static_memory_usage()
+	print("[Dialogues]")
+	for dir in dirs:
+		var head = dir.plus_file("dialogue")
+		for soot_path in UFile.get_files(head, ".soot"):
+			Mods._print_file(soot_path)
+			var d := Dialogue.new(soot_path)
+			cache[d.id] = d
+	var memory_used = OS.get_static_memory_usage() - memory_before
+	prints("  Dialogues:", String.humanize_size(memory_used))
+
+func _ready() -> void:
+	# timer chat checks if any files were modified.
+	var timer := Timer.new()
+	add_child(timer)
+	timer.timeout.connect(_timer)
+	timer.start(CHECK_FILES_EVERY)
 
 func has(id: String) -> bool:
 	return id in cache
@@ -16,28 +37,6 @@ func get_dialogue_ids() -> Dictionary:
 		out[id] = cache[id].flows.keys()
 	return out
 
-func _ready() -> void:
-	if load_all_on_startup:
-		if not UFile.dir_exists("res://dialogue"):
-			push_error("No res://dialogue folder!")
-			return
-		var memory_before = OS.get_static_memory_usage()
-		print("[Dialogues]")
-		for file in UFile.get_files("res://dialogue", ".soot"):
-			print("\t- ", file.trim_prefix("res://dialogue/"))
-			add_dialogue(Dialogue.new(file))
-		var memory_used = OS.get_static_memory_usage() - memory_before
-		prints("Dialogues:", String.humanize_size(memory_used))
-	
-	# timer chat checks if any files were modified.
-	var timer := Timer.new()
-	add_child(timer)
-	timer.timeout.connect(_timer)
-	timer.start(CHECK_FILES_EVERY)
-
-func add_dialogue(d: Dialogue):
-	cache[d.id] = d
-
 func _timer():
 	return
 	for d in cache.values():
@@ -46,18 +45,19 @@ func _timer():
 			d._reload()
 			reloaded.emit(d)
 
-const DIR_RES := "res://dialogue"
+#const DIR_RES := "res://dialogue"
 func get_dialogue(id: String) -> Dialogue:
-	if not id in cache:
-		var d := Dialogue.new(DIR_RES.plus_file("%s.soot"))
-		if d.has_errors():
-			push_error("Bad dialogue: %s." % id)
-			return null
-		else:
-			add_dialogue(d)
-			return d
-	else:
-		return cache[id]
+	return cache.get(id, null)
+#	if not id in cache:
+#		var d := Dialogue.new(DIR_RES.plus_file("%s.soot"))
+#		if d.has_errors():
+#			push_error("Bad dialogue: %s." % id)
+#			return null
+#		else:
+#			add_dialogue(d)
+#			return d
+#	else:
+#		return cache[id]
 
 #func get_flow_lines(flow: String) -> Array[String]:
 #	var p := flow.split(".", true, 1)

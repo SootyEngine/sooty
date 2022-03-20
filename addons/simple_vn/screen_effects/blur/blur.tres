@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://addons/simple_vn/screen_effects/blur/blur.gdshader" id="1_u4a63"]
+
+[resource]
+shader = ExtResource( "1_u4a63" )
+shader_param/amount = null
+shader_param/power = null

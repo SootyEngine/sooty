@@ -131,9 +131,16 @@ This allows us to do `stat += 1` instead of `stat.value += 1`
 
 # Modding
 **TODO**
-At bootup, show list of discovered mods, with toggles. Save state to config.
-After clicking accept, selected mods are loaded.
-May need to reboot to uninstall mods.
+All state data (main and mods) is loaded at once. Internally, the main data is treated like a mod.
+
+## Folders
+On `_init`, an autoload should call `Mods.install_mod(directory)`.
+Inside that directory can be directories for:
+- `dialogues/`: `*.soot`
+- `states/`: `*.gd`
+- `states_persistent/`: `*gd`
+- `scenes/`: `.tscn` `.scn`
+
 
 # Localization
 **TODO**

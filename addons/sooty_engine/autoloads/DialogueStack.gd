@@ -71,11 +71,10 @@ func tick():
 	while has_steps() and not _break:
 		safety -= 1
 		if safety <= 0:
-			print("Tripped safety!", safety)
+			push_error("Tripped safety! Increase MAX_STEPS_PER_TICK if necessary.", safety)
 			break
 		
 		var line := pop_next_line()
-#		print(line)
 		
 		if not len(line):
 			break
@@ -85,7 +84,7 @@ func tick():
 			"goto": goto(line.line.goto, true)
 			"call": goto(line.line.call, false)
 			"text": on_line.emit(DialogueLine.new(line.did, line.line))
-			_: print("Huh? ", line.line.keys(), line.line)
+			_: push_warning("Huh? %s %s" % [line.line.keys(), line.line])
 	
 	tick_finished.emit()
 
@@ -138,7 +137,6 @@ func goto(did_flow: String, step_type: int) -> bool:
 func select_option(option: DialogueLine):
 	var o := option._data
 	if "then" in o:
-		print("SELECT ", o)
 		_push(option._dialogue_id, "%OPTION%", o.then, STEP_CALL)
 	unhalt()
 
@@ -181,7 +179,6 @@ func pop_next_line() -> Dictionary:
 			for i in len(line.cases):
 				var case = line.cases[i]
 				var got = State._eval(case)
-#				print("\tCASE %s: '%s' -> %s == %s (%s)" % [i, line.cases[i], got, match_result, match_result == got])
 				if match_result == got or case == "_":
 					_push(did, flow, line.case_lines[i], STEP_CALL)
 					break

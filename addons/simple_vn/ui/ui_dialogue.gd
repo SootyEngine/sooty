@@ -36,8 +36,8 @@ func _ready() -> void:
 	options.visible = false
 	
 	text.nicer_quotes_format = "[w=.5;q;tomato][dim]“[]%s[dim]”[][][w=.5]"
-	text.quote_started.connect(_quote_started)
-	text.quote_ended.connect(_quote_ended)
+#	text.quote_started.connect(_quote_started)
+#	text.quote_ended.connect(_quote_ended)
 	text.faded_in.connect(_done_fading_in)
 	resized.connect(_resized)
 	_resized()
@@ -46,12 +46,6 @@ func _resized():
 	var ts = $backing.get_texture().get_size()
 	$backing.global_position = get_global_rect().position
 	$backing.scale = get_rect().size / ts
-
-func _quote_started():
-	print("QUOTE STARTED")
-
-func _quote_ended():
-	print("QUOTE ENDED")
 
 func _input(_event: InputEvent) -> void:
 	if visible and Input.is_action_just_pressed("advance"):

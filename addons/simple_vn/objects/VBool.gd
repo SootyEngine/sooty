@@ -16,7 +16,6 @@ class_name VBool
 				_eval(on_false)
 			if len(on_changed):
 				_eval(on_changed)
-			print("Toggled")
 
 func _operator_get():
 	return value

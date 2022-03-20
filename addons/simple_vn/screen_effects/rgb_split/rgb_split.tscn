@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Material" path="res://addons/simple_vn/screen_effects/rgb_split/rgb_split.tres" id="1_idwo3"]
+
+[node name="rgb_split" type="CanvasLayer"]
+
+[node name="rgb_split" type="ColorRect" parent="."]
+material = ExtResource( "1_idwo3" )
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -529.0
+offset_top = -296.0
+offset_right = -529.0
+offset_bottom = -296.0

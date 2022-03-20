@@ -1,6 +1,7 @@
-[gd_scene load_steps=13 format=3 uid="uid://cmtk877fqtogm"]
+[gd_scene load_steps=14 format=3 uid="uid://cmtk877fqtogm"]
 
 [ext_resource type="PackedScene" uid="uid://co3mleycewnda" path="res://addons/simple_vn/ui/ui_caption.tscn" id="1_5fvuj"]
+[ext_resource type="Script" path="res://addons/simple_vn/autoloads/SimpleVN.gd" id="1_41ilk"]
 [ext_resource type="Script" path="res://addons/simple_vn/ui/EdgeClampContainer.gd" id="2_mqxw1"]
 [ext_resource type="PackedScene" uid="uid://m84326jpcicc" path="res://addons/simple_vn/ui/ui_option_menu.tscn" id="3_so0hf"]
 [ext_resource type="PackedScene" uid="uid://dl2mg14o34fng" path="res://addons/sys_notifications/ui/ui_notifications.tscn" id="4_sf4ru"]
@@ -17,6 +18,7 @@ shader = ExtResource( "6_6ry1d" )
 shader_param/blur = null
 
 [node name="simple_vn" type="Node"]
+script = ExtResource( "1_41ilk" )
 
 [node name="captions" type="CanvasLayer" parent="."]
 

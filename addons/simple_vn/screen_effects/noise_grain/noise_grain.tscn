@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Material" path="res://addons/simple_vn/screen_effects/noise_grain/noise.tres" id="1_xg8kw"]
+
+[node name="noise" type="CanvasLayer"]
+
+[node name="noise" type="ColorRect" parent="."]
+material = ExtResource( "1_xg8kw" )
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -518.0
+offset_top = -393.0
+offset_right = -518.0
+offset_bottom = -393.0

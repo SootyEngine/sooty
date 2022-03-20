@@ -156,18 +156,7 @@ func _parse(btext: String):
 		btext = "" if len(p) == 1 else p[1]
 		
 		# go through all tags
-		var tag := p[0]
-#		print("TAG: ", tag)
-		# close last
-#		if tag == "":
-#			# if tags weren't closed, redraw the ending.
-#			if len(_stack) and not len(_stack[-1]):
-#				_add_text("[]")
-#
-#			_stack_pop()
-#
-#		else:
-		_parse_opening(tag)
+		_parse_opening(p[0])
 	
 	if btext:
 		_add_text(btext)
@@ -345,7 +334,6 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		_:
 			if not _has_effect(tag):
 				pass
-#				print("no effect ", tag)
 			
 			# custom effect
 			if _has_effect(tag):
@@ -487,7 +475,7 @@ func _replace_outside(s: String, head: String, tail: String, fr: Callable) -> St
 	while true:
 #		safety -= 1
 #		if safety <= 0:
-#			print("tripped safey")
+#			push_error("tripped safey")
 #			break
 		if head in s:
 			var p1 := s.split(head, true, 1)

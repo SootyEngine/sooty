@@ -39,17 +39,17 @@ size_flags_vertical = 3
 [node name="labels" type="VBoxContainer" parent="CenterContainer"]
 rect_min_size = Vector2(460, 0)
 offset_left = 2.0
-offset_top = 8.0
+offset_top = 5.0
 offset_right = 462.0
-offset_bottom = 124.0
+offset_bottom = 128.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 alignment = 1
 
 [node name="center" type="Control" parent="CenterContainer/labels"]
-rect_min_size = Vector2(0, 14)
+rect_min_size = Vector2(0, 21)
 offset_right = 460.0
-offset_bottom = 19.0
+offset_bottom = 26.0
 script = ExtResource( "2_mhkgc" )
 
 [node name="from" type="RichTextLabel" parent="CenterContainer/labels"]
@@ -62,16 +62,15 @@ theme_override_fonts/bold_italics_font = ExtResource( "3_ccacc" )
 theme_override_fonts/italics_font = ExtResource( "3_lrkqk" )
 theme_override_fonts/bold_font = ExtResource( "4_e85rd" )
 theme_override_fonts/normal_font = ExtResource( "5_c8524" )
-theme_override_font_sizes/mono_font_size = 24
-theme_override_font_sizes/bold_italics_font_size = 24
-theme_override_font_sizes/italics_font_size = 24
-theme_override_font_sizes/bold_font_size = 24
-theme_override_font_sizes/normal_font_size = 24
+theme_override_font_sizes/mono_font_size = 16
+theme_override_font_sizes/bold_italics_font_size = 16
+theme_override_font_sizes/italics_font_size = 16
+theme_override_font_sizes/bold_font_size = 16
+theme_override_font_sizes/normal_font_size = 16
 fit_content_height = true
 script = ExtResource( "2_w06q7" )
 bbcode = "[dim;dim]\\[[]From[dim;dim]\\][]"
 font = "robotomono"
-size = 24
 outline_colored = 8
 
 [node name="text" type="RichTextLabel" parent="CenterContainer/labels"]
@@ -95,7 +94,7 @@ script = ExtResource( "3_es7ai" )
 bbcode = "[dim;dim]\"[]Text[dim;dim]\"[]"
 size = 24
 outline_colored = 8
-effect_time = 17.2813
+effect_time = 4.79434
 _triggers = {}
 _alpha_real = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 _alpha_goal = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]

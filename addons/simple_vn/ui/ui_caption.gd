@@ -61,7 +61,6 @@ func _caption(id: String, msg_type: String, payload: Variant):
 						rtl_text.advance()
 						_delay_action()
 					elif _waiting_for_option:
-						print("Waiting for options")
 						payload.append(self)
 					else:
 						_hide_eventually()

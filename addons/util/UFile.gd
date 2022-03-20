@@ -137,7 +137,6 @@ static func load_image(path: String, default = null) -> ImageTexture:
 		image.load(path)
 		var texture := ImageTexture.new()
 		texture.create_from_image(image)
-		print(texture)
 		return texture
 	push_error("No image at %s" % path)
 	return default
@@ -238,6 +237,32 @@ static func _scan_dir(dir:Directory, call: Callable, nested:bool):
 		fname = dir.get_next()
 	dir.list_dir_end()
 
+static func get_dirs(paths, nested: bool = false, hidden: bool = false) -> PackedStringArray:
+	var out := []
+	var dir := Directory.new()
+	dir.include_hidden = hidden
+	
+	for path in UList.list(paths):
+		if dir.dir_exists(path) and not UError.error(dir.open(path), "Can't open '%s'." % path):
+			_get_dirs(dir, out, nested)
+	
+	return PackedStringArray(out)
+
+static func _get_dirs(dir: Directory, out: Array, nested: bool):
+	dir.list_dir_begin()
+	var fname = dir.get_next()
+	while fname != "":
+		if dir.current_is_dir():
+			var path = dir.get_current_dir().plus_file(fname)
+			out.append(path)
+			# ignore folders with a .gdignore file.
+			if nested and not file_exists(path.plus_file(".gdignore")):
+				var sub_dir = Directory.new()
+				sub_dir.open(path)
+				_get_dirs(sub_dir, out, true)
+		fname = dir.get_next()
+	dir.list_dir_end()
+
 static func get_files(paths, extensions=null, nested: bool = true, hidden: bool = false) -> PackedStringArray:
 	var out := []
 	var dir := Directory.new()
@@ -251,17 +276,17 @@ static func get_files(paths, extensions=null, nested: bool = true, hidden: bool 
 	
 	return PackedStringArray(out)
 
-static func _get_files(dir: Directory, files: Array, extensions: PackedStringArray, nested: bool):
+static func _get_files(dir: Directory, out: Array, extensions: PackedStringArray, nested: bool):
 	dir.list_dir_begin()
 	var fname = dir.get_next()
 	while fname != "":
 		var path = dir.get_current_dir().plus_file(fname)
 		if dir.current_is_dir():
 			# ignore .import and folders with a .gdignore file.
-			if nested and not fname == ".import" and not File.new().file_exists(path.plus_file(".gdignore")):
+			if nested and not fname == ".import" and not file_exists(path.plus_file(".gdignore")):
 				var sub_dir = Directory.new()
 				sub_dir.open(path)
-				_get_files(sub_dir, files, extensions, true)
+				_get_files(sub_dir, out, extensions, true)
 		
 		elif not len(extensions) or _ends_with(fname, extensions):
 			# html5 export hack
@@ -271,7 +296,7 @@ static func _get_files(dir: Directory, files: Array, extensions: PackedStringArr
 			elif path.ends_with(".remap"):
 				path = path.substr(0, len(path)-6)
 			
-			files.append(path)
+			out.append(path)
 		
 		elif len(extensions) and ".gd" in extensions:
 			if not OS.is_debug_build():

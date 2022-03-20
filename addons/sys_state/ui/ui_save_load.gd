@@ -29,10 +29,10 @@ func _select_slot(index: int):
 			# Are you sure you want to save over?
 			pass
 		else:
-			print("Saving isn't implemented yet.")
+			push_error("Saving isn't implemented yet.")
 	# load?
 	else:
-		print("Loading isn't implemented yet.")
+		push_error("Loading isn't implemented yet.")
 
 func _update_page():
 	for i in slots_per_page:

@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3 uid="uid://dg1jj3ttkog8k"]
+
+[ext_resource type="Script" path="res://addons/simple_vn/action_button.gd" id="1_bxev1"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="2_tjk0l"]
+
+[node name="main_menu" type="Node2D"]
+
+[node name="Button" type="Button" parent="."]
+offset_left = 409.0
+offset_top = 297.0
+offset_right = 629.0
+offset_bottom = 393.0
+text = "Start"
+script = ExtResource( "1_bxev1" )
+command = "$start"
+
+[node name="Label" type="RichTextLabel" parent="."]
+offset_left = 59.0
+offset_top = 120.0
+offset_right = 967.0
+offset_bottom = 250.0
+theme_override_font_sizes/mono_font_size = 64
+theme_override_font_sizes/bold_italics_font_size = 64
+theme_override_font_sizes/italics_font_size = 64
+theme_override_font_sizes/bold_font_size = 64
+theme_override_font_sizes/normal_font_size = 64
+script = ExtResource( "2_tjk0l" )
+bbcode = "Main Menu"
+size = 64

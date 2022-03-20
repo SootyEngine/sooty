@@ -15,7 +15,6 @@ func _input(e: InputEvent) -> void:
 		if len(_slot_info):
 			match e.button_index:
 				MOUSE_BUTTON_LEFT:
-					print("Select")
 					owner._select_slot(get_index())
 
 func set_info(info: Dictionary):

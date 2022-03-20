@@ -1,7 +1,0 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3]
-
-[ext_resource type="Shader" path="res://addons/screen_effects/noise_grain/noise.gdshader" id="1_itwes"]
-
-[resource]
-shader = ExtResource( "1_itwes" )
-shader_param/noise = 512.0

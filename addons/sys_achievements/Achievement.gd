@@ -14,7 +14,6 @@ var unlocked: bool = false:
 	get: return tick == toll
 	set(x):
 		if unlocked != x:
-			print("Set unlocked")
 			self.tick = toll if x else 0
 
 var progress: float = 0.0:

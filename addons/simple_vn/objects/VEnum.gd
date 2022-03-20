@@ -13,7 +13,6 @@ class_name VEnum
 				_eval(on_state[value])
 			if len(on_changed):
 				_eval(on_changed)
-			print("Changed State")
 
 func _operator_get():
 	return value

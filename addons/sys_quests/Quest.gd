@@ -103,11 +103,10 @@ func start(force := false):
 	if force or has_requirements():
 		state = QUEST_STARTED
 	else:
-		print("%s doesn't meet it's requirements." % self)
+		push_error("%s doesn't meet it's requirements." % self)
 
 func complete():
 	if state != QUEST_COMPLETED:
-		print("Completed quest: %s" % self)
 		state = QUEST_COMPLETED
 
 static func exists(id: String) -> bool:

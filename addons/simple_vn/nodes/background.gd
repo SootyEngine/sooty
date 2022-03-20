@@ -11,6 +11,5 @@ func bg(a, args: Array = [], kwargs: Dictionary = {"ok": true}):
 	for e in UFile.EXT_IMAGE:
 		var p = path + "." + e
 		if UFile.file_exists(p):
-			print("found ", p)
 			set_texture(UFile.load_image(p))
 			return

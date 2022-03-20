@@ -15,7 +15,6 @@ func _toggled(t):
 	_update()
 
 func _changed(property, from, to):
-#	print("Changed %s to %s from %s." % [property, to, from])
 	_update()
 
 func _filter_changed(t: String):

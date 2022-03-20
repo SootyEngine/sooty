@@ -8,24 +8,28 @@ signal loaded()
 var _default := {}
 var _children := []
 
+func _get_subdir() -> String:
+	assert(false)
+	return ""
+
 func _ready() -> void:
 	child_entered_tree.connect(_child_added)
 	_post_init.call_deferred()
+	Mods.install.connect(_install_mods)
+
+func _install_mods(dirs: Array):
+	var subdir := _get_subdir()
+	print("[%s]" % subdir.get_file().capitalize())
+	for dir in dirs:
+		var head = dir.plus_file(subdir)
+		for script_path in UFile.get_files(head, ".gd"):
+			Mods._print_file(script_path)
+			var mod: Node = load(script_path).new()
+			mod.set_name(script_path.get_file().split(".", true, 1)[0])
+			add_child(mod)
 
 func reset():
 	_load_state(_default)
-
-func install_all(path: String):
-	print("[%s]" % path.get_file().capitalize())
-	for script_path in UFile.get_files(path, ".gd"):
-		var mod = install(script_path)
-		print("\t- ", script_path.trim_prefix(path + "/"))
-
-func install(path: String):
-	var mod: Node = load(path).new()
-	mod.set_name(path.get_file().split(".", true, 1)[0])
-	add_child(mod)
-	return mod
 
 func _post_init():
 	_default = _get_state()

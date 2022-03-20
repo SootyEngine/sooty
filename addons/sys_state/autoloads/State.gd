@@ -2,6 +2,9 @@ extends "res://addons/sooty_engine/autoloads/base_state.gd"
 
 var _expr := Expression.new()
 
+func _get_subdir() -> String:
+	return "states"
+
 func do(command: String) -> Variant:
 	# state method
 	if command.begins_with(Sooty.S_ACTION_STATE):
@@ -143,10 +146,6 @@ func _set(property: StringName, value) -> bool:
 	if Persistent._has(property):
 		return Persistent._set(property, value)
 	return super._set(property, value)
-
-func _ready() -> void:
-	super._ready()
-	install_all("res://states")
 
 func get_save_state() -> Dictionary:
 	return _get_changed_states()
