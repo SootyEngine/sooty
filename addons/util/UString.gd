@@ -59,6 +59,41 @@ static func extract(s: String, head: String, tail: String, strip_edges: bool = t
 	else:
 		return [s, ""]
 
+static func split_between(s: String, head: String, tail = null) -> PackedStringArray:
+	var out := PackedStringArray()
+	tail = head if tail == null else tail
+	
+	# edge case hack
+	var x := s.find(head)
+	var y := s.find(tail)
+	if y != -1 and ((x != -1 and y < x) or x == -1):
+		s = head + s
+	
+	while true:
+		var a = s.find(head)
+		if a == -1: break
+		var b = s.find(tail, a+len(head))
+		var inner
+		var p = part(s, 0, a)
+		
+		if b == -1:
+			inner = part(s, a+len(head))
+			s = ""
+		
+		else:
+			inner = part(s, a+len(head), b)
+			s = part(s, b+len(tail))
+		
+		if p:
+			out.append(p)
+		
+		out.append(head + inner + tail)
+	
+	if s:
+		out.append(s)
+	
+	return out
+
 static func replace_between(s: String, head: String, tail: String, call: Callable) -> String:
 	var index := 0
 	while true:
