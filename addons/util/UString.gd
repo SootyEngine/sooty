@@ -29,10 +29,10 @@ static func is_at(s: String, tag: String, index: int) -> bool:
 	return true
 
 # Removes a string from between tags, and returns [cleaned string, inner string].
-static func extract(s: String, head: String, tail: String, strip_edges: bool = true) -> Array[String]:
+static func extract(s: String, head: String, tail: String, strip_edges: bool = true) -> Dictionary:
 	if head == "" or tail == "":
 		push_error("Must pass a head and tail.")
-		return []
+		return {outside=s, inside=""}
 	var a := s.find(head)
 	if a != -1:
 		var b := a + len(head)
@@ -51,13 +51,14 @@ static func extract(s: String, head: String, tail: String, strip_edges: bool = t
 		if found_at != -1:
 			var outer := part(s, 0, a).strip_edges(false, strip_edges) + part(s, found_at+len(head)).strip_edges(strip_edges, false)
 			var inner := part(s, a+len(head), found_at)
-			return [outer, inner]
+			return {outside=outer, inside=inner}
 		else:
 			var outer := part(s, 0, a).strip_edges(false, strip_edges)
 			var inner :=  part(s, a+len(head))
-			return [outer, inner]
+			return {outside=outer, inside=inner}
+	
 	else:
-		return [s, ""]
+		return {outside=s, inside=""}
 
 static func split_between(s: String, head: String, tail = null) -> PackedStringArray:
 	var out := PackedStringArray()

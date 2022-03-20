@@ -80,11 +80,23 @@ func tick():
 			break
 		
 		match line.line.type:
-			"action": State.do(line.line.action)
-			"goto": goto(line.line.goto, true)
-			"call": goto(line.line.call, false)
-			"text": on_line.emit(DialogueLine.new(line.did, line.line))
-			_: push_warning("Huh? %s %s" % [line.line.keys(), line.line])
+			"action":
+				State.do(line.line.action)
+				
+			"goto":
+				goto(line.line.goto, true)
+				
+			"call":
+				goto(line.line.call, false)
+				
+			"text":
+				if "action" in line.line:
+					State.do(line.line.action)
+				
+				on_line.emit(DialogueLine.new(line.did, line.line))
+			
+			_:
+				push_warning("Huh? %s %s" % [line.line.keys(), line.line])
 	
 	tick_finished.emit()
 
@@ -105,6 +117,17 @@ func start(id: String):
 		else:
 			var first = Dialogues.get_dialogue(id).flows.keys()[0]
 			goto("%s.%s" % [id, first], STEP_GOTO)
+
+func can_do(command: String) -> bool:
+	return command.begins_with(Sooty.S_FLOW_GOTO) or command.begins_with(Sooty.S_FLOW_CALL)
+
+func do(command: String):
+	if command.begins_with(Sooty.S_FLOW_GOTO):
+		goto(command.trim_prefix(Sooty.S_FLOW_GOTO).strip_edges(), STEP_GOTO)
+	elif command.begins_with(Sooty.S_FLOW_CALL):
+		goto(command.trim_prefix(Sooty.S_FLOW_CALL).strip_edges(), STEP_CALL)
+	else:
+		push_error("Don't know what to do with '%s'." % command)
 
 func goto(did_flow: String, step_type: int) -> bool:
 	var p := did_flow.split(".", true, 1)

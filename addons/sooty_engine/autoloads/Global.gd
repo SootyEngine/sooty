@@ -34,6 +34,9 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("reload_scene"):
 		get_tree().reload_current_scene()
 
+func notify(msg: Dictionary):
+	message.emit("notification", msg)
+
 #func change_scene(to: String):
 #	if not File.new().file_exists(to):
 #		push_error("No scene at %s." % to)

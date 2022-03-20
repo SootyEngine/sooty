@@ -381,7 +381,12 @@ static func _line_as_dialogue(line: Dictionary):
 		var p := text.split(":", true, 1)
 		line.from = text.substr(0, i).strip_edges().replace("\\:", ":")
 		line.text = text.substr(i+1, len(text)-i).strip_edges()
-	
+		
+		if "(" in line.from:
+			var a := UString.extract(line.from, "(", ")", true)
+			line.from = a.outside
+			line.action = "@%s %s" % [line.from, a.inside]
+		
 	line.text = line.text.replace("\\:", ":")
 	
 	var options := []
@@ -438,9 +443,9 @@ static func _extract_conditional(line: Dictionary) -> bool:
 
 static func _extract(line: Dictionary, head: String, tail: String, key: String) -> bool:
 	var p := UString.extract(line.text, head, tail)
-	line.text = p[0]
-	if p[1] != "":
-		line[key] = p[1]
+	line.text = p.outside
+	if p.inside != "":
+		line[key] = p.inside
 		return true
 	return false
 

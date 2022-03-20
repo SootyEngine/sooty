@@ -68,7 +68,6 @@ func set_fonts(node: Node, fname: String):
 		var rt: RichTextLabel = node as RichTextLabel
 		var f = _get_font_set(fname)
 		if f.r:
-			print(f)
 			rt.add_theme_font_override("normal_font", f.r)
 			rt.add_theme_font_override("bold_font", f.b if f.b else f.r)
 			rt.add_theme_font_override("italics_font", f.i if f.i else f.r)
