@@ -26,7 +26,7 @@ func _get(property: StringName):
 	
 	return super._get(property)
 
-func to_string() -> String:
+func as_string() -> String:
 	if format == "":
 		if Global.config.has_section_key("default_formats", "character_name"):
 			var fmt = Global.config.get_value("default_formats", "character_name", "{name}")

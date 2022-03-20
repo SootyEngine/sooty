@@ -1,7 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://c8dw7qvxvuwbu"]
+[gd_scene load_steps=7 format=3 uid="uid://c8dw7qvxvuwbu"]
 
 [ext_resource type="Script" path="res://addons/simple_vn/ui/ui_option_button.gd" id="1_ptcho"]
+[ext_resource type="Font" uid="uid://c37vrxkusosl7" path="res://fonts/robotomono/robotomono_bi.tres" id="2_82qb6"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="2_waskk"]
+[ext_resource type="Font" uid="uid://gaslg38f16nv" path="res://fonts/robotomono/robotomono_i.tres" id="3_eldg6"]
+[ext_resource type="Font" uid="uid://beb81bi6s03fl" path="res://fonts/robotomono/robotomono_b.tres" id="4_74d83"]
+[ext_resource type="Font" uid="uid://b4g61a4hgqqak" path="res://fonts/robotomono/robotomono_r.tres" id="5_gh021"]
 
 [node name="option" type="Button"]
 offset_right = 1024.0
@@ -21,4 +25,8 @@ anchor_bottom = 1.0
 [node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer"]
 offset_right = 1024.0
 offset_bottom = 31.0
+theme_override_fonts/bold_italics_font = ExtResource( "2_82qb6" )
+theme_override_fonts/italics_font = ExtResource( "3_eldg6" )
+theme_override_fonts/bold_font = ExtResource( "4_74d83" )
+theme_override_fonts/normal_font = ExtResource( "5_gh021" )
 script = ExtResource( "2_waskk" )

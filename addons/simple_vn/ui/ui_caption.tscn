@@ -1,10 +1,14 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=10 format=3 uid="uid://co3mleycewnda"]
 
 [ext_resource type="Script" path="res://addons/simple_vn/ui/ui_caption.gd" id="1_me3hd"]
 [ext_resource type="Script" path="res://addons/simple_vn/ui/VBoxCenterer.gd" id="2_mhkgc"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="2_w06q7"]
+[ext_resource type="Font" uid="uid://c37vrxkusosl7" path="res://fonts/robotomono/robotomono_bi.tres" id="3_ccacc"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextAnimation.gd" id="3_es7ai"]
+[ext_resource type="Font" uid="uid://gaslg38f16nv" path="res://fonts/robotomono/robotomono_i.tres" id="3_lrkqk"]
 [ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="4_3n06j"]
+[ext_resource type="Font" uid="uid://beb81bi6s03fl" path="res://fonts/robotomono/robotomono_b.tres" id="4_e85rd"]
+[ext_resource type="Font" uid="uid://b4g61a4hgqqak" path="res://fonts/robotomono/robotomono_r.tres" id="5_c8524"]
 
 [node name="caption" type="MarginContainer" groups=["caption"]]
 visible = false
@@ -35,17 +39,17 @@ size_flags_vertical = 3
 [node name="labels" type="VBoxContainer" parent="CenterContainer"]
 rect_min_size = Vector2(460, 0)
 offset_left = 2.0
-offset_top = 24.0
+offset_top = 18.0
 offset_right = 462.0
-offset_bottom = 108.0
+offset_bottom = 115.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 alignment = 1
 
 [node name="center" type="Control" parent="CenterContainer/labels"]
-rect_min_size = Vector2(0, 2.5)
+rect_min_size = Vector2(0, 15)
 offset_right = 460.0
-offset_bottom = 14.0
+offset_bottom = 26.5
 script = ExtResource( "2_mhkgc" )
 
 [node name="from" type="RichTextLabel" parent="CenterContainer/labels"]
@@ -54,9 +58,14 @@ offset_right = 460.0
 offset_bottom = 4.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_fonts/bold_italics_font = ExtResource( "3_ccacc" )
+theme_override_fonts/italics_font = ExtResource( "3_lrkqk" )
+theme_override_fonts/bold_font = ExtResource( "4_e85rd" )
+theme_override_fonts/normal_font = ExtResource( "5_c8524" )
 fit_content_height = true
 script = ExtResource( "2_w06q7" )
 bbcode = "[dim;dim]\\[[]From[dim;dim]\\][]"
+font = "robotomono"
 
 [node name="text" type="RichTextLabel" parent="CenterContainer/labels"]
 offset_top = 8.0
@@ -64,6 +73,10 @@ offset_right = 460.0
 offset_bottom = 31.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_fonts/bold_italics_font = ExtResource( "3_ccacc" )
+theme_override_fonts/italics_font = ExtResource( "3_lrkqk" )
+theme_override_fonts/bold_font = ExtResource( "4_e85rd" )
+theme_override_fonts/normal_font = ExtResource( "5_c8524" )
 theme_override_font_sizes/mono_font_size = 16
 theme_override_font_sizes/bold_italics_font_size = 16
 theme_override_font_sizes/italics_font_size = 16
@@ -73,7 +86,7 @@ bbcode_enabled = true
 fit_content_height = true
 script = ExtResource( "3_es7ai" )
 bbcode = "[dim;dim]\"[]Text[dim;dim]\"[]"
-effect_time = 8.91725
+effect_time = 84.083
 _triggers = {}
 _alpha_real = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 _alpha_goal = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]

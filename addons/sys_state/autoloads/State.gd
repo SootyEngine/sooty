@@ -28,11 +28,8 @@ func do(command: String) -> Variant:
 		
 		var nodes := get_tree().get_nodes_in_group(group)
 		if len(nodes):
-			print(group, nodes)
 			for node in nodes:
-				print("\t", node, converted_args)
 				UObject.call_w_args(node, method, converted_args)
-			print("---")
 		else:
 			push_error("No nodes in group %s for %s(%s)." % [group, method, converted_args])
 	

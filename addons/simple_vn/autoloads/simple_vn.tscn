@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://3nkvliqm6y0a"]
 
-[ext_resource type="PackedScene" path="res://addons/simple_vn/ui/ui_caption.tscn" id="1_5fvuj"]
+[ext_resource type="PackedScene" uid="uid://co3mleycewnda" path="res://addons/simple_vn/ui/ui_caption.tscn" id="1_5fvuj"]
 [ext_resource type="Script" path="res://addons/simple_vn/ui/EdgeClampContainer.gd" id="2_mqxw1"]
 [ext_resource type="PackedScene" uid="uid://m84326jpcicc" path="res://addons/simple_vn/ui/ui_option_menu.tscn" id="3_so0hf"]
 [ext_resource type="PackedScene" uid="uid://dl2mg14o34fng" path="res://addons/sys_notifications/ui/ui_notifications.tscn" id="4_sf4ru"]

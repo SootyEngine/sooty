@@ -48,7 +48,6 @@ enum {
 @export var _triggers := {}
 @export var _alpha_real: Array[float] = []
 @export var _alpha_goal: Array[float] = []
-#@export var _advance_finished := false
 
 func is_finished() -> bool:
 	return progress == 0 if fade_out else progress == 1.0
@@ -64,7 +63,6 @@ func set_bbcode(btext: String):
 	_skip = false
 	_wait = 0.0
 	_pace = 1.0
-#	_advance_finished = false
 	progress = 0.0
 	effect_time = 0.0
 	visible_character = -1

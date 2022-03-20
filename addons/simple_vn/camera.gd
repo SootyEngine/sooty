@@ -72,11 +72,15 @@ func _get_tween():
 	tween.bind_node(self)
 	return tween
 
+func wait():
+	DialogueStack.halt()
+	tween.tween_callback(DialogueStack.unhalt)
+
 func pan(x := 0.0, y := 0.0):
 	var t := _get_tween()
 	t.tween_property(self, "position_offset", Vector2(x, y), 0.5)\
-		.set_trans(Tween.TRANS_BACK)\
-		.set_ease(Tween.EASE_OUT)
+		.set_trans(Tween.TRANS_CUBIC)\
+		.set_ease(Tween.EASE_IN_OUT)
 
 func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():

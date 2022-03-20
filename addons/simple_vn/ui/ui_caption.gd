@@ -83,6 +83,8 @@ func set_show_indicator(s):
 			_tween_indicator.stop()
 		_tween_indicator = get_tree().create_tween()
 		if s:
+			# wait half a second before showing indicator
+			_tween_indicator.tween_interval(0.5)
 			_tween_indicator.tween_property(indicator, "modulate:a", 1.0, 0.125)
 		else:
 			_tween_indicator.tween_property(indicator, "modulate:a", 0.0, 0.0125)
@@ -90,15 +92,16 @@ func set_show_indicator(s):
 func _show_line(payload: Dictionary):
 	var from = payload.from
 	var line: DialogueLine = payload.line
+	var text: String = payload.text
 	
 	if from is String:
 		rtl_from.visible = true
 		rtl_from.set_bbcode(from)
-		rtl_text.set_bbcode(line.text)
+		rtl_text.set_bbcode(text)
 		rtl_text.fade_out = false
 	else:
 		rtl_from.visible = false
-		rtl_text.set_bbcode(line.text)
+		rtl_text.set_bbcode(text)
 		rtl_text.fade_out = false
 	
 	# show choices?
