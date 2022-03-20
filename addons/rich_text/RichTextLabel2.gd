@@ -173,12 +173,12 @@ func _parse(btext: String):
 		_add_text(btext)
 
 func _parse_opening(tag: String):
-	if tag.begins_with("$"):
-		var p := tag.substr(1).split(";", true, 1)
+	if len(tag) and tag[0] in "~@$":
+		var p := tag.split(";", true, 1)
 		if len(p) == 2:
 			_parse_tags(p[1])
 		
-		var got = State._eval(p[0])
+		var got = State.do(p[0])
 		if got == null:
 			push_error("BBCode: Couldn't replace '%s'." % p[0])
 			push_bgcolor(Color.RED)
@@ -340,6 +340,7 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		
 		"dim": _push_color(_state.color.darkened(.33))
 		"lit": _push_color(_state.color.lightened(.33))
+		"hide": _push_color(Color.TRANSPARENT)
 		
 		_:
 			if not _has_effect(tag):

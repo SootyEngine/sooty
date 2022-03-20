@@ -11,19 +11,19 @@ static func get_user_dir() -> String:
 			return dir + "/data/"
 	return "user://"
 
-static func file_exists(path:String) -> bool:
+static func file_exists(path: String) -> bool:
 	return File.new().file_exists(path)
 
-static func dir_exists(path:String) -> bool:
+static func dir_exists(path: String) -> bool:
 	return Directory.new().dir_exists(path)
 
-static func get_modified_time(path:String) -> int:
+static func get_modified_time(path: String) -> int:
 	return File.new().get_modified_time(path)
 
-static func get_file_size_humanized(path:String) -> String:
+static func get_file_size_humanized(path: String) -> String:
 	return String.humanize_size(get_file_size(path))
 
-static func get_file_size(path:String) -> int:
+static func get_file_size(path: String) -> int:
 	var f := File.new()
 	var _e = f.open(path, File.READ)
 	f.seek_end()
@@ -31,9 +31,12 @@ static func get_file_size(path:String) -> int:
 	f.close()
 	return bytes
 
+static func get_file_name(path: String) -> String:
+	return path.get_file().split(".", true, 1)[0]
+
 # hacky
-static func get_directory_size(directory:String) -> String:
-	var bytes:int = 0
+static func get_directory_size(directory: String) -> String:
+	var bytes := 0
 	for path in get_files(directory, null, true, true):
 		bytes += get_file_size(path)
 	return String.humanize_size(bytes)

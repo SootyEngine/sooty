@@ -15,6 +15,7 @@ offset_top = 10.0
 offset_right = -9.0
 offset_bottom = 346.0
 grow_horizontal = 0
+mouse_filter = 2
 __meta__ = {
 "_edit_layout_mode": 1,
 "_edit_use_custom_anchors": false

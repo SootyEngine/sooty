@@ -144,6 +144,11 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/rich_text/Markdown.gd"
 }, {
+"base": "Resource",
+"class": &"PropList",
+"language": &"GDScript",
+"path": "res://addons/PropList.gd"
+}, {
 "base": "BaseDataClass",
 "class": &"Quest",
 "language": &"GDScript",
@@ -168,6 +173,11 @@ _global_script_classes=[{
 "class": &"Sprite2DAnimations",
 "language": &"GDScript",
 "path": "res://addons/simple_vn/nodes/Sprite2DAnimations.gd"
+}, {
+"base": "Resource",
+"class": &"SpriteTransitions",
+"language": &"GDScript",
+"path": "res://simple_vn_assets/shaders/SpriteTransition.gd"
 }, {
 "base": "Resource",
 "class": &"UDebug",
@@ -277,11 +287,13 @@ _global_script_class_icons={
 "Item": "",
 "Location": "",
 "Markdown": "",
+"PropList": "",
 "Quest": "",
 "Reward": "",
 "RichTextAnimation": "",
 "RichTextLabel2": "",
 "Sprite2DAnimations": "",
+"SpriteTransitions": "",
 "UDebug": "",
 "UDict": "",
 "UError": "",

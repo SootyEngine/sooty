@@ -200,7 +200,9 @@ func _h_bbcode(from: int, to: int, default: Color):
 					# colorize action tags
 					if tag.begins_with(Sooty.S_ACTION_EVAL):
 						_h_action(off, off+len(tag), C_ACTION_EVAL)
-					elif tag.begins_with(Sooty.S_ACTION_SHORTCUT):
+					elif tag.begins_with(Sooty.S_ACTION_GROUP):
+						_set_var_color(off, tag)
+					elif tag.begins_with(Sooty.S_ACTION_STATE):
 						_set_var_color(off, tag)
 					# colorize normal tags
 					else:

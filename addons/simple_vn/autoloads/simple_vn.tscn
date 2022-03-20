@@ -25,6 +25,7 @@ offset_left = -494.0
 offset_top = -290.0
 offset_right = -14.0
 offset_bottom = -172.0
+mouse_filter = 2
 _option_menu = NodePath("../bottom\\main/option_menu")
 
 [node name="bottom\\main" type="VBoxContainer" parent="captions"]
@@ -34,6 +35,7 @@ offset_right = 724.5
 offset_bottom = 600.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+mouse_filter = 2
 alignment = 2
 script = ExtResource( "2_mqxw1" )
 margin = 8.0
@@ -47,6 +49,7 @@ offset_left = 230.0
 offset_top = 519.0
 offset_right = 710.0
 offset_bottom = 590.0
+mouse_filter = 2
 _option_menu = NodePath("../option_menu")
 
 [node name="option_menu" parent="captions/bottom\\main" instance=ExtResource( "3_so0hf" )]
@@ -55,6 +58,7 @@ anchor_bottom = 0.0
 offset_right = 425.0
 offset_bottom = 31.0
 size_flags_horizontal = 3
+mouse_filter = 2
 
 [node name="notification" parent="." groups=["notification_manager"] instance=ExtResource( "4_sf4ru" )]
 

@@ -96,7 +96,7 @@ func start(id: String):
 	
 	# start dialogue
 	if "." in id:
-		goto(id)
+		goto(id, STEP_GOTO)
 	
 	# go to first flow of dialogue
 	else:
@@ -105,9 +105,9 @@ func start(id: String):
 			push_error("No flows in '%s'." % id)
 		else:
 			var first = Dialogues.get_dialogue(id).flows.keys()[0]
-			goto("%s.%s" % [id, first])
+			goto("%s.%s" % [id, first], STEP_GOTO)
 
-func goto(did_flow: String, clear_stack: bool = true) -> bool:
+func goto(did_flow: String, step_type: int) -> bool:
 	var p := did_flow.split(".", true, 1)
 	var did: String = p[0]
 	var flow: String = p[1]
@@ -127,11 +127,11 @@ func goto(did_flow: String, clear_stack: bool = true) -> bool:
 		return false
 	
 	# if the stack is cleared, it means this was a "goto" not a "call"
-	if clear_stack:
+	if step_type == STEP_GOTO:
 		while len(_stack):
 			_pop()
 	
-	_push(did, flow, lines, STEP_GOTO if clear_stack else STEP_CALL)
+	_push(did, flow, lines, step_type)
 	return true
 
 # select an option, adding it's lines to the stack

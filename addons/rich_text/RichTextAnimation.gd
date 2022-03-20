@@ -96,7 +96,7 @@ func _preparse(btext: String) -> String:
 
 func _parse_tag_unused(tag: String, info: String, raw: String) -> bool:
 	# the user may want to fire things off, with their own signal.
-	if raw[0] in "~!?@&*":
+	if raw[0] == "!":# in "~!?@&*":
 		return _register_trigger(TRIG_ACTION, raw)
 	
 	match tag:
@@ -120,7 +120,7 @@ func _tag_closed(tag: int, data: Variant):
 func _trigger(type: int, data: Variant):
 	match type:
 		TRIG_SYMBOL: symbol.emit(data)
-		TRIG_ACTION: State._eval(data)
+		TRIG_ACTION: State.do(data)# State._eval(data)
 		TRIG_WAIT: _wait += data.get("wait", data.get("w", 1.0))
 		TRIG_HOLD: play = false
 		TRIG_PACE: _pace = data.get("pace", data.get("p", 1.0))

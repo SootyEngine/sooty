@@ -19,10 +19,36 @@ var shake_offset := Vector2.ZERO
 
 var position_offset := Vector2.ZERO
 
-@export var draw_thirds := true
+@export var draw_thirds := false:
+	set(d):
+		draw_thirds = d
+		update()
 
-func _init() -> void:
+func _init():
 	add_to_group("sa:camera")
+
+func target(id: String, snap := false):
+	__target(_get_tween(), id, snap)
+
+func __target(tween: Tween, id: String, snap := false):
+	prints("TARGET ", id)
+	
+	var targ: Camera2D = get_tree().get_first_node_in_group("camera_target:%s" % id)
+	if not targ:
+		push_error("No camera target %s." % id)
+		return
+	
+	if snap:
+		position = targ.position
+		rotation = targ.rotation
+		zoom = targ.zoom
+	
+	else:
+		var time := 1.0
+		tween.set_parallel()
+		tween.tween_property(self, "position", targ.position, time)
+		tween.tween_property(self, "rotation", targ.rotation, time)
+		tween.tween_property(self, "zoom", targ.zoom, time)
 
 func _get_tool_buttons():
 	return [center]
@@ -37,7 +63,7 @@ func camera(action: String, args: Array = [], kwargs: Dictionary = {}):
 			if flow_manager.add_pauser(self):
 				t.tween_callback(flow_manager.remove_pauser.bind(self))
 	else:
-		print("\tno action ", action)
+		print("\tno action '%s'." % action)
 
 func set_target(id: String):
 	var target := UGroup.get_first_where("camera_target", {name=id})
@@ -64,17 +90,17 @@ func _draw() -> void:
 		
 		draw_circle(-position, 16.0, Color.WHITE)
 
-var tween: Tween
-func _get_tween():
-	if tween:
-		tween.stop()
-	tween = get_tree().create_tween()
-	tween.bind_node(self)
-	return tween
+var _tween: Tween
+func _get_tween() -> Tween:
+	if _tween:
+		_tween.stop()
+	_tween = get_tree().create_tween()
+	_tween.bind_node(self)
+	return _tween
 
 func wait():
 	DialogueStack.halt()
-	tween.tween_callback(DialogueStack.unhalt)
+	_tween.tween_callback(DialogueStack.unhalt)
 
 func pan(x := 0.0, y := 0.0):
 	var t := _get_tween()
@@ -82,22 +108,22 @@ func pan(x := 0.0, y := 0.0):
 		.set_trans(Tween.TRANS_CUBIC)\
 		.set_ease(Tween.EASE_IN_OUT)
 
-func _process(_delta: float) -> void:
-	if Engine.is_editor_hint():
-		set_process(false)
-		return
-	
-	noise_offset = URand.fbm_animated_v2(position, 0.0125 * noise_time_scale)
-	noise_offset *= noise_unit
-	noise_offset *= noise_aspect
-	noise_offset *= noise_scale
-	
-	get_parent().rotation = URand.noise_animated(-position.x, 0.1) * 0.0025 * rotation_noise_scale
-	zoom = Vector2.ONE * (1.0 + zoom_offset + URand.noise_animated(-position.y, 0.1) * .00125 * zoom_noise_scale)
-	offset = noise_offset + shake_offset + position_offset
-	
-	offset += ((get_global_mouse_position() / Global.window_size) - Vector2(.5, .5)) * Vector2(1, 0.125) * 4.0
-	
+#func _process(_delta: float) -> void:
+#	if Engine.is_editor_hint():
+#		set_process(false)
+#		return
+#
+#	noise_offset = URand.fbm_animated_v2(position, 0.0125 * noise_time_scale)
+#	noise_offset *= noise_unit
+#	noise_offset *= noise_aspect
+#	noise_offset *= noise_scale
+#
+##	get_parent().rotation = URand.noise_animated(-position.x, 0.1) * 0.0025 * rotation_noise_scale
+#	zoom = Vector2.ONE * (1.0 + zoom_offset + URand.noise_animated(-position.y, 0.1) * .00125 * zoom_noise_scale)
+#	offset = noise_offset + shake_offset + position_offset
+#
+#	offset += ((get_global_mouse_position() / Global.window_size) - Vector2(.5, .5)) * Vector2(1, 0.125) * 4.0
+#
 func center():
 	if anchor_mode == ANCHOR_MODE_FIXED_TOP_LEFT:
 		position = Vector2.ZERO
