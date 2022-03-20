@@ -1,9 +1,9 @@
-extends CanvasLayer
+extends Control
 
-@onready var output: RichTextLabel2 = $c/c/output
+@onready var output: RichTextLabel = $c/c/output
 @onready var input: LineEdit = $c/input
 
-enum LineType { INPUT, LOG, ERROR, WARNING }
+enum LineType { INPUT, LOG, ERROR, WARNING, RESULT }
 
 var lines := []
 
@@ -11,7 +11,7 @@ var show_log := true
 var show_error := true
 var show_warnings := true
 
-var history := []
+var history := [""]
 var history_index := 0:
 	set(h):
 		history_index = clampi(h, 0, len(history)-1)
@@ -24,18 +24,28 @@ func _ready() -> void:
 	add_line(LineType.WARNING, "Not enough.")
 
 func _text_submitted(t: String):
-	history.append(t)
+	t = t.strip_edges()
+	if not len(t):
+		return
+	
+	history[-1] = t
+	history.append("")
 	history_index = len(history)
 	add_line(LineType.INPUT, t)
 	_set_input("")
+	if t[0] in "~@$":
+		var got = State.do(t)
+		add_line(LineType.RESULT, str(got))
 
 func add_line(type: LineType, text: String):
 	var s = get_stack()[-1]
 	var msg: String
 	if type == LineType.INPUT:
-		msg = "\t[b]>[/b] %s" % [text]
+		msg = "[b]>[/b] %s" % [text]
 	else:
-		msg = "[b][%s:%s:%s][/b] %s" % [s.source.get_file(), s.function, s.line, text]
+		var address := "[%s:%s %s]" % [s.source.get_file(), s.line, s.function]
+		var spaces := " ".repeat((42-len(text)) + (42-len(address)))
+		msg = "\t%s%s[b][color=#00000080]%s[/color][/b]" % [text, spaces, address]
 	lines.append([type, msg])
 	redraw()
 	
@@ -45,12 +55,13 @@ func redraw():
 		match line[0]:
 			LineType.ERROR: output.push_color(Color.RED)
 			LineType.WARNING: output.push_color(Color.YELLOW)
-			LineType.WARNING: output.push_color(Color.AQUAMARINE)
+#			LineType.WARNING: output.push_color(Color.AQUAMARINE)
+			LineType.RESULT: output.push_color(Color.AQUAMARINE)
 		output.append_text(line[1])
 		match line[0]:
 			LineType.ERROR: output.pop()
 			LineType.WARNING: output.pop()
-			LineType.WARNING: output.pop()
+			LineType.RESULT: output.pop()
 		output.newline()
 
 func _set_input(t: String):

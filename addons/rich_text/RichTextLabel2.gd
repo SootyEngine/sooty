@@ -31,8 +31,9 @@ enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
 
 @export var effects_mode: EffectsMode = EffectsMode.OFF_IN_EDITOR
 @export var alignment: Align = Align.CENTER
-@export var color: Color = Color.WHITE
-@export var font: String = "":
+@export var color := Color.WHITE
+@export_dir var font_dir := "res://fonts"
+@export var font := "":
 	set = set_font
 @export var size: int = 16:
 	set(x):
@@ -56,11 +57,11 @@ enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
 @export var markdown_format_bold_italics := "[bi]%s[]"
 @export var markdown_format_strike_through := "[s]%s[]"
 
-var _stack: Array = []
-var _state: Dictionary = {}
+var _stack := []
+var _state := {}
 
-var _shortcuts: Dictionary = {}
-var _custom_colors: Dictionary = {}
+var _shortcuts := {}
+var _custom_colors := {}
 
 func _get_tool_buttons():
 	return ["_redraw"]
@@ -99,8 +100,7 @@ func set_bbcode(btext: String):
 
 func set_font(id: String):
 	font = id
-	return
-	FontHelper.new().set_fonts(self, id)
+	FontHelper.new(font_dir).set_fonts(self, id)
 
 func uninstall_effects():
 	while len(custom_effects):

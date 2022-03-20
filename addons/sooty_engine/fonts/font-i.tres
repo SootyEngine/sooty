@@ -1,0 +1,6 @@
+[gd_resource type="Font" load_steps=2 format=3 uid="uid://b0o1i3qufj2wj"]
+
+[ext_resource type="FontData" uid="uid://binc0g6hmbhkc" path="res://addons/sooty_engine/fonts/Hack-Italic.ttf" id="1_7xs6x"]
+
+[resource]
+data/0 = ExtResource( "1_7xs6x" )

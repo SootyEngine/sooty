@@ -9,7 +9,7 @@ signal installed()
 signal pre_uninstalled(mod: String)
 signal uninstalled(mod: String)
 
-var auto_load_user_mods := true
+var auto_load_user_mods := false
 var installed_dirs := []
 
 func _init() -> void:
