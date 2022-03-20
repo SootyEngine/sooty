@@ -127,7 +127,7 @@ func _preparse_untagged(btext: String) -> String:
 		return btext
 	
 	# nice quotes
-	if nicer_quotes_format:
+	if nicer_quotes_enabled:
 		btext = _replace2(btext, '"', nicer_quotes_format)
 	
 	# markdown

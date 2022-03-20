@@ -14,7 +14,9 @@ func _input(e: InputEvent) -> void:
 	if e is InputEventMouseButton and e.pressed:
 		if len(_slot_info):
 			match e.button_index:
-				MOUSE_BUTTON_LEFT: owner._select_slot(get_index())
+				MOUSE_BUTTON_LEFT:
+					print("Select")
+					owner._select_slot(get_index())
 
 func set_info(info: Dictionary):
 	_slot_info = info
@@ -31,7 +33,7 @@ func _mouse_entered():
 		return
 	if _tween:
 		_tween.stop()
-	_tween = get_tree().create_tween().set_parallel()
+	_tween = get_tree().create_tween().set_parallel().bind_node(self)
 	_tween.tween_property($mask/preview, "rect_scale", Vector2.ONE * 1.05, 0.25)\
 		.set_trans(Tween.TRANS_CUBIC)\
 		.set_ease(Tween.EASE_OUT)
@@ -43,7 +45,7 @@ func _mouse_exited():
 		return
 	if _tween:
 		_tween.stop()
-	_tween = get_tree().create_tween().set_parallel()
+	_tween = get_tree().create_tween().set_parallel().bind_node(self)
 	_tween.tween_property($mask/preview, "rect_scale", Vector2.ONE, 0.25)\
 		.set_trans(Tween.TRANS_CUBIC)\
 		.set_ease(Tween.EASE_IN)

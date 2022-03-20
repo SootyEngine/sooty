@@ -1,12 +1,20 @@
-[gd_scene load_steps=8 format=3 uid="uid://3nkvliqm6y0a"]
+[gd_scene load_steps=13 format=3 uid="uid://cmtk877fqtogm"]
 
 [ext_resource type="PackedScene" uid="uid://co3mleycewnda" path="res://addons/simple_vn/ui/ui_caption.tscn" id="1_5fvuj"]
 [ext_resource type="Script" path="res://addons/simple_vn/ui/EdgeClampContainer.gd" id="2_mqxw1"]
 [ext_resource type="PackedScene" uid="uid://m84326jpcicc" path="res://addons/simple_vn/ui/ui_option_menu.tscn" id="3_so0hf"]
 [ext_resource type="PackedScene" uid="uid://dl2mg14o34fng" path="res://addons/sys_notifications/ui/ui_notifications.tscn" id="4_sf4ru"]
-[ext_resource type="PackedScene" uid="uid://dghw2svgan2t1" path="res://addons/sooty_engine/debug/ui_debug.tscn" id="5_ojci6"]
+[ext_resource type="PackedScene" uid="uid://bfngd7b38mvow" path="res://addons/sys_state/ui/ui_debug.tscn" id="5_ojci6"]
+[ext_resource type="PackedScene" uid="uid://bvj1pdttilpdc" path="res://addons/console/ui_console.tscn" id="5_yxv2n"]
+[ext_resource type="Shader" path="res://addons/screen_blur.gdshader" id="6_6ry1d"]
 [ext_resource type="PackedScene" uid="uid://beeajbnhjflok" path="res://addons/sys_quests/ui/ui_quest_list.tscn" id="6_e6odl"]
+[ext_resource type="PackedScene" uid="uid://3kiavxcgtsmg" path="res://addons/sys_state/ui/ui_save_load.tscn" id="6_p1slb"]
+[ext_resource type="Script" path="res://addons/simple_vn/ui/ui_debug_menu.gd" id="6_rc2au"]
 [ext_resource type="PackedScene" uid="uid://pd6qker8pist" path="res://addons/sys_achievements/ui/ui_achievements.tscn" id="7_s3pqk"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_adcva"]
+shader = ExtResource( "6_6ry1d" )
+shader_param/blur = null
 
 [node name="simple_vn" type="Node"]
 
@@ -50,20 +58,34 @@ size_flags_horizontal = 3
 
 [node name="notification" parent="." groups=["notification_manager"] instance=ExtResource( "4_sf4ru" )]
 
-[node name="debug" type="CanvasLayer" parent="."]
+[node name="console" parent="." instance=ExtResource( "5_yxv2n" )]
 visible = false
 
-[node name="TabContainer" type="TabContainer" parent="debug"]
+[node name="debug" type="CanvasLayer" parent="."]
+process_mode = 3
+visible = false
+script = ExtResource( "6_rc2au" )
+
+[node name="backing" type="ColorRect" parent="debug"]
+material = SubResource( "ShaderMaterial_adcva" )
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_bottom = -214.0
 
-[node name="debug" parent="debug/TabContainer" instance=ExtResource( "5_ojci6" )]
+[node name="debug_menu" type="TabContainer" parent="debug"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+tab_alignment = 0
+drag_to_rearrange_enabled = true
+
+[node name="debug" parent="debug/debug_menu" instance=ExtResource( "5_ojci6" )]
 offset_top = 31.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="quests" parent="debug/TabContainer" instance=ExtResource( "6_e6odl" )]
+[node name="save_load" parent="debug/debug_menu" instance=ExtResource( "6_p1slb" )]
+visible = false
+
+[node name="quests" parent="debug/debug_menu" instance=ExtResource( "6_e6odl" )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -73,7 +95,7 @@ offset_bottom = 361.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="achievements" parent="debug/TabContainer" instance=ExtResource( "7_s3pqk" )]
+[node name="achievements" parent="debug/debug_menu" instance=ExtResource( "7_s3pqk" )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0

@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=4 format=3 uid="uid://d118gcdl1wkns"]
 
 [ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="1_60yqm"]
 [ext_resource type="Script" path="res://addons/sys_state/ui/ui_save_slot.gd" id="1_fmcgh"]

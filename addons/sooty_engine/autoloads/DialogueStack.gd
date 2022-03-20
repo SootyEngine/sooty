@@ -145,15 +145,13 @@ func select_option(option: DialogueLine):
 func _pop():
 	var last: Dictionary = _stack.pop_back()
 	if last.type == STEP_GOTO:
-		var id := "%s.%s" % [last.did, last.flow]
-
 		# let everyone know a flow ended
-		flow_ended.emit(last.flow)
+		flow_ended.emit("%s.%s" % [last.did, last.flow])
 
 func _push(did: String, flow: String, lines: Array, type: int):
 	_stack.append({ did=did, flow=flow, lines=lines, type=type, step=0 })
 	if type == STEP_GOTO:
-		flow_started.emit(flow)
+		flow_started.emit("%s.%s" % [did, flow])
 
 func pop_next_line() -> Dictionary:
 	var did_line := _pop_next_line()

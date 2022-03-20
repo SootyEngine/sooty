@@ -1,13 +1,18 @@
-[gd_scene load_steps=13 format=3 uid="uid://bvj1pdttilpdc"]
+[gd_scene load_steps=15 format=3 uid="uid://bvj1pdttilpdc"]
 
 [ext_resource type="Script" path="res://addons/console/ui_console.gd" id="1_uuj7a"]
-[ext_resource type="FontData" path="res://fonts/robotomono/robotomono-r.ttf" id="2_yhjr7"]
-[ext_resource type="FontData" path="res://fonts/unifont/unifont-13.0.01.ttf" id="3_wrwqb"]
-[ext_resource type="FontData" path="res://fonts/unifont/unifont_upper-13.0.01.ttf" id="4_8erui"]
-[ext_resource type="FontData" path="res://fonts/robotomono/robotomono-bi.ttf" id="5_aex24"]
-[ext_resource type="FontData" path="res://fonts/robotomono/robotomono-i.ttf" id="6_ry1w2"]
-[ext_resource type="FontData" path="res://fonts/robotomono/robotomono-b.ttf" id="7_3ejrb"]
+[ext_resource type="Shader" path="res://addons/screen_blur.gdshader" id="2_d20gb"]
+[ext_resource type="FontData" uid="uid://by1aqauhysmgf" path="res://fonts/robotomono/robotomono-r.ttf" id="2_yhjr7"]
+[ext_resource type="FontData" uid="uid://dhlm735o5phw0" path="res://fonts/unifont/unifont-13.0.01.ttf" id="3_wrwqb"]
+[ext_resource type="FontData" uid="uid://dfus0kvrbquox" path="res://fonts/unifont/unifont_upper-13.0.01.ttf" id="4_8erui"]
+[ext_resource type="FontData" uid="uid://dq2imiejh1ci5" path="res://fonts/robotomono/robotomono-bi.ttf" id="5_aex24"]
+[ext_resource type="FontData" uid="uid://dw0hrbje7waa2" path="res://fonts/robotomono/robotomono-i.ttf" id="6_ry1w2"]
+[ext_resource type="FontData" uid="uid://5hcq4bx4kalo" path="res://fonts/robotomono/robotomono-b.ttf" id="7_3ejrb"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="8_7k2fj"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rhy81"]
+shader = ExtResource( "2_d20gb" )
+shader_param/blur = null
 
 [sub_resource type="Font" id="Font_mdd4c"]
 data/0 = ExtResource( "2_yhjr7" )
@@ -31,6 +36,12 @@ data/2 = ExtResource( "4_8erui" )
 
 [node name="console" type="CanvasLayer"]
 script = ExtResource( "1_uuj7a" )
+
+[node name="backing" type="ColorRect" parent="."]
+material = SubResource( "ShaderMaterial_rhy81" )
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.25)
 
 [node name="c" type="VBoxContainer" parent="."]
 anchor_right = 1.0
