@@ -382,10 +382,11 @@ static func _line_as_dialogue(line: Dictionary):
 		line.from = text.substr(0, i).strip_edges().replace("\\:", ":")
 		line.text = text.substr(i+1, len(text)-i).strip_edges()
 		
+		# get action
 		if "(" in line.from:
 			var a := UString.extract(line.from, "(", ")", true)
 			line.from = a.outside
-			line.action = "@%s %s" % [line.from, a.inside]
+			line.action = "@%s.%s" % [line.from, a.inside]
 		
 	line.text = line.text.replace("\\:", ":")
 	

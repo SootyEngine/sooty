@@ -23,11 +23,12 @@ func _install_mods(dirs: Array):
 	for dir in dirs:
 		var head = dir.plus_file(subdir)
 		for script_path in UFile.get_files(head, ".gd"):
-			var mod: Node = load(script_path).new()
+			var mod = load(script_path).new()
 			if mod is Node:
 				Mods._print_file(script_path)
 				mod.set_name(script_path.get_file().split(".", true, 1)[0])
 				add_child(mod)
+#				mod.set_owner(self)
 			else:
 				push_error("States must be node. Can't load %s." % script_path)
 

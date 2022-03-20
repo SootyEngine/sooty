@@ -13,25 +13,29 @@ signal tick_started()
 signal tick_finished()
 signal flow_started(id: String)
 signal flow_ended(id: String)
-#signal option_selected(option: Dictionary)
+signal option_selected(option: Dictionary)
 signal on_line(text: DialogueLine)
 
 @export var _break := false
 @export var _active := false
 @export var _stack := []
 @export var _wait := 0.0
-#@export var history := [] # th
-#@export var visited := {} # how many times a flow has been visited.
+@export var _halting_for := []
 
 func wait(time := 1.0):
 	_wait = time
 	_break = true
 
-func halt():
+func halt(halter: Object):
 	_break = true
+	if not halter in _halting_for:
+		_halting_for.append(halter)
 
-func unhalt():
-	_break = false
+func unhalt(halter: Object):
+	if halter in _halting_for:
+		_halting_for.erase(halter)
+		if not len(_halting_for):
+			_break = false
 
 func is_active() -> bool:
 	return _active
@@ -161,7 +165,8 @@ func select_option(option: DialogueLine):
 	var o := option._data
 	if "then" in o:
 		_push(option._dialogue_id, "%OPTION%", o.then, STEP_CALL)
-	unhalt()
+	option_selected.emit(option)
+#	unhalt()
 
 func _pop():
 	var last: Dictionary = _stack.pop_back()
