@@ -17,8 +17,10 @@ data_*/
 /dialogue_debug/
 /states/
 /states_persistent/
-/story_scenes/
-
-/simple_vn_assets/
+/scenes/
 
 /TODO.md
+/config.cfg
+/main.tscn
+/icon.png
+/icon.png.import
