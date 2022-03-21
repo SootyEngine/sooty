@@ -200,13 +200,17 @@ func _h_bbcode(from: int, to: int, default: Color):
 				var inner := text.substr(i+1, b-i-1)
 				var off = i + 1
 				for tag in inner.split(";"):
+					if tag.begins_with("!"):
+						tag = tag.substr(1)
+						_c(off, C_SYMBOL)
+						off += 1
 					# colorize action tags
 					if tag.begins_with(S_ACTION_EVAL):
 						_h_action(off, off+len(tag), C_ACTION_EVAL)
 					elif tag.begins_with(S_ACTION_GROUP):
-						_set_var_color(off, tag)
+						_h_action(off, off+len(tag), C_ACTION_GROUP)
 					elif tag.begins_with(S_ACTION_STATE):
-						_set_var_color(off, tag)
+						_h_action(off, off+len(tag), C_ACTION_STATE)
 					# colorize normal tags
 					else:
 						_c(off, C_TAG)
