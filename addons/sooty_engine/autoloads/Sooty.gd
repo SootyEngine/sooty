@@ -9,6 +9,8 @@ const S_ACTION_EVAL := "~"
 const S_ACTION_STATE := "$"
 const S_ACTION_GROUP := "@"
 
+var debug_show_hidden_options := false
+
 func _init() -> void:
 	add_to_group("sa:sooty_version")
 
