@@ -36,7 +36,7 @@ Some tags are self closing.
 |`hue` `sat` `val`|Modify hue/sat/val of color.||
 |`:emoji_name:` `:)`|Tags wrapped in `::` will use the emoji.<br>Some old fashioned emojis are supported. `[:)]`,||
 |`\|pipe`|Will pipe text through a function.||
-|`$property`|Inserts the value of a state.<br>Will auto close any style it's wrapped with:<br>`The [$stranger;b;red] looks at you.`<br>Can be piped to a function. `[$player.coins\|commas]`||
+|`@group call` `$state call` `~expression`|Inserts returned value at this position.<br>Will auto close any style it's wrapped with:<br>`The [$stranger;b;red] looks at you.`<br>Can be piped to a function. `[$player.coins\|commas]`||
 |`lb` `rb`|Insert brackets *[]*||
 
 Along with typical: `b` `i` `bi` `u`
@@ -49,7 +49,7 @@ Along with typical: `b` `i` `bi` `u`
 |`hold`|Hold animation till user action.|`[h]` `[hold]`|
 |`jump`|Jump animation forward. So entire word or phrase can pop in.<br>`I already told you [jump]NO[][w] [jump]MORE[][w] [jump]LEAVING MY THINGS OUT![][w]`
 |`pace`|Change pace of animation.|`[p]` `[pace]` `[p=2]`|
-|`~action`|Call any [action](#actions) at that point in the animation.||
+|`!@group call` `!$state call` `!~expression`|Call any [action](#actions) at that point in the animation.||
 
 *Custom text effects*<br>**TODO**
 
@@ -67,8 +67,8 @@ In `config.cfg` you can set shortcuts for complex actions and custom colors:
 
 ```cfg
 [rich_text_shortcuts]
-cam1="~camera shake 2.0;~camera zoom 2.0;wait=0.5"
-cam_reset="~camera shake 0.0;~camera zoom 1.0
+cam1="!@camera shake 2.0;!@camera zoom 2.0;wait=0.5"
+cam_reset="!@camera shake 0.0;!@camera zoom 1.0
 highlight="cherry;b;u"
 pscore="$player.score|commas;b;greeny
 
@@ -87,34 +87,17 @@ john: These [cherry]cherries[] sure look good. [cam1]Wait, these aren't cherries
 # Actions
 ![](readme/actions.png)
 
-Starting with a `~` actions can do a number of things.
+|Char|Description|
+|----|-----------|
+|`~`|State expression.|`~score += pow(20, 2)` == `State.score += pow(20, 2)`|
+|`$`|State call.|`$player.damage 10 type:water` == `State.player.damage(10, {"type":"water"})`|
+|`@`|Group call.|`@camera.shake false y:0.5` == `get_nodes_in_group("camera").shake(false, {"y":0.5})`|
 
-Actions are bracket-less `()` and comma-less `,` except for arrays.
-```
-// for node in get_tree().get_nodes_in_group("camera"):
-//		node.camera("shake", 10, { "rotate": true })
-~camera shake 10 rotate:true
-
-// State.player.damage("fire", 10, { "rand": [2, 3 ] })
-~$player.damage fire 10 rand:2,3
-
-// for strings with spaces, use ""
-// State.player.set_name("The Lone Wanderer")
-~$player.set_name "The Lone Wanderer"
-
-// to state variables inside a function, use $
-// State.enemy.damage("head", 2, 10)
-~$enemy.damage $player.target $damage_modifier 10
-```
-
-Modify state variables, and call state functions, with `$`
-```
-~$score += 20
-~$player.damage 10
-```
+Action calls are bracket-less `()` and comma-less `,` except for arrays.
 
 ## Operator Overloads
-`StringActions` has basic support for operator overloads.
+
+State has basic support for operation overloads.
 
 Look at the *VStat* class `VStat.gd`:
 ```
@@ -134,7 +117,9 @@ This allows us to do `stat += 1` instead of `stat.value += 1`
 
 # Modding
 **TODO**
-All state data (main and mods) is loaded at once. Internally, the main data is treated like a mod.
+All state data is treated as mods.  
+They are "installed" at start up.  
+Optionally scripts in `user://mods` can be autoloaded.
 
 ## Folders
 On `_init`, an autoload should call `Mods.install_mod(directory)`.
@@ -180,5 +165,5 @@ var fields := Character.new({name="Mr. Fields"})
 var fields := Location.new({name="The Fields"})
 ```
 
-# Exporting
+# Building/Exporting
 Make sure to include `*.soot,*.cfg` files when exporting.
