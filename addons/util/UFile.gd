@@ -89,10 +89,9 @@ static func create_dir(path: String) -> bool:
 	push_error("Cant make dir '%s'." % path)
 	return false
 
-static func remove_directory(path: String) -> bool:
+static func remove_dir(path: String) -> bool:
 	var d := Directory.new()
-	var userdir := get_user_dir()
-	if path != userdir and path.begins_with(userdir) and d.dir_exists(path):
+	if path != "user://" and path.begins_with("user://") and d.dir_exists(path):
 		
 		for file in get_files(path):
 			d.remove(file)

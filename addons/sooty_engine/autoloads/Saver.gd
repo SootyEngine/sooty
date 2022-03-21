@@ -21,18 +21,8 @@ func _ready() -> void:
 	if not d.dir_exists(DIR):
 		d.make_dir(DIR)
 
-func get_slot_names() -> PackedStringArray:
-	var out := PackedStringArray()
-	var d := Directory.new()
-	d.open(DIR)
-	d.list_dir_begin()
-	var fname := d.get_next()
-	while fname != "":
-		if d.current_is_dir():# and fname.begins_with("slot_"):
-			out.append(fname)#.trim_prefix("slot_"))
-		fname = d.get_next()
-	d.list_dir_end()
-	return out
+func get_all_saved_slots() -> PackedStringArray:
+	return UFile.get_dirs(DIR)
 
 func get_slot_directory(slot: String) -> String:
 	return DIR.plus_file(slot)
@@ -50,20 +40,30 @@ func get_slot_info(slot: String) -> Dictionary:
 	else:
 		return {}
 
-func load_slot(slot: String):
-	pre_load.emit()
-	
+func delete_slot(slot: String):
 	var slot_path := get_slot_directory(slot)
-	var state: Dictionary = UFile.load_from_resource(slot_path.plus_file("state.res"))
-	_set_state.emit(state)
+	if UFile.dir_exists(slot_path):
+		UFile.remove_directory(slot_path)
+
+func load_slot(slot: String):
+	var slot_path := get_slot_directory(slot)
+	var state: Dictionary = UFile.load_from_resource(slot_path.plus_file(FNAME_STATE))
 	
+	var scene: Node = load(state.current_scene).instantiate()
+	if get_tree().change_scene(state.current_scene) != OK:
+		push_error("Couldn't load the scene.")
+		return
+	
+	await get_tree().process_frame
+	
+	pre_load.emit()
+	_set_state.emit(state)
 	loaded.emit()
 
-func save_to_slot(slot: String):
+func save_slot(slot: String):
 	pre_save.emit()
 	
 	var slot_path := get_slot_directory(slot)
-	print("Save to ", slot)
 	
 	var d := Directory.new()
 	if not d.dir_exists(slot_path):
@@ -71,8 +71,11 @@ func save_to_slot(slot: String):
 	
 	# state data
 	var state := {}
+	state.current_scene = get_tree().current_scene.scene_file_path
 	_get_state.emit(state)
 	UFile.save_to_resource(slot_path.plus_file(FNAME_STATE), state)
+	# DEBUG
+	UFile.save_to_resource(slot_path.plus_file("state.tres"), state)
 	
 	# save slot info
 	var state_info := { time=Time.get_datetime_dict_from_system() }
