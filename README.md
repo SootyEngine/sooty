@@ -3,10 +3,10 @@ A dialogue engine for Godot4.
 
 `WARNING: Currently under **heavy** construction.`
 
-![](readme/code_preview.png)
-
 Example project [here](https://github.com/teebarjunk/sooty-example).
 ![](https://raw.githubusercontent.com/teebarjunk/sooty-example/main/README/preview.png)
+
+![](readme/code_preview.png)
 
 # Features
 - Scripting language with highlighter.
