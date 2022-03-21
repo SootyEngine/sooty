@@ -9,13 +9,6 @@ func _init() -> void:
 	Saver._get_state.connect(_save_state)
 	Saver._set_state.connect(_load_state)
 
-func _save_state(data: Dictionary):
-	data["State"] = _get_changed_states()
-
-func _load_state(data: Dictionary):
-	_reset()
-	_patch(data["State"])
-
 func do(command: String) -> Variant:
 	# state method
 	if command.begins_with(Sooty.S_ACTION_STATE):

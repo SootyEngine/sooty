@@ -22,6 +22,23 @@ signal on_line(text: DialogueLine)
 @export var _wait := 0.0
 @export var _halting_for := []
 
+func _init() -> void:
+	if not Engine.is_editor_hint():
+		Saver._check_can_save.connect(_check_can_save)
+		Saver._get_state.connect(_save_state)
+		Saver._set_state.connect(_load_state)
+
+func _check_can_save(blockers: Array):
+	if _active:
+		push_error("Currently can't save an active Dialogue.")
+		blockers.append(self)
+
+func _save_state(state: Dictionary):
+	state["DS"] = UObject.get_state(self)
+
+func _load_state(state: Dictionary):
+	UObject.set_state(self, state["DS"])
+
 func wait(time := 1.0):
 	_wait = time
 	_break = true

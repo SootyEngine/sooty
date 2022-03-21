@@ -112,4 +112,5 @@ bbcode_enabled = true
 fit_content_height = true
 script = ExtResource( "3_aic4g" )
 bbcode = "Slot Data"
+color = Color(0.529412, 0.529412, 0.529412, 1)
 outline_colored = 4

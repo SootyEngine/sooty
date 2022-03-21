@@ -13,6 +13,13 @@ func _get_subdir() -> String:
 	assert(false)
 	return ""
 
+func _save_state(data: Dictionary):
+	data[_get_subdir()] = _get_changed_states()
+
+func _load_state(data: Dictionary):
+	_reset()
+	_patch(data.get(_get_subdir(), {}))
+
 func _ready() -> void:
 	child_entered_tree.connect(_child_added)
 	_post_init.call_deferred()

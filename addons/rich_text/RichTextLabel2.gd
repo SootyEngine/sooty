@@ -145,7 +145,13 @@ func set_bbcode(btext: String):
 		opened = {},
 		pipes = []
 	}
+	if color != Color.WHITE:
+		_push_color(color)
+	
 	_parse(_preparse(btext))
+	
+	if color != Color.WHITE:
+		_pop_color(Color.WHITE)
 
 func set_meta_data(key: String, data: Variant):
 	_meta[key] = data

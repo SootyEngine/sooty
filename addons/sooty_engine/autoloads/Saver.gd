@@ -11,6 +11,7 @@ signal pre_save()
 signal pre_load()
 signal saved()
 signal loaded()
+signal _check_can_save(blocking: Array)
 # internally collect all state data
 signal _get_state(data: Dictionary)
 signal _set_state(data: Dictionary)
@@ -91,6 +92,12 @@ func load_slot(slot: String):
 	print("Loaded Slot %s." % slot)
 
 func save_slot(slot: String):
+	var blocking_save := []
+	_check_can_save.emit(blocking_save)
+	if len(blocking_save):
+		push_error("Can't save. Blocked by %s." % [blocking_save])
+		return
+	
 	pre_save.emit()
 	
 	var slot_path := get_slot_directory(slot)
