@@ -95,7 +95,8 @@ func tick():
 				
 			"text":
 				if "action" in line.line:
-					State.do(line.line.action)
+					for a in line.line.action:
+						State.do(a)
 				
 				on_line.emit(DialogueLine.new(line.did, line.line))
 			

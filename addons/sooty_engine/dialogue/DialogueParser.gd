@@ -386,8 +386,11 @@ static func _line_as_dialogue(line: Dictionary):
 		if "(" in line.from:
 			var a := UString.extract(line.from, "(", ")", true)
 			line.from = a.outside
-			line.action = "@%s.%s" % [line.from, a.inside]
-		
+			var action := []
+			for part in a.inside.split(";"):
+				action.append("@%s.%s" % [line.from, part])
+			line.action = action
+	
 	line.text = line.text.replace("\\:", ":")
 	
 	var options := []
