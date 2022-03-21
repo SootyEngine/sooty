@@ -27,9 +27,9 @@ func wait(time := 1.0):
 	_break = true
 
 func halt(halter: Object):
-	_break = true
 	if not halter in _halting_for:
 		_halting_for.append(halter)
+		_break = true
 
 func unhalt(halter: Object):
 	if halter in _halting_for:

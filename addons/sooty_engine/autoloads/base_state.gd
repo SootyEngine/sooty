@@ -68,10 +68,17 @@ func _call(method: String, args: Array = [], default = null) -> Variant:
 			push_error("No property %s in state." % p[0])
 			return default
 	
+	# first check if it's a property
+	if len(args) == 0:
+		for node in _children:
+			if method in node:
+				return node[method]
+	
+	# call the first method we find
 	for node in _children:
 		if node.has_method(method):
 			return UObject.call_w_args(node, method, args)
-#			return node.callv(method, args)
+	
 	return default
 
 func _reset_state():

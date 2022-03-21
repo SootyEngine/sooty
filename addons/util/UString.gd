@@ -2,6 +2,12 @@
 extends Resource
 class_name UString
 
+static func as_string(v: Variant) -> String:
+	if v is Object and v.has_method("as_string"):
+		return v.as_string()
+	else:
+		return str(v)
+
 # Get a list of strings that are similar, sorted by similarity.
 static func find_most_similar(to: String, options: Array, threshold: float = 0.25) -> Array[String]:
 	var out := []

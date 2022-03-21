@@ -43,8 +43,16 @@ enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
 		add_theme_font_size_override("italics_font_size", size)
 		add_theme_font_size_override("mono_font_size", size)
 		add_theme_font_size_override("normal_font_size", size)
-@export var outline_mode: Outline = Outline.DARKEN
-@export var outline_colored := 0
+@export var outline_mode: Outline = Outline.DARKEN:
+	set(o):
+		outline_mode = o
+		add_theme_color_override("font_outline_color", _get_outline_color(Color.WHITE))
+	
+@export var outline_colored := 0:
+	set(o):
+		outline_colored = o
+		add_theme_constant_override("outline_size", o)
+
 @export_range(0.0, 1.0) var outline_adjust := 0.5
 @export var outline_hue_adjust := 0.0125
 
@@ -174,11 +182,7 @@ func _parse_opening(tag: String):
 			_add_text("[%s]" % tag)
 			pop()
 		else:
-#			_add_text(str(got))
-			if got is Object and got.has_method("to_string"):
-				_parse(got.to_string())
-			else:
-				_parse(str(got))
+			_parse(UString.as_string(got))
 		
 		if len(p) == 2:
 			_stack_pop()
@@ -422,16 +426,24 @@ func _push_color(clr: Color):
 	push_color(clr)
 	
 	# outline color
-	var outline_color := clr
-	match outline_mode:
-		Outline.DARKEN: outline_color = clr.darkened(outline_adjust)
-		Outline.LIGHTEN: outline_color = clr.lightened(outline_adjust)
-	outline_color.h = wrapf(outline_color.h + outline_hue_adjust, 0.0, 1.0)
+	var outline_color := _get_outline_color(clr)
+#	match outline_mode:
+#		Outline.DARKEN: outline_color = clr.darkened(outline_adjust)
+#		Outline.LIGHTEN: outline_color = clr.lightened(outline_adjust)
+#	outline_color.h = wrapf(outline_color.h + outline_hue_adjust, 0.0, 1.0)
 	push_outline_color(outline_color)
 	
 	# outline size
 	if outline_colored > 0:
 		push_outline_size(outline_colored)
+
+func _get_outline_color(clr: Color) -> Color:
+	var out := clr
+	match outline_mode:
+		Outline.DARKEN: out = clr.darkened(outline_adjust)
+		Outline.LIGHTEN: out = clr.lightened(outline_adjust)
+	out.h = wrapf(out.h + outline_hue_adjust, 0.0, 1.0)
+	return out
 
 func _pop_color(data):
 	_state.color = data
