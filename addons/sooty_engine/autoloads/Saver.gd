@@ -1,6 +1,7 @@
 extends Node
 
 const DIR := "user://saves"
+const PATH_PERSISTENT := "user://persistent.res"
 const FNAME_INFO := "info.json"
 const FNAME_PREVIEW := "preview.png"
 const FNAME_STATE := "state.res"
@@ -16,10 +17,38 @@ signal _set_state(data: Dictionary)
 # internall collect state info
 signal _get_state_info(data: Dictionary)
 
+signal pre_save_persistent()
+signal _get_persistent(data: Dictionary)
+signal saved_persistent()
+signal pre_load_persistent()
+signal _set_persistent(data: Dictionary)
+signal loaded_persistent()
+
 func _ready() -> void:
 	var d := Directory.new()
 	if not d.dir_exists(DIR):
 		d.make_dir(DIR)
+	_ready_deferred.call_deferred()
+
+func _ready_deferred():
+	load_persistent()
+
+func save_persistent():
+	pre_save_persistent.emit()
+	var data := {}
+	_get_persistent.emit(data)
+	UFile.save_to_resource(PATH_PERSISTENT, data)
+	# DEBUG
+	UFile.save_to_resource("user://persistent.tres", data)
+	saved_persistent.emit()
+	print("Saved Persistent.")
+
+func load_persistent():
+	pre_load_persistent.emit()
+	var data: Dictionary = UFile.load_from_resource(PATH_PERSISTENT, {})
+	_set_persistent.emit(data)
+	loaded_persistent.emit()
+	print("Loaded Persistent.")
 
 func get_all_saved_slots() -> PackedStringArray:
 	return UFile.get_dirs(DIR)
@@ -59,6 +88,7 @@ func load_slot(slot: String):
 	pre_load.emit()
 	_set_state.emit(state)
 	loaded.emit()
+	print("Loaded Slot %s." % slot)
 
 func save_slot(slot: String):
 	pre_save.emit()
@@ -89,3 +119,4 @@ func save_slot(slot: String):
 	img.save_png(slot_path.plus_file(FNAME_PREVIEW))
 	
 	saved.emit()
+	print("Saved Slot %s." % slot)

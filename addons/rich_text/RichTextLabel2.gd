@@ -16,6 +16,7 @@ enum {
 	T_CONDITION,
 	T_BOLD, T_ITALICS, T_BOLD_ITALICS, T_UNDERLINE, T_STRIKE_THROUGH,
 	T_CODE,
+	T_META,
 	T_FONT_SIZE,
 	T_TABBLE, T_CELL,
 	T_EFFECT,
@@ -26,6 +27,9 @@ enum {
 enum Align { NONE, LEFT, CENTER, RIGHT }
 enum Outline { OFF, DARKEN, LIGHTEN }
 enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
+
+signal clicked(variant: Variant)
+signal right_clicked(variant: Variant)
 
 @export_multiline var bbcode := "": set = set_bbcode
 
@@ -67,12 +71,49 @@ enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
 
 var _stack := []
 var _state := {}
+var _meta := {}
+var _meta_hovered: Variant = null
 
 var _shortcuts := {}
 var _custom_colors := {}
 
 func _get_tool_buttons():
 	return ["_redraw"]
+
+func _init():
+	if not Engine.is_editor_hint():
+		meta_hover_started.connect(_meta_hover_started)
+		meta_hover_ended.connect(_meta_hover_ended)
+		gui_input.connect(_gui_input)
+
+func _meta_hover_started(meta: Variant):
+	_meta_hovered = meta
+
+func _meta_hover_ended(meta: Variant):
+	_meta_hovered = null
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and _meta_hovered != null:
+		match event.button_index:
+			MOUSE_BUTTON_LEFT:
+				if _meta_hovered in _meta:
+					if _meta[_meta_hovered] is Callable:
+						_meta[_meta_hovered].call()
+					else:
+						clicked.emit(_meta[_meta_hovered])
+				else:
+					push_error("No meta url for '%s'. %s" % [_meta_hovered, _meta.keys()])
+				get_viewport().set_input_as_handled()
+				
+			MOUSE_BUTTON_RIGHT:
+				if _meta_hovered in _meta:
+					if _meta[_meta_hovered] is Callable:
+						_meta[_meta_hovered].call()
+					else:
+						right_clicked.emit(_meta[_meta_hovered])
+				else:
+					push_error("No meta url for '%s'." % _meta_hovered)
+				get_viewport().set_input_as_handled()
 
 func _ready() -> void:
 	_reload_config()
@@ -95,7 +136,7 @@ func set_bbcode(btext: String):
 	bbcode = btext
 	clear()
 	uninstall_effects()
-	
+	_meta.clear()
 	_stack.clear()
 	_state = {
 		color = color,
@@ -105,6 +146,9 @@ func set_bbcode(btext: String):
 		pipes = []
 	}
 	_parse(_preparse(btext))
+
+func set_meta_data(key: String, data: Variant):
+	_meta[key] = data
 
 func set_font(id: String):
 	font = id
@@ -203,7 +247,6 @@ func _parse_tags(tags_string: String):
 	
 	var added_stack := false
 	for tag in tags:
-#		prints("\t[%s]" % tag)
 		# close last
 		if tag == "":
 			if added_stack and len(_stack) and not len(_stack[-1]):
@@ -275,11 +318,9 @@ func _passes_condition(cond: String, raw: String) -> bool:
 			_stack_push(T_CONDITION)
 			
 		"elif":
-			prints("ELIF", raw)
 			if "condition" in _state and _state.condition == false:
 				var test := raw.split(" ", true, 1)[1]
 				_state.condition = State._test(test)
-				prints("tested:", test, "got:", _state.condition)
 		
 		"else":
 			if "condition" in _state:
@@ -335,6 +376,8 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		"lit": _push_color(_state.color.lightened(.33))
 		"hide": _push_color(Color.TRANSPARENT)
 		
+		"meta": _push_meta(info.strip_edges())
+		
 		_:
 			if not _has_effect(tag):
 				pass
@@ -359,9 +402,12 @@ func _add_text(t: String):
 #	if _state.get("condition", true):
 	for pipe in _state.pipes:
 		var got = State._pipe(t, pipe)
-#		prints("PIPED (%s) WITH (%s) ANDGOT (%s)" % [t, pipe, got])
 		t = str(got)
 	add_text(t)
+
+func _push_meta(data: Variant):
+	_stack_push(T_META)
+	push_meta(data)
 
 func _push_bold():
 	_stack_push(T_BOLD)

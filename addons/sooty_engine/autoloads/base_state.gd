@@ -33,8 +33,8 @@ func _install_mods(dirs: Array):
 			else:
 				push_error("States must be node. Can't load %s." % script_path)
 
-func reset():
-	_load_state(_default)
+func _reset():
+	_patch(_default)
 
 func _post_init():
 	_default = _get_state()
@@ -85,8 +85,7 @@ func _call(method: String, args: Array = [], default = null) -> Variant:
 func _reset_state():
 	UObject.set_state(self, _default)
 
-func _load_state(state: Dictionary):
-	_reset_state()
+func _patch(state: Dictionary):
 	UObject.set_state(self, state)
 
 func _get_changed_states() -> Dictionary:

@@ -25,7 +25,7 @@ func _select_slot(index: int):
 	var slot := "%s_%s" % [page, index] # slot_names[index]
 	
 	# save?
-	if Input.is_key_pressed(KEY_SHIFT):# save_mode:
+	if not Input.is_key_pressed(KEY_SHIFT):# save_mode:
 		await Saver.save_slot(slot)
 		_update_slot(index)
 		return
