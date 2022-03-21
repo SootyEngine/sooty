@@ -1,0 +1,6 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bi2kwmgsucqsp"]
+
+[ext_resource type="Shader" path="res://addons/sooty_engine/ui/ui_save_slot.gdshader" id="1_6qgtw"]
+
+[resource]
+shader = ExtResource( "1_6qgtw" )

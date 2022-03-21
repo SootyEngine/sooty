@@ -1,6 +1,9 @@
 extends Node
 
 const DIR := "user://saves"
+const FNAME_INFO := "info.json"
+const FNAME_PREVIEW := "preview.png"
+const FNAME_STATE := "state.res"
 const PREVIEW_SIZE_DIV_AMOUNT := 3.0 # How much to shrink preview image.
 
 signal pre_save()
@@ -36,13 +39,16 @@ func get_slot_directory(slot: String) -> String:
 
 func get_slot_info(slot: String) -> Dictionary:
 	var dir := get_slot_directory(slot)
-	var info = UFile.load_json(dir.plus_file("slot.json"), {})
-	var preview = UFile.load_image(dir.plus_file("preview.png"))
-	info.slot = slot
-	info.preview = preview
-	info.dir_size = UFile.get_directory_size(dir)
-	info.date_time = DateTime.create_from_datetime(info.time)
-	return info
+	if UFile.dir_exists(dir):
+		var info = UFile.load_json(dir.plus_file(FNAME_INFO), {})
+		var preview = UFile.load_image(dir.plus_file("preview.png"))
+		info.slot = slot
+		info.preview = preview
+		info.dir_size = UFile.get_directory_size(dir)
+		info.date_time = DateTime.create_from_datetime(info.time)
+		return info
+	else:
+		return {}
 
 func load_slot(slot: String):
 	pre_load.emit()
@@ -57,26 +63,26 @@ func save_to_slot(slot: String):
 	pre_save.emit()
 	
 	var slot_path := get_slot_directory(slot)
+	print("Save to ", slot)
 	
 	var d := Directory.new()
 	if not d.dir_exists(slot_path):
 		d.make_dir(slot_path)
 	
-	# preview image
-	var vp := get_viewport()
-	var img := vp.get_texture().get_image()
-	var siz := img.get_size() / PREVIEW_SIZE_DIV_AMOUNT
-	img.resize(ceil(siz.x), ceil(siz.y), Image.INTERPOLATE_LANCZOS)
-	img.save_png(slot_path.plus_file("preview.png"))
-	
 	# state data
 	var state := {}
 	_get_state.emit(state)
-	UFile.save_to_resource(slot_path.plus_file("state.res"), state)
+	UFile.save_to_resource(slot_path.plus_file(FNAME_STATE), state)
 	
 	# save slot info
 	var state_info := { time=Time.get_datetime_dict_from_system() }
 	_get_state_info.emit(state_info)
-	UFile.save_json(slot_path.plus_file("info.json"), state_info)
+	UFile.save_json(slot_path.plus_file(FNAME_INFO), state_info)
+	
+	# preview image
+	var img: Image = SimpleVN.get_node("debug")._screenshot.duplicate()
+	var siz := img.get_size() / PREVIEW_SIZE_DIV_AMOUNT
+	img.resize(ceil(siz.x), ceil(siz.y), Image.INTERPOLATE_LANCZOS)
+	img.save_png(slot_path.plus_file(FNAME_PREVIEW))
 	
 	saved.emit()

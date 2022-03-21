@@ -1,8 +1,17 @@
-[gd_scene load_steps=4 format=3 uid="uid://d118gcdl1wkns"]
+[gd_scene load_steps=6 format=3 uid="uid://d118gcdl1wkns"]
 
-[ext_resource type="Texture2D" uid="uid://d0usc6cst6c1d" path="res://icon.png" id="1_60yqm"]
-[ext_resource type="Script" path="res://addons/sys_state/ui/ui_save_slot.gd" id="1_fmcgh"]
+[ext_resource type="Texture2D" uid="uid://b3vywvjoc08be" path="res://icon.png" id="1_60yqm"]
+[ext_resource type="Script" path="res://addons/sooty_engine/ui/ui_save_slot.gd" id="1_k0e3m"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="3_aic4g"]
+
+[sub_resource type="Gradient" id="Gradient_g0bwb"]
+interpolation_mode = 2
+offsets = PackedFloat32Array(0, 0.182156, 0.814126, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0.601562, 0.601562, 0.601562, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_ehy0a"]
+gradient = SubResource( "Gradient_g0bwb" )
+fill_to = Vector2(0, 1)
 
 [node name="save_slot" type="VBoxContainer"]
 rect_min_size = Vector2(240, 160)
@@ -14,16 +23,28 @@ offset_left = -120.0
 offset_top = -80.0
 offset_right = 120.0
 offset_bottom = 80.0
-script = ExtResource( "1_fmcgh" )
+script = ExtResource( "1_k0e3m" )
+_preview = NodePath("Control/mask/preview")
+_label_caption = NodePath("Control/align/caption")
+_label_info = NodePath("label")
+_caption_container = NodePath("Control/align")
 
-[node name="mask" type="ColorRect" parent="."]
-clip_children = true
-rect_min_size = Vector2(180, 120)
+[node name="Control" type="Control" parent="."]
 offset_right = 240.0
-offset_bottom = 120.0
+offset_bottom = 133.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
 mouse_filter = 2
 
-[node name="preview" type="TextureRect" parent="mask"]
+[node name="mask" type="TextureRect" parent="Control"]
+clip_children = true
+rect_min_size = Vector2(180, 120)
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = SubResource( "GradientTexture2D_ehy0a" )
+
+[node name="preview" type="TextureRect" parent="Control/mask"]
 rect_clip_content = true
 rect_min_size = Vector2(180, 120)
 anchor_right = 1.0
@@ -39,10 +60,41 @@ __meta__ = {
 "_edit_use_custom_anchors": false
 }
 
-[node name="label" type="RichTextLabel" parent="."]
-offset_top = 124.0
+[node name="align" type="VBoxContainer" parent="Control"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -66.5
+offset_right = 120.0
+offset_bottom = 66.5
+mouse_filter = 2
+alignment = 2
+
+[node name="caption" type="RichTextLabel" parent="Control/align"]
+offset_top = 99.0
 offset_right = 240.0
-offset_bottom = 147.0
+offset_bottom = 133.0
+size_flags_vertical = 8
+mouse_filter = 2
+theme_override_colors/font_outline_color = Color(0.5, 0.5, 0.5, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/mono_font_size = 24
+theme_override_font_sizes/bold_italics_font_size = 24
+theme_override_font_sizes/italics_font_size = 24
+theme_override_font_sizes/bold_font_size = 24
+theme_override_font_sizes/normal_font_size = 24
+fit_content_height = true
+script = ExtResource( "3_aic4g" )
+bbcode = "test"
+size = 24
+outline_colored = 4
+
+[node name="label" type="RichTextLabel" parent="."]
+offset_top = 137.0
+offset_right = 240.0
+offset_bottom = 160.0
 bbcode_enabled = true
 fit_content_height = true
 script = ExtResource( "3_aic4g" )

@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-const AUTOLOADS := ["Sooty", "Global", "Mods", "State", "Persistent", "Dialogues", "DialogueStack"]
+const AUTOLOADS := ["Sooty", "Global", "Mods", "State", "Persistent", "Saver", "Dialogues", "DialogueStack"]
 const HIGHLIGHTER = preload("res://addons/sooty_engine/dialogue/SootHighlighter.gd")
 var highligher = HIGHLIGHTER.new()
 
