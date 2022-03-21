@@ -87,8 +87,8 @@ john: These [cherry]cherries[] sure look good. [cam1]Wait, these aren't cherries
 # Actions
 ![](readme/actions.png)
 
-|Char|Description|
-|----|-----------|
+|Char|Description|Example|
+|----|-----------|-------|
 |`~`|State expression.|`~score += pow(20, 2)` == `State.score += pow(20, 2)`|
 |`$`|State call.|`$player.damage 10 type:water` == `State.player.damage(10, {"type":"water"})`|
 |`@`|Group call.|`@camera.shake false y:0.5` == `get_nodes_in_group("camera").shake(false, {"y":0.5})`|
