@@ -384,6 +384,9 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		
 		"meta": _push_meta(info.strip_edges())
 		
+		"lb": _add_text("[")
+		"rb": _add_text("]")
+		
 		_:
 			if not _has_effect(tag):
 				pass

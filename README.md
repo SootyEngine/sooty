@@ -118,7 +118,7 @@ This allows us to do `stat += 1` instead of `stat.value += 1`
 # The State System - Saving, Loading, and Modding.
 Create a script in `res://states` that extends any `Node`.  
 On startup, Sooty will add all scripts in this folder as children of the `State` node.  
-All of their properties and functions are now assessible to the scripting system.
+All of their properties and functions are now accessible to the scripting system.
 
 ```
 # state.gd

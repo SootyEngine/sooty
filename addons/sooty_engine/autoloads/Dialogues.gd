@@ -7,13 +7,17 @@ signal reloaded(dialogue: Dialogue)
 var cache := {}
 
 func _init() -> void:
-	Mods.install.connect(_install_mods)
+	Mods.pre_loaded.connect(_clear_mods)
+	Mods.load_all.connect(_load_mods)
 
-func _install_mods(dirs: Array):
+func _clear_mods():
+	cache.clear()
+
+func _load_mods(mods: Array):
 	var memory_before = OS.get_static_memory_usage()
 	print("[Dialogues]")
-	for dir in dirs:
-		var head = dir.plus_file("dialogue")
+	for mod in mods:
+		var head = mod.dir.plus_file("dialogue")
 		for soot_path in UFile.get_files(head, ".soot"):
 			Mods._print_file(soot_path)
 			var d := Dialogue.new(soot_path)

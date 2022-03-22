@@ -1,23 +1,20 @@
 extends Node
 
 const USER_DIR := "user://mods"
+const AUTO_INSTALL_USER_MODS := false
 
-signal pre_installed()
-signal install(dirs: Array[String])
-signal installed()
+signal pre_loaded()
+signal load_all(list: Array)
+signal loaded()
 
-signal pre_uninstalled(mod: String)
-signal uninstalled(mod: String)
-
-var auto_load_user_mods := false
-var installed_dirs := []
+var mods := {}
 
 func _init() -> void:
-	install_mod("res://")
+	_add_mod("res://", true)
 	
-	if auto_load_user_mods and UFile.dir_exists(USER_DIR):
+	if UFile.dir_exists(USER_DIR):
 		for mod in get_user_mod_dirs():
-			install_mod(mod)
+			_add_mod(mod, AUTO_INSTALL_USER_MODS)
 
 func get_user_mod_dirs() -> PackedStringArray:
 	return UFile.get_dirs("user://mods")
@@ -26,9 +23,32 @@ func _ready() -> void:
 	_ready_deferred.call_deferred()
 
 func _ready_deferred():
-	pre_installed.emit()
-	install.emit(installed_dirs)
-	installed.emit()
+	_update()
+
+func get_installed() -> Array:
+	var filtered := mods.values().filter(func(x): return x.installed)
+	filtered.sort_custom(func(a, b): return a.get_priority() < b.get_priority())
+	return filtered
+
+func get_uninstalled() -> Array:
+	var filtered := mods.values().filter(func(x): return not x.installed)
+	filtered.sort_custom(func(a, b): return a.get_priority() < b.get_priority())
+	return filtered
+
+func install(dir: String):
+	if not mods[dir].installed:
+		mods[dir].installed = true
+		_update()
+
+func uninstall(dir: String):
+	if mods[dir].installed:
+		mods[dir].installed = false
+		_update()
+
+func _update():
+	pre_loaded.emit()
+	load_all.emit(get_installed())
+	loaded.emit()
 
 func _print_file(path: String):
 	var f = UFile.get_file_name(path)
@@ -47,10 +67,10 @@ func _print_file(path: String):
 	var space = " ".repeat(16 - len(f))
 	print("  %s %s%s%s" % [h, f, space, d ])
 
-func install_mod(mod: String):
-	if not mod.begins_with("res://") and not mod.begins_with("user://"):
+func _add_mod(mod_dir: String, install: bool):
+	if not mod_dir.begins_with("res://") and not mod_dir.begins_with("user://"):
 		push_error("Only mods in res:// and user:// are allowed.")
 		return
 	
-	if not mod in installed_dirs:
-		installed_dirs.append(mod)
+	if not mod_dir in mods:
+		mods[mod_dir] = ModInfo.new(mod_dir, install)
