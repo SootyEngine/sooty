@@ -115,46 +115,33 @@ This allows us to do `stat += 1` instead of `stat.value += 1`
 # Conditionals
 ![](readme/ifelse.png)
 
+# The State System - Saving, Loading, and Modding.
+Create a script in `res://states` that extends any `Node`.  
+On startup, Sooty will add all scripts in this folder as children of the `State` node.  
+All of their properties and functions are now assessible to the scripting system.
 
-# Modding
-**TODO**
-All state data is treated as mods.  
-They are "installed" at start up.  
-Optionally scripts in `user://mods` can be autoloaded.
+```
+# state.gd
+extends Node
 
-## Folders
-On `_init`, an autoload should call `Mods.install_mod(directory)`.
-Inside that directory can be directories for:
+var score := 0
 
-|Folder|File type(s)|Desc|
-|:-----|-----------:|:---|
-|`dialogues/`| `*.soot`|Dialogue files.|
-|`states/`| `*.gd`|Node scripts contain state data.|
-|`states_persistent/`| `*gd`|Node scripts containing persistent state data.|
-|`scenes/`| `.tscn` `.scn`|Scenes accessed by name.|
+func my_score():
+    return "[b]%s[]" % score
+
+func boost_score(amount := 1):
+    score += amount
 
 
-# Localization
-**TODO**
-End of line comment of form `//#unique_line_id`<br>
-These can be auto generated.
+# story.soot
+My score is [$my_score].
+$boost_score 1234567
+My score plus 1,234,567 is [$score].
+```
 
-# States
-The `State` class and `Persistent` are where game properties should be accessed.
+Sooty will automatically save any values that changed, and only values that changed.
 
-`State` loads scripts in `res://states` as node children.  
-- Characters
-- World states
-
-`Persistent` loads scripts in `res://states_persistent` as node children.
-- Achievements
-- Unlockables
-
-From `State` you can access anything in `Persistent`: `State.achievement_NiceJob.progress > 0`
-
-All initial values are tracked, and then any value that changes will be saved.
-
-*WARNING:* Properties across scripts should be unique, as they are accessed on a first name basis.
+*WARNING:* Properties across scripts should be unique, as they are accessed on a first come first serve basis.
 
 ```
 # If you do this, only one of these properties will be saved, and accessible through State.
@@ -166,5 +153,44 @@ var fields := Character.new({name="Mr. Fields"})
 var fields := Location.new({name="The Fields"})
 ```
 
+The `State` class has signals you may find useful:  
+
+|Signal|Desc|
+|------|----|
+|changed(property: String)|Property that was changed.|
+|changed_to(property: String, to: Variant)|Property that was changed and what it was changed to.|
+|changed_from_to(property: String, from: Variant, to: Variant)|Property that was changed, it's old value, and it's new value.|
+
+*WARNING:* Property string may be "nested": `"player.stat.STR"`
+
+## Save System
+
+Any kind of property can be saved, including built in Godot types like Vector2 and Color, and even complex Objects and Resources.  
+For each Object/Resource, a dictionary of properties (only those that have changed) will be saved.  
+Arrays of Objects/Resource aren't currently savable.
+
+If you add a property `var save_caption := "Save Name"` it will be shown on the save screen. This could be used to indicate to the player what location, mission, or progress, the slot's data contains. It could contain BBCode.
+
+## Modding
+**TODO**  
+The state system was entirely designed with modding/expansions/patches in mind.  
+
+Mods should each have their own folder in `user://mods`.
+
+Inside that directory can be directories for:
+
+|Folder|File type(s)|Desc|
+|:-----|-----------:|:---|
+|`dialogues/`| `*.soot`|Dialogue files.|
+|`states/`| `*.gd`|Node scripts contain state data.|
+|`states_persistent/`| `*gd`|Node scripts containing persistent state data.|
+|`scenes/`| `.tscn` `.scn`|Scenes accessed by name.|
+
+# Localization
+**TODO**  
+End of line comment of form `//#unique_line_id`<br>
+These can be auto generated.
+
+
 # Building/Exporting
-Make sure to include `*.soot,*.cfg` files when exporting.
+Make sure to include `*.soot,*.cfg` files when building.

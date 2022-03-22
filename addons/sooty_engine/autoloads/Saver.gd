@@ -111,6 +111,13 @@ func save_slot(slot: String):
 	
 	# save slot info
 	var state_info := { time=Time.get_datetime_dict_from_system() }
+	
+	if State._has("save_caption"):
+		state_info.save_caption = State._get("save_caption")
+	
+	if State._has("progress"):
+		state_info.progress = State._get("progress")
+	
 	_get_state_info.emit(state_info)
 	UFile.save_json(slot_path.plus_file(FNAME_INFO), state_info)
 	
