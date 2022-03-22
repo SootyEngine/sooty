@@ -61,6 +61,7 @@ Values can be piped through functions: `You have [$apples|commas] apples.` -> `Y
 
 So can text: `I have [|commas]1234567[] apples.` -> `I have 1,234,567,apples.`
 
+Any function defined in a node in the `states` folder will be accessible. You can spread functions across multiple scripts/nodes, but if there are multiple with the same name, only the first will be used.
 
 ## Shortcuts
 In `config.cfg` you can set shortcuts for complex actions and custom colors:

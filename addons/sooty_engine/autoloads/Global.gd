@@ -19,12 +19,31 @@ var window_size: Vector2:
 var window_aspect: float:
 	get: return float(window_width) / float(window_height)
 
+var scene_id: String:
+	get: return UFile.get_file_name(get_tree().current_scene.scene_file_path)
+
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		set_process(false)
+	
+	# call the start function
+	await get_tree().process_frame
+	var scene := get_tree().current_scene
+	scene_changed.emit()
+	if scene.has_method("_start"):
+		scene._start(false)
 
-func _get(property: StringName):
-	ProjectSettings
+# change scene with signals, and call start function
+func change_scene(path: String, is_loading: bool):
+	if get_tree().change_scene(path) == OK:
+		pass
+	
+	pre_scene_changed.emit()
+	await get_tree().process_frame
+	var scene := get_tree().current_scene
+	scene_changed.emit()
+	if scene.has_method("_start"):
+		scene._start(is_loading)
 
 func _input(event: InputEvent) -> void:
 	if Engine.is_editor_hint():
@@ -36,22 +55,6 @@ func _input(event: InputEvent) -> void:
 
 func notify(msg: Dictionary):
 	message.emit("notification", msg)
-
-#func change_scene(to: String):
-#	if not File.new().file_exists(to):
-#		push_error("No scene at %s." % to)
-#		return
-#
-#	# remove old scene
-#	var root := get_tree().get_root()
-#	var old: Node = get_tree().current_scene
-#	root.remove_child(old)
-#	old.queue_free()
-#
-#	# add new scene
-#	var new: Node = load(to).instantiate()
-#	root.add_child(new)
-#	get_tree().current_scene = new
 
 func call_group(group: String, fname: String, args := []):
 	match len(args):

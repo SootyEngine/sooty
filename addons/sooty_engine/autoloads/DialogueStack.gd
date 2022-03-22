@@ -1,11 +1,8 @@
 @tool
 extends Node
 
-const MAX_STEPS_PER_TICK := 20
-enum {
-	STEP_GOTO,
-	STEP_CALL
-}
+const MAX_STEPS_PER_TICK := 20 # Safety limit, in case of excessive loops.
+enum { STEP_GOTO, STEP_CALL }
 
 signal started()
 signal finished()
@@ -21,23 +18,41 @@ signal on_line(text: DialogueLine)
 @export var _stack := []
 @export var _wait := 0.0
 @export var _halting_for := []
+@export var _last_tick_stack := []
 
 func _init() -> void:
 	if not Engine.is_editor_hint():
-		Saver._check_can_save.connect(_check_can_save)
+#		Saver._check_can_save.connect(_check_can_save)
 		Saver._get_state.connect(_save_state)
 		Saver._set_state.connect(_load_state)
+		Saver.loaded.connect(_loaded)
 
-func _check_can_save(blockers: Array):
-	if _active:
-		push_error("Currently can't save an active Dialogue.")
-		blockers.append(self)
+#func _check_can_save(blockers: Array):
+#	if _active:
+#		push_error("Currently can't save an active Dialogue.")
+#		blockers.append(self)
 
 func _save_state(state: Dictionary):
-	state["DS"] = UObject.get_state(self)
+	state["DS"] = { active=_active, stack=_last_tick_stack }
 
 func _load_state(state: Dictionary):
-	UObject.set_state(self, state["DS"])
+	_break = false
+	_wait = 0.0
+	_halting_for = []
+	
+	_active = state["DS"].active
+	_stack = state["DS"].stack
+	
+	# rewind to last step before save happened?
+#	if len(_stack):
+#		if _stack[-1].step > 0:
+#			_stack[-1].step -= 1
+#		else:
+#			# Shouldn't happen.
+#			assert(false)
+
+func _loaded():
+	print("Loaded. Starting...")
 
 func wait(time := 1.0):
 	_wait = time
@@ -70,57 +85,6 @@ func _process(delta: float) -> void:
 			_wait = 0.0
 			_break = false
 	tick()
-
-func tick():
-	if _break:
-		return
-	
-	if not _active and has_steps():
-		_active = true
-		started.emit()
-	
-	if _active and not has_steps():
-		_active = false
-		finished.emit()
-	
-	if has_steps() and not _break:
-		tick_started.emit()
-	else:
-		return
-	
-	var safety := MAX_STEPS_PER_TICK
-	while has_steps() and not _break:
-		safety -= 1
-		if safety <= 0:
-			push_error("Tripped safety! Increase MAX_STEPS_PER_TICK if necessary.", safety)
-			break
-		
-		var line := pop_next_line()
-		
-		if not len(line):
-			break
-		
-		match line.line.type:
-			"action":
-				State.do(line.line.action)
-				
-			"goto":
-				goto(line.line.goto, true)
-				
-			"call":
-				goto(line.line.call, false)
-				
-			"text":
-				if "action" in line.line:
-					for a in line.line.action:
-						State.do(a)
-				
-				on_line.emit(DialogueLine.new(line.did, line.line))
-			
-			_:
-				push_warning("Huh? %s %s" % [line.line.keys(), line.line])
-	
-	tick_finished.emit()
 
 func start(id: String):
 	if _active:
@@ -184,7 +148,6 @@ func select_option(option: DialogueLine):
 	if "then" in o:
 		_push(option._dialogue_id, "%OPTION%", o.then, STEP_CALL)
 	option_selected.emit(option)
-#	unhalt()
 
 func _pop():
 	var last: Dictionary = _stack.pop_back()
@@ -196,6 +159,58 @@ func _push(did: String, flow: String, lines: Array, type: int):
 	_stack.append({ did=did, flow=flow, lines=lines, type=type, step=0 })
 	if type == STEP_GOTO:
 		flow_started.emit("%s.%s" % [did, flow])
+
+func tick():
+	if _break:
+		return
+	
+	if not _active and has_steps():
+		_active = true
+		started.emit()
+	
+	if _active and not has_steps():
+		_active = false
+		finished.emit()
+	
+	if has_steps() and not _break:
+		_last_tick_stack = _stack.duplicate(true)
+		tick_started.emit()
+	else:
+		return
+	
+	var safety := MAX_STEPS_PER_TICK
+	while has_steps() and not _break:
+		safety -= 1
+		if safety <= 0:
+			push_error("Tripped safety! Increase MAX_STEPS_PER_TICK if necessary.", safety)
+			break
+		
+		var line := pop_next_line()
+		
+		if not len(line):
+			break
+		
+		match line.line.type:
+			"action":
+				State.do(line.line.action)
+				
+			"goto":
+				goto(line.line.goto, true)
+				
+			"call":
+				goto(line.line.call, false)
+				
+			"text":
+				if "action" in line.line:
+					for a in line.line.action:
+						State.do(a)
+				
+				on_line.emit(DialogueLine.new(line.did, line.line))
+			
+			_:
+				push_warning("Huh? %s %s" % [line.line.keys(), line.line])
+	
+	tick_finished.emit()
 
 func pop_next_line() -> Dictionary:
 	var did_line := _pop_next_line()
