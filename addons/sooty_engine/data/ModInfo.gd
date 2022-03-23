@@ -36,8 +36,6 @@ func _init(d: String, inst: bool):
 		author = cfg.get_value("info", "author", "NO_AUTHOR")
 		version = cfg.get_value("info", "version", "NO_VERSION")
 		priority = cfg.get_value("info", "priority", 0)
-	
-	prints(name, author, version, get_priority())
 
 func get_priority() -> int:
 	return (-10000 if dir.begins_with("res://") else 10000) + priority

@@ -257,12 +257,17 @@ static func _process_line(line: Dictionary):
 	if t.begins_with(S_FLOW): return _line_as_flow(line)
 	if t.begins_with("{{"): return _line_as_condition(line)
 	_extract_conditional(line)
+	# option
 	if t.begins_with("- "): return _line_as_option(line)
-	if t.begins_with(Sooty.S_ACTION_EVAL): return _line_as_action(line)
-	if t.begins_with(Sooty.S_ACTION_STATE): return _line_as_action(line)
-	if t.begins_with(Sooty.S_ACTION_GROUP): return _line_as_action(line)
+	# actions
+	if t.begins_with("~"): return _line_as_action(line)
+	if t.begins_with("$"): return _line_as_action(line)
+	if t.begins_with("#"): return _line_as_action(line)
+	if t.begins_with("@"): return _line_as_action(line)
+	# flows
 	if t.begins_with(S_FLOW_GOTO): return _line_as_goto(line)
 	if t.begins_with(S_FLOW_CALL): return _line_as_call(line)
+	# property
 	if t.begins_with(S_PROPERTY_HEAD): return _line_as_properties(line)
 	return _line_as_dialogue(line)
 

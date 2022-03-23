@@ -96,7 +96,7 @@ func _preparse(btext: String) -> String:
 
 func _parse_tag_unused(tag: String, info: String, raw: String) -> bool:
 	# the user may want to fire things off, with their own signal.
-	if raw[0] == "!":# in "~!?@&*":
+	if raw[0] == "!":
 		return _register_trigger(TRIG_ACTION, raw.substr(1))
 	
 	match tag:

@@ -220,7 +220,7 @@ func _parse(btext: String):
 		_add_text(btext)
 
 func _parse_opening(tag: String):
-	if len(tag) and tag[0] in "~@$":
+	if len(tag) and tag[0] in "~@$#":
 		var p := tag.split(";", true, 1)
 		if len(p) == 2:
 			_parse_tags(p[1])

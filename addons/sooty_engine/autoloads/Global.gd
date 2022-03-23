@@ -34,7 +34,7 @@ func _ready() -> void:
 		scene._start(false)
 
 # change scene with signals, and call start function
-func change_scene(path: String, is_loading: bool):
+func change_scene(path: String, is_loading: bool = false):
 	if get_tree().change_scene(path) == OK:
 		pass
 	

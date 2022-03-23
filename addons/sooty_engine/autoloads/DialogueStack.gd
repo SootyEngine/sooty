@@ -13,12 +13,16 @@ signal flow_ended(id: String)
 signal option_selected(option: Dictionary)
 signal on_line(text: DialogueLine)
 
+@export var _execute_mode := false
 @export var _break := false
 @export var _active := false
 @export var _stack := []
 @export var _wait := 0.0
 @export var _halting_for := []
 @export var _last_tick_stack := []
+
+const S_FLOW_GOTO := "=>"
+const S_FLOW_CALL := "=="
 
 func _init() -> void:
 	if not Engine.is_editor_hint():
@@ -105,20 +109,29 @@ func start(id: String):
 			goto("%s.%s" % [id, first], STEP_GOTO)
 
 func can_do(command: String) -> bool:
-	return command.begins_with(Sooty.S_FLOW_GOTO) or command.begins_with(Sooty.S_FLOW_CALL)
+	return command.begins_with(S_FLOW_GOTO) or command.begins_with(S_FLOW_CALL)
 
 func do(command: String):
-	if command.begins_with(Sooty.S_FLOW_GOTO):
-		goto(command.trim_prefix(Sooty.S_FLOW_GOTO).strip_edges(), STEP_GOTO)
-	elif command.begins_with(Sooty.S_FLOW_CALL):
-		goto(command.trim_prefix(Sooty.S_FLOW_CALL).strip_edges(), STEP_CALL)
+	if command.begins_with(S_FLOW_GOTO):
+		goto(command.trim_prefix(S_FLOW_GOTO).strip_edges(), STEP_GOTO)
+	elif command.begins_with(S_FLOW_CALL):
+		goto(command.trim_prefix(S_FLOW_CALL).strip_edges(), STEP_CALL)
 	else:
 		push_error("Don't know what to do with '%s'." % command)
 
+func has(id: String) -> bool:
+	var p := id.split(".", true, 1)
+	if not Dialogues.has(p[0]):
+		return false
+	var d := Dialogues.get_dialogue(p[0])
+	if not d.has_flow(p[1]):
+		return false
+	return true
+
 func goto(did_flow: String, step_type: int) -> bool:
 	var p := did_flow.split(".", true, 1)
-	var did: String = p[0]
-	var flow: String = p[1]
+	var did := p[0]
+	var flow := p[1]
 	
 	if not Dialogues.has(did):
 		push_error("No dialogue %s." % did)
@@ -205,12 +218,21 @@ func tick():
 					for a in line.line.action:
 						State.do(a)
 				
-				on_line.emit(DialogueLine.new(line.did, line.line))
+				if not _execute_mode:
+					on_line.emit(DialogueLine.new(line.did, line.line))
 			
 			_:
 				push_warning("Huh? %s %s" % [line.line.keys(), line.line])
 	
 	tick_finished.emit()
+
+# forcibly run a flow. usefuly for setting up scenes from a .soot file.
+func execute(id: String):
+	if has(id):
+		var d = load("res://addons/sooty_engine/autoloads/DialogueStack.gd").new()
+		d._execute_mode = true
+		d.start(id)
+		d.tick()
 
 func pop_next_line() -> Dictionary:
 	var did_line := _pop_next_line()

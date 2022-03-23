@@ -11,15 +11,29 @@ func _init() -> void:
 
 func do(command: String) -> Variant:
 	# state method
-	if command.begins_with(Sooty.S_ACTION_STATE):
+	if command.begins_with("$"):
 		var call = command.substr(1)
 		var args := UString.split_on_spaces(call)
 		var method = args.pop_front()
 		var converted_args := args.map(_str_to_var)
 		return _call(method, converted_args)
 	
+	# node path method
+	elif command.begins_with("^"):
+		var call = command.substr(1)
+		var args := UString.split_on_spaces(call)
+		var head = args.pop_front()
+		if "." in head:
+			var p = args.pop_front().rsplit(".", true, 1)
+			var node_path = p[0].replace(",", ".")
+			var target := get_tree().current_scene.get_node(node_path)
+			var method = p[1]
+			return UObject.call_w_args(target, method, args)
+		else:
+			push_error("Not implemented.")
+	
 	# group function
-	elif command.begins_with(Sooty.S_ACTION_GROUP):
+	elif command.begins_with("@"):
 		var call = command.substr(1)
 		var args := UString.split_on_spaces(call)
 		var method = args.pop_front()
@@ -43,20 +57,34 @@ func do(command: String) -> Variant:
 			push_error("No nodes in group %s for %s(%s)." % [group, method, converted_args])
 	
 	# evaluate
-	elif command.begins_with(Sooty.S_ACTION_EVAL):
+	elif command.begins_with("~"):
 		return _eval(command.substr(1))
 	
 	else:
 		return _eval(command)
 
 func _str_to_var(s: String) -> Variant:
+	# builting
 	match s:
 		"true": return true
 		"false": return false
 		"null": return null
+		"INF": return INF
+		"-INF": return -INF
+		"PI": return PI
+		"TAU": return TAU
+	
 	# state variable?
 	if s.begins_with("$"):
 		return _get(s.substr(1))
+	
+	# evaluate
+	if UString.is_wrapped(s, "<<", ">>"):
+		var e := UString.unwrap(s, "<<", ">>")
+		var got = _eval(e)
+#		print("EVAL %s -> %s" % [e, got])
+		return got
+	
 	# array or dict?
 	if "," in s or ":" in s:
 		var args := s.split(",")
@@ -80,9 +108,11 @@ func _str_to_var(s: String) -> Variant:
 	# must be a string?
 	return s
 
+const OP_ASSIGN := [" = ", " += ", " -= ", " *= ", " /= "]
+
 func _eval(expression: String, default = null) -> Variant:
 	# assignments?
-	for op in [" = ", " += ", " -= ", " *= ", " /= "]:
+	for op in OP_ASSIGN:
 		if op in expression:
 			var p := expression.split(op, true, 1)
 			var property := p[0].strip_edges()

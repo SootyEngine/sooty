@@ -3,6 +3,7 @@ extends EditorScript
 
 var x = "Who"
 var y = [9,1,1]
+var clr := Color.WHITE
 
 func Character(x):
 	print("CALLED Character WITH ", x)
@@ -10,6 +11,10 @@ func Character(x):
 enum {WINTER, SPRING}
 
 func _run():
+	var exp = Expression.new()
+	exp.parse("Color('TRANSPARENT')")
+	print(exp.execute())
+	return
 	var test := "someFunc(a,b,func1(a,b+c),func2(a*b,func3(a+b,c)),func4(e)+func5(f),func6(func7(g,h)+func8(i,(a)=>a+2)),g+2)"
 	var done = State._globalize_functions("x += my_func(x, quest.win(y)) + sin(nein())")
 	print(done)

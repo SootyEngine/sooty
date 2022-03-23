@@ -186,7 +186,65 @@ Inside that directory can be directories for:
 |`states_persistent/`| `*gd`|Node scripts containing persistent state data.|
 |`scenes/`| `.tscn` `.scn`|Scenes accessed by name.|
 
-# Localization
+# Soot Script
+
+Script names are used internally as the `Dialogue` id. They contain *Flows*, which start with `===`.
+- `=>` Goes to a chapter.
+- `==` Goes to a chapter, then returns to this line when completed.
+
+```
+// my_story.soot
+=== START
+    Once upon a time.
+    => chapter_1
+
+=== chapter_1
+    There lived a dog.
+    => other_chapters.chapter_2
+
+
+// other_chapters.soot
+=== chapter_2
+    The dog was a fast runner.
+```
+
+## Built In Flows
+There are some special built in flow ids.
+
+They are all optional.
+
+|Flow ID|Desc|
+|-------|----|
+|INIT|Called when a scene is initialized. Will not run any dialogue, as it should be used for setting up a scene based on the `State`.|
+|START|Called when a scene is entered.|
+|CHANGED:property_name|Called whenever a property is changed. Useful for changing backgrounds.|
+
+```
+=== INIT
+    {{is_night_time}}
+        @bg.set_to night_time
+        @ghosts.show
+    {{else}}
+        @bg.set_to day_time
+        @ghosts.hide
+
+=== CHANGED:is_night_time
+    {{is_night_time}}
+        You sense spookiness.
+        player: I should get home.
+        @ghosts.show
+        @ghosts.animate spooky_dance
+
+```
+
+You can include a `MAIN.soot` file, which can have:
+
+|Flow ID|Desc|
+|-------|----|
+|START|Will be called when the game starts.|
+|END|Will be called when any flow ends.|
+
+## Localization
 **TODO**  
 End of line comment of form `//#unique_line_id`<br>
 These can be auto generated.

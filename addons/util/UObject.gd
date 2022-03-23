@@ -3,6 +3,7 @@ extends Resource
 class_name UObject
 
 const GLOBAL_SCOPE_METHODS := [
+	"Color", "Vector2", "Vector2i", "Vector3", "Vector3i",
 	"abs", "absf", "absi",
 	"acos", "asin", "atan", "atan2",
 	"bytes2var", "bytes2var_with_objects",
@@ -151,7 +152,12 @@ static func call_w_args(target: Object, method: String, in_args: Array = []) -> 
 		push_error("No method '%s(%s)' in %s." % [method, in_args, obj])
 		return
 	
-	var arg_info := get_method_arg_info(obj, method)
+	var arg_info = get_method_arg_info(obj, method)
+	
+	# no args mean it was probably not a script function but a built in
+	if arg_info == null:
+		return obj.callv(method, in_args)
+	
 	var old := in_args.duplicate(true)
 	var new := in_args.duplicate(true)
 	var out := []
@@ -226,13 +232,14 @@ static func try_get_at(d: Variant, path: Array, default = null) -> Variant:
 	else:
 		return default
 
-static func get_method_arg_info(obj: Object, meth: String) -> Dictionary:
-	return get_methods(obj).get(meth, {})
+static func get_method_arg_info(obj: Object, meth: String) -> Variant:
+	var methods = get_methods(obj) # TODO: Cache.
+	return null if methods == null or not meth in methods else methods[meth]
 
-static func get_methods(obj: Object) -> Dictionary:
+static func get_methods(obj: Object) -> Variant:
 	var script = obj.get_script()
 	if script == null:
-		return {}
+		return null
 	var out := {}
 	for line in script.source_code.split("\n", false):
 		if line.begins_with("func "):

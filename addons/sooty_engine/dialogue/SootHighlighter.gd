@@ -28,8 +28,9 @@ const C_VAR_STATE_PROPERTY := Color.SPRING_GREEN
 const C_COMMENT := Color(1.0, 1.0, 1.0, 0.25)
 const C_FE_TAG := Color.PALE_VIOLET_RED
 const C_ACTION_EVAL := Color.SPRING_GREEN
-const C_ACTION_STATE := Color.MEDIUM_PURPLE
-const C_ACTION_GROUP := Color.MEDIUM_AQUAMARINE
+const C_ACTION_NODE := Color.SALMON
+const C_ACTION_GROUP := Color.MEDIUM_PURPLE
+const C_ACTION_STATE := Color.DEEP_SKY_BLUE
 
 const C_FLOW := Color.TOMATO
 const C_FLOW_GOTO := Color.GREEN_YELLOW
@@ -49,6 +50,7 @@ const S_OPTION := "- "
 const S_OPTION_ADD := "+ "
 
 const S_ACTION_EVAL := "~"
+const S_ACTION_NODE := "#"
 const S_ACTION_GROUP := "@"
 const S_ACTION_STATE := "$"
 
@@ -207,6 +209,8 @@ func _h_bbcode(from: int, to: int, default: Color):
 					# colorize action tags
 					if tag.begins_with(S_ACTION_EVAL):
 						_h_action(off, off+len(tag), C_ACTION_EVAL)
+					elif tag.begins_with(S_ACTION_NODE):
+						_h_action(off, off+len(tag), C_ACTION_NODE)
 					elif tag.begins_with(S_ACTION_GROUP):
 						_h_action(off, off+len(tag), C_ACTION_GROUP)
 					elif tag.begins_with(S_ACTION_STATE):
@@ -251,26 +255,20 @@ func _h_line(from: int, to: int):
 		_c(i, C_SYMBOL)
 		_set_var_color(j, text.substr(j))
 	
-	# action
+	# state calls
 	elif t.begins_with(S_ACTION_STATE):
 		_h_action(text.find(S_ACTION_STATE, from), to, C_ACTION_STATE)
-	
+	# group calls
 	elif t.begins_with(S_ACTION_GROUP):
 		_h_action(text.find(S_ACTION_GROUP, from), to, C_ACTION_GROUP)
-	
+	# node calls
+	elif t.begins_with(S_ACTION_NODE):
+		_h_action(text.find(S_ACTION_NODE, from), to, C_ACTION_NODE)
+	# eval calls
 	elif t.begins_with(S_ACTION_EVAL):
 		_h_action_expression(text.find(S_ACTION_EVAL, from), to)
 	
-	# options
-#	elif t.begins_with(S_OPTION_START):
-#		var s := text.find(S_OPTION_START)
-#		var e := text.find(S_OPTION_END)
-#		_c(s, C_SYMBOL, 1)
-#		_c(s+1, C_OPTION_FLAG)
-#		_c(e, C_SYMBOL, 1)
-#		_co(C_OPTION_TEXT)
-#		_h_bbcode(e+1, to, C_OPTION_TEXT)
-#		_h_flow()
+	# node options
 	elif t.begins_with(S_OPTION):
 		var s := text.find(S_OPTION)
 		_c(s, C_SYMBOL, 1)
@@ -278,6 +276,7 @@ func _h_line(from: int, to: int):
 		_h_bbcode(s+1, to, C_OPTION_TEXT)
 		_h_flow()
 	
+	# flow actions
 	elif t.begins_with(S_FLOW_GOTO) or t.begins_with(S_FLOW_CALL):
 		_h_flow()
 	
