@@ -27,11 +27,17 @@ signal loaded_persistent()
 
 var _wait_timer := 0.0
 
+func _init() -> void:
+	Mods.loaded.connect(_mods_loaded)
+
+func _mods_loaded():
+	load_persistent()
+
 func _ready() -> void:
 	var d := Directory.new()
 	if not d.dir_exists(DIR):
 		d.make_dir(DIR)
-	_ready_deferred.call_deferred()
+	
 	set_process(false)
 
 func _process(delta: float) -> void:
@@ -41,9 +47,6 @@ func _process(delta: float) -> void:
 		_wait_timer = 1.0
 		_save_persistent()
 		set_process(false)
-
-func _ready_deferred():
-	load_persistent()
 
 func save_persistent():
 	set_process(true)
@@ -61,6 +64,7 @@ func _save_persistent():
 func load_persistent():
 	pre_load_persistent.emit()
 	var data: Dictionary = UFile.load_from_resource(PATH_PERSISTENT, {})
+	print(data)
 	_set_persistent.emit(data)
 	loaded_persistent.emit()
 	print("Loaded Persistent to user://persistent.tres.")

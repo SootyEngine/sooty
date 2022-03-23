@@ -4,9 +4,9 @@ class_name BaseState
 signal changed(property: String)
 signal changed_to(property: String, to: Variant)
 signal changed_from_to(property: String, from: Variant, to: Variant)
-signal loaded()
 
-var _changed := false
+var _silent := false # won't emit signals when changing things.
+var _changed := false # state has changed.
 var _default := {}
 var _children := []
 
@@ -18,12 +18,13 @@ func _save_state(data: Dictionary):
 	data[_get_subdir()] = _get_changed_states()
 
 func _load_state(data: Dictionary):
+	_silent = true
 	_reset()
 	_patch(data.get(_get_subdir(), {}))
+	_silent = false
 
 func _ready() -> void:
 	child_entered_tree.connect(_child_added)
-	_post_init.call_deferred()
 	Mods.pre_loaded.connect(_clear_mods)
 	Mods.load_all.connect(_load_mods)
 
@@ -45,14 +46,10 @@ func _load_mods(mods: Array):
 				add_child(state)
 			else:
 				push_error("States must be node. Can't load %s." % script_path)
+	_default = _get_state()
 
 func _reset():
 	_patch(_default)
-
-func _post_init():
-	_default = _get_state()
-#	UDict.log(_default)
-	loaded.emit()
 
 func _child_added(_n: Node):
 	_children = get_children()
@@ -99,7 +96,7 @@ func _reset_state():
 	UObject.set_state(self, _default)
 
 func _patch(state: Dictionary):
-	UObject.set_state(self, state)
+	UObject.patch(self, state)
 
 func _get_changed_states() -> Dictionary:
 	var current := _get_state()# UObject.get_state(self)
@@ -146,10 +143,11 @@ func _set(property_path: StringName, value) -> bool:
 			o.set(property, value)
 			var new = o.get(property)
 			if old != new:
-				_changed = true
-				changed.emit(property_path)
-				changed_to.emit(property_path, new)
-				changed_from_to.emit(property_path, old, new)
+				if not _silent:
+					_changed = true
+					changed.emit(property_path)
+					changed_to.emit(property_path, new)
+					changed_from_to.emit(property_path, old, new)
 			return true
 	push_error("No %s in State. (Attempted '%s = %s')" % [property_path, property, value])
 	return true

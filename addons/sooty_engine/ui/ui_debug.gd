@@ -2,19 +2,26 @@ extends Node
 
 var lines := []
 var filter := ""
+var persistent := false
 var only_modified := true
 
 func _ready() -> void:
-	$VBoxContainer/HBoxContainer/Button.pressed.connect(_update)
-	$VBoxContainer/HBoxContainer/CheckButton.toggled.connect(_toggled)
-	$VBoxContainer/HBoxContainer/LineEdit.text_changed.connect(_filter_changed)
-	State.changed_from_to.connect(_changed)
+	$VBoxContainer/HBoxContainer/persistent.toggled.connect(_toggle_persistent)
+	$VBoxContainer/HBoxContainer/force_update.pressed.connect(_update)
+	$VBoxContainer/HBoxContainer/only_modified.toggled.connect(_toggle_only_modified)
+	$VBoxContainer/HBoxContainer/filter.text_changed.connect(_filter_changed)
+	State.changed.connect(_changed)
+	Persistent.changed.connect(_changed)
 
-func _toggled(t):
+func _toggle_persistent(t):
+	persistent = t
+	_update()
+
+func _toggle_only_modified(t):
 	only_modified = t
 	_update()
 
-func _changed(property, from, to):
+func _changed(_property):
 	_update()
 
 func _filter_changed(t: String):
@@ -22,13 +29,14 @@ func _filter_changed(t: String):
 	_redraw()
 
 func _update():
-	var state := State._get_changed_states() if only_modified else State._get_state()
+	var node = Persistent if persistent else State
+	var state := node._get_changed_states() if only_modified else node._get_state()
 	lines = JSON.new().stringify(state, "\t", false).split("\n")
 	_redraw()
-	
+
 func _redraw():
 	var text = []
 	for line in lines:
 		if filter == "" or filter in line.to_lower():
 			text.append(line)
-	$VBoxContainer/RichTextLabel.set_bbcode("\n".join(text))
+	$VBoxContainer/output.set_bbcode("\n".join(text))
