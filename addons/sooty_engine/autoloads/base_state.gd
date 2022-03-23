@@ -6,6 +6,7 @@ signal changed_to(property: String, to: Variant)
 signal changed_from_to(property: String, from: Variant, to: Variant)
 signal loaded()
 
+var _changed := false
 var _default := {}
 var _children := []
 
@@ -145,6 +146,7 @@ func _set(property_path: StringName, value) -> bool:
 			o.set(property, value)
 			var new = o.get(property)
 			if old != new:
+				_changed = true
 				changed.emit(property_path)
 				changed_to.emit(property_path, new)
 				changed_from_to.emit(property_path, old, new)

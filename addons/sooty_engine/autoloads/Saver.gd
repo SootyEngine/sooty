@@ -25,16 +25,30 @@ signal pre_load_persistent()
 signal _set_persistent(data: Dictionary)
 signal loaded_persistent()
 
+var _wait_timer := 0.0
+
 func _ready() -> void:
 	var d := Directory.new()
 	if not d.dir_exists(DIR):
 		d.make_dir(DIR)
 	_ready_deferred.call_deferred()
+	set_process(false)
+
+func _process(delta: float) -> void:
+	if _wait_timer > 0.0:
+		_wait_timer -= delta
+	else:
+		_wait_timer = 1.0
+		_save_persistent()
+		set_process(false)
 
 func _ready_deferred():
 	load_persistent()
 
 func save_persistent():
+	set_process(true)
+
+func _save_persistent():
 	pre_save_persistent.emit()
 	var data := {}
 	_get_persistent.emit(data)
@@ -42,14 +56,14 @@ func save_persistent():
 	# DEBUG
 	UFile.save_to_resource("user://persistent.tres", data)
 	saved_persistent.emit()
-	print("Saved Persistent.")
+	print("Saved Persistent to user://persistent.tres.")
 
 func load_persistent():
 	pre_load_persistent.emit()
 	var data: Dictionary = UFile.load_from_resource(PATH_PERSISTENT, {})
 	_set_persistent.emit(data)
 	loaded_persistent.emit()
-	print("Loaded Persistent.")
+	print("Loaded Persistent to user://persistent.tres.")
 
 func get_all_saved_slots() -> PackedStringArray:
 	return UFile.get_dirs(DIR)

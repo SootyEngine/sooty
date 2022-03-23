@@ -10,6 +10,7 @@ func _init() -> void:
 	if not Engine.is_editor_hint():
 		Saver._get_persistent.connect(_save_state)
 		Saver._set_persistent.connect(_load_state)
+		changed.connect(func(_x): Saver.save_persistent())
 
 #func _post_init():
 #	super._post_init()
