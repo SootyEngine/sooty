@@ -78,6 +78,10 @@ func _str_to_var(s: String) -> Variant:
 	if s.begins_with("$"):
 		return _get(s.substr(1))
 	
+	# is a string with spaces?
+	if UString.is_wrapped(s, '"'):
+		return UString.unwrap(s, '"')
+	
 	# evaluate
 	if UString.is_wrapped(s, "<<", ">>"):
 		var e := UString.unwrap(s, "<<", ">>")

@@ -1,8 +1,8 @@
 @tool
 class_name UFile
 
-const EXT_IMAGE := ["png", "jpg", "jpeg", "webp"]
-const EXT_AUDIO := ["mp3", "wav", "ogg"]
+const EXT_IMAGE := [".png", ".jpg", ".jpeg", ".webp"]
+const EXT_AUDIO := [".mp3", ".wav", ".ogg"]
 
 static func get_user_dir() -> String:
 	if not OS.is_debug_build():
@@ -111,13 +111,13 @@ static func save_node(path: String, node: Node) -> bool:
 # allows loading external assets if in "user://"
 static func load2(path: String, default = null) -> Variant:
 	if path.begins_with(get_user_dir()):
-		var type = path.get_extension().to_lower()
-		if type in EXT_IMAGE:
+		var ext = "." + path.get_extension().to_lower()
+		if ext in EXT_IMAGE:
 			return load_image(path, default) 
-		elif type in EXT_AUDIO:
+		elif ext in EXT_AUDIO:
 			return load_audio(path, default)
 		else:
-			push_error("No external loader for type '%s' at '%s'." % [type, path])
+			push_error("No external loader for '%s' at '%s'." % [ext, path])
 			return default
 	else:
 		return load(path)
@@ -289,11 +289,11 @@ static func _get_files(dir: Directory, out: Array, extensions: PackedStringArray
 		
 		elif not len(extensions) or _ends_with(fname, extensions):
 			# html5 export hack
-			if path.ends_with(".import"):
-				path = path.substr(0, len(path)-7)
-			
-			elif path.ends_with(".remap"):
-				path = path.substr(0, len(path)-6)
+#			if path.ends_with(".import"):
+#				path = path.substr(0, len(path)-7)
+#
+#			elif path.ends_with(".remap"):
+#				path = path.substr(0, len(path)-6)
 			
 			out.append(path)
 		
@@ -310,8 +310,8 @@ static func _ends_with(s: String, endings: PackedStringArray) -> bool:
 			return true
 	
 	# html5 export hack
-	for ending in endings:
-		if s.ends_with(ending + ".import") or s.ends_with(".remap"):
-			return true
+#	for ending in endings:
+#		if s.ends_with(ending + ".import") or s.ends_with(".remap"):
+#			return true
 	
 	return false

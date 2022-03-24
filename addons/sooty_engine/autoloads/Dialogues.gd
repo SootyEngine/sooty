@@ -15,15 +15,15 @@ func _clear_mods():
 
 func _load_mods(mods: Array):
 	var memory_before = OS.get_static_memory_usage()
-	print("[Dialogues]")
 	for mod in mods:
 		var head = mod.dir.plus_file("dialogue")
+		mod.meta["dialogues"] = []
 		for soot_path in UFile.get_files(head, ".soot"):
-			Mods._print_file(soot_path)
+			mod.meta.dialogues.append(soot_path)
 			var d := Dialogue.new(soot_path)
 			cache[d.id] = d
 	var memory_used = OS.get_static_memory_usage() - memory_before
-	prints("  Dialogues:", String.humanize_size(memory_used))
+	prints("Dialogues:", String.humanize_size(memory_used))
 
 func _ready() -> void:
 	# timer chat checks if any files were modified.

@@ -47,7 +47,28 @@ func uninstall(dir: String):
 
 func _update():
 	pre_loaded.emit()
-	load_all.emit(get_installed())
+	
+	var installed := get_installed()
+	for mod in installed:
+		mod.meta.clear()
+	
+	load_all.emit(installed)
+	
+	# Display lists of what was added by the mods.
+	var meta := {}
+	for k in installed[0].meta.keys():
+		meta[k] = []
+	print("[Mods - %s]" % [len(installed)])
+	for i in len(installed):
+		var mod = installed[i]
+		print("\t%s %s" % [i+1, mod.dir])
+		for k in mod.meta:
+			meta[k].append_array(mod.meta[k])
+	for k in meta:
+		print("[%s - %s]" % [k.capitalize(), len(meta[k])])
+		for i in len(meta[k]):
+			print("\t%s %s" % [i+1, meta[k][i].get_file()])
+	
 	loaded.emit()
 
 func _print_file(path: String):

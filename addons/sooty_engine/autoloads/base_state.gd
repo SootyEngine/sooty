@@ -35,13 +35,13 @@ func _clear_mods():
 
 func _load_mods(mods: Array):
 	var subdir := _get_subdir()
-	print("[%s]" % subdir.get_file().capitalize())
 	for mod in mods:
+		mod.meta[subdir] = []
 		var head = mod.dir.plus_file(subdir)
 		for script_path in UFile.get_files(head, ".gd"):
 			var state = load(script_path).new()
 			if state is Node:
-				Mods._print_file(script_path)
+				mod.meta[subdir].append(script_path)
 				state.set_name(script_path.get_file().split(".", true, 1)[0])
 				add_child(state)
 			else:
