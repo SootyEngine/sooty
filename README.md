@@ -1,5 +1,5 @@
-# Sooty `0.1_unstable` `Godot4`
-A dialogue engine for Godot4.
+# Sooty `0.1` `unstable` `Godot4`
+A dialogue engine for Godot 4.
 
 `WARNING: Currently under **heavy** construction.`
 
@@ -14,6 +14,10 @@ Example project [here](https://github.com/teebarjunk/sooty-example).
 - Advanced text animation system.
 - Built with modding support in mind.
 - Built with localization in mind.
+
+# Check Out:
+- [Getting Started](readme/getting_started.md)
+- [Writing Soot](readme/writing_soot.md)
 
 # Text and BBCode
 ![](readme/bbcode.png)
@@ -181,7 +185,7 @@ Inside that directory can be directories for:
 
 |Folder|File type(s)|Desc|
 |:-----|-----------:|:---|
-|`dialogues/`| `*.soot`|Dialogue files.|
+|`dialogue/`| `*.soot`|Dialogue files.|
 |`states/`| `*.gd`|Node scripts contain state data.|
 |`states_persistent/`| `*gd`|Node scripts containing persistent state data.|
 |`scenes/`| `.tscn` `.scn`|Scenes accessed by name.|

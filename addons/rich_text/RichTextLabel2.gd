@@ -39,14 +39,15 @@ signal right_clicked(variant: Variant)
 @export_dir var font_dir := "res://fonts"
 @export var font := "":
 	set = set_font
-@export var size: int = 16:
+@export var font_size: int = 16:
 	set(x):
-		size = clampi(x, MIN_FONT_SIZE, MAX_FONT_SIZE)
-		add_theme_font_size_override("bold_font_size", size)
-		add_theme_font_size_override("bold_italics_font_size", size)
-		add_theme_font_size_override("italics_font_size", size)
-		add_theme_font_size_override("mono_font_size", size)
-		add_theme_font_size_override("normal_font_size", size)
+		font_size = clampi(x, MIN_FONT_SIZE, MAX_FONT_SIZE)
+		add_theme_font_size_override("bold_font_size", font_size)
+		add_theme_font_size_override("bold_italics_font_size", font_size)
+		add_theme_font_size_override("italics_font_size", font_size)
+		add_theme_font_size_override("mono_font_size", font_size)
+		add_theme_font_size_override("normal_font_size", font_size)
+
 @export var outline_mode: Outline = Outline.DARKEN:
 	set(o):
 		outline_mode = o
@@ -141,7 +142,7 @@ func set_bbcode(btext: String):
 	_state = {
 		color = color,
 		align = alignment,
-		font_size = size,
+		font_size = font_size,
 		opened = {},
 		pipes = []
 	}
@@ -471,8 +472,8 @@ func _push_font_size(s: int):
 	_state.font_size = s
 	push_font_size(s)
 
-func _pop_font_size(size):
-	_state.font_size = size
+func _pop_font_size(s):
+	_state.font_size = s
 	pop()
 
 func _push_color(clr: Color):

@@ -176,8 +176,6 @@ func _has(property: StringName):
 func _get(property: StringName):
 	if Persistent._has(property):
 		return Persistent._get(property)
-	match str(property):
-		"current_scene": return get_tree().current_scene
 	return super._get(property)
 
 func _set(property: StringName, value) -> bool:

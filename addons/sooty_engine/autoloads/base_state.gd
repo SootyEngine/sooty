@@ -152,12 +152,12 @@ func _set(property_path: StringName, value) -> bool:
 	push_error("No %s in State. (Attempted '%s = %s')" % [property_path, property, value])
 	return true
 
-func _get_objects_property(obj: Object) -> String:
-	for k in _default:
-		var o = self[k]
-		if o is Object and o == obj:
-			return k
-	return ""
+#func _get_objects_property(obj: Object) -> String:
+#	for k in _default:
+#		var o = self[k]
+#		if o is Object and o == obj:
+#			return k
+#	return ""
 
 func _get_all_of_type(type: Variant) -> Dictionary:
 	var out := {}

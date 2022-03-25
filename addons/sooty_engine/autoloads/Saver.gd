@@ -85,6 +85,7 @@ func get_slot_info(slot: String) -> Dictionary:
 		info.dir_size = UFile.get_directory_size(dir)
 		info.date_time = DateTime.create_from_datetime(info.time)
 		return info
+	
 	else:
 		return {}
 

@@ -98,10 +98,13 @@ static func patch(target: Variant, patch: Dictionary, erase_patched := false) ->
 	var lines_changed := 0
 	for k in patch:
 		if k in target:
+			var p = patch[k]
+			var t = target[k]
+			
 			if patch[k] is Dictionary:
 				lines_changed += patch(target[k], patch[k])
 			
-			elif target[k] != patch[k]:
+			elif t != p:
 				target[k] = patch[k]
 				lines_changed += 1
 		

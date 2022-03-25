@@ -29,7 +29,7 @@ func _save_state(state: Dictionary):
 	state["SFX"] = { queue=_queue }
 
 func _load_state(state: Dictionary):
-	_queue = state["SFX"].get("queue", [])
+	_queue = state.get("SFX", {}).get("queue", [])
 
 func _process(delta: float) -> void:
 	if len(_queue) and get_child_count() < MAX_SOUNDS:

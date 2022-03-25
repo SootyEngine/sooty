@@ -22,7 +22,7 @@ offset_bottom = 265.5
 
 [node name="GridContainer" type="GridContainer" parent="VBoxContainer"]
 offset_right = 736.0
-offset_bottom = 496.0
+offset_bottom = 97.0
 theme_override_constants/vseparation = 8
 theme_override_constants/hseparation = 8
 columns = 3
@@ -34,28 +34,28 @@ anchor_right = 0.0
 anchor_bottom = 0.0
 offset_left = 0.0
 offset_top = 0.0
-offset_right = 240.0
-offset_bottom = 160.0
+offset_right = 0.0
+offset_bottom = 27.0
 
 [node name="a2" parent="VBoxContainer/GridContainer" instance=ExtResource( "1_qdd0e" )]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 248.0
+offset_left = 8.0
 offset_top = 0.0
-offset_right = 488.0
-offset_bottom = 160.0
+offset_right = 8.0
+offset_bottom = 27.0
 
 [node name="a3" parent="VBoxContainer/GridContainer" instance=ExtResource( "1_qdd0e" )]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 496.0
+offset_left = 16.0
 offset_top = 0.0
-offset_right = 736.0
-offset_bottom = 160.0
+offset_right = 16.0
+offset_bottom = 27.0
 
 [node name="a4" parent="VBoxContainer/GridContainer" instance=ExtResource( "1_qdd0e" )]
 anchor_left = 0.0
@@ -63,29 +63,29 @@ anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
 offset_left = 0.0
-offset_top = 168.0
-offset_right = 240.0
-offset_bottom = 328.0
+offset_top = 35.0
+offset_right = 0.0
+offset_bottom = 62.0
 
 [node name="a5" parent="VBoxContainer/GridContainer" instance=ExtResource( "1_qdd0e" )]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 248.0
-offset_top = 168.0
-offset_right = 488.0
-offset_bottom = 328.0
+offset_left = 8.0
+offset_top = 35.0
+offset_right = 8.0
+offset_bottom = 62.0
 
 [node name="a6" parent="VBoxContainer/GridContainer" instance=ExtResource( "1_qdd0e" )]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 496.0
-offset_top = 168.0
-offset_right = 736.0
-offset_bottom = 328.0
+offset_left = 16.0
+offset_top = 35.0
+offset_right = 16.0
+offset_bottom = 62.0
 
 [node name="a7" parent="VBoxContainer/GridContainer" instance=ExtResource( "1_qdd0e" )]
 anchor_left = 0.0
@@ -93,34 +93,34 @@ anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
 offset_left = 0.0
-offset_top = 336.0
-offset_right = 240.0
-offset_bottom = 496.0
+offset_top = 70.0
+offset_right = 0.0
+offset_bottom = 97.0
 
 [node name="a8" parent="VBoxContainer/GridContainer" instance=ExtResource( "1_qdd0e" )]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 248.0
-offset_top = 336.0
-offset_right = 488.0
-offset_bottom = 496.0
+offset_left = 8.0
+offset_top = 70.0
+offset_right = 8.0
+offset_bottom = 97.0
 
 [node name="a9" parent="VBoxContainer/GridContainer" instance=ExtResource( "1_qdd0e" )]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-offset_left = 496.0
-offset_top = 336.0
-offset_right = 736.0
-offset_bottom = 496.0
+offset_left = 16.0
+offset_top = 70.0
+offset_right = 16.0
+offset_bottom = 97.0
 
 [node name="pages" type="HBoxContainer" parent="VBoxContainer"]
-offset_top = 500.0
+offset_top = 101.0
 offset_right = 736.0
-offset_bottom = 531.0
+offset_bottom = 132.0
 alignment = 1
 
 [node name="Button" type="Button" parent="VBoxContainer/pages"]

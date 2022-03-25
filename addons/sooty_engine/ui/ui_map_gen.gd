@@ -20,8 +20,8 @@ func _ready_deferred():
 		var d: Dialogue = Dialogues.cache[dialogue_id]
 		var node: GraphNode = prefab.duplicate()
 		graph.add_child(node)
-		node.rect_size = Vector2(200.0, 0.0)
-		node.rect_min_size = Vector2(200.0, 0.0)
+		node.size = Vector2(200.0, 0.0)
+		node.minimum_size = Vector2(200.0, 0.0)
 		node.visible = true
 		node.name = dialogue_id
 		node.title = dialogue_id

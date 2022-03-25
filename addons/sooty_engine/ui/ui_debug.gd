@@ -32,6 +32,12 @@ func _update():
 	var node = Persistent if persistent else State
 	var state := node._get_changed_states() if only_modified else node._get_state()
 	lines = JSON.new().stringify(state, "\t", false).split("\n")
+	for i in len(lines):
+		if ":" in lines[i]:
+			var p = lines[i].split(":", true, 1)
+			p[0] = p[0].replace('"', "")
+			p[1] = UString.unwrap(p[1].strip_edges().trim_suffix(","), '"')
+			lines[i] = "[dim]%s[dim]:[/] %s" % [p[0], p[1]]
 	_redraw()
 
 func _redraw():

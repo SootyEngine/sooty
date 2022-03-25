@@ -26,15 +26,9 @@ const S_FLOW_CALL := "=="
 
 func _init() -> void:
 	if not Engine.is_editor_hint():
-#		Saver._check_can_save.connect(_check_can_save)
 		Saver._get_state.connect(_save_state)
 		Saver._set_state.connect(_load_state)
 		Saver.loaded.connect(_loaded)
-
-#func _check_can_save(blockers: Array):
-#	if _active:
-#		push_error("Currently can't save an active Dialogue.")
-#		blockers.append(self)
 
 func _save_state(state: Dictionary):
 	state["DS"] = { active=_active, stack=_last_tick_stack }
@@ -46,14 +40,6 @@ func _load_state(state: Dictionary):
 	
 	_active = state["DS"].active
 	_stack = state["DS"].stack
-	
-	# rewind to last step before save happened?
-#	if len(_stack):
-#		if _stack[-1].step > 0:
-#			_stack[-1].step -= 1
-#		else:
-#			# Shouldn't happen.
-#			assert(false)
 
 func _loaded():
 	print("Loaded. Starting...")

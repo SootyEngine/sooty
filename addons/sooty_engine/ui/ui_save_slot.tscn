@@ -14,7 +14,7 @@ gradient = SubResource( "Gradient_g0bwb" )
 fill_to = Vector2(0, 1)
 
 [node name="save_slot" type="VBoxContainer"]
-rect_min_size = Vector2(240, 160)
+minimum_size = Vector2(240, 160)
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -38,20 +38,16 @@ mouse_filter = 2
 
 [node name="mask" type="TextureRect" parent="Control"]
 clip_children = true
-rect_min_size = Vector2(180, 120)
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 texture = SubResource( "GradientTexture2D_ehy0a" )
 
 [node name="preview" type="TextureRect" parent="Control/mask"]
-rect_clip_content = true
-rect_min_size = Vector2(180, 120)
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-rect_pivot_offset = Vector2(120, 80)
 mouse_filter = 2
 texture = ExtResource( "1_60yqm" )
 stretch_mode = 6
@@ -91,7 +87,6 @@ theme_override_font_sizes/normal_font_size = 24
 fit_content_height = true
 script = ExtResource( "3_aic4g" )
 bbcode = "test"
-size = 24
 outline_colored = 4
 
 [node name="label" type="RichTextLabel" parent="."]

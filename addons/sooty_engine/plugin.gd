@@ -3,7 +3,7 @@ extends EditorPlugin
 
 const AUTOLOADS := ["Sooty", "Global", "Mods", "Saver", "Persistent", "State", "Music", "SFX", "Dialogues", "DialogueStack"]
 const HIGHLIGHTER = preload("res://addons/sooty_engine/dialogue/SootHighlighter.gd")
-var highligher = HIGHLIGHTER.new()
+var highlighter = HIGHLIGHTER.new()
 
 func _enter_tree() -> void:
 	for id in AUTOLOADS:
@@ -13,10 +13,12 @@ func _enter_tree() -> void:
 	var fs = es.get_setting("docks/filesystem/textfile_extensions")
 	if not "soot" in fs:
 		es.set_setting("docks/filesystem/textfile_extensions", fs + ",soot")
-	get_editor_interface().get_script_editor().register_syntax_highlighter(highligher)
+	
+	var se: ScriptEditor = get_editor_interface().get_script_editor()
+	se.register_syntax_highlighter(highlighter)
 
 func _exit_tree() -> void:
 	for id in AUTOLOADS:
 		remove_autoload_singleton(id)
 	
-	get_editor_interface().get_script_editor().unregister_syntax_highlighter(highligher)
+	get_editor_interface().get_script_editor().unregister_syntax_highlighter(highlighter)
