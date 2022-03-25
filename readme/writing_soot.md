@@ -168,6 +168,25 @@ journey_man: Where to, traveler?
         
 ```
 
+You can place a `=>` on the same line, for convenience.  
+If there are tabbed lines, the `=>` will be called last.
+
+```
+Where to?
+    - East => east
+    - West => west
+    - North => north
+        All right, north we go.
+```
+
+While not advisable, as it's hard to read, you can use `(())` and `;;` to write tabbed lines on the same line.
+
+```
+Where to?
+    - East. ((man: All right, east we go. ;; @sfx east ;; $dir = "east" )) => east
+    - North. ((man: Okay, north it is. ;; @sfx north ;; $dir = "north")) => north
+```
+
 # Conditionals
 
 |Condition|Description|Example|
