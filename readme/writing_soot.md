@@ -21,7 +21,38 @@ To get syntax highligting in Godot, open the file in editor and select `Edit > S
 |`{{condition}}`|For only displaying lines that pass.|`mary: Oh wow, you brought it. {{talked_to_mary and player.item_count("spoon") > 1}}`|
 
 # Flow Control
-*TODO*
+
+To go to another flow in the file, use `=> other_flow`.
+
+To call another flow, and then return to where we are, use `== other_flow`.  
+This is useful for having common lines:
+
+```
+=== monday
+    == start_of_day
+    Time to get to class.
+    // do a bunch of stuff here
+    == end_of_day
+    
+=== tuesday
+    == start_of_day
+    Today is the big day.
+    // do a bunch of stuff here
+    == end_of_day
+
+=== start_of_day
+    ~money_at_start = money
+    Today is {{time.day_of_week}}.
+
+=== end_of_day
+```~money_earned = money - money_at_start
+    {{money_earned > 0}}
+        I earned [~money_earned] today.
+    {{elif money_earned < 0}}
+        I lost [~-money_earned] today.
+    {{else}}
+        I didn't make any money today.
+```
 
 # Dialogue
 
@@ -140,6 +171,7 @@ journey_man: Where to, traveler?
 # Conditionals
 
 |Condition|Description|Example|
+|---------|-----------|-------|
 |`{{if}}`|The classic *if* statement. You don't need to type *if* though.|`{{if apples > oranges}}` `{{apples > oranges}}`|
 |`{{elif}}`|If the previous condition failed, this one will be checked.|`{{elif apples > pears}}`|
 |`{{else}}`|If all other conditions failed, this will occur.`{{else}}`|
