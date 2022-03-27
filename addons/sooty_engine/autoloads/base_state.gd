@@ -45,6 +45,7 @@ func _load_mods(mods: Array):
 				state.set_name(script_path.get_file().split(".", true, 1)[0])
 				add_child(state)
 			else:
+				# TODO: Allow resources.
 				push_error("States must be node. Can't load %s." % script_path)
 	_default = _get_state()
 
@@ -151,13 +152,6 @@ func _set(property_path: StringName, value) -> bool:
 			return true
 	push_error("No %s in State. (Attempted '%s = %s')" % [property_path, property, value])
 	return true
-
-#func _get_objects_property(obj: Object) -> String:
-#	for k in _default:
-#		var o = self[k]
-#		if o is Object and o == obj:
-#			return k
-#	return ""
 
 func _get_all_of_type(type: Variant) -> Dictionary:
 	var out := {}

@@ -27,9 +27,16 @@ signal _set_persistent(data: Dictionary)
 signal loaded_persistent()
 
 var _wait_timer := 0.0
+var _last_save_slot := ""
 
 func _init() -> void:
 	Mods.loaded.connect(_mods_loaded)
+
+func has_last_save() -> bool:
+	return _last_save_slot != "" and has_slot(_last_save_slot)
+
+func load_last_save():
+	load_slot(_last_save_slot)
 
 func _mods_loaded():
 	load_persistent()
@@ -55,6 +62,7 @@ func save_persistent():
 func _save_persistent():
 	pre_save_persistent.emit()
 	var data := {}
+	data["last_save_slot"] = _last_save_slot
 	_get_persistent.emit(data)
 	UFile.save_to_resource(PATH_PERSISTENT, data)
 	# DEBUG
@@ -65,7 +73,7 @@ func _save_persistent():
 func load_persistent():
 	pre_load_persistent.emit()
 	var data: Dictionary = UFile.load_from_resource(PATH_PERSISTENT, {})
-	print(data)
+	_last_save_slot = data.get("last_save_slot", _last_save_slot)
 	_set_persistent.emit(data)
 	loaded_persistent.emit()
 	print("Loaded Persistent to user://persistent.tres.")
@@ -102,7 +110,7 @@ func load_slot(slot: String):
 	var slot_path := get_slot_directory(slot)
 	var state: Dictionary = UFile.load_from_resource(slot_path.plus_file(FNAME_STATE))
 	
-	await Global.change_scene(state.current_scene, true)
+	await Scenes.change_scene(state.current_scene, true)
 	
 	pre_load.emit()
 	_set_state.emit(state)
@@ -154,4 +162,6 @@ func save_slot(slot: String):
 	img.save_png(slot_path.plus_file(FNAME_PREVIEW))
 	
 	saved.emit()
+	_last_save_slot = slot
+	save_persistent()
 	print("Saved Slot %s." % slot)

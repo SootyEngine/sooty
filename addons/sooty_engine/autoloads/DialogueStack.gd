@@ -13,7 +13,7 @@ signal flow_ended(id: String)
 signal option_selected(option: Dictionary)
 signal on_line(text: DialogueLine)
 
-@export var _execute_mode := false
+@export var _execute_mode := false # TODO: Implement this differently.
 @export var _break := false
 @export var _active := false
 @export var _stack := []
@@ -30,27 +30,34 @@ func _init(em := false) -> void:
 		Saver._get_state.connect(_save_state)
 		Saver._set_state.connect(_load_state)
 		Saver.pre_load.connect(_pre_load)
-		Saver.loaded.connect(_loaded)
+		Global.started.connect(_on_start)
+		Global.ended.connect(_on_end)
 
 func _save_state(state: Dictionary):
 	state["DS"] = { active=_active, stack=_last_tick_stack }
-	print("SAVE DS ", self, _last_tick_stack)
 
 func _load_state(state: Dictionary):
 	_active = state["DS"].active
 	_stack = state["DS"].stack
-	print("LOADED DS ", _stack)
 
 func _pre_load():
+	_clear()
+
+func _clear():
 	_active = false
 	_break = false
 	_wait = 0.0
 	_halting_for = []
 	_stack.clear()
 
-func _loaded():
-	return
-	print("Loaded. Starting...")
+func _on_start():
+	if has("MAIN.START"):
+		execute("MAIN.START")
+
+func _on_end():
+	_clear()
+	if has("MAIN.END"):
+		execute("MAIN.END")
 
 func wait(time := 1.0):
 	_wait = time
@@ -181,7 +188,6 @@ func tick():
 	
 	if has_steps() and not _break:
 		_last_tick_stack = _stack.duplicate(true)
-		print("LAST TICK STACK ", _last_tick_stack)
 		tick_started.emit()
 	else:
 		return

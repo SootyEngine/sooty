@@ -22,7 +22,6 @@ func _load_mods(mods: Array):
 		mod.meta["music"] = []
 		var dir = mod.dir.plus_file("audio").plus_file("music")
 		var got = UFile.get_files(dir, UFile.EXT_AUDIO)
-		print("SCAN ", dir, " GOT ", got)
 		for file_path in got:
 			var id := UFile.get_file_name(file_path)
 			_files[id] = file_path

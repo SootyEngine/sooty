@@ -10,9 +10,6 @@ const OP_ALL := OP_ASSIGN + OP_RELATION + OP_ARITHMETIC + OP_LOGICAL
 const BUILT_IN := ["true", "false", "null"]
 
 func do(command: String) -> Variant:
-	print(command)
-	print_stack()
-	
 	# state method
 	if command.begins_with("$"):
 		var call = command.substr(1)
