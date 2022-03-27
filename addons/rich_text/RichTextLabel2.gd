@@ -226,7 +226,7 @@ func _parse_opening(tag: String):
 		if len(p) == 2:
 			_parse_tags(p[1])
 		
-		var got = State.do(p[0])
+		var got = StringAction.do(p[0])
 		if got == null:
 			push_error("BBCode: Couldn't replace '%s'." % p[0])
 			push_bgcolor(Color.RED)

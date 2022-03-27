@@ -35,7 +35,7 @@ func _text_submitted(t: String):
 	_set_input("")
 	
 	if t[0] in "~@$":
-		var got = State.do(t)
+		var got = StringAction.do(t)
 		add_line(LineType.RESULT, str(got))
 	else:
 		var parts := UString.split_on_spaces(t)

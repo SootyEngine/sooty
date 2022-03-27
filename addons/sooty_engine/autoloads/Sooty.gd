@@ -2,6 +2,8 @@ extends Node
 
 const VERSION := "0.1_alpha"
 
+signal story_started()
+
 var debug_show_hidden_options := false
 
 func _init() -> void:

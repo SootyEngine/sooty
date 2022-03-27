@@ -103,7 +103,7 @@ static func merge(target: Dictionary, patch: Dictionary, deep: bool = false, lis
 				
 				# replace different type
 				else:
-					push_error("can't merge %s with %s. replacing %s instead." % [Global.type_name(target[k]), Global.type_name(patch[k]), k])
+					push_error("can't merge %s with %s. replacing %s instead." % [UType.type_name(target[k]), UType.type_name(patch[k]), k])
 					target[k] = patch[k]
 
 static func set_at(target: Dictionary, path: Array, value: Variant):

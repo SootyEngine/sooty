@@ -122,9 +122,3 @@ Now we can access these in a `.soot` dialogue.
     
     
 ```
-
-# Working with Godo Scenes
-
-## Clickables
-Inside our scene we can add buttons and the `SceneActionButton` component.  
-When clicked, it will run the `flow` in the `soot` file with the same name as the current scene.

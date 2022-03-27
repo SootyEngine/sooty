@@ -5,6 +5,7 @@ const PATH_PERSISTENT := "user://persistent.res"
 const FNAME_INFO := "info.json"
 const FNAME_PREVIEW := "preview.png"
 const FNAME_STATE := "state.res"
+const FNAME_SCENE := "scene.scn"
 const PREVIEW_SIZE_DIV_AMOUNT := 3.0 # How much to shrink preview image.
 
 signal pre_save()
@@ -72,6 +73,9 @@ func load_persistent():
 func get_all_saved_slots() -> PackedStringArray:
 	return UFile.get_dirs(DIR)
 
+func has_slot(slot: String) -> bool:
+	return UFile.dir_exists(get_slot_directory(slot))
+
 func get_slot_directory(slot: String) -> String:
 	return DIR.plus_file(slot)
 
@@ -122,7 +126,10 @@ func save_slot(slot: String):
 	
 	# state data
 	var state := {}
-	state.current_scene = get_tree().current_scene.scene_file_path
+	state.current_scene = slot_path.plus_file("scene.tscn")#get_tree().current_scene.scene_file_path
+	UFile.save_node(slot_path.plus_file(FNAME_SCENE), get_tree().current_scene)
+	UFile.save_node(slot_path.plus_file("scene.tscn"), get_tree().current_scene) # debug
+	
 	_get_state.emit(state)
 	UFile.save_to_resource(slot_path.plus_file(FNAME_STATE), state)
 	# DEBUG
@@ -141,7 +148,7 @@ func save_slot(slot: String):
 	UFile.save_json(slot_path.plus_file(FNAME_INFO), state_info)
 	
 	# preview image
-	var img: Image = SimpleVN.get_node("debug")._screenshot.duplicate()
+	var img: Image = Global._screenshot.duplicate()
 	var siz := img.get_size() / PREVIEW_SIZE_DIV_AMOUNT
 	img.resize(ceil(siz.x), ceil(siz.y), Image.INTERPOLATE_LANCZOS)
 	img.save_png(slot_path.plus_file(FNAME_PREVIEW))

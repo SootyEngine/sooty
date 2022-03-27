@@ -5,9 +5,9 @@ const MAX_STEPS_PER_TICK := 20 # Safety limit, in case of excessive loops.
 enum { STEP_GOTO, STEP_CALL }
 
 signal started()
-signal finished()
+signal ended()
 signal tick_started()
-signal tick_finished()
+signal tick_ended()
 signal flow_started(id: String)
 signal flow_ended(id: String)
 signal option_selected(option: Dictionary)
@@ -24,24 +24,32 @@ signal on_line(text: DialogueLine)
 const S_FLOW_GOTO := "=>"
 const S_FLOW_CALL := "=="
 
-func _init() -> void:
-	if not Engine.is_editor_hint():
+func _init(em := false) -> void:
+	_execute_mode = em
+	if not Engine.is_editor_hint() and not em:
 		Saver._get_state.connect(_save_state)
 		Saver._set_state.connect(_load_state)
+		Saver.pre_load.connect(_pre_load)
 		Saver.loaded.connect(_loaded)
 
 func _save_state(state: Dictionary):
 	state["DS"] = { active=_active, stack=_last_tick_stack }
+	print("SAVE DS ", self, _last_tick_stack)
 
 func _load_state(state: Dictionary):
+	_active = state["DS"].active
+	_stack = state["DS"].stack
+	print("LOADED DS ", _stack)
+
+func _pre_load():
+	_active = false
 	_break = false
 	_wait = 0.0
 	_halting_for = []
-	
-	_active = state["DS"].active
-	_stack = state["DS"].stack
+	_stack.clear()
 
 func _loaded():
+	return
 	print("Loaded. Starting...")
 
 func wait(time := 1.0):
@@ -114,7 +122,7 @@ func has(id: String) -> bool:
 		return false
 	return true
 
-func goto(did_flow: String, step_type: int) -> bool:
+func goto(did_flow: String, step_type: int = STEP_GOTO) -> bool:
 	var p := did_flow.split(".", true, 1)
 	var did := p[0]
 	var flow := p[1]
@@ -169,10 +177,11 @@ func tick():
 	
 	if _active and not has_steps():
 		_active = false
-		finished.emit()
+		ended.emit()
 	
 	if has_steps() and not _break:
 		_last_tick_stack = _stack.duplicate(true)
+		print("LAST TICK STACK ", _last_tick_stack)
 		tick_started.emit()
 	else:
 		return
@@ -186,12 +195,12 @@ func tick():
 		
 		var line := pop_next_line()
 		
-		if not len(line):
+		if not len(line) or not len(line.line):
 			break
 		
 		match line.line.type:
 			"action":
-				State.do(line.line.action)
+				StringAction.do(line.line.action)
 				
 			"goto":
 				goto(line.line.goto, true)
@@ -202,7 +211,7 @@ func tick():
 			"text":
 				if "action" in line.line:
 					for a in line.line.action:
-						State.do(a)
+						StringAction.do(a)
 				
 				if not _execute_mode:
 					on_line.emit(DialogueLine.new(line.did, line.line))
@@ -210,13 +219,12 @@ func tick():
 			_:
 				push_warning("Huh? %s %s" % [line.line.keys(), line.line])
 	
-	tick_finished.emit()
+	tick_ended.emit()
 
 # forcibly run a flow. usefuly for setting up scenes from a .soot file.
 func execute(id: String):
 	if has(id):
-		var d = load("res://addons/sooty_engine/autoloads/DialogueStack.gd").new()
-		d._execute_mode = true
+		var d = load("res://addons/sooty_engine/autoloads/DialogueStack.gd").new(true)
 		d.start(id)
 		d.tick()
 

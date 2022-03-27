@@ -24,6 +24,7 @@ func _gui_input(e: InputEvent) -> void:
 		match e.button_index:
 			MOUSE_BUTTON_LEFT:
 				owner._select_slot(get_index())
+				get_viewport().set_input_as_handled()
 
 func set_info(info: Dictionary):
 	_slot_info = info

@@ -58,9 +58,9 @@ func _get_options(input: Array, output: Array, depth: int):
 #			out.append(DialogueLine.new(_dialogue_id, opdata))
 
 func get_options() -> Array[DialogueLine]:
-	var out_lines: Array[DialogueLine] = []
+	var out_lines: Array = []
 	if "options" in _data:
-		var all_lines: Array[String] = _data.options
+		var all_lines: Array = _data.options
 		_get_options(all_lines, out_lines, 0)
 	return out_lines
 

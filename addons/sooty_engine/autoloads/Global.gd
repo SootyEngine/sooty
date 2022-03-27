@@ -5,7 +5,11 @@ signal message(type: String, payload: Variant)
 signal pre_scene_changed()
 signal scene_changed()
 
-@onready var config := Config.new("res://config.cfg")
+@onready var config := Config.new("res://config.cfg") # the main config settings file. TODO: add reload option in settings
+var _screenshot: Image # a copy of the screen, for use in menus, or save system.
+
+func snap_screenshot():
+	_screenshot = get_viewport().get_texture().get_image()
 
 var window_width: int:
 	get: return ProjectSettings.get_setting("display/window/size/viewport_width")
@@ -42,6 +46,8 @@ func change_scene(path: String, is_loading: bool = false):
 	await get_tree().process_frame
 	var scene := get_tree().current_scene
 	scene_changed.emit()
+	prints("CHANING SCENE ", path, is_loading)
+	print(get_stack())
 	if scene.has_method("_start"):
 		scene._start(is_loading)
 

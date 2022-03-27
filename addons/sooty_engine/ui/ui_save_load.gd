@@ -25,31 +25,19 @@ func _select_slot(index: int):
 	var slot := "%s_%s" % [page, index] # slot_names[index]
 	
 	# save?
-	if not Input.is_key_pressed(KEY_SHIFT):# save_mode:
+	if save_mode:
+		if Saver.has_slot(slot):
+			pass # TODO: Are you sure?
+		
 		await Saver.save_slot(slot)
 		_update_slot(index)
-		return
-		if Saver.has_slot(slot):
-			# Are you sure you want to save over?
-			pass
-		else:
-			push_error("Saving isn't implemented yet.")
 	# load?
 	else:
-		await Saver.load_slot(slot)
-		
-		push_error("Loading isn't implemented yet.")
+		Saver.load_slot(slot)
 
 func _update_page():
 	for i in slots_per_page:
 		_update_slot(i)
-#		var slot_node := buttons.get_child(i)
-#		var slot_index = page * slots_per_page + i
-#		if slot_index >= 0 and slot_index < len(slot_names):
-#			var info := Saver.get_slot_info(slot_names[slot_index])
-#			slot_node.set_info(info)
-#		else:
-#			slot_node.set_info({})
 
 func _update_slot(index: int):
 	var info := Saver.get_slot_info("%s_%s" % [page, index])

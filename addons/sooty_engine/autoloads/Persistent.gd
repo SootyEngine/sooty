@@ -4,7 +4,7 @@ const GROUP_PERSISTENT := "has_persistent_state"
 const SAVE_PATH := "user://persistent.res"
 
 func _get_subdir() -> String:
-	return "states_persistent"
+	return "persistent"
 
 func _init() -> void:
 	super._init()

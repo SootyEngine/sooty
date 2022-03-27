@@ -120,7 +120,7 @@ func _tag_closed(tag: int, data: Variant):
 func _trigger(type: int, data: Variant):
 	match type:
 		TRIG_SYMBOL: symbol.emit(data)
-		TRIG_ACTION: State.do(data)# State._eval(data)
+		TRIG_ACTION: StringAction.do(data)
 		TRIG_WAIT: _wait += data.get("wait", data.get("w", 1.0))
 		TRIG_HOLD: play = false
 		TRIG_PACE: _pace = data.get("pace", data.get("p", 1.0))
