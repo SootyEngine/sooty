@@ -12,14 +12,14 @@ signal flow_started(id: String)
 signal flow_ended(id: String)
 signal option_selected(option: Dictionary)
 signal on_line(text: DialogueLine)
+signal _refresh() # called when dialogues were reloaded, and so we should clear the captions/options.
 
 @export var _execute_mode := false # TODO: Implement this differently.
-@export var _break := false
-@export var _active := false
-@export var _stack := []
-@export var _wait := 0.0
-@export var _halting_for := []
-@export var _last_tick_stack := []
+@export var _break := false # breaking from the flow, temporarilly.
+@export var _active := false # currently in the middle of running?
+@export var _stack := [] # current stack of flows, so we can return to a position in a previous flow.
+@export var _halting_for := [] # objects that want the flow to _break
+@export var _last_tick_stack := [] # stack of the previous tick, used for saving and rollback.
 
 const S_FLOW_GOTO := "=>"
 const S_FLOW_CALL := "=="
@@ -34,6 +34,7 @@ func _ready():
 		Saver.pre_load.connect(_pre_load)
 		Global.started.connect(_on_start)
 		Global.ended.connect(_on_end)
+		Dialogues.reloaded.connect(_dialogues_reloaded)
 
 func _save_state(state: Dictionary):
 	state["DS"] = { active=_active, stack=_last_tick_stack }
@@ -42,13 +43,17 @@ func _load_state(state: Dictionary):
 	_active = state["DS"].active
 	_stack = state["DS"].stack
 
+func _dialogues_reloaded():
+	_refresh.emit()
+	_stack = _last_tick_stack.duplicate(true)
+	_break = false
+
 func _pre_load():
 	_clear()
 
 func _clear():
 	_active = false
 	_break = false
-	_wait = 0.0
 	_halting_for = []
 	_stack.clear()
 
@@ -60,10 +65,6 @@ func _on_end():
 	_clear()
 	if has("MAIN.END"):
 		execute("MAIN.END")
-
-func wait(time := 1.0):
-	_wait = time
-	_break = true
 
 func halt(halter: Object):
 	if not halter in _halting_for:
@@ -86,11 +87,6 @@ func get_current_dialogue() -> Dialogue:
 	return null if not len(_stack) else Dialogues.get_dialogue(_stack[-1].did)
 
 func _process(delta: float) -> void:
-	if _wait > 0.0:
-		_wait -= delta
-		if _wait <= 0.0:
-			_wait = 0.0
-			_break = false
 	tick()
 
 func start(id: String):
@@ -201,6 +197,7 @@ func tick():
 			push_error("Tripped safety! Increase MAX_STEPS_PER_TICK if necessary.", safety)
 			break
 		
+		print(_stack[-1])
 		var line := pop_next_line()
 		
 		if not len(line) or not len(line.line):
