@@ -1,6 +1,5 @@
 extends "res://addons/sooty_engine/autoloads/base_state.gd"
 
-
 func _get_subdir() -> String:
 	return "states"
 

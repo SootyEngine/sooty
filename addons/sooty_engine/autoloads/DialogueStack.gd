@@ -10,7 +10,7 @@ signal tick_started()
 signal tick_ended()
 signal flow_started(id: String)
 signal flow_ended(id: String)
-signal option_selected(option: Dictionary)
+signal option_selected(option: DialogueLine)
 signal on_line(text: DialogueLine)
 signal _refresh() # called when dialogues were reloaded, and so we should clear the captions/options.
 
@@ -76,6 +76,8 @@ func unhalt(halter: Object):
 		_halting_for.erase(halter)
 		if not len(_halting_for):
 			_break = false
+		else:
+			print("WAITING FOR ", _halting_for)
 
 func is_active() -> bool:
 	return _active
@@ -159,6 +161,7 @@ func select_option(option: DialogueLine):
 	var o := option._data
 	if "then" in o:
 		_push(option._dialogue_id, "%OPTION%", o.then, STEP_CALL)
+#	await get_tree().process_frame
 	option_selected.emit(option)
 
 func _pop():
@@ -197,7 +200,6 @@ func tick():
 			push_error("Tripped safety! Increase MAX_STEPS_PER_TICK if necessary.", safety)
 			break
 		
-		print(_stack[-1])
 		var line := pop_next_line()
 		
 		if not len(line) or not len(line.line):

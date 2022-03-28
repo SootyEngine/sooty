@@ -671,3 +671,6 @@ func _install_effect(id:String) -> bool:
 			return true
 
 	return false
+
+static func sanitize(t: String) -> String:
+	return UString.replace_between(t, "[", "]", func(s): "").replace("*", "")
