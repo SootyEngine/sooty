@@ -24,7 +24,7 @@ func _reload():
 func _parse_file(file: String):
 	files[file] = UFile.get_modified_time(file)
 	
-	var data := DialogueParser.parse(file)
+	var data := DialogueParser.new().parse(file)
 	UDict.merge(flows, data.flows)
 	UDict.merge(lines, data.lines)
 #	UDict.log(out_flows)

@@ -10,4 +10,4 @@ func start(file: FE_File):
 	$label.set_text("File being moved...")
 
 func _process(_delta: float) -> void:
-	rect_global_position = get_global_mouse_position() + Vector2(4, 4)
+	global_position = get_global_mouse_position() + Vector2(4, 4)

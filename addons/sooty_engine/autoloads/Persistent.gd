@@ -6,8 +6,8 @@ const SAVE_PATH := "user://persistent.res"
 func _get_subdir() -> String:
 	return "persistent"
 
-func _init() -> void:
-	super._init()
+func _ready() -> void:
+	super._ready()
 	if not Engine.is_editor_hint():
 		Saver._get_persistent.connect(_save_state)
 		Saver._set_persistent.connect(_load_state)

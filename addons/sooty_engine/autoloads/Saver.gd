@@ -29,8 +29,14 @@ signal loaded_persistent()
 var _wait_timer := 0.0
 var _last_save_slot := ""
 
-func _init() -> void:
+func _ready() -> void:
 	Mods.loaded.connect(_mods_loaded)
+	
+	var d := Directory.new()
+	if not d.dir_exists(DIR):
+		d.make_dir(DIR)
+	
+	set_process(false)
 
 func has_last_save() -> bool:
 	return _last_save_slot != "" and has_slot(_last_save_slot)
@@ -40,13 +46,6 @@ func load_last_save():
 
 func _mods_loaded():
 	load_persistent()
-
-func _ready() -> void:
-	var d := Directory.new()
-	if not d.dir_exists(DIR):
-		d.make_dir(DIR)
-	
-	set_process(false)
 
 func _process(delta: float) -> void:
 	if _wait_timer > 0.0:

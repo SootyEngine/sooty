@@ -9,10 +9,12 @@ var _files := {}
 
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group("sa:music")
+
+func _ready():
 	Mods.load_all.connect(_load_mods)
 	Saver._get_state.connect(_save_state)
 	Saver._set_state.connect(_load_state)
-	add_to_group("sa:music")
 
 func music(id: String):
 	play(id)

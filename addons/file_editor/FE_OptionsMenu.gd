@@ -1,6 +1,7 @@
 @tool
 extends PopupMenu
-class_name FE_OptionsMenu
+
+const FE_Util := preload("res://addons/file_editor/FE_Util.gd")
 
 var _popups := {}
 var _options := []

@@ -181,3 +181,18 @@ func _file_modified(file: FE_BaseFile):
 		_refresh_dir(file)
 	file_updated.emit(file)
 	files_updated.emit()
+
+func get_file(path: String) -> FE_BaseFile:
+	return _get_file(self, path)
+
+func _get_file(node: Node, path: String) -> FE_BaseFile:
+	if node is FE_File:
+		if node.path == path:
+			return node
+	
+	for file in node.get_children():
+		var out := _get_file(node, path)
+		if out != null:
+			return out
+	
+	return null

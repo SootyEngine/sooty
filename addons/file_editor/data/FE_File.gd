@@ -74,8 +74,8 @@ func save(text: String) -> bool:
 		push_error("Failed saving %s." % path)
 		return false
 
-func open(line: int=-1):
-	var tab := editors.open(self)
+func open(line := -1):
+	var tab = editors.open(self)
 	tab.goto(line)
 #	var tab := get_editor_tab()
 #

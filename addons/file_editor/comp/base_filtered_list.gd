@@ -1,6 +1,11 @@
 @tool
 extends Control
 
+const FE_Main := preload("res://addons/file_editor/comp/FE_Main.gd")
+const FE_Files := preload("res://addons/file_editor/comp/FE_Files.gd")
+const FE_Editors := preload("res://addons/file_editor/comp/FE_Editors.gd")
+const FE_OptionsMenu := preload("res://addons/file_editor/FE_OptionsMenu.gd")
+
 @export var _popup: NodePath
 @export var _filter: NodePath
 @export var _list: NodePath

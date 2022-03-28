@@ -113,24 +113,23 @@ popup/item_1/id = 1
 
 [node name="space" type="Control" parent="c/menu_top"]
 offset_left = 130.0
-offset_right = 950.0
+offset_right = 966.0
 offset_bottom = 31.0
 size_flags_horizontal = 3
 
 [node name="version" type="Label" parent="c/menu_top"]
 modulate = Color(1, 1, 1, 0.25)
-offset_left = 954.0
+offset_left = 970.0
 offset_top = 4.0
-offset_right = 1004.0
+offset_right = 1020.0
 offset_bottom = 27.0
 theme_override_fonts/font = ExtResource( "6_g230f" )
-text = "v1.12"
+text = "v1.13"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="c" type="Control" parent="c/menu_top"]
-rect_min_size = Vector2(16, 0)
-offset_left = 1008.0
+offset_left = 1024.0
 offset_right = 1024.0
 offset_bottom = 31.0
 
@@ -203,7 +202,6 @@ autowrap_mode = 0
 
 [node name="drag_object" type="ColorRect" parent="c/c/c/c/file_list"]
 visible = false
-rect_min_size = Vector2(0, 24)
 offset_top = -31.0
 offset_right = 190.0
 offset_bottom = -7.0
@@ -262,8 +260,6 @@ script = ExtResource( "8_pt73u" )
 _meta_panel = NodePath("editor_meta")
 _error_label = NodePath("editor_meta/errors")
 _meta_label = NodePath("editor_meta/meta")
-word_wrap = false
-font_size = 16
 
 [node name="tab_bar" type="TabBar" parent="c/c/c/c2/c/editors"]
 offset_right = 614.0
@@ -274,7 +270,6 @@ theme_override_colors/font_unselected_color = Color(1, 1, 1, 0)
 theme_override_constants/hseparation = 24
 theme_override_styles/tab_selected = SubResource( "StyleBoxEmpty_mr5r7" )
 theme_override_styles/tab_unselected = SubResource( "StyleBoxEmpty_fuis2" )
-tab_alignment = 0
 tab_close_display_policy = 2
 drag_to_rearrange_enabled = true
 script = ExtResource( "11_ylho7" )
@@ -415,7 +410,6 @@ offset_top = 388.0
 offset_right = 1024.0
 offset_bottom = 565.0
 size_flags_vertical = 3
-tab_alignment = 0
 script = ExtResource( "4_td4f3" )
 
 [node name="console" type="VBoxContainer" parent="c/c/meta_panels"]

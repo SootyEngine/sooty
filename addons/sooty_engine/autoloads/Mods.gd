@@ -9,21 +9,18 @@ signal loaded()
 
 var mods := {}
 
-func _init() -> void:
+func _init():
 	_add_mod("res://", true)
 	
 	if UFile.dir_exists(USER_DIR):
 		for mod in get_user_mod_dirs():
 			_add_mod(mod, AUTO_INSTALL_USER_MODS)
 
+func _ready() -> void:
+	_update.call_deferred()
+
 func get_user_mod_dirs() -> PackedStringArray:
 	return UFile.get_dirs("user://mods")
-
-func _ready() -> void:
-	_ready_deferred.call_deferred()
-
-func _ready_deferred():
-	_update()
 
 func get_installed() -> Array:
 	var filtered := mods.values().filter(func(x): return x.installed)

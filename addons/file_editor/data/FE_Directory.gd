@@ -2,6 +2,8 @@
 extends FE_BaseFile
 class_name FE_Directory
 
+const FE_File := preload("res://addons/file_editor/data/FE_File.gd")
+
 @export var tint := Color.WHITE
 
 func _ready() -> void:

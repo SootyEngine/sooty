@@ -1,6 +1,6 @@
 @tool
 extends Node
-class_name FE_Main
+class_name FE
 
 @export var _is_plugin := false
 
@@ -15,6 +15,11 @@ class_name FE_Main
 
 func _set_as_plugin():
 	_is_plugin = true
+	add_to_group("file_editor:plugin")
 
 func is_plugin_hint() -> bool:
 	return _is_plugin
+
+func edit_file(path: String):
+	var file := files.get_file(path)
+	print("Edit file: ", file, path)

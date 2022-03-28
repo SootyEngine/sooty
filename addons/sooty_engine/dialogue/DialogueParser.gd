@@ -12,7 +12,9 @@ const S_FLOW_GOTO := "=>"
 const S_FLOW_CALL := "=="
 const S_PROPERTY_HEAD := "|"
 
-static func parse(file: String) -> Dictionary:
+var _last_speaker := ""
+
+func parse(file: String) -> Dictionary:
 	var original_text := UFile.load_text(file)
 	var text_lines := original_text.split("\n")
 	var dict_lines := []
@@ -127,14 +129,14 @@ static func parse(file: String) -> Dictionary:
 		lines=out_lines
 	}
 
-static func set_line_uid(lines: PackedStringArray, line: int, uid: String):
+func set_line_uid(lines: PackedStringArray, line: int, uid: String):
 	if S_LANG_ID in lines[line]:
 		var p := lines[line].split(S_LANG_ID, true, 1)
 		lines[line] = p[0].strip_edges(false, true) + " //#%s" % uid
 	else:
 		lines[line] = lines[line] + " //#%s" % uid
 
-static func get_uid(lines: Dictionary, size := 8) -> String:
+func get_uid(lines: Dictionary, size := 8) -> String:
 	var uid := get_id()
 	var safety := 100
 	while uid in lines:
@@ -145,7 +147,7 @@ static func get_uid(lines: Dictionary, size := 8) -> String:
 			break
 	return uid
 
-static func get_id(size := 8) -> String:
+func get_id(size := 8) -> String:
 	var dict := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	var lenn := len(dict)
 	var out = ""
@@ -153,18 +155,18 @@ static func get_id(size := 8) -> String:
 		out += dict[randi() % lenn]
 	return out
 
-static func _clean_array(lines: Array, all_lines: Dictionary):
+func _clean_array(lines: Array, all_lines: Dictionary):
 	for i in len(lines):
 		if DEBUG_KEEP_DICTS: # DEBUG SANITY
 			_clean(lines[i], all_lines)
 		else:
 			lines[i] = _clean(lines[i], all_lines)
 
-static func _clean_nested_array(lines_list: Array, all_lines: Dictionary):
+func _clean_nested_array(lines_list: Array, all_lines: Dictionary):
 	for i in len(lines_list):
 		_clean_array(lines_list[i], all_lines)
 
-static func _clean(line: Dictionary, all_lines: Dictionary) -> String:
+func _clean(line: Dictionary, all_lines: Dictionary) -> String:
 	var id := "%s!%s" % [line.file, line.line]
 	if "flat" in line:
 		id += "_%s" % [line.flat]
@@ -207,7 +209,7 @@ static func _clean(line: Dictionary, all_lines: Dictionary) -> String:
 	all_lines[id] = line
 	return id
 
-static func _collect_tabbed(dict_lines: Array, i: int) -> Array:
+func _collect_tabbed(dict_lines: Array, i: int) -> Array:
 	var line = dict_lines[i]
 #	_extract_properties(line)
 	i += 1
@@ -252,7 +254,7 @@ static func _collect_tabbed(dict_lines: Array, i: int) -> Array:
 	_process_line(line)
 	return [i, line]
 
-static func _process_line(line: Dictionary):
+func _process_line(line: Dictionary):
 	var t: String = line.text
 	if t.begins_with(S_FLOW): return _line_as_flow(line)
 	if t.begins_with("{{"): return _line_as_condition(line)
@@ -271,7 +273,7 @@ static func _process_line(line: Dictionary):
 	if t.begins_with(S_PROPERTY_HEAD): return _line_as_properties(line)
 	return _line_as_dialogue(line)
 
-static func _line_as_condition(line: Dictionary):
+func _line_as_condition(line: Dictionary):
 	line.type = "cond"
 	line.cond_type = "if"
 	_extract_conditional(line)
@@ -312,7 +314,7 @@ static func _line_as_condition(line: Dictionary):
 		line.conds = [line.cond]
 		line.cond_lines = [line.tabbed]
 
-static func _line_as_option(line: Dictionary):
+func _line_as_option(line: Dictionary):
 	var t: String = line.text
 	var a := t.find("-")
 	
@@ -346,26 +348,26 @@ static func _line_as_option(line: Dictionary):
 	
 	line.then = lines
 
-static func _line_as_goto(line: Dictionary):
+func _line_as_goto(line: Dictionary):
 	var p = line.text.rsplit(S_FLOW_GOTO, true, 1)
 	line.text = p[0].strip_edges()
 	_add_flow_action(line, "goto", p[1].strip_edges())
 
-static func _line_as_call(line: Dictionary):
+func _line_as_call(line: Dictionary):
 	var p = line.text.split(S_FLOW_CALL, true, 1)
 	line.text = p[0].strip_edges()
 	_add_flow_action(line, "call", p[1].strip_edges())
 
-static func _add_flow_action(line: Dictionary, type: String, f_action: String):
+func _add_flow_action(line: Dictionary, type: String, f_action: String):
 	line.type = type
 	line[type] = f_action if "." in f_action else "%s.%s" % [line.did, f_action]
 	return line
 	
-static func _line_as_action(line: Dictionary):
+func _line_as_action(line: Dictionary):
 	line.type = "action"
 	line.action = line.text.strip_edges()
 
-static func _line_as_properties(line: Dictionary):
+func _line_as_properties(line: Dictionary):
 	var properties := {}
 	for prop in line.text.substr(len("|")).split(" "):
 		var p = prop.split(":", true, 1)
@@ -373,12 +375,14 @@ static func _line_as_properties(line: Dictionary):
 	line.type = "prop"
 	line.prop = properties
 
-static func _line_as_flow(line: Dictionary):
+func _line_as_flow(line: Dictionary):
+	_last_speaker = ""
+	
 	line.type = "flow"
 	line.text = line.text.substr(len("===")).strip_edges()
 	line.then = line.tabbed
 
-static func _line_as_dialogue(line: Dictionary):
+func _line_as_dialogue(line: Dictionary):
 	var text: String = line.text
 	line.type = "text"
 	var i := _find_speaker_split(text, 0)
@@ -395,6 +399,12 @@ static func _line_as_dialogue(line: Dictionary):
 			for part in a.inside.split(";"):
 				action.append("@%s.%s" % [line.from, part])
 			line.action = action
+		
+		# remember last speaker
+		if line.from.strip_edges() == "":
+			line.from = _last_speaker
+		else:
+			_last_speaker = line.from
 	
 	line.text = line.text.replace("\\:", ":")
 	
@@ -410,7 +420,7 @@ static func _line_as_dialogue(line: Dictionary):
 	if options:
 		line.options = options
 
-static func _find_speaker_split(text: String, from: int) -> int:
+func _find_speaker_split(text: String, from: int) -> int:
 	var in_bbcode := false
 	for i in range(from, len(text)):
 		match text[i]:
@@ -421,7 +431,7 @@ static func _find_speaker_split(text: String, from: int) -> int:
 					return i
 	return -1
 
-static func _extract_flat_lines(line: Dictionary) -> Array:
+func _extract_flat_lines(line: Dictionary) -> Array:
 	var out := []
 	if _extract(line, "((", "))", "flat_lines"):
 		var p = line.flat_lines.split(";;")
@@ -444,13 +454,13 @@ static func _extract_flat_lines(line: Dictionary) -> Array:
 		line.erase("flat_lines")
 	return out
 
-static func _extract_action(line: Dictionary) -> bool:
+func _extract_action(line: Dictionary) -> bool:
 	return _extract(line, "[[", "]]", "action")
 
-static func _extract_conditional(line: Dictionary) -> bool:
+func _extract_conditional(line: Dictionary) -> bool:
 	return _extract(line, "{{", "}}", "cond")
 
-static func _extract(line: Dictionary, head: String, tail: String, key: String) -> bool:
+func _extract(line: Dictionary, head: String, tail: String, key: String) -> bool:
 	var p := UString.extract(line.text, head, tail)
 	line.text = p.outside
 	if p.inside != "":
@@ -458,11 +468,11 @@ static func _extract(line: Dictionary, head: String, tail: String, key: String) 
 		return true
 	return false
 
-static func _erase(d: Dictionary, keys: Array):
+func _erase(d: Dictionary, keys: Array):
 	for k in keys:
 		d.erase(k)
 
-static func _trailing_tokens(s: String, splitters: Array) -> Array:
+func _trailing_tokens(s: String, splitters: Array) -> Array:
 	var f := UString.split_on_next(s, splitters)
 	var token: String = f[0]
 	var left_side: String = f[1]
@@ -479,7 +489,7 @@ static func _trailing_tokens(s: String, splitters: Array) -> Array:
 		tokens.append([f[0], left_over])
 	return [left_side, tokens]
 
-static func _count_leading_tabs(s: String) -> int:
+func _count_leading_tabs(s: String) -> int:
 	var out := 0
 	for c in s:
 		match c:

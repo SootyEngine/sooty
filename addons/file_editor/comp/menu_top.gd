@@ -1,6 +1,10 @@
 @tool
 extends Control
 
+const FE_Util := preload("res://addons/file_editor/FE_Util.gd")
+const FE_Main := preload("res://addons/file_editor/comp/FE_Main.gd")
+const FE_OptionsMenu := preload("res://addons/file_editor/FE_OptionsMenu.gd")
+
 @export_node_path(Label) var _l_version:NodePath
 @onready var l_version: Label = get_node(_l_version)
 

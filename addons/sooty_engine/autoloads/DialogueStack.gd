@@ -26,7 +26,9 @@ const S_FLOW_CALL := "=="
 
 func _init(em := false) -> void:
 	_execute_mode = em
-	if not Engine.is_editor_hint() and not em:
+
+func _ready():
+	if not Engine.is_editor_hint() and not _execute_mode:
 		Saver._get_state.connect(_save_state)
 		Saver._set_state.connect(_load_state)
 		Saver.pre_load.connect(_pre_load)

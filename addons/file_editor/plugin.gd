@@ -1,6 +1,7 @@
 @tool
 extends EditorPlugin
 
+const FE_Main := preload("res://addons/file_editor/comp/FE_Main.gd")
 const TEPanel: PackedScene = preload("res://addons/file_editor/file_editor.tscn")
 var panel: FE_Main
 
