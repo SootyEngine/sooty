@@ -11,16 +11,16 @@ const OP_ALL := OP_RELATIONS + OP_ASSIGNMENTS
 
 # colors
 const C_TEXT := Color.GAINSBORO
-const C_SPEAKER := Color(1, 1, 1, 0.4)
+const C_SPEAKER := Color(1, 1, 1, 0.5)
 const C_TAG := Color(1, 1, 1, .5)
 const C_SYMBOL := Color(1, 1, 1, 0.33)
 const C_FLAT_LINE := Color(1, 1, 1, 0.5)
 
 const C_PROPERTY := Color(1, 1, 1, .25)
-const C_VAR_BOOL := Color.PALE_GOLDENROD
-const C_VAR_FLOAT := Color.ORANGE
-const C_VAR_INT := Color.ORANGE
-const C_VAR_STR := Color.SANDY_BROWN
+const C_VAR_BOOL := Color.AQUAMARINE
+const C_VAR_FLOAT := Color.DARK_TURQUOISE
+const C_VAR_INT := Color.DARK_TURQUOISE
+const C_VAR_STR := Color.CADET_BLUE
 const C_VAR_CONSTANT := Color.DARK_GRAY
 const C_VAR_STATE_PROPERTY := Color.SPRING_GREEN
 
@@ -32,12 +32,12 @@ const C_ACTION_GROUP := Color.MEDIUM_PURPLE
 const C_ACTION_STATE := Color.DEEP_SKY_BLUE
 
 const C_FLOW := Color.TAN
-const C_FLOW_GOTO := Color.TAN# Color.GREEN_YELLOW
-const C_FLOW_CALL := Color.TAN#Color.DEEP_SKY_BLUE
+const C_FLOW_GOTO := Color.TAN
+const C_FLOW_CALL := Color.TAN
 
 const C_CONDITION := Color.WHEAT
 const C_OPTION_FLAG := Color(0.25, 0.88, 0.82, 0.5)
-const C_OPTION_TEXT := Color.TURQUOISE
+const C_OPTION_TEXT := Color.TAN
 
 # strings
 const S_FLOW := "==="
@@ -73,7 +73,11 @@ func _c(i: int, clr: Color, offset := 0):
 	_co(clr, offset)
 
 func _set_var_color(i: int, v: String, is_function := false, func_color := C_ACTION_EVAL):
-	if " " in v:
+	if UString.is_wrapped(v, "<<", ">>"):
+		_c(i, C_SYMBOL)
+		_c(i+2, C_ACTION_EVAL)
+		_c(i+len(v)-2, C_SYMBOL)
+	elif " " in v:
 		var off := i
 		for part in v.split(" "):
 			_set_var_color(off, part)
@@ -286,9 +290,18 @@ func _h_line(from: int, to: int):
 		var i := _find_speaker_split(from)
 #		if ":" in text:
 		if i != -1:
-			_c(max(from, _find_speaker_start(i)), C_SPEAKER)
+			var j = max(from, _find_speaker_start(i))
+			_c(j, C_SPEAKER)
 			_c(i, C_SYMBOL, 1)
 			_co(C_TEXT)
+			var sub = text.substr(j, i-j)
+			# colorize in brackets
+			if "(" in sub:
+				var a := sub.find("(")
+				var b := sub.rfind(")")
+				_c(a, C_SYMBOL)
+				_c(a+1, C_ACTION_GROUP)
+				_c(b, C_SYMBOL)
 		
 		_h_bbcode(from, to, C_TEXT)
 

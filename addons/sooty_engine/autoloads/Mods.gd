@@ -11,7 +11,6 @@ var mods := {}
 
 func _init():
 	_add_mod("res://", true)
-	
 	if UFile.dir_exists(USER_DIR):
 		for mod in get_user_mod_dirs():
 			_add_mod(mod, AUTO_INSTALL_USER_MODS)
