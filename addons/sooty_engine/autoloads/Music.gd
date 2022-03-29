@@ -1,6 +1,6 @@
 extends Node
 
-const MUSIC_BUSS := "Master"
+const BUS := "music"
 const DEFAULT_FADE_TIME := 2.0
 const MAX_MUSIC_PLAYERS := 3
 
@@ -22,7 +22,7 @@ func music(id: String):
 func _load_mods(mods: Array):
 	for mod in mods:
 		mod.meta["music"] = []
-		var dir = mod.dir.plus_file("audio").plus_file("music")
+		var dir = mod.dir.plus_file("audio/music")
 		var got = UFile.get_files(dir, UFile.EXT_AUDIO)
 		for file_path in got:
 			var id := UFile.get_file_name(file_path)
@@ -105,7 +105,7 @@ func play(id: String, kwargs := {}):
 	player.set_meta("state", "playing")
 	player.stream = load(_files[id])
 	player.finished.connect(_on_music_finished.bind(player))
-	player.bus = MUSIC_BUSS
+	player.bus = BUS
 	
 	var play_pos: float = kwargs.get("pos", 0.0)
 	if "rand_offset" in kwargs:

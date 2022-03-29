@@ -1,7 +1,6 @@
 extends Node
 
-const DIR := "audio/sfx"
-const SFX_BUSS := "Master"
+const BUS := "sfx"
 const MAX_SOUNDS := 8
 
 var _files := {} # all playable audio
@@ -23,7 +22,7 @@ func _load_mods(mods: Array):
 	_files.clear()
 	for mod in mods:
 		mod.meta["sfx"] = []
-		for file_path in UFile.get_files(mod.dir.plus_file(DIR), UFile.EXT_AUDIO):
+		for file_path in UFile.get_files(mod.dir.plus_file("audio/sfx"), UFile.EXT_AUDIO):
 			_files[UFile.get_file_name(file_path)] = file_path
 			mod.meta.sfx.append(file_path)
 
@@ -58,7 +57,7 @@ func _play(id: String, kwargs := {}):
 	add_child(player)
 	player.stream = load(_files[id])
 	player.finished.connect(_on_audio_finished.bind(player))
-	player.bus = SFX_BUSS
+	player.bus = BUS
 	if "scale_rand" in kwargs:
 		player.pitch_scale = randf_range(1.0 - kwargs.scale_rand, 1.0 + kwargs.scale_rand)
 	player.play()

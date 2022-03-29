@@ -29,6 +29,9 @@ signal loaded_persistent()
 var _wait_timer := 0.0
 var _last_save_slot := ""
 
+func _init() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
 func _ready() -> void:
 	Mods.loaded.connect(_mods_loaded)
 	
@@ -51,7 +54,8 @@ func _process(delta: float) -> void:
 	if _wait_timer > 0.0:
 		_wait_timer -= delta
 	else:
-		_wait_timer = 1.0
+		# in case a setting is being changed or a lot is happening.
+		_wait_timer = 4.0
 		_save_persistent()
 		set_process(false)
 
@@ -116,6 +120,12 @@ func load_slot(slot: String):
 	loaded.emit()
 	print("Loaded Slot %s." % slot)
 
+func temp_save(index := 0):
+	save_slot("temp_%s" % index)
+
+func auto_save(index := 0):
+	save_slot("auto_%s" % index)
+
 func save_slot(slot: String):
 	var blocking_save := []
 	_check_can_save.emit(blocking_save)
@@ -155,6 +165,8 @@ func save_slot(slot: String):
 	UFile.save_json(slot_path.plus_file(FNAME_INFO), state_info)
 	
 	# preview image
+	if not Global._screenshot:
+		Global.snap_screenshot()
 	var img: Image = Global._screenshot.duplicate()
 	var siz := img.get_size() / PREVIEW_SIZE_DIV_AMOUNT
 	img.resize(ceil(siz.x), ceil(siz.y), Image.INTERPOLATE_LANCZOS)

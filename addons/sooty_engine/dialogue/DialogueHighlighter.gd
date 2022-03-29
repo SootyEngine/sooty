@@ -31,7 +31,7 @@ const C_ACTION_NODE := Color.SALMON
 const C_ACTION_GROUP := Color.MEDIUM_PURPLE
 const C_ACTION_STATE := Color.DEEP_SKY_BLUE
 
-const C_FLOW := Color.TAN
+const C_FLOW := Color.LIGHT_CORAL
 const C_FLOW_GOTO := Color.TAN
 const C_FLOW_CALL := Color.TAN
 

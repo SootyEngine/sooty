@@ -1,7 +1,7 @@
 extends "res://addons/sooty_engine/autoloads/base_state.gd"
 
 func _get_subdir() -> String:
-	return "persistent"
+	return "settings"
 
 func _ready() -> void:
 	super._ready()

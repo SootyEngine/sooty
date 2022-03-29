@@ -204,3 +204,9 @@ static func ordinal(n: Variant, one := "%sst", two := "%snd", three := "%srd", o
 		n = n.to_int()
 	var ord = {1: one, 2: two, 3: three}.get(n if n % 100 < 20 else n % 10, other)
 	return ord % str(n) if "%s" in ord else ord
+
+static func split_chars(s: String) -> Array:
+	var out := []
+	for c in s:
+		out.append(c)
+	return out
