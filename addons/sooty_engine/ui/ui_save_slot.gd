@@ -31,7 +31,7 @@ func set_info(info: Dictionary):
 	if info:
 		preview.set_texture(info.preview)
 		preview.pivot_offset = info.preview.get_size() * .5
-		var r = DateTime.create_from_current().get_relation_string(info.date_time)
+		var r = info.date_time.get_since()
 		label_info.set_bbcode(r)
 		label_info.hint_tooltip = info.dir_size
 		if "caption" in info:

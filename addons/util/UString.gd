@@ -101,7 +101,8 @@ static func split_between(s: String, head: String, tail = null) -> PackedStringA
 	
 	return out
 
-static func replace_between(s: String, head: String, tail: String, call: Callable) -> String:
+# with_index: means the location in the main string will also be returned.
+static func replace_between(s: String, head: String, tail: String, call: Callable, with_index := false) -> String:
 	var index := 0
 	while true:
 		index = s.find(head, index)
@@ -112,7 +113,9 @@ static func replace_between(s: String, head: String, tail: String, call: Callabl
 		if head in inner:
 			index += len(head)
 			continue
-		var got = call.call(index, inner)
+		
+		var got = str(call.call(index, inner) if with_index else call.call(inner))
+		
 		if got:
 			s = part(s, 0, index) + got + part(s, b+len(tail))
 			index += len(got)

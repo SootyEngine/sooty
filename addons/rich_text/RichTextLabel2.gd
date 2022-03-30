@@ -14,9 +14,8 @@ enum {
 	T_COLOR, T_OUTLINE_COLOR,
 	T_PARAGRAPH,
 	T_CONDITION,
-	T_BOLD, T_ITALICS, T_BOLD_ITALICS, T_UNDERLINE, T_STRIKE_THROUGH,
-	T_CODE,
-	T_META,
+	T_BOLD, T_ITALICS, T_BOLD_ITALICS, T_UNDERLINE, T_STRIKE_THROUGH, T_CODE,
+	T_META, T_HINT,
 	T_FONT_SIZE,
 	T_TABBLE, T_CELL,
 	T_EFFECT,
@@ -383,7 +382,8 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		"lit": _push_color(_state.color.lightened(.33))
 		"hide": _push_color(Color.TRANSPARENT)
 		
-		"meta": _push_meta(info.strip_edges())
+		"meta": _push_meta(info)
+		"hint": _push_hint(info)
 		
 		"lb": _add_text("[")
 		"rb": _add_text("]")
@@ -416,8 +416,19 @@ func _add_text(t: String):
 	add_text(t)
 
 func _push_meta(data: Variant):
-	_stack_push(T_META)
-	push_meta(data)
+	if "^" in data:
+		var p = data.split("^", true, 1)
+		push_meta(p[0].strip_edges())
+		push_hint(p[1].strip_edges())
+		_stack_push(T_META)
+		_stack_push(T_HINT)
+	else:
+		push_meta(data.strip_edges())
+		_stack_push(T_META)
+
+func _push_hint(data: Variant):
+	_stack_push(T_HINT)
+	push_hint(data)
 
 func _push_bold():
 	_stack_push(T_BOLD)
