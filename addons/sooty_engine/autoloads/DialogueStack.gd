@@ -76,8 +76,6 @@ func unhalt(halter: Object):
 		_halting_for.erase(halter)
 		if not len(_halting_for):
 			_break = false
-		else:
-			print("WAITING FOR ", _halting_for)
 
 func is_active() -> bool:
 	return _active

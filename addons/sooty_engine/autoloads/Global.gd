@@ -6,8 +6,10 @@ const VERSION := "0.1_alpha"
 signal started()
 signal ended()
 signal message(type: String, payload: Variant)
+signal added_to_group(node: Node, group: String)
+signal removed_from_group(node: Node, group: String)
 
-var active_game := true#false
+var active_game := true
 
 @onready var config := Config.new("res://config.cfg") # the main config settings file. TODO: add reload option in settings
 var _screenshot: Image # a copy of the screen, for use in menus, or save system.
@@ -77,3 +79,15 @@ func sooty_version():
 
 func snap_screenshot():
 	_screenshot = get_viewport().get_texture().get_image()
+
+# add to group and emit signal alerting everyone.
+func add_node_to_group(node: Node, group: String):
+	if not node.is_in_group(group):
+		node.add_to_group(group)
+		added_to_group.emit(node, group)
+
+# remove from group and emit signal alerting everyone.
+func remove_node_from_group(node: Node, group: String):
+	if node.is_in_group(group):
+		node.remove_from_group(group)
+		removed_from_group.emit(node, group)

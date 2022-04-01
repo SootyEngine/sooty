@@ -9,6 +9,12 @@ func _init() -> void:
 	Mods.load_all.connect(_load_mods)
 	add_to_group("sa:goto")
 
+func _get(property: StringName):
+	return get_tree().current_scene._get(property)
+
+func _set(property: StringName, value) -> bool:
+	return get_tree().current_scene._set(property, value)
+
 func _iter_init(arg):
 	_iter_current = 0
 	return _iter_current < len(scenes)
