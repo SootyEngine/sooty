@@ -13,3 +13,8 @@ static func dig_path(node: Node, call: Callable, path := []):
 	for child in node.get_children():
 		dig_path(child, call, path)
 	path.pop_back()
+
+static func remove_children(node: Node):
+	for child in node.get_children():
+		node.remove_child(child)
+		child.queue_free()

@@ -39,7 +39,15 @@ func get_main_scene_ids(sort := true) -> Array:
 	if sort:
 		ids.sort()
 	return ids
-	
+
+func create(id: String, parent: Node = null) -> Node:
+	if id in scenes:
+		var out: Node = load(scenes[id]).instantiate()
+		if parent:
+			parent.add_child(out)
+		return out
+	return null
+
 #func _iter_init(arg):
 #	_iter_current = 0
 #	return _iter_current < len(scenes)
