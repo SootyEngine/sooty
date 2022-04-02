@@ -116,7 +116,7 @@ If you add a property `var save_caption := "Save Name"` it will be shown on the 
 The state system was entirely designed with modding/expansions/patches in mind.  
 
 User mods can have their own folder in `user://mods`.  
-Notice the (Visual Novel)[https://github.com/teebarjunk/sooty-visual_novel] system treats itself as a "mod".
+Notice the [Visual Novel](https://github.com/teebarjunk/sooty-visual_novel) system treats itself as a "mod".
 
 Inside that directory can be directories for:
 
@@ -124,14 +124,17 @@ Inside that directory can be directories for:
 |:-----|-----------:|:---|
 |`dialogue/`| `*.soot`|Dialogue files.|
 |`states/`| `*.gd`|Node scripts contain state data.|
-|`states_persistent/`| `*gd`|Node scripts containing persistent state data.|
+|`persistent/`| `*gd`|Node scripts containing persistent state data.|
 |`scenes/`| `.tscn` `.scn`|Scenes accessed by name.|
+|`audio/music/`| `.wav` `.mp3`, `.ogg`|Music.|
+|`audio/sfx/`| `.wav` `.mp3`, `.ogg`|Sound effects.|
 
 # Soot Script
 
 Script names are used internally as the `Dialogue` id. They contain *Flows*, which start with `===`.
 - `=>` Goes to a chapter.
 - `==` Goes to a chapter, then returns to this line when completed.
+- `><` Ends the flow.
 
 ```
 // my_story.soot
