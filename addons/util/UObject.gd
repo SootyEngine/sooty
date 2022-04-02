@@ -290,3 +290,21 @@ static func _parse_method_arguments(s: String) -> Dictionary:
 			out[k].default = str2var(v[1].strip_edges())
 	return out
 
+static func get_class_from_name(name: String) -> Variant:
+	for item in ProjectSettings.get_setting("_global_script_class"):
+		if item["class"] == name:
+			return load(item.path)
+	return null
+
+static func create(name: String, args := []) -> Variant:
+	var obj = get_class_from_name(name)
+	if obj != null:
+		match len(args):
+			0: return obj.new()
+			1: return obj.new(args[0])
+			2: return obj.new(args[0], args[1])
+			3: return obj.new(args[0], args[1], args[2])
+			4: return obj.new(args[0], args[1], args[2], args[3])
+			5: return obj.new(args[0], args[1], args[2], args[3], args[4])
+			_: push_error("Not implemented.")
+	return null

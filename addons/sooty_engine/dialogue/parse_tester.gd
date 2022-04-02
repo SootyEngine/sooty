@@ -11,20 +11,81 @@ func Character(x):
 enum {WINTER, SPRING}
 
 func _run():
-	var exp = Expression.new()
-	exp.parse("Color('TRANSPARENT')")
-	print(exp.execute())
-	return
-	var test := "someFunc(a,b,func1(a,b+c),func2(a*b,func3(a+b,c)),func4(e)+func5(f),func6(func7(g,h)+func8(i,(a)=>a+2)),g+2)"
-	var done = State._globalize_functions("x += my_func(x, quest.win(y)) + sin(nein())")
-	print(done)
-#	var exp := Expression.new()
-#	exp.parse("who_is(0, 1)")
-#	print(exp.execute([], self))
+	print(format_speaker_text("I'm *John*. (He get's angry.) [!@john.shake_no][w] [!@john.talk]I'm the angriest one."))
+	print(format_speaker_text('(Tutning away.) [w]You never know, they could say, "He was robbed," tell you iy all! (Closed eyes.)'))
+	print(format_speakerless_text('It\'s all "A Joke" he said.'))
+	print(format_speakerless_text('"They are" he said.'))
 	return
 
-func call(f:StringName):
-	print("CALLED ", f)
+func format_speakerless_text(text: String) -> String:
+	return _wrap(UString.fix_quotes(text), UString.CHAR_QUOTE_OPENED, UString.CHAR_QUOTE_CLOSED, '"', '"', '*', '*')
+
+func format_speaker_text(text: String) -> String:
+	return _wrap(text, "(", ")", "*", "*", UString.CHAR_QUOTE_OPENED, UString.CHAR_QUOTE_CLOSED)
+
+func _wrap(text: String,
+	inner_opened := "(",
+	inner_closed := ")",
+	quote_opened := "{",
+	quote_closed := "}",
+	pred_opened := "<",
+	pred_closed := ">"
+	) -> String:
+	var out := ""
+	var leading := ""
+	
+	var in_pred := not text.begins_with(inner_opened)
+	var start := true
+	var started := false
+	var in_tag := false
+	
+	for c in text:
+		if c == "[":
+			in_tag = true
+			leading += c
+		elif c == "]":
+			in_tag = false
+			leading += c
+		elif in_tag:
+			leading += c
+		
+		elif c == inner_opened:
+			in_pred = false
+			start = true
+			if started:
+				out += pred_closed
+			leading += quote_opened
+		
+		elif c == inner_closed:
+			in_pred = true
+			start = true
+			out += quote_closed
+		
+		elif c == " ":
+			leading += " "
+		
+		else:
+			if in_pred:
+				if leading:
+					out += leading
+					leading = ""
+				
+				if start:
+					start = false
+					started = true
+					out += pred_opened
+			
+			else:
+				if leading:
+					out += leading
+					leading = ""
+			
+			out += c
+	
+	if in_pred and not start:
+		out += pred_closed
+	
+	return out
 
 #func fix_functions(t: String) -> String:
 #	var i := 0

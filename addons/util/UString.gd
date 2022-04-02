@@ -2,11 +2,28 @@
 extends Resource
 class_name UString
 
+const CHAR_QUOTE_OPENED := "“"
+const CHAR_QUOTE_CLOSED := "”"
+const CHAR_INNER_QUOTE_OPENED := "‘"
+const CHAR_INNER_QUOTE_CLOSED := "’"
+
 static func as_string(v: Variant) -> String:
 	if v is Object and v.has_method("as_string"):
 		return v.as_string()
 	else:
 		return str(v)
+
+# Replace "quotes" with “quotes”.
+static func fix_quotes(input: String) -> String:
+	var out := ""
+	var open := false
+	for c in input:
+		if c == '"':
+			open = not open
+			out += CHAR_QUOTE_OPENED if open else CHAR_QUOTE_CLOSED
+		else:
+			out += c
+	return out
 
 # Get a list of strings that are similar, sorted by similarity.
 static func find_most_similar(to: String, options: Array, threshold: float = 0.25) -> Array[String]:
@@ -166,6 +183,9 @@ static func split_on_spaces(s: String) -> Array:
 		else:
 			out[-1] += c
 	return out
+
+static func is_capitalized(s: String) -> bool:
+	return s[0] == s[0].to_upper()
 
 static func is_wrapped(s: String, head: String, tail=null) -> bool:
 	return s.begins_with(head) and s.ends_with(tail if tail else head)

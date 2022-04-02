@@ -157,7 +157,11 @@ func set_progress(p:float):
 			
 			if i in _triggers:
 				for t in _triggers[i]:
-					_trigger(t[0], t[1])
+					if _wait > 0.0:
+						var timer := get_tree().create_timer(_wait)
+						timer.timeout.connect(_trigger.bind(t[0], t[1]))
+					else:
+						_trigger(t[0], t[1])
 				
 				if is_waiting():
 					next_progress = (i+1) / float(get_total_character_count())
