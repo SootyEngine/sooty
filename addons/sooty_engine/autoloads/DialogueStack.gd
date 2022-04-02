@@ -71,7 +71,7 @@ func unhalt(halter: Object):
 		_halting_for.erase(halter)
 		_halt_list_changed.emit()
 
-func has_steps() -> bool:
+func is_active() -> bool:
 	return len(_stack) != 0
 
 func get_current_dialogue() -> Dialogue:
@@ -81,7 +81,7 @@ func _process(_delta: float) -> void:
 	_tick()
 
 func start(id: String):
-	if has_steps():
+	if is_active():
 		push_warning("Already started.")
 		return
 	
@@ -184,14 +184,14 @@ func _push(can_start: bool, d_id: String, flow: String, lines: Array, type: int)
 		flow_started.emit(Soot.join_path([d_id, flow]))
 
 func _tick():
-	if has_steps() and not is_halted():
+	if is_active() and not is_halted():
 		_last_tick_stack = _stack.duplicate(true)
 		tick.emit()
 	else:
 		return
 	
 	var safety := MAX_STEPS_PER_TICK
-	while has_steps() and not is_halted():
+	while is_active() and not is_halted():
 		safety -= 1
 		if safety <= 0:
 			push_error("Tripped safety! Increase MAX_STEPS_PER_TICK if necessary.", safety)
