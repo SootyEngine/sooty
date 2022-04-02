@@ -7,7 +7,9 @@ func _get_name() -> String:
 # operators
 const OP_RELATIONS := ["==", "!=", "<", "<=", ">", ">="]
 const OP_ASSIGNMENTS := ["=", "+=", "-="]
-const OP_ALL := OP_RELATIONS + OP_ASSIGNMENTS
+const OP_EVALS := ["if", "elif", "else", "match"]
+const OP_KEYWORDS := ["and", "or", "not"]
+const OP_ALL := OP_RELATIONS + OP_ASSIGNMENTS + OP_EVALS + OP_KEYWORDS
 
 # colors
 const C_TEXT := Color.GAINSBORO
@@ -31,7 +33,7 @@ const C_ACTION_NODE := Color.SALMON
 const C_ACTION_GROUP := Color.MEDIUM_PURPLE
 const C_ACTION_STATE := Color.DEEP_SKY_BLUE
 
-const C_FLOW := Color.LIGHT_CORAL
+const C_FLOW := Color.WHEAT
 const C_FLOW_GOTO := Color.TAN
 const C_FLOW_CALL := Color.TAN
 const C_FLOW_END := Color.TOMATO
@@ -146,14 +148,21 @@ func _h_conditional(from: int, to: int):
 	var off := from
 	var parts = Array(text.substr(from, to-from+1).split(" "))
 	
-	if parts[0] in ["if", "elif", "else", "match", "not"]:
-		var part = parts.pop_front()
-		_c(off, C_SYMBOL)
+	for part in parts:
+		if part in OP_ALL:
+			_c(off, C_SYMBOL)
+		else:
+			_c(off, C_ACTION_EVAL)
 		off += len(part)+1
-		if part == "else":
-			return
 	
-	_c(off, C_ACTION_EVAL)
+#	if parts[0] in ["if", "elif", "else", "match", "not", "and", "or"]:
+#		var part = parts.pop_front()
+#		_c(off, C_SYMBOL)
+#		off += len(part)+1
+#		if part == "else":
+#			return
+#
+#	_c(off, C_ACTION_EVAL)
 	return
 	
 	var is_assign = len(parts)==3 and parts[1] in OP_ALL
@@ -239,11 +248,18 @@ func _h_flow(from := 0):
 			if j == -1:
 				break
 			var lit = tag[1]
-			var drk = tag[1]
-			drk.a = .5
-			_c(j, drk, len(tag[0]))
-			_co(lit)
-			i = j + len(tag[0])
+			_c(j, C_SYMBOL)
+			j += len(tag[0])
+			# path divider exists?
+			var d := text.find(Soot.FLOW_PATH_DIVIDER, j)
+			if d != -1:
+				# darken head of the path
+				_c(j, lit.darkened(.33))
+				j = d+1
+			# colorize path
+			_c(j, lit)
+			j += len(tag[0])
+			i = j
 
 func _h_line(from: int, to: int):
 	var t := text.substr(from, to-from).strip_edges()

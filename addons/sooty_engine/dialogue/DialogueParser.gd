@@ -356,7 +356,7 @@ func _add_flow_action(line: Dictionary, type: String, f_action: String):
 	# if full path wasn't typed out, add file id as head.
 	line[type] = f_action if Soot.is_path(f_action) else Soot.join_path([line.did, f_action])
 	return line
-	
+
 func _line_as_action(line: Dictionary):
 	line.type = "action"
 	line.action = line.text.strip_edges()
