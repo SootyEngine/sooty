@@ -28,8 +28,8 @@ func _ready():
 		Saver._get_state.connect(_save_state)
 		Saver._set_state.connect(_load_state)
 		Saver.pre_load.connect(_game_loaded)
-		Global.started.connect(_game_ended)
-		Global.ended.connect(_game_started)
+		Global.started.connect(_game_started)
+		Global.ended.connect(_game_ended)
 		Dialogues.reloaded.connect(_dialogues_reloaded)
 
 func _save_state(state: Dictionary):
@@ -52,6 +52,8 @@ func _game_loaded():
 func _game_started():
 	if Dialogues.has_dialogue_flow(Soot.M_START):
 		execute(Soot.M_START)
+	else:
+		push_error("There is no '%s' flow." % Soot.M_START)
 
 func _game_ended():
 	end("GAME_ENDED")
@@ -150,11 +152,11 @@ func _goto(can_start: bool, dia_flow: String, step_type: int = STEP_GOTO) -> boo
 
 func end(msg := ""):
 	last_end_message = msg
-	ended.emit()
-	ended_w_msg.emit(msg)
 	_stack.clear()
 	_halting_for.clear()
 	_halt_list_changed.emit()
+	ended.emit()
+	ended_w_msg.emit(msg)
 
 # select an option, adding it's lines to the stack
 func select_option(option: DialogueLine):
@@ -200,31 +202,34 @@ func _tick():
 		if not len(line) or not len(line.line):
 			break
 		
-		match line.line.type:
-			"action":
-				StringAction.do(line.line.action)
+		# skip certain lines in execute mode
+		if _execute_mode and line.line.type in ["text"]:
+			push_error("Skipping line in execute mode: %s" % line)
+		
+		else:
+			match line.line.type:
+				"action":
+					StringAction.do(line.line.action)
+					
+				"goto":
+					DialogueStack._goto(false, line.line.goto, STEP_GOTO)
+					
+				"call":
+					DialogueStack._goto(false, line.line.call, STEP_CALL)
 				
-			"goto":
-				_goto(false, line.line.goto, STEP_GOTO)
+				"end":
+					end(line.line.end)
+					break
 				
-			"call":
-				_goto(false, line.line.call, STEP_CALL)
-			
-			"end":
-				end(line.line.end)
-				break
-			
-			"text":
-				# ignore text when in _execute_mode
-				if not _execute_mode:
+				"text":
 					if "action" in line.line:
 						for a in line.line.action:
 							StringAction.do(a)
 					
 					on_line.emit(DialogueLine.new(line.d_id, line.line))
-			
-			_:
-				push_warning("Huh? %s %s" % [line.line.keys(), line.line])
+				
+				_:
+					push_warning("Huh? %s %s" % [line.line.keys(), line.line])
 
 # forcibly run a flow. usefuly for setting up scenes from a .soot file.
 # TODO: do this differently.

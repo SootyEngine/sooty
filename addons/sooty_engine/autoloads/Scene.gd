@@ -40,6 +40,9 @@ func get_main_scene_ids(sort := true) -> Array:
 		ids.sort()
 	return ids
 
+func has(id: String) -> bool:
+	return id in scenes
+
 func create(id: String, parent: Node = null) -> Node:
 	if id in scenes:
 		var out: Node = load(scenes[id]).instantiate()
