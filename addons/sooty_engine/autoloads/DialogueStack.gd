@@ -14,6 +14,7 @@ signal on_line(text: DialogueLine)
 signal _refresh() # called when dialogues were reloaded, and so we should clear the captions/options.
 signal _halt_list_changed()
 
+@export var last_end_message := ""
 @export var _execute_mode := false # TODO: Implement this differently.
 @export var _stack := [] # current stack of flows, so we can return to a position in a previous flow.
 @export var _halting_for := [] # objects that want the flow to _break
@@ -32,10 +33,14 @@ func _ready():
 		Dialogues.reloaded.connect(_dialogues_reloaded)
 
 func _save_state(state: Dictionary):
-	state["DS"] = { stack=_last_tick_stack }
+	state["DS"] = {
+		stack=_last_tick_stack,
+		last_end_message=last_end_message,
+	}
 
 func _load_state(state: Dictionary):
 	_stack = state["DS"].stack
+	_stack = state["DS"].last_end_message
 
 func _dialogues_reloaded():
 	_refresh.emit()
@@ -45,8 +50,8 @@ func _game_loaded():
 	end("LOADING")
 
 func _game_started():
-	if Dialogues.has_dialogue_flow("MAIN.START"):
-		execute("MAIN.START")
+	if Dialogues.has_dialogue_flow(Soot.M_START):
+		execute(Soot.M_START)
 
 func _game_ended():
 	end("GAME_ENDED")
@@ -68,7 +73,7 @@ func has_steps() -> bool:
 	return len(_stack) != 0
 
 func get_current_dialogue() -> Dialogue:
-	return null if not len(_stack) else Dialogues.get_dialogue(_stack[-1].did)
+	return null if not len(_stack) else Dialogues.get_dialogue(_stack[-1].d_id)
 
 func _process(_delta: float) -> void:
 	_tick()
@@ -109,25 +114,25 @@ func do(command: String):
 	else:
 		push_error("Don't know what to do with '%s'." % command)
 
-func goto(did_flow: String, step_type: int = STEP_GOTO) -> bool:
-	return _goto(true, did_flow, step_type)
+func goto(dia_flow: String, step_type: int = STEP_GOTO) -> bool:
+	return _goto(true, dia_flow, step_type)
 
-func _goto(can_start: bool, did_flow: String, step_type: int = STEP_GOTO) -> bool:
-	if not Soot.is_path(did_flow):
-		push_error("Missing part of goto: '=> %s'." % did_flow)
+func _goto(can_start: bool, dia_flow: String, step_type: int = STEP_GOTO) -> bool:
+	if not Soot.is_path(dia_flow):
+		push_error("Missing part of flow path: '%s'." % dia_flow)
 		return false
 	
-	var p := Soot.split_path(did_flow)
-	var did := p[0]
+	var p := Soot.split_path(dia_flow)
+	var d_id := p[0]
 	var flow := p[1]
 	
-	if not Dialogues.has_dialogue(did):
-		push_error("No dialogue %s." % did)
+	if not Dialogues.has_dialogue(d_id):
+		push_error("No dialogue %s." % d_id)
 		return false
 	
-	var d := Dialogues.get_dialogue(did)
+	var d := Dialogues.get_dialogue(d_id)
 	if not d.has_flow(flow):
-		push_error("No flow '%s' in '%s'." % [flow, did])
+		push_error("No flow '%s' in '%s'." % [flow, d_id])
 		return false
 	
 	var lines := d.get_flow_lines(flow)
@@ -140,10 +145,11 @@ func _goto(can_start: bool, did_flow: String, step_type: int = STEP_GOTO) -> boo
 		while len(_stack):
 			_pop(false)
 	
-	_push(can_start, did, flow, lines, step_type)
+	_push(can_start, d_id, flow, lines, step_type)
 	return true
 
 func end(msg := ""):
+	last_end_message = msg
 	ended.emit()
 	ended_w_msg.emit(msg)
 	_stack.clear()
@@ -161,19 +167,19 @@ func _pop(call_end: bool):
 	var last: Dictionary = _stack.pop_back()
 	if last.type == STEP_GOTO:
 		# let everyone know a flow ended
-		flow_ended.emit(Soot.join_path([last.did, last.flow]))
+		flow_ended.emit(Soot.join_path([last.d_id, last.flow]))
 	
 	if call_end and len(_stack) == 0:
 		end()
 
-func _push(can_start: bool, did: String, flow: String, lines: Array, type: int):
+func _push(can_start: bool, d_id: String, flow: String, lines: Array, type: int):
 	if can_start and len(_stack) == 0:
 		started.emit()
 	
-	_stack.append({ did=did, flow=flow, lines=lines, type=type, step=0 })
+	_stack.append({ d_id=d_id, flow=flow, lines=lines, type=type, step=0 })
 	
 	if type == STEP_GOTO:
-		flow_started.emit(Soot.join_path([did, flow]))
+		flow_started.emit(Soot.join_path([d_id, flow]))
 
 func _tick():
 	if has_steps() and not is_halted():
@@ -209,12 +215,13 @@ func _tick():
 				break
 			
 			"text":
-				if "action" in line.line:
-					for a in line.line.action:
-						StringAction.do(a)
-				
+				# ignore text when in _execute_mode
 				if not _execute_mode:
-					on_line.emit(DialogueLine.new(line.did, line.line))
+					if "action" in line.line:
+						for a in line.line.action:
+							StringAction.do(a)
+					
+					on_line.emit(DialogueLine.new(line.d_id, line.line))
 			
 			_:
 				push_warning("Huh? %s %s" % [line.line.keys(), line.line])
@@ -236,22 +243,23 @@ func pop_next_line() -> Dictionary:
 			push_error("Tripped safety.")
 			return {}
 		
+		# remove last step, and potentially end the flow.
 		if _stack[-1].step >= len(_stack[-1].lines):
 			_pop(true)
 			continue
 		
 		var step_info: Dictionary = _stack[-1]
-		var dilg := Dialogues.get_dialogue(step_info.did)
+		var dilg := Dialogues.get_dialogue(step_info.d_id)
 		var line: Dictionary = dilg.get_line(step_info.lines[step_info.step])
-		var did: String = step_info.did
+		var d_id: String = step_info.d_id
 		var flow: String = step_info.flow
 		step_info.step += 1
 		
-		var out := {did=did, flow=flow, line=line}
+		var out := {d_id=d_id, flow=flow, line=line}
 		
 		# 'if' 'elif' 'else' chain
 		if line.type == "if":
-			var d := Dialogues.get_dialogue(did)
+			var d := Dialogues.get_dialogue(d_id)
 			for i in len(line.conds):
 				if StringAction._test(line.conds[i]):
 					_push(false, d.id, flow, line.cond_lines[i], STEP_CALL)
@@ -264,12 +272,13 @@ func pop_next_line() -> Dictionary:
 				var case = line.cases[i]
 				var got = StringAction._eval(case)
 				if match_result == got or case == "_":
-					_push(false, did, flow, line.case_lines[i], STEP_CALL)
+					_push(false, d_id, flow, line.case_lines[i], STEP_CALL)
 					return out
 		
 		# has a condition
-		elif "cond" in line and StringAction._test(line.cond):
-			return out
+		elif "cond" in line:
+			if StringAction._test(line.cond):
+				return out
 		
 		else:
 			return out
