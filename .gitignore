@@ -13,6 +13,8 @@ export_presets.cfg
 data_*/
 
 # Sooty-specific ignores
+/addons/common_file_highlighters/
+/addons/file_editor/
 /dialogue/
 /dialogue_debug/
 /states/
