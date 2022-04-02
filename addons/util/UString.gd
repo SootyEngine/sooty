@@ -26,7 +26,7 @@ static func fix_quotes(input: String) -> String:
 	return out
 
 # Get a list of strings that are similar, sorted by similarity.
-static func find_most_similar(to: String, options: Array, threshold: float = 0.25) -> Array[String]:
+static func find_most_similar(to: String, options: Array, threshold := 0.25) -> Array[String]:
 	var out := []
 	for option in options:
 		var sim := to.similarity(option)
@@ -36,6 +36,14 @@ static func find_most_similar(to: String, options: Array, threshold: float = 0.2
 	out.sort_custom(func(a, b): return a[0] > b[0])
 	# only return the strings
 	return out.map(func(x): return x[1])
+
+# Pushes an error, showing potentially desired options.
+static func push_error_similar(error: String, to: String, options: Array, threshold := 0.25):
+	var similar := find_most_similar(to, options, threshold)
+	if len(similar):
+		push_error(error + " Did you mean: %s?" % ", ".join(similar))
+	else:
+		push_error(error)
 
 # Works like python list[begin:end]
 static func part(s: String, from: int = 0, to = null) -> String:

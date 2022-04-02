@@ -74,12 +74,8 @@ func get_flow(flow: String) -> Dictionary:
 	if flow in flows:
 		return flows[flow]
 	
-	var most_similar := UString.find_most_similar(flow, flows.keys())
-	if len(most_similar):
-		push_error("No flow '%s' in dialogue '%s'. Did you mean '%s'?" % [flow, id, "', '".join(most_similar)])
-	else:
-		push_error("No flow '%s' in dialogue '%s'." % [flow, id])
-	
+	var err := "No flow '%s' in dialogue '%s'." % [flow, id]
+	UString.push_error_similar(err, flow, flows.keys())
 	return {}
 
 func get_line(line: String) -> Dictionary:

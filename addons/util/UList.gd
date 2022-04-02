@@ -12,7 +12,19 @@ static func part(a: Array, begin: int = 0, end=null) -> Array:
 	return a.slice(begin, end)
 
 static func list(thing: Variant) -> Array:
-	return [] if thing == null else thing if thing is Array else [thing]
+	match typeof(thing):
+		TYPE_NIL: return []
+		TYPE_ARRAY: return thing
+		TYPE_PACKED_BYTE_ARRAY: return thing
+		TYPE_PACKED_INT32_ARRAY: return thing
+		TYPE_PACKED_INT64_ARRAY: return thing
+		TYPE_PACKED_FLOAT32_ARRAY: return thing
+		TYPE_PACKED_FLOAT64_ARRAY: return thing
+		TYPE_PACKED_STRING_ARRAY: return thing
+		TYPE_PACKED_VECTOR2_ARRAY: return thing
+		TYPE_PACKED_VECTOR3_ARRAY: return thing
+		TYPE_PACKED_COLOR_ARRAY: return thing
+		_: return [thing]
 
 static func append(target: Array, patch: Variant):
 	if patch is Array:

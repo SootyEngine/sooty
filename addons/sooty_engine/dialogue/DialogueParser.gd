@@ -5,7 +5,7 @@ class_name DialogueParser
 const DEBUG_KEEP_DICTS := false # don't clean useless info from steps?
 const REWRITE := 6 # total times rewritten from scrath :{
 
-const S_LANG_ID := "//#"
+const S_LANG_ID := "#L:"
 const S_PROPERTY_HEAD := "|"
 
 var _last_speaker := ""

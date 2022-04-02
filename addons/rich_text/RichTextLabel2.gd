@@ -57,7 +57,7 @@ signal right_clicked(variant: Variant)
 		outline_colored = o
 		add_theme_constant_override("outline_size", o)
 
-@export_range(0.0, 1.0) var outline_adjust := 0.5
+@export_range(0.0, 1.0) var outline_adjust := 0.33
 @export var outline_hue_adjust := 0.0125
 
 @export var nicer_quotes_enabled := true
@@ -88,21 +88,30 @@ func _init():
 
 func _meta_hover_started(meta: Variant):
 	_meta_hovered = meta
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 func _meta_hover_ended(meta: Variant):
 	_meta_hovered = null
+	mouse_default_cursor_shape = Control.CURSOR_ARROW
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and _meta_hovered != null:
 		match event.button_index:
 			MOUSE_BUTTON_LEFT:
+				# call a callable
 				if _meta_hovered in _meta:
 					if _meta[_meta_hovered] is Callable:
 						_meta[_meta_hovered].call()
 					else:
 						clicked.emit(_meta[_meta_hovered])
+				
+				# goto url
+				elif _meta_hovered.begins_with("https://"):
+					OS.shell_open(_meta_hovered)
+				
 				else:
 					push_error("No meta url for '%s'. %s" % [_meta_hovered, _meta.keys()])
+				
 				get_viewport().set_input_as_handled()
 				
 			MOUSE_BUTTON_RIGHT:

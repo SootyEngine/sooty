@@ -32,9 +32,20 @@ func _load_mods(mods: Array):
 	var memory_used = OS.get_static_memory_usage() - memory_before
 	prints("Dialogues:", String.humanize_size(memory_used))
 
-func has(id: String) -> bool:
+func has_dialogue(id: String) -> bool:
 	return id in cache
-	
+
+func has_dialogue_flow(id: String) -> bool:
+	if not Soot.is_path(id):
+		return false
+	var p := Soot.split_path(id)
+	if not has_dialogue(p[0]):
+		return false
+	var d := get_dialogue(p[0])
+	if not d.has_flow(p[1]):
+		return false
+	return true
+
 func get_dialogue_ids() -> Dictionary:
 	var out := {}
 	for id in cache:

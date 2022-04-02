@@ -1,3 +1,4 @@
+@tool
 extends Node
 
 signal pre_scene_changed()
@@ -9,11 +10,10 @@ var _iter_current := 0
 var id: String:
 	get: return UFile.get_file_name(current.scene_file_path)
 
-func _init() -> void:
-	add_to_group("Scene")
-	add_to_group("sa:goto")
-
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		return
+	
 	Mods.load_all.connect(_load_mods)
 	
 	# call the start function when testing from editor
@@ -33,6 +33,12 @@ func _set(property: StringName, value) -> bool:
 		return true
 	return false
 
+func get_main_scene_ids(sort := true) -> Array:
+	var ids := Array(UFile.get_files("res://scenes", [".tscn", ".scn"])).map(func(x): return UFile.get_file_name(x))
+	if sort:
+		ids.sort()
+	return ids
+	
 #func _iter_init(arg):
 #	_iter_current = 0
 #	return _iter_current < len(scenes)
@@ -60,7 +66,7 @@ func goto(id: String, kwargs := {}):
 			change.bind(scenes[id]),
 			DialogueStack.unhalt.bind(self))
 	else:
-		push_error("Couldn't find scene %s." % id)
+		UString.push_error_similar("Couldn't find scene '%s'." % id, id, scenes.keys())
 
 # change scene with signals, and call start function
 func change(path: String, is_loading: bool = false):

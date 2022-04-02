@@ -277,20 +277,19 @@ static func _get_dirs(dir: Directory, out: Array, nested: bool):
 		fname = dir.get_next()
 	dir.list_dir_end()
 
-static func get_files(paths, extensions=null, nested: bool = true, hidden: bool = false, maximum := -1) -> PackedStringArray:
-	var out := []
+# Calls a function on every file in the given directories, with the given extensions.
+# paths can be a string or an array of strings.
+static func on_files(paths: Variant, call: Callable, extensions: Variant = [], nested := true, hidden := false, maximum := 1_000_000_000):
 	var dir := Directory.new()
 	dir.include_hidden = hidden
-	
 	var exts := UList.list(extensions)
-	
 	for path in UList.list(paths):
 		if dir.dir_exists(path) and not UError.error(dir.open(path), "Can't open '%s'." % path):
-			_get_files(dir, out, exts, nested, maximum)
-	
-	return PackedStringArray(out)
+			maximum = _on_files(dir, call, exts, nested, hidden, maximum)
+			if maximum <= 0:
+				return
 
-static func _get_files(dir: Directory, out: Array, extensions: PackedStringArray, nested: bool, maximum: int):
+static func _on_files(dir: Directory, call: Callable, extensions: Variant, nested: bool, hidden: bool, maximum: int) -> int:
 	dir.list_dir_begin()
 	var fname = dir.get_next()
 	while fname != "":
@@ -299,29 +298,70 @@ static func _get_files(dir: Directory, out: Array, extensions: PackedStringArray
 			# ignore .import and folders with a .gdignore file.
 			if nested and not fname == ".import" and not file_exists(path.plus_file(".gdignore")):
 				var sub_dir = Directory.new()
+				sub_dir.include_hidden = hidden
 				sub_dir.open(path)
-				_get_files(sub_dir, out, extensions, true, maximum)
+				maximum = _on_files(sub_dir, extensions, call, nested, hidden, maximum)
 		
 		elif not len(extensions) or _ends_with(fname, extensions):
-			# html5 export hack
-#			if path.ends_with(".import"):
-#				path = path.substr(0, len(path)-7)
-#
-#			elif path.ends_with(".remap"):
-#				path = path.substr(0, len(path)-6)
-			
-			out.append(path)
-			if maximum != -1 and len(out) >= maximum:
-				break
+			call.call(path)
+			maximum -= 1
 		
-		elif len(extensions) and ".gd" in extensions:
-			if not OS.is_debug_build():
-				push_error("?? " + path)
+		if maximum <= 0:
+			break
 		
 		fname = dir.get_next()
 	dir.list_dir_end()
+	return maximum
 
-static func _ends_with(s: String, endings: PackedStringArray) -> bool:
+static func get_files(paths: Variant, extensions: Variant = [], nested := true, hidden := false, maximum := 1_000_000_000) -> PackedStringArray:
+	var out := []
+	on_files(paths, func(x): out.append(x), extensions, nested, hidden, maximum)
+	return PackedStringArray(out)
+
+#	var out := []
+#	var dir := Directory.new()
+#	dir.include_hidden = hidden
+#
+#	var exts := UList.list(extensions)
+#
+#	for path in UList.list(paths):
+#		if dir.dir_exists(path) and not UError.error(dir.open(path), "Can't open '%s'." % path):
+#			_get_files(dir, out, exts, nested, maximum)
+#
+#	return PackedStringArray(out)
+
+#static func _get_files(dir: Directory, extensions: Array, out: Array, nested: bool, maximum: int):
+#	dir.list_dir_begin()
+#	var fname = dir.get_next()
+#	while fname != "":
+#		var path = dir.get_current_dir().plus_file(fname)
+#		if dir.current_is_dir():
+#			# ignore .import and folders with a .gdignore file.
+#			if nested and not fname == ".import" and not file_exists(path.plus_file(".gdignore")):
+#				var sub_dir = Directory.new()
+#				sub_dir.open(path)
+#				_get_files(sub_dir, out, extensions, true, maximum)
+#
+#		elif not len(extensions) or _ends_with(fname, extensions):
+#			# html5 export hack
+##			if path.ends_with(".import"):
+##				path = path.substr(0, len(path)-7)
+##
+##			elif path.ends_with(".remap"):
+##				path = path.substr(0, len(path)-6)
+#
+#			out.append(path)
+#			if maximum != -1 and len(out) >= maximum:
+#				break
+#
+#		elif len(extensions) and ".gd" in extensions:
+#			if not OS.is_debug_build():
+#				push_error("?? " + path)
+#
+#		fname = dir.get_next()
+#	dir.list_dir_end()
+
+static func _ends_with(s: String, endings: Array) -> bool:
 	for ending in endings:
 		if s.ends_with(ending):
 			return true
