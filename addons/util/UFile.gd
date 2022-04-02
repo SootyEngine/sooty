@@ -300,7 +300,7 @@ static func _on_files(dir: Directory, call: Callable, extensions: Variant, neste
 				var sub_dir = Directory.new()
 				sub_dir.include_hidden = hidden
 				sub_dir.open(path)
-				maximum = _on_files(sub_dir, extensions, call, nested, hidden, maximum)
+				maximum = _on_files(sub_dir, call, extensions, nested, hidden, maximum)
 		
 		elif not len(extensions) or _ends_with(fname, extensions):
 			call.call(path)
