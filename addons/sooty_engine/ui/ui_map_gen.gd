@@ -54,7 +54,7 @@ func _ready_deferred():
 				var line = d.lines[k]
 				match line.type:
 					"goto", "call":
-						var goto = line[line.type].split(".", true, 1)
+						var goto = DialogueStack.split_path(line[line.type])
 						var goto_dialogue: String = goto[0]
 						var goto_flow: String = goto[1]
 						var goto_label := Button.new()
@@ -79,9 +79,9 @@ func _ready_deferred():
 		var dialogue_from: String = g[0]
 		var goto_index: int = g[1]
 		var goto: String = g[2]
-		var p := goto.split(".", true, 1)
-		var dialogue_to := p[0]
-		var goto_flow := p[1]
+		var p = DialogueStack.split_path(goto)
+		var dialogue_to = p[0]
+		var goto_flow = p[1]
 		if dialogue_to in nodes and dialogue_to != dialogue_from:
 			var n: GraphNode = nodes[dialogue_to]
 			if n.has_meta(goto_flow):

@@ -2,8 +2,8 @@
 extends Resource
 class_name DialogueParser
 
-const DEBUG_KEEP_DICTS := false
-const REWRITE := 6
+const DEBUG_KEEP_DICTS := false # don't clean useless info from steps?
+const REWRITE := 6 # total times rewritten from scrath :{
 
 const S_COMMENT := "//"
 const S_LANG_ID := "//#"
@@ -65,7 +65,7 @@ func parse(file: String) -> Dictionary:
 		
 		# ignore empty lines
 		elif len(stripped):
-			var did: String = file.get_file().split(".", true, 1)[0]
+			var did: String = UFile.get_file_name(file)
 			var deep := _count_leading_tabs(text_lines[i])
 			dict_lines.append({
 				did=did,
@@ -360,7 +360,8 @@ func _line_as_call(line: Dictionary):
 
 func _add_flow_action(line: Dictionary, type: String, f_action: String):
 	line.type = type
-	line[type] = f_action if "." in f_action else "%s.%s" % [line.did, f_action]
+	# if full path wasn't typed out, add file id as head.
+	line[type] = f_action if DialogueStack.is_path(f_action) else DialogueStack.join_path([line.did, f_action])
 	return line
 	
 func _line_as_action(line: Dictionary):

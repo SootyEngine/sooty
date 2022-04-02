@@ -42,7 +42,7 @@ func _load_mods(mods: Array):
 			var state = load(script_path).new()
 			if state is Node:
 				mod.meta[subdir].append(script_path)
-				state.set_name(script_path.get_file().split(".", true, 1)[0])
+				state.set_name(UFile.get_file_name(script_path))#.get_file().split(".", true, 1)[0])
 				add_child(state)
 			else:
 				# TODO: Allow resources.

@@ -21,8 +21,18 @@ signal _refresh() # called when dialogues were reloaded, and so we should clear 
 @export var _halting_for := [] # objects that want the flow to _break
 @export var _last_tick_stack := [] # stack of the previous tick, used for saving and rollback.
 
+const S_DIVIDER := "/"
 const S_FLOW_GOTO := "=>"
 const S_FLOW_CALL := "=="
+
+static func is_path(path: String) -> bool:
+	return S_DIVIDER in path
+
+static func join_path(parts: Array) -> String:
+	return S_DIVIDER.join(parts)
+
+static func split_path(path: String) -> PackedStringArray:
+	return path.split(S_DIVIDER)
 
 func _init(em := false) -> void:
 	_execute_mode = em
@@ -95,7 +105,7 @@ func start(id: String):
 		return
 	
 	# start dialogue
-	if "." in id:
+	if is_path(id):
 		goto(id, STEP_GOTO)
 	
 	# go to first flow of dialogue
@@ -105,7 +115,7 @@ func start(id: String):
 			push_error("No flows in '%s'." % id)
 		else:
 			var first = Dialogues.get_dialogue(id).flows.keys()[0]
-			goto("%s.%s" % [id, first], STEP_GOTO)
+			goto(join_path([id, first]), STEP_GOTO)
 
 func can_do(command: String) -> bool:
 	return command.begins_with(S_FLOW_GOTO) or command.begins_with(S_FLOW_CALL)
@@ -119,7 +129,9 @@ func do(command: String):
 		push_error("Don't know what to do with '%s'." % command)
 
 func has(id: String) -> bool:
-	var p := id.split(".", true, 1)
+	if not is_path(id):
+		return false
+	var p := split_path(id)
 	if not Dialogues.has(p[0]):
 		return false
 	var d := Dialogues.get_dialogue(p[0])
@@ -128,11 +140,11 @@ func has(id: String) -> bool:
 	return true
 
 func goto(did_flow: String, step_type: int = STEP_GOTO) -> bool:
-	if not "." in did_flow:
+	if not is_path(did_flow):
 		push_error("Missing part of goto: '=> %s'." % did_flow)
 		return false
 	
-	var p := did_flow.split(".", true, 1)
+	var p := split_path(did_flow)
 	var did := p[0]
 	var flow := p[1]
 	
@@ -170,12 +182,12 @@ func _pop():
 	var last: Dictionary = _stack.pop_back()
 	if last.type == STEP_GOTO:
 		# let everyone know a flow ended
-		flow_ended.emit("%s.%s" % [last.did, last.flow])
+		flow_ended.emit(join_path([last.did, last.flow]))
 
 func _push(did: String, flow: String, lines: Array, type: int):
 	_stack.append({ did=did, flow=flow, lines=lines, type=type, step=0 })
 	if type == STEP_GOTO:
-		flow_started.emit("%s.%s" % [did, flow])
+		flow_started.emit(join_path([did, flow]))
 
 func tick():
 	if _break:
