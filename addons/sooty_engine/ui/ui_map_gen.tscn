@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://b4ogq5gmuv2fe"]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://addons/sooty_engine/ui/ui_map_gen.gd" id="1_k02g5"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="2_dajy4"]

@@ -5,11 +5,7 @@ class_name DialogueParser
 const DEBUG_KEEP_DICTS := false # don't clean useless info from steps?
 const REWRITE := 6 # total times rewritten from scrath :{
 
-const S_COMMENT := "//"
 const S_LANG_ID := "//#"
-const S_FLOW := "==="
-const S_FLOW_GOTO := "=>"
-const S_FLOW_CALL := "=="
 const S_PROPERTY_HEAD := "|"
 
 var _last_speaker := ""
@@ -33,14 +29,14 @@ func parse(file: String) -> Dictionary:
 		var line := i
 		
 		# remove comment
-		if S_COMMENT in uncommented:
+		if Soot.COMMENT in uncommented:
 			# remove unique id
 			if S_LANG_ID in uncommented:
 				var p := uncommented.rsplit(S_LANG_ID, true, 1)
 				uncommented = p[0]
 				id = p[1].strip_edges()
 			
-			uncommented = uncommented.split(S_COMMENT, true, 1)[0]
+			uncommented = uncommented.split(Soot.COMMENT, true, 1)[0]
 		
 		var stripped := uncommented.strip_edges()
 		
@@ -256,7 +252,7 @@ func _collect_tabbed(dict_lines: Array, i: int) -> Array:
 
 func _process_line(line: Dictionary):
 	var t: String = line.text
-	if t.begins_with(S_FLOW): return _line_as_flow(line)
+	if t.begins_with(Soot.FLOW): return _line_as_flow(line)
 	if t.begins_with("{{"): return _line_as_condition(line)
 	_extract_conditional(line)
 	# option
@@ -267,8 +263,9 @@ func _process_line(line: Dictionary):
 	if t.begins_with("#"): return _line_as_action(line)
 	if t.begins_with("@"): return _line_as_action(line)
 	# flows
-	if t.begins_with(S_FLOW_GOTO): return _line_as_goto(line)
-	if t.begins_with(S_FLOW_CALL): return _line_as_call(line)
+	if t.begins_with(Soot.FLOW_GOTO): return _line_as_flow_goto(line)
+	if t.begins_with(Soot.FLOW_CALL): return _line_as_flow_call(line)
+	if t.begins_with(Soot.FLOW_ENDD): return _line_as_flow_end(line)
 	# property
 	if t.begins_with(S_PROPERTY_HEAD): return _line_as_properties(line)
 	return _line_as_dialogue(line)
@@ -329,39 +326,35 @@ func _line_as_option(line: Dictionary):
 		match li.type:
 			_: lines.append(li)
 	
-	if S_FLOW_GOTO in line.text:
-		var p = line.text.split(S_FLOW_GOTO, true, 1)
+	if Soot.FLOW_GOTO in line.text:
+		var p = line.text.split(Soot.FLOW_GOTO, true, 1)
 		line.text = p[0].strip_edges()
 		var i = 1000
 		var id = "%s_%s"%[line.flat, i] if "flat" in line else str(i)
 		var fstep = _add_flow_action({did=line.did, file=line.file, line=line.line, flat=id}, "goto", p[1].strip_edges())
 		lines.append(fstep)
-#	var p := _trailing_tokens(line.text, ["=>", "==", "~"])
-#	line.text = p[0]
-#	for t in p[1]:
-#		var token: String = t[0]
-#		var t_str: String = t[1]
-#		match token:
-#			"=>": lines.append(_add_flow_action({did=line.did, file=line.file, line=line.line}, "call", t_str))
-#			"==": lines.append(_add_flow_action({did=line.did, file=line.file, line=line.line}, "goto", t_str))
-#			"~" : lines.append({file=line.file, line=line.line, type="action", action=t_str })
 	
 	line.then = lines
 
-func _line_as_goto(line: Dictionary):
-	var p = line.text.rsplit(S_FLOW_GOTO, true, 1)
+func _line_as_flow_goto(line: Dictionary):
+	var p = line.text.rsplit(Soot.FLOW_GOTO, true, 1)
 	line.text = p[0].strip_edges()
 	_add_flow_action(line, "goto", p[1].strip_edges())
 
-func _line_as_call(line: Dictionary):
-	var p = line.text.split(S_FLOW_CALL, true, 1)
+func _line_as_flow_call(line: Dictionary):
+	var p = line.text.split(Soot.FLOW_CALL, true, 1)
 	line.text = p[0].strip_edges()
 	_add_flow_action(line, "call", p[1].strip_edges())
+
+func _line_as_flow_end(line: Dictionary):
+	var p = line.text.split(Soot.FLOW_ENDD, true, 1)
+	line.text = p[0].strip_edges()
+	_add_flow_action(line, "end", p[1].strip_edges())
 
 func _add_flow_action(line: Dictionary, type: String, f_action: String):
 	line.type = type
 	# if full path wasn't typed out, add file id as head.
-	line[type] = f_action if DialogueStack.is_path(f_action) else DialogueStack.join_path([line.did, f_action])
+	line[type] = f_action if Soot.is_path(f_action) else Soot.join_path([line.did, f_action])
 	return line
 	
 func _line_as_action(line: Dictionary):

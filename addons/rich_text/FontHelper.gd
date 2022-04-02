@@ -3,11 +3,10 @@ class_name FontHelper
 
 const DEFAULT_FONT := ""
 # TODO: use 'dir'
-# TODO: look for unifont_*, so version number wont matter
-const FALLBACK_FONTS := [
-	"res://fonts/unifont/unifont-14.0.02.ttf",
-	"res://fonts/unifont/unifont_upper-14.0.02.ttf"
-]
+#const FALLBACK_FONT_HEADS := [
+#	"res://fonts/unifont/unifont-",
+#	"res://fonts/unifont/unifont_upper-"
+#]
 const PATTERN_R := ["-r", "_r", "-regular", "_regular", "-Regular", "_Regular"]
 const PATTERN_B := ["-b", "_b", "-bold", "_bold", "-Bold", "_Bold"]
 const PATTERN_I := ["-i", "_i", "-italic", "_italic", "-Italic", "_Italic"]
@@ -19,7 +18,7 @@ var dir := "res://fonts"
 var font_cache := {}
 var fontset_cache := {}
 
-func _init(d := "res://fonts"):
+func _init(d := dir):
 	dir = d
 
 func _get_font(path: String) -> Font:
@@ -31,9 +30,9 @@ func _get_font(path: String) -> Font:
 			else:
 				font = Font.new()
 				font.add_data(load(path))
-				for fallback in FALLBACK_FONTS:
-					if file.file_exists(fallback):
-						font.add_data(load(fallback))
+#				for fallback in FALLBACK_FONT_HEADS:
+#					if file.file_exists(fallback):
+#						font.add_data(load(fallback))
 			font_cache[path] = font
 	return font_cache.get(path)
 

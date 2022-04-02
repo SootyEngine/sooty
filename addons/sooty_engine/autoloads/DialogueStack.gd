@@ -2,12 +2,13 @@
 extends Node
 
 const MAX_STEPS_PER_TICK := 20 # Safety limit, in case of excessive loops.
-enum { STEP_GOTO, STEP_CALL }
+enum { STEP_GOTO, STEP_CALL, STEP_END }
 
-signal started()
-signal ended()
-signal tick_started()
-signal tick_ended()
+signal started() # Dialogue starts up.
+signal ended() # Dialogue has ended.
+signal ended_w_msg(msg: String) # Dialogue has ended, and includes ending msg.
+signal tick_started() # Step tick started.
+signal tick_ended() # Step tick ended.
 signal flow_started(id: String)
 signal flow_ended(id: String)
 signal option_selected(option: DialogueLine)
@@ -20,19 +21,6 @@ signal _refresh() # called when dialogues were reloaded, and so we should clear 
 @export var _stack := [] # current stack of flows, so we can return to a position in a previous flow.
 @export var _halting_for := [] # objects that want the flow to _break
 @export var _last_tick_stack := [] # stack of the previous tick, used for saving and rollback.
-
-const S_DIVIDER := "/"
-const S_FLOW_GOTO := "=>"
-const S_FLOW_CALL := "=="
-
-static func is_path(path: String) -> bool:
-	return S_DIVIDER in path
-
-static func join_path(parts: Array) -> String:
-	return S_DIVIDER.join(parts)
-
-static func split_path(path: String) -> PackedStringArray:
-	return path.split(S_DIVIDER)
 
 func _init(em := false) -> void:
 	_execute_mode = em
@@ -105,7 +93,7 @@ func start(id: String):
 		return
 	
 	# start dialogue
-	if is_path(id):
+	if Soot.is_path(id):
 		goto(id, STEP_GOTO)
 	
 	# go to first flow of dialogue
@@ -115,23 +103,30 @@ func start(id: String):
 			push_error("No flows in '%s'." % id)
 		else:
 			var first = Dialogues.get_dialogue(id).flows.keys()[0]
-			goto(join_path([id, first]), STEP_GOTO)
+			goto(Soot.join_path([id, first]), STEP_GOTO)
 
 func can_do(command: String) -> bool:
-	return command.begins_with(S_FLOW_GOTO) or command.begins_with(S_FLOW_CALL)
+	return command.begins_with(Soot.FLOW_GOTO)\
+		or command.begins_with(Soot.FLOW_CALL)\
+		or command.begins_with(Soot.FLOW_ENDD)
 
 func do(command: String):
-	if command.begins_with(S_FLOW_GOTO):
-		goto(command.trim_prefix(S_FLOW_GOTO).strip_edges(), STEP_GOTO)
-	elif command.begins_with(S_FLOW_CALL):
-		goto(command.trim_prefix(S_FLOW_CALL).strip_edges(), STEP_CALL)
+	# => goto
+	if command.begins_with(Soot.FLOW_GOTO):
+		goto(command.trim_prefix(Soot.FLOW_GOTO).strip_edges(), STEP_GOTO)
+	# == call
+	elif command.begins_with(Soot.FLOW_CALL):
+		goto(command.trim_prefix(Soot.FLOW_CALL).strip_edges(), STEP_CALL)
+	# <> end
+	elif command.begins_with(Soot.FLOW_ENDD):
+		_end(command.trim_prefix(Soot.FLOW_ENDD).strip_edges())
 	else:
 		push_error("Don't know what to do with '%s'." % command)
 
 func has(id: String) -> bool:
-	if not is_path(id):
+	if not Soot.is_path(id):
 		return false
-	var p := split_path(id)
+	var p := Soot.split_path(id)
 	if not Dialogues.has(p[0]):
 		return false
 	var d := Dialogues.get_dialogue(p[0])
@@ -140,11 +135,11 @@ func has(id: String) -> bool:
 	return true
 
 func goto(did_flow: String, step_type: int = STEP_GOTO) -> bool:
-	if not is_path(did_flow):
+	if not Soot.is_path(did_flow):
 		push_error("Missing part of goto: '=> %s'." % did_flow)
 		return false
 	
-	var p := split_path(did_flow)
+	var p := Soot.split_path(did_flow)
 	var did := p[0]
 	var flow := p[1]
 	
@@ -170,6 +165,14 @@ func goto(did_flow: String, step_type: int = STEP_GOTO) -> bool:
 	_push(did, flow, lines, step_type)
 	return true
 
+func _end(msg := ""):
+	if _active:
+		_active = false
+		ended.emit()
+		ended_w_msg.emit(msg)
+	else:
+		push_error("Dialogue already ended.")
+
 # select an option, adding it's lines to the stack
 func select_option(option: DialogueLine):
 	var o := option._data
@@ -182,12 +185,12 @@ func _pop():
 	var last: Dictionary = _stack.pop_back()
 	if last.type == STEP_GOTO:
 		# let everyone know a flow ended
-		flow_ended.emit(join_path([last.did, last.flow]))
+		flow_ended.emit(Soot.join_path([last.did, last.flow]))
 
 func _push(did: String, flow: String, lines: Array, type: int):
 	_stack.append({ did=did, flow=flow, lines=lines, type=type, step=0 })
 	if type == STEP_GOTO:
-		flow_started.emit(join_path([did, flow]))
+		flow_started.emit(Soot.join_path([did, flow]))
 
 func tick():
 	if _break:
@@ -198,8 +201,7 @@ func tick():
 		started.emit()
 	
 	if _active and not has_steps():
-		_active = false
-		ended.emit()
+		_end("END_OF_STEPS")
 	
 	if has_steps() and not _break:
 		_last_tick_stack = _stack.duplicate(true)

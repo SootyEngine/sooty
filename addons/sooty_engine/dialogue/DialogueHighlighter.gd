@@ -34,16 +34,13 @@ const C_ACTION_STATE := Color.DEEP_SKY_BLUE
 const C_FLOW := Color.LIGHT_CORAL
 const C_FLOW_GOTO := Color.TAN
 const C_FLOW_CALL := Color.TAN
+const C_FLOW_END := Color.TOMATO
 
 const C_CONDITION := Color.WHEAT
 const C_OPTION_FLAG := Color(0.25, 0.88, 0.82, 0.5)
 const C_OPTION_TEXT := Color.TAN
 
 # strings
-const S_FLOW := "==="
-const S_FLOW_GOTO := "=>"
-const S_FLOW_CALL := "=="
-const S_COMMENT := "//"
 const S_PROPERTY := "|"
 const S_OPTION := "- "
 const S_OPTION_ADD := "+ "
@@ -235,7 +232,7 @@ func _h_bbcode(from: int, to: int, default: Color):
 
 func _h_flow(from := 0):
 	# => and ==
-	for tag in [[S_FLOW_GOTO, C_FLOW_GOTO], [S_FLOW_CALL, C_FLOW_CALL]]:
+	for tag in [[Soot.FLOW_GOTO, C_FLOW_GOTO], [Soot.FLOW_CALL, C_FLOW_CALL]]:
 		var i := from
 		while true:
 			var j := text.find(tag[0], i)
@@ -282,8 +279,13 @@ func _h_line(from: int, to: int):
 		_h_flow()
 	
 	# flow actions
-	elif t.begins_with(S_FLOW_GOTO) or t.begins_with(S_FLOW_CALL):
+	elif t.begins_with(Soot.FLOW_GOTO) or t.begins_with(Soot.FLOW_CALL):
 		_h_flow()
+	# flow ended
+	elif t.begins_with(Soot.FLOW_ENDD):
+		var a := text.find(Soot.FLOW_ENDD)
+		_c(a, C_FLOW_END)
+		_c(a+2, C_FLOW_END.darkened(.33))
 	
 	else:
 		# text
@@ -333,9 +335,9 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 	var to := _h_flatline(C_TEXT, 0)
 	
 	# flow
-	if text.begins_with(S_FLOW):
+	if text.begins_with(Soot.FLOW):
 		_c(0, C_SYMBOL)
-		_c(len(S_FLOW), C_FLOW)
+		_c(len(Soot.FLOW), C_FLOW)
 	
 	else:
 		# condition
@@ -356,7 +358,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 			_c(f, C_SYMBOL)
 	
 	# comments
-	index = text.find(S_COMMENT)
+	index = text.find(Soot.COMMENT)
 	if index != -1:
 		_co(C_COMMENT)
 		# erase all colors afterwards
