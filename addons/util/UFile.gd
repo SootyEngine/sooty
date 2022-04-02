@@ -11,18 +11,31 @@ static func get_user_dir() -> String:
 			return dir + "/data/"
 	return "user://"
 
+# Check if file exists at this location.
 static func file_exists(path: String) -> bool:
 	return File.new().file_exists(path)
 
+# Check if file exists in directory or one of it's sub directories.
+static func file_exists_in_dir(dir: String, tail: String) -> bool:
+	return len(get_files(dir, tail, true, false, 1)) > 0
+
+# Get a file ending in tail, in this directory or one of it's sub directories.
+static func get_file_in_dir(dir: String, tail: String) -> String:
+	var paths := get_files(dir, tail, true, false, 1)
+	return "" if len(paths) == 0 else paths[0]
+
+# Check if directory exists at this path.
 static func dir_exists(path: String) -> bool:
 	return Directory.new().dir_exists(path)
 
+# Time this file was modified at.
 static func get_modified_time(path: String) -> int:
 	return File.new().get_modified_time(path)
 
 static func get_file_size_humanized(path: String) -> String:
 	return String.humanize_size(get_file_size(path))
 
+# Size of file, in bytes, at this location.
 static func get_file_size(path: String) -> int:
 	var f := File.new()
 	var _e = f.open(path, File.READ)
@@ -31,15 +44,17 @@ static func get_file_size(path: String) -> int:
 	f.close()
 	return bytes
 
-static func get_file_name(path: String) -> String:
-	return path.get_file().split(".", true, 1)[0]
-
-# hacky
+# Hacky.
+# Size of all the files in a directory, added up together.
 static func get_directory_size(directory: String) -> String:
 	var bytes := 0
 	for path in get_files(directory, null, true, true):
 		bytes += get_file_size(path)
 	return String.humanize_size(bytes)
+
+static func get_file_name(path: String) -> String:
+	return path.get_file().split(".", true, 1)[0]
+
 
 #static func get_directory_name(path:String) -> String:
 #	var head = null
@@ -262,7 +277,7 @@ static func _get_dirs(dir: Directory, out: Array, nested: bool):
 		fname = dir.get_next()
 	dir.list_dir_end()
 
-static func get_files(paths, extensions=null, nested: bool = true, hidden: bool = false) -> PackedStringArray:
+static func get_files(paths, extensions=null, nested: bool = true, hidden: bool = false, maximum := -1) -> PackedStringArray:
 	var out := []
 	var dir := Directory.new()
 	dir.include_hidden = hidden
@@ -271,11 +286,11 @@ static func get_files(paths, extensions=null, nested: bool = true, hidden: bool 
 	
 	for path in UList.list(paths):
 		if dir.dir_exists(path) and not UError.error(dir.open(path), "Can't open '%s'." % path):
-			_get_files(dir, out, exts, nested)
+			_get_files(dir, out, exts, nested, maximum)
 	
 	return PackedStringArray(out)
 
-static func _get_files(dir: Directory, out: Array, extensions: PackedStringArray, nested: bool):
+static func _get_files(dir: Directory, out: Array, extensions: PackedStringArray, nested: bool, maximum: int):
 	dir.list_dir_begin()
 	var fname = dir.get_next()
 	while fname != "":
@@ -285,7 +300,7 @@ static func _get_files(dir: Directory, out: Array, extensions: PackedStringArray
 			if nested and not fname == ".import" and not file_exists(path.plus_file(".gdignore")):
 				var sub_dir = Directory.new()
 				sub_dir.open(path)
-				_get_files(sub_dir, out, extensions, true)
+				_get_files(sub_dir, out, extensions, true, maximum)
 		
 		elif not len(extensions) or _ends_with(fname, extensions):
 			# html5 export hack
@@ -296,6 +311,8 @@ static func _get_files(dir: Directory, out: Array, extensions: PackedStringArray
 #				path = path.substr(0, len(path)-6)
 			
 			out.append(path)
+			if maximum != -1 and len(out) >= maximum:
+				break
 		
 		elif len(extensions) and ".gd" in extensions:
 			if not OS.is_debug_build():

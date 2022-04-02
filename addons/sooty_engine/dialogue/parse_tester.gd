@@ -11,10 +11,13 @@ func Character(x):
 enum {WINTER, SPRING}
 
 func _run():
-	print(format_speaker_text("I'm *John*. (He get's angry.) [!@john.shake_no][w] [!@john.talk]I'm the angriest one."))
-	print(format_speaker_text('(Tutning away.) [w]You never know, they could say, "He was robbed," tell you iy all! (Closed eyes.)'))
-	print(format_speakerless_text('It\'s all "A Joke" he said.'))
-	print(format_speakerless_text('"They are" he said.'))
+	print(UFile.file_exists_in_dir("res://", "demo002_persistent_state.soot"))
+	print(UFile.get_file_in_dir("res://", "demo002_persistent_state.soot"))
+	
+#	print(format_speaker_text("I'm *John*. (He get's angry.) [!@john.shake_no][w] [!@john.talk]I'm the angriest one."))
+#	print(format_speaker_text('(Tutning away.) [w]You never know, they could say, "He was robbed," tell you iy all! (Closed eyes.)'))
+#	print(format_speakerless_text('It\'s all "A Joke" he said.'))
+#	print(format_speakerless_text('"They are" he said.'))
 	return
 
 func format_speakerless_text(text: String) -> String:
