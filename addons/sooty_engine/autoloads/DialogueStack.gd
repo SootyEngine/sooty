@@ -128,6 +128,10 @@ func has(id: String) -> bool:
 	return true
 
 func goto(did_flow: String, step_type: int = STEP_GOTO) -> bool:
+	if not "." in did_flow:
+		push_error("Missing part of goto: '=> %s'." % did_flow)
+		return false
+	
 	var p := did_flow.split(".", true, 1)
 	var did := p[0]
 	var flow := p[1]
@@ -251,21 +255,21 @@ func pop_next_line() -> Dictionary:
 		if line.type == "if":
 			var d := Dialogues.get_dialogue(did)
 			for i in len(line.conds):
-				if State._test(line.conds[i]):
+				if StringAction._test(line.conds[i]):
 					_push(d.id, flow, line.cond_lines[i], STEP_CALL)
 					break
 		
 		# match chain
 		elif line.type == "match":
-			var match_result = State._eval(line.match)
+			var match_result = StringAction._eval(line.match)
 			for i in len(line.cases):
 				var case = line.cases[i]
-				var got = State._eval(case)
+				var got = StringAction._eval(case)
 				if match_result == got or case == "_":
 					_push(did, flow, line.case_lines[i], STEP_CALL)
 					break
 		
-		elif "cond" in line and State._test(line.cond):
+		elif "cond" in line and StringAction._test(line.cond):
 			break
 		
 		did_line = _pop_next_line()

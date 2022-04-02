@@ -6,6 +6,9 @@ var current: Node
 var scenes := {}
 var _iter_current := 0
 
+var id: String:
+	get: return UFile.get_file_name(current.scene_file_path)
+
 func _init() -> void:
 	add_to_group("Scene")
 	add_to_group("sa:goto")
@@ -21,11 +24,11 @@ func _ready() -> void:
 		current._start(false)
 
 func _get(property: StringName):
-	if property in current:
+	if current and current.has_method("_has") and current._has(property):
 		return current[property]
 
 func _set(property: StringName, value) -> bool:
-	if property in current:
+	if current and current.has_method("_has") and current._has(property):
 		current[property] = value
 		return true
 	return false

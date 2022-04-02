@@ -33,7 +33,7 @@ func _get_options(input: Array, output: Array, depth: int):
 		var opdata := dialogue.get_line(input[i])
 		var passed := true
 		if "cond" in opdata:
-			passed = State._test(opdata.cond)
+			passed = StringAction._test(opdata.cond)
 		
 		match opdata.get("flag", ""):
 			"++":
