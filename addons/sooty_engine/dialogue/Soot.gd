@@ -11,6 +11,11 @@ const FLOW_ENDD := "><"
 
 const FLOW_PATH_DIVIDER := "/"
 
+# Called when the main game starts.
+const M_START := "MAIN" + FLOW_PATH_DIVIDER + "START"
+# Called when a flow ends.
+const M_FLOW_END := "MAIN" + FLOW_PATH_DIVIDER + "FLOW_END"
+
 static func is_path(path: String) -> bool:
 	return FLOW_PATH_DIVIDER in path
 

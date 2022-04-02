@@ -50,9 +50,6 @@ func call_group_flags(flags: int, group: String, fname: String, args := []):
 		4: return get_tree().call_group_flags(flags, group, fname, args[0], args[1], args[2], args[3])
 		_: push_error("Not implemented.")
 
-func _init() -> void:
-	add_to_group("sa:sooty_version")
-
 func _ready() -> void:
 	get_tree().set_auto_accept_quit(false)
 
@@ -74,7 +71,7 @@ func end():
 	active_game = false
 	ended.emit()
 
-func sooty_version():
+func version():
 	return "[%s]%s[]" % [Color.TOMATO, VERSION]
 
 func snap_screenshot():

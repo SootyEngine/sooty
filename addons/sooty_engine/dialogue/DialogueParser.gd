@@ -347,9 +347,8 @@ func _line_as_flow_call(line: Dictionary):
 	_add_flow_action(line, "call", p[1].strip_edges())
 
 func _line_as_flow_end(line: Dictionary):
-	var p = line.text.split(Soot.FLOW_ENDD, true, 1)
-	line.text = p[0].strip_edges()
-	_add_flow_action(line, "end", p[1].strip_edges())
+	line.type = "end"
+	line.end = line.text.trim_prefix(Soot.FLOW_ENDD).strip_edges()
 
 func _add_flow_action(line: Dictionary, type: String, f_action: String):
 	line.type = type

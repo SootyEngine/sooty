@@ -77,7 +77,7 @@ func _call(method: String, args: Array = [], default = null) -> Variant:
 			var target = _get(p[0])
 			return UObject.call_w_args(target, method, args)
 		else:
-			push_error("No property %s in state." % p[0])
+			push_error("No property '%s' in state." % p[0])
 			return default
 	
 	# first check if it's a property

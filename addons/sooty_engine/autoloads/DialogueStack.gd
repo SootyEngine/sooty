@@ -1,4 +1,3 @@
-@tool
 extends Node
 
 const MAX_STEPS_PER_TICK := 20 # Safety limit, in case of excessive loops.
@@ -16,7 +15,7 @@ signal on_line(text: DialogueLine)
 signal _refresh() # called when dialogues were reloaded, and so we should clear the captions/options.
 
 @export var _execute_mode := false # TODO: Implement this differently.
-@export var _break := false # breaking from the flow, temporarilly.
+#@export var _break := false # breaking from the flow, temporarilly.
 @export var _active := false # currently in the middle of running?
 @export var _stack := [] # current stack of flows, so we can return to a position in a previous flow.
 @export var _halting_for := [] # objects that want the flow to _break
@@ -29,9 +28,9 @@ func _ready():
 	if not Engine.is_editor_hint() and not _execute_mode:
 		Saver._get_state.connect(_save_state)
 		Saver._set_state.connect(_load_state)
-		Saver.pre_load.connect(_pre_load)
-		Global.started.connect(_on_start)
-		Global.ended.connect(_on_end)
+		Saver.pre_load.connect(_game_loaded)
+		Global.started.connect(_game_ended)
+		Global.ended.connect(_game_started)
 		Dialogues.reloaded.connect(_dialogues_reloaded)
 
 func _save_state(state: Dictionary):
@@ -44,36 +43,28 @@ func _load_state(state: Dictionary):
 func _dialogues_reloaded():
 	_refresh.emit()
 	_stack = _last_tick_stack.duplicate(true)
-	_break = false
+#	_break = false
 
-func _pre_load():
-	_clear()
+func _game_loaded():
+	end("LOADING")
 
-func _clear():
-	_active = false
-	_break = false
-	_halting_for = []
-	_stack.clear()
-
-func _on_start():
+func _game_started():
 	if has("MAIN.START"):
 		execute("MAIN.START")
 
-func _on_end():
-	_clear()
-	if has("MAIN.END"):
-		execute("MAIN.END")
+func _game_ended():
+	end("GAME_ENDED")
+
+func is_halted() -> bool:
+	return len(_halting_for) > 0
 
 func halt(halter: Object):
 	if not halter in _halting_for:
 		_halting_for.append(halter)
-		_break = true
 
 func unhalt(halter: Object):
 	if halter in _halting_for:
 		_halting_for.erase(halter)
-		if not len(_halting_for):
-			_break = false
 
 func is_active() -> bool:
 	return _active
@@ -119,7 +110,7 @@ func do(command: String):
 		goto(command.trim_prefix(Soot.FLOW_CALL).strip_edges(), STEP_CALL)
 	# <> end
 	elif command.begins_with(Soot.FLOW_ENDD):
-		_end(command.trim_prefix(Soot.FLOW_ENDD).strip_edges())
+		end(command.trim_prefix(Soot.FLOW_ENDD).strip_edges())
 	else:
 		push_error("Don't know what to do with '%s'." % command)
 
@@ -165,11 +156,13 @@ func goto(did_flow: String, step_type: int = STEP_GOTO) -> bool:
 	_push(did, flow, lines, step_type)
 	return true
 
-func _end(msg := ""):
-	if _active:
-		_active = false
+func end(msg := ""):
+	if is_active():
 		ended.emit()
 		ended_w_msg.emit(msg)
+		_active = false
+		_stack.clear()
+		_halting_for.clear()
 	else:
 		push_error("Dialogue already ended.")
 
@@ -193,7 +186,7 @@ func _push(did: String, flow: String, lines: Array, type: int):
 		flow_started.emit(Soot.join_path([did, flow]))
 
 func tick():
-	if _break:
+	if is_halted():
 		return
 	
 	if not _active and has_steps():
@@ -201,16 +194,16 @@ func tick():
 		started.emit()
 	
 	if _active and not has_steps():
-		_end("END_OF_STEPS")
+		end("END_OF_STEPS")
 	
-	if has_steps() and not _break:
+	if has_steps() and not is_halted():
 		_last_tick_stack = _stack.duplicate(true)
 		tick_started.emit()
 	else:
 		return
 	
 	var safety := MAX_STEPS_PER_TICK
-	while has_steps() and not _break:
+	while has_steps() and not is_halted():
 		safety -= 1
 		if safety <= 0:
 			push_error("Tripped safety! Increase MAX_STEPS_PER_TICK if necessary.", safety)
@@ -226,11 +219,15 @@ func tick():
 				StringAction.do(line.line.action)
 				
 			"goto":
-				goto(line.line.goto, true)
+				goto(line.line.goto, STEP_GOTO)
 				
 			"call":
-				goto(line.line.call, false)
-				
+				goto(line.line.call, STEP_CALL)
+			
+			"end":
+				end(line.line.end)
+				break
+			
 			"text":
 				if "action" in line.line:
 					for a in line.line.action:
