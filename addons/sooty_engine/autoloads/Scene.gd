@@ -18,6 +18,7 @@ func _ready() -> void:
 	
 	# call the start function when testing from editor
 	await get_tree().process_frame
+	
 	current = get_tree().current_scene
 	scene_changed.emit()
 	if current.has_method("_start"):

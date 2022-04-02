@@ -96,7 +96,7 @@ static func set_state(o: Object, data: Dictionary):
 
 static func patch(target: Variant, patch: Dictionary, erase_patched := false) -> int:
 	var lines_changed := 0
-	for k in patch:
+	for k in patch.keys():
 		if k in target:
 			var p = patch[k]
 			var t = target[k]
@@ -107,6 +107,8 @@ static func patch(target: Variant, patch: Dictionary, erase_patched := false) ->
 			elif t != p:
 				target[k] = patch[k]
 				lines_changed += 1
+				if erase_patched:
+					patch.erase(k)
 		
 		elif target is Dictionary:
 			target[k] = patch[k]
