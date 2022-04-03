@@ -17,7 +17,7 @@ signal _halt_list_changed()
 @export var last_end_message := ""
 @export var _execute_mode := false # TODO: Implement this differently.
 @export var _started := false
-@export var _ticked := []
+#@export var _ticked := []
 @export var _stack := [] # current stack of flows, so we can return to a position in a previous flow.
 @export var _halting_for := [] # objects that want the flow to _break
 @export var _last_tick_stack := [] # stack of the previous tick, used for saving and rollback.
@@ -161,7 +161,7 @@ func end(msg := ""):
 		last_end_message = msg
 		_started = false
 		_stack.clear()
-		_ticked.clear()
+#		_ticked.clear()
 		_halting_for.clear()
 		_halt_list_changed.emit()
 		if not _execute_mode:
@@ -177,7 +177,7 @@ func select_option(option: DialogueLine):
 
 func _pop():
 	var last: Dictionary = _stack.pop_back()
-	_ticked.append(last)
+#	_ticked.append(last)
 	
 	# let everyone know a flow ended
 	if last.type == STEP_GOTO:
@@ -204,7 +204,7 @@ func _tick():
 			tick.emit()
 	
 	var safety := MAX_STEPS_PER_TICK
-	while _started and len(_stack):
+	while (_started or _execute_mode) and len(_stack):
 		if not _execute_mode and is_halted():
 			break
 		
@@ -268,11 +268,11 @@ func _pop_next_line() -> Dictionary:
 			break
 		
 		# remove last step, and potentially end the flow.
-		if _stack[-1].step >= len(_stack[-1].lines):
+		var step_info: Dictionary = _stack[-1]
+		if step_info.step >= len(step_info.lines):
 			_pop()
 			continue
 		
-		var step_info: Dictionary = _stack[-1]
 		var dilg := Dialogues.get_dialogue(step_info.d_id)
 		var line: Dictionary = dilg.get_line(step_info.lines[step_info.step])
 		var d_id: String = step_info.d_id
