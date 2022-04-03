@@ -26,7 +26,7 @@ func parse(file: String) -> Dictionary:
 	while i < len(text_lines):
 		var uncommented := text_lines[i]
 		var id := ""
-		var line := i
+		var line := i+1 # prevent off by ones 
 		
 		# remove comment
 		if Soot.COMMENT in uncommented:

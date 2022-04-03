@@ -57,7 +57,7 @@ func _eval(expression: String, default = null) -> Variant:
 #	prints("(%s) >>> (%s)" %[expression, global])
 	
 	if _expr.parse(global, []) != OK:
-		push_error(_expr.get_error_text())
+		push_error(_expr.get_error_text() + ": " + expression)
 	else:
 		var result = _expr.execute([], self, false)
 		if _expr.has_execute_failed():
