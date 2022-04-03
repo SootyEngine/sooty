@@ -165,7 +165,6 @@ func end(msg := ""):
 		_halting_for.clear()
 		_halt_list_changed.emit()
 		if not _execute_mode:
-			print("DS ENDED")
 			ended.emit()
 			ended_w_msg.emit(msg)
 
@@ -182,7 +181,6 @@ func _pop():
 	
 	# let everyone know a flow ended
 	if last.type == STEP_GOTO:
-		print("DS FLOW ENDED")
 		flow_ended.emit(Soot.join_path([last.d_id, last.flow]))
 
 func _push(d_id: String, flow: String, lines: Array, type: int):
@@ -192,7 +190,6 @@ func _push(d_id: String, flow: String, lines: Array, type: int):
 		# let everyone know a flow started
 		if type == STEP_GOTO:
 			await get_tree().process_frame
-			print("DS FLOW STARTED")
 			flow_started.emit(Soot.join_path([d_id, flow]))
 
 func _tick():
@@ -226,10 +223,12 @@ func _tick():
 				StringAction.do(line.line.action)
 				
 			"goto":
-				DialogueStack._goto(false, line.line.goto, STEP_GOTO)
+				# call main stack, since this could be run in _execute_mode
+				DialogueStack._goto(line.line.goto, STEP_GOTO)
 				
 			"call":
-				DialogueStack._goto(false, line.line.call, STEP_CALL)
+				# call main stack, since this could be run in _execute_mode
+				DialogueStack._goto(line.line.call, STEP_CALL)
 			
 			"end":
 				end(line.line.end)
@@ -249,7 +248,6 @@ func _tick():
 	# emit start trigger
 	if not _execute_mode and len(_stack) and not _started:
 		_started = true
-		print("DS STARTED")
 		started.emit()
 
 # forcibly run a flow. usefuly for setting up scenes from a .soot file.
