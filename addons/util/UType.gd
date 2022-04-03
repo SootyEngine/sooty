@@ -1,6 +1,9 @@
 extends Node
 class_name UType
 
+static func compare(a: Variant, b: Variant) -> bool:
+	return typeof(a) == typeof(b) and a == b
+
 static func get_type_from_name(name: String) -> int:
 	match name:
 		"null": return TYPE_NIL

@@ -268,17 +268,16 @@ func pop_next_line() -> Dictionary:
 			for i in len(line.conds):
 				if StringAction._test(line.conds[i]):
 					_push(false, d.id, flow, line.cond_lines[i], STEP_CALL)
-					return out
+					return {}
 		
 		# match chain
 		elif line.type == "match":
-			var match_result = StringAction._eval(line.match)
+			var match_result = State._eval(line.match)
 			for i in len(line.cases):
 				var case = line.cases[i]
-				var got = StringAction._eval(case)
-				if match_result == got or case == "_":
+				if case == "_" or UType.compare(match_result, State._eval(case)):
 					_push(false, d_id, flow, line.case_lines[i], STEP_CALL)
-					return out
+					return {}
 		
 		# has a condition
 		elif "cond" in line:

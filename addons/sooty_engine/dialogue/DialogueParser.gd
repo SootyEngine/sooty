@@ -289,9 +289,9 @@ func _line_as_condition(line: Dictionary):
 		line.cond = "true"
 	
 	# match condition
-	elif cond.begins_with("*"):
+	elif cond.begins_with("match "):
 		line.cond_type = "match"
-		line.match = line.cond.substr(1)
+		line.match = line.cond.trim_prefix("match ").strip_edges()
 		line.cases = []
 		line.case_lines = []
 		for tabbed_line in line.tabbed:
