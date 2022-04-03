@@ -44,6 +44,8 @@ func _load_state(state: Dictionary):
 
 func _dialogues_reloaded():
 	_refresh.emit()
+	_halting_for.clear()
+	_halt_list_changed.emit()
 	_stack = _last_tick_stack.duplicate(true)
 
 func _game_loaded():
