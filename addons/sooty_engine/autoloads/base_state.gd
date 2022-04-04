@@ -1,9 +1,9 @@
 extends Node
 class_name BaseState
 
-signal changed(property: String)
-signal changed_to(property: String, to: Variant)
-signal changed_from_to(property: String, from: Variant, to: Variant)
+signal changed(property: Array)
+signal changed_to(property: Array, to: Variant)
+signal changed_from_to(property: Array, from: Variant, to: Variant)
 
 var _silent := false # won't emit signals when changing things.
 var _changed := false # state has changed.
@@ -160,9 +160,9 @@ func _set(property_path: StringName, value) -> bool:
 			if old != new:
 				if not _silent:
 					_changed = true
-					changed.emit(property_path)
-					changed_to.emit(property_path, new)
-					changed_from_to.emit(property_path, old, new)
+					changed.emit(path)
+					changed_to.emit(path, new)
+					changed_from_to.emit(path, old, new)
 			return true
 	push_error("No %s in %s. (Attempted '%s = %s')" % [property_path, _get_state(), property, value])
 	return true

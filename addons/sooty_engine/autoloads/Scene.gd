@@ -51,8 +51,6 @@ func create(id: String, parent: Node = null) -> Node:
 		return out
 	return null
 
-
-
 func _input(event: InputEvent) -> void:
 	if Engine.is_editor_hint():
 		set_process_input(false)

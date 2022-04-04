@@ -57,6 +57,7 @@ func save_persistent():
 	_timer.start()
 
 func _save_persistent():
+	_timer.stop()
 	pre_save_persistent.emit()
 	var data := {}
 	data["last_save_slot"] = _last_save_slot
