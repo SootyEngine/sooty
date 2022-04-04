@@ -294,7 +294,7 @@ func _pop_next_line() -> Dictionary:
 			var match_result = State._eval(line.match)
 			for i in len(line.cases):
 				var case = line.cases[i]
-				if case == "_" or UType.compare(match_result, State._eval(case)):
+				if case == "_" or UType.is_equal(match_result, State._eval(case)):
 					_push(d_id, flow, line.case_lines[i], STEP_CALL)
 					return {}
 		

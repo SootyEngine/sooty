@@ -28,6 +28,7 @@ signal loaded_persistent()
 
 var _wait_timer := 0.0
 var _last_save_slot := ""
+var _timer := Timer.new()
 
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -39,7 +40,9 @@ func _ready() -> void:
 	if not d.dir_exists(DIR):
 		d.make_dir(DIR)
 	
-	set_process(false)
+	add_child(_timer)
+	_timer.wait_time = 2.0
+	_timer.timeout.connect(_save_persistent)
 
 func has_last_save() -> bool:
 	return _last_save_slot != "" and has_slot(_last_save_slot)
@@ -50,17 +53,8 @@ func load_last_save():
 func _mods_loaded():
 	load_persistent()
 
-func _process(delta: float) -> void:
-	if _wait_timer > 0.0:
-		_wait_timer -= delta
-	else:
-		# in case a setting is being changed or a lot is happening.
-		_wait_timer = 4.0
-		_save_persistent()
-		set_process(false)
-
 func save_persistent():
-	set_process(true)
+	_timer.start()
 
 func _save_persistent():
 	pre_save_persistent.emit()

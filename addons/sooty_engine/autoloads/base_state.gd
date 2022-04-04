@@ -20,7 +20,7 @@ func _save_state(data: Dictionary):
 func _load_state(data: Dictionary):
 	_silent = true
 	_reset()
-	_patch(data.get(_get_subdir(), {}))
+	UObject.set_state(self, data.get(_get_subdir(), {}))
 	_silent = false
 
 func _ready() -> void:
@@ -35,22 +35,34 @@ func _clear_mods():
 
 func _load_mods(mods: Array):
 	var subdir := _get_subdir()
+	
+	# init nodes from .gd scripts.
 	for mod in mods:
 		mod.meta[subdir] = []
+		
 		var head = mod.dir.plus_file(subdir)
 		for script_path in UFile.get_files(head, ".gd"):
 			var state = load(script_path).new()
 			if state is Node:
 				mod.meta[subdir].append(script_path)
-				state.set_name(UFile.get_file_name(script_path))#.get_file().split(".", true, 1)[0])
+				state.set_name(UFile.get_file_name(script_path))
 				add_child(state)
 			else:
 				# TODO: Allow resources.
 				push_error("States must be node. Can't load %s." % script_path)
+	
+	# install .data
+	for mod in mods:
+		var head = mod.dir.plus_file(subdir)
+		for data_path in UFile.get_files(head, ".data"):
+			mod.meta[subdir].append(data_path)
+			var state = DataParser.new().parse(data_path)
+			UObject.patch(self, state, [data_path])
+	
 	_default = _get_state()
 
 func _reset():
-	_patch(_default)
+	UObject.set_state(self, _default)
 
 func _child_added(_n: Node):
 	_children = get_children()
@@ -96,16 +108,18 @@ func _call(method: String, args: Array = [], default = null) -> Variant:
 func _reset_state():
 	UObject.set_state(self, _default)
 
-func _patch(state: Dictionary):
-	UObject.patch(self, state)
-
 func _get_changed_states() -> Dictionary:
-	var current := _get_state()# UObject.get_state(self)
+	var current := _get_state()
 	return UDict.get_different(_default, current)
 
-func _set_state(state: Dictionary):
-	_reset_state()
-	UObject.patch(self, state)
+#func _set_state(state: Dictionary):
+#
+#	for child_name in state:
+#		var child = get_node_or_null(child_name)
+#		if child != null:
+#			UObject.set_state(child, state)
+#		else:
+#			assert(false)
 
 func _get_state() -> Dictionary:
 	var out := {}
@@ -150,7 +164,7 @@ func _set(property_path: StringName, value) -> bool:
 					changed_to.emit(property_path, new)
 					changed_from_to.emit(property_path, old, new)
 			return true
-	push_error("No %s in State. (Attempted '%s = %s')" % [property_path, property, value])
+	push_error("No %s in %s. (Attempted '%s = %s')" % [property_path, _get_state(), property, value])
 	return true
 
 func _get_all_of_type(type: Variant) -> Dictionary:

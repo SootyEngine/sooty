@@ -1,7 +1,10 @@
 extends Node
 class_name UType
 
-static func compare(a: Variant, b: Variant) -> bool:
+static func is_same(a: Variant, b: Variant) -> bool:
+	return typeof(a) == typeof(b)
+
+static func is_equal(a: Variant, b: Variant) -> bool:
 	return typeof(a) == typeof(b) and a == b
 
 static func get_type_from_name(name: String) -> int:

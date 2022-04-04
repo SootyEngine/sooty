@@ -60,66 +60,100 @@ const GLOBAL_SCOPE_METHODS := [
 static func get_class_name(o: Object) -> String:
 	return o.get_script().resource_path.get_file().split(".", true, 1)[0]
 
-static func get_state(o: Object) -> Dictionary:
-	var out := {}
-	for prop in o.get_property_list():
-		if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and prop.name[0] != "_":
-			match prop.type:
-				TYPE_OBJECT:
-					out[prop.name] = get_state(o[prop.name])
-				TYPE_DICTIONARY:
-					out[prop.name] = _get_dict_state(o[prop.name])
-				_:
-					out[prop.name] = o[prop.name]
-	return out
+# get a serializable state. (can be Color and Vector2, but not Objects.)
+static func get_state(target: Variant) -> Dictionary:
+	if target is Object and target.has_method("_get_state"):
+		return target._get_state()
+	else:
+		var out := {}
+		for k in get_state_properties(target):
+			match typeof(target[k]):
+				TYPE_OBJECT, TYPE_DICTIONARY: out[k] = get_state(target[k])
+				_: out[k] = target[k]
+		return out
 
-static func _get_dict_state(dict: Dictionary) -> Dictionary:
-	var out := {}
-	for k in dict:
-		match typeof(dict[k]):
-			TYPE_OBJECT:
-				out[k] = get_state(dict[k])
-			TYPE_DICTIONARY:
-				out[k] = _get_dict_state(dict[k])
-			_:
-				out[k] = dict[k]
-	return out
+# set a serializable state.
+static func set_state(target: Variant, state: Dictionary):
+	if target is Object and target.has_method("_set_state"):
+		target._set_state(state)
+	else:
+		for k in state:
+			if k in target:
+				match typeof(target[k]):
+					TYPE_OBJECT, TYPE_DICTIONARY: set_state(target[k], state[k]) 
+					_: target[k] = state[k]
+			else:
+				push_error("No property '%s' in %s." % [k, target])
 
-static func set_state(o: Object, data: Dictionary):
-	for prop in o.get_property_list():
-		if prop in data and prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and prop.name[0] != "_":
-			match prop.type:
-				TYPE_OBJECT:
-					set_state(o[prop.name], data[prop.name])
-				_:
-					o[prop.name] = data[prop.name]
+# get list of script variables not starting in a _
+static func get_state_properties(target: Variant) -> Array:
+	match typeof(target):
+		TYPE_OBJECT:
+			if target.has_method("_get_state_properties"):
+				return target._get_state_properties()
+			else:
+				return target.get_property_list()\
+					.filter(func(x): return x.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and x.name[0] != "_")\
+					.map(func(x): return x.name)
+		TYPE_DICTIONARY:
+			return target.keys()
+		_:
+			return []
 
-static func patch(target: Variant, patch: Dictionary, erase_patched := false) -> int:
-	var lines_changed := 0
-	for k in patch.keys():
-		if k in target:
-			var p = patch[k]
-			var t = target[k]
-			
-			if patch[k] is Dictionary:
-				lines_changed += patch(target[k], patch[k])
-			
-			elif t != p:
-				target[k] = patch[k]
-				lines_changed += 1
-				if erase_patched:
-					patch.erase(k)
-		
-		elif target is Dictionary:
-			target[k] = patch[k]
-			lines_changed += 1
-			if erase_patched:
-				patch.erase(k)
-		
-		elif not erase_patched:
-			push_error("Couldn't find '%s' in %s." % [k, target])
+static func patch(target: Object, patch: Dictionary, sources: Array):
+	if target.has_method("_patch"):
+		for k in patch:
+			target._patch(k, patch[k], sources)
 	
-	return lines_changed
+	else:
+		for k in patch:
+			if k in target:
+				var target_type = typeof(target[k])
+				# recursively check sub objects.
+				if target_type == TYPE_OBJECT:
+					patch(target[k], patch[k], sources)
+				
+				else:
+					# extract debug data, like line number
+					var info = patch[k].split("!", true, 2)
+					var file: String = info[0]
+					var line: String = info[1]
+					var data: String = info[2]
+					# convert string to appropriate type
+					var value = UString.str_to_type(data, target_type)
+					if typeof(value) == target_type:
+						target[k] = value
+					else:
+						push_error("Couldn't convert '%s' for property %s. (%s:%s)" % [patch[k], k, sources[file.to_int()], line])
+			else:
+				push_error("No %s in %s." % [k, target])
+
+#static func patch(target: Object, patch: Dictionary, erase_patched := false) -> int:
+#	var lines_changed := 0
+#	for k in patch.keys():
+#		# special method for patching
+#		if target.has_method("_patch"):
+#			target._patch(k, patch[k])
+#			lines_changed += len(patch[k])
+#
+#		# does property exist in target?
+#		elif k in target:
+#			var p = patch[k]
+#			var t = target[k]
+#
+#			if patch[k] is Dictionary:
+#				lines_changed += patch(target[k], patch[k])
+#
+#			elif t != p:
+#				target[k] = patch[k]
+#				lines_changed += 1
+#				if erase_patched:
+#					patch.erase(k)
+#
+#		elif not erase_patched:
+#			push_error("Couldn't find '%s' in %s." % [k, target])
+#
+#	return lines_changed
 
 static func get_operator_value(v):
 	if v is Object:
@@ -293,7 +327,7 @@ static func _parse_method_arguments(s: String) -> Dictionary:
 	return out
 
 static func get_class_from_name(name: String) -> Variant:
-	for item in ProjectSettings.get_setting("_global_script_class"):
+	for item in ProjectSettings.get_setting("_global_script_classes"):
 		if item["class"] == name:
 			return load(item.path)
 	return null

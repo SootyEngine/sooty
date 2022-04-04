@@ -2,8 +2,10 @@
 extends EditorPlugin
 
 const AUTOLOADS := ["Global", "Mods", "Settings", "Scene", "Saver", "Persistent", "State", "StringAction", "Music", "SFX", "Dialogues", "DialogueStack"]
-const HIGHLIGHTER = preload("res://addons/sooty_engine/dialogue/DialogueHighlighter.gd")
-var highlighter := HIGHLIGHTER.new()
+const SOOT_HIGHLIGHTER = preload("res://addons/sooty_engine/dialogue/DialogueHighlighter.gd")
+const DATA_HIGHLIGHTER = preload("res://addons/sooty_engine/data/DataHighlighter.gd")
+var soot_highlighter := SOOT_HIGHLIGHTER.new()
+var data_highlighter := DATA_HIGHLIGHTER.new()
 
 func _enter_tree() -> void:
 	# load all autoloads in order.
@@ -18,7 +20,8 @@ func _enter_tree() -> void:
 	
 	var se: ScriptEditor = get_editor_interface().get_script_editor()
 	# register syntax highlighter for drop down.
-	se.register_syntax_highlighter(highlighter)
+	se.register_syntax_highlighter(soot_highlighter)
+	se.register_syntax_highlighter(data_highlighter)
 	# track scripts opened/closed to can add highliter.
 	se.editor_script_changed.connect(_editor_script_changed)
 
@@ -26,13 +29,14 @@ func _editor_script_changed(s):
 	for e in get_editor_interface().get_script_editor().get_open_script_editors():
 		if e.has_meta("_edit_res_path") and not e.has_meta("_soot_hl") and e.get_meta("_edit_res_path").ends_with(".soot"):
 			e = e as ScriptEditorBase
-			e.add_syntax_highlighter(highlighter)
-			(e.get_base_editor() as CodeEdit).syntax_highlighter = highlighter
+#			e.add_syntax_highlighter(soot_highlighter)
+			(e.get_base_editor() as CodeEdit).syntax_highlighter = soot_highlighter
 			e.set_meta("_soot_hl", true)
 
 func _exit_tree() -> void:
 	# remove .soot highlighter.
-	get_editor_interface().get_script_editor().unregister_syntax_highlighter(highlighter)
+	get_editor_interface().get_script_editor().unregister_syntax_highlighter(soot_highlighter)
+	get_editor_interface().get_script_editor().unregister_syntax_highlighter(data_highlighter)
 	
 	for id in AUTOLOADS:
 		remove_autoload_singleton(id)

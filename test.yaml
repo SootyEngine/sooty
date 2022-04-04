@@ -1,0 +1,11 @@
+new Character boss
+    name: true
+    score: [1, 2, 3]
+
+new Character p
+    name: true
+    inventory:
+        - coin: 20
+        - score: 3
+
+=== flow_okay

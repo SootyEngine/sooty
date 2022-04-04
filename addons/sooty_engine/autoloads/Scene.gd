@@ -51,16 +51,7 @@ func create(id: String, parent: Node = null) -> Node:
 		return out
 	return null
 
-#func _iter_init(arg):
-#	_iter_current = 0
-#	return _iter_current < len(scenes)
-#
-#func _iter_next(arg):
-#	_iter_current += 1
-#	return _iter_current < len(scenes)
-#
-#func _iter_get(arg):
-#	return scenes.keys()[_iter_current]
+
 
 func _input(event: InputEvent) -> void:
 	if Engine.is_editor_hint():
