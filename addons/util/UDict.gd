@@ -254,3 +254,14 @@ static func dig(d: Variant, call: Callable, reverse: bool = false):
 		TYPE_ARRAY:
 			for item in d:
 				dig(item, call, reverse)
+
+# returns an tree where all vlaues that were empty (str="" int=0 list=[] dict={}) were removed
+static func trim_empty(v: Variant):
+	var out = v.duplicate(true)
+	dig(out, func(x):
+		for k in x.keys():
+			if x[k]:
+				pass
+			else:
+				x.erase(k))
+	return out

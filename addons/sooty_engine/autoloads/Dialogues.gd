@@ -25,7 +25,7 @@ func _load_mods(mods: Array):
 	for mod in mods:
 		var head = mod.dir.plus_file("dialogue")
 		mod.meta["dialogues"] = []
-		for soot_path in UFile.get_files(head, ".soot"):
+		for soot_path in UFile.get_files(head, Soot.EXT_DIALOGUE):
 			mod.meta.dialogues.append(soot_path)
 			var d := Dialogue.new(soot_path)
 			cache[d.id] = d

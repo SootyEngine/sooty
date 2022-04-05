@@ -272,10 +272,17 @@ static func get_key_var(s: String, split_on := ":") -> Array:
 
 static func str_to_var(s: String) -> Variant:
 	var a := s.replace("_", "")
+	# int
 	if a.is_valid_int(): return a.to_int() 
+	# float
 	if a.is_valid_float(): return a.to_float()
-	return str2var(s)
-	
+	# bool
+	if a in ["true", "false"]: return a == "true"
+	# color
+	if a.is_valid_html_color(): return Color(a)
+	# string
+	return s
+
 static func str_to_type(s: String, type: int) -> Variant:
 	match type:
 		TYPE_NIL: return null

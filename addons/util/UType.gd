@@ -7,6 +7,9 @@ static func is_same(a: Variant, b: Variant) -> bool:
 static func is_equal(a: Variant, b: Variant) -> bool:
 	return typeof(a) == typeof(b) and a == b
 
+static func type_name(o: Variant) -> String:
+	return get_name_from_type(typeof(o))
+
 static func get_type_from_name(name: String) -> int:
 	match name:
 		"null": return TYPE_NIL

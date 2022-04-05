@@ -5,12 +5,14 @@ class_name DialogueParser
 const DEBUG_KEEP_DICTS := false # don't clean useless info from steps?
 const REWRITE := 6 # total times rewritten from scrath :{
 
-const S_LANG_ID := "#L:"
 const S_PROPERTY_HEAD := "|"
 
+var _file := ""
 var _last_speaker := ""
 
 func parse(file: String) -> Dictionary:
+	_file = file
+	
 	var original_text := UFile.load_text(file)
 	var text_lines := original_text.split("\n")
 	var dict_lines := []
@@ -26,16 +28,10 @@ func parse(file: String) -> Dictionary:
 	while i < len(text_lines):
 		var uncommented := text_lines[i]
 		var id := ""
-		var line := i+1 # prevent off by ones 
+		var line := i
 		
 		# remove comment
 		if Soot.COMMENT in uncommented:
-			# remove unique id
-			if S_LANG_ID in uncommented:
-				var p := uncommented.rsplit(S_LANG_ID, true, 1)
-				uncommented = p[0]
-				id = p[1].strip_edges()
-			
 			uncommented = uncommented.split(Soot.COMMENT, true, 1)[0]
 		
 		var stripped := uncommented.strip_edges()
@@ -95,61 +91,11 @@ func parse(file: String) -> Dictionary:
 				out_flows[new_list[i].text] = new_list[i]
 				_clean(new_list[i], out_lines)
 	
-	# generate unique ids
-	var GENERATE_TRANSLATIONS := false
-	if GENERATE_TRANSLATIONS:
-		var translations := []
-		for k in out_lines:
-			var step = out_lines[k]
-			match step.type:
-				"text", "option":
-					if step.id == "":
-						step.id = get_uid(out_lines)
-						set_line_uid(text_lines, step.line, step.id)
-					var f = step.get("from", "NONE")
-					var t := Array(step.text.split("\n"))
-					if len(t) != 1:
-						t.push_front('""""')
-						t.push_back('""""')
-					t[0] = "%s: %s" % [f, t[0]]
-					for i in len(t):
-						t[i] = "\t//" + t[i]
-					translations.append("#%s:\n%s\n\t%s: \n" % [step.id, "\n".join(t), f])
-		
-		UFile.save_text(file, "\n".join(text_lines))
-		UFile.save_text(UFile.change_extension(file, "lsoot"), "\n".join(translations))
-	
 	return {
 		original_text=original_text,
 		flows=out_flows,
 		lines=out_lines
 	}
-
-func set_line_uid(lines: PackedStringArray, line: int, uid: String):
-	if S_LANG_ID in lines[line]:
-		var p := lines[line].split(S_LANG_ID, true, 1)
-		lines[line] = p[0].strip_edges(false, true) + " //#%s" % uid
-	else:
-		lines[line] = lines[line] + " //#%s" % uid
-
-func get_uid(lines: Dictionary, size := 8) -> String:
-	var uid := get_id()
-	var safety := 100
-	while uid in lines:
-		uid = get_id()
-		safety -= 1
-		if safety <= 0:
-			push_error("Should never happen.")
-			break
-	return uid
-
-func get_id(size := 8) -> String:
-	var dict := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	var lenn := len(dict)
-	var out = ""
-	for i in size:
-		out += dict[randi() % lenn]
-	return out
 
 func _clean_array(lines: Array, all_lines: Dictionary):
 	for i in len(lines):
@@ -201,7 +147,7 @@ func _clean(line: Dictionary, all_lines: Dictionary) -> String:
 	
 	if id in all_lines:
 		var old = all_lines[id]
-		push_error("Line at %s %s replaced with %s" % [id, old, line])
+		push_error("%s Line at %s %s replaced with %s" % [_file, id, old, line])
 	all_lines[id] = line
 	return id
 

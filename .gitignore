@@ -18,10 +18,9 @@ data_*/
 /dialogue/
 /dialogue_debug/
 /states/
-/states_persistent/
+/persistent/
 /scenes/
 
-/TODO.md
 /config.cfg
 /main.tscn
 /icon.png

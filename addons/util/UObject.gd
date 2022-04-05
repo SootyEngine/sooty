@@ -60,30 +60,45 @@ const GLOBAL_SCOPE_METHODS := [
 static func get_class_name(o: Object) -> String:
 	return o.get_script().resource_path.get_file().split(".", true, 1)[0]
 
+# looks for an object of given type
+# call(player, HealthInfo) would look for "var health:HealthInfo" and return a reference to it.
+static func get_first_property_of_object_type(target: Object, object_type: Variant):
+	for k in get_state_properties(target):
+		if target[k] is object_type:
+			return target[k]
+	return null
+
 # get a serializable state. (can be Color and Vector2, but not Objects.)
-static func get_state(target: Variant) -> Dictionary:
+static func get_state(target: Variant) -> Variant:
 	if target is Object and target.has_method("_get_state"):
 		return target._get_state()
+	elif target is Array:
+		return target.map(func(x): return get_state(x))
 	else:
 		var out := {}
 		for k in get_state_properties(target):
 			match typeof(target[k]):
-				TYPE_OBJECT, TYPE_DICTIONARY: out[k] = get_state(target[k])
+				TYPE_OBJECT, TYPE_DICTIONARY, TYPE_ARRAY: out[k] = get_state(target[k])
 				_: out[k] = target[k]
 		return out
 
 # set a serializable state.
-static func set_state(target: Variant, state: Dictionary):
+static func set_state(target: Variant, state: Variant):
 	if target is Object and target.has_method("_set_state"):
 		target._set_state(state)
-	else:
+	elif target is Array:
+		for i in len(state):
+			set_state(target[i], state[i])
+	elif state is Dictionary:
 		for k in state:
 			if k in target:
 				match typeof(target[k]):
-					TYPE_OBJECT, TYPE_DICTIONARY: set_state(target[k], state[k]) 
+					TYPE_OBJECT, TYPE_DICTIONARY, TYPE_ARRAY: set_state(target[k], state[k])
 					_: target[k] = state[k]
 			else:
 				push_error("No property '%s' in %s." % [k, target])
+	else:
+		assert(false)
 
 # get list of script variables not starting in a _
 static func get_state_properties(target: Variant) -> Array:
@@ -106,24 +121,29 @@ static func _get_state_properties(target: Object) -> Array:
 # patches contain file index and line index for debug purposes
 # it keeps everything as a string until it's time to apply to an object
 # this will clean it all and auto convert strings to variants
-static func patch_to_vars(patch: Variant) -> Variant:
+static func patch_to_var(patch: Variant, sources: Array, explicit_type := -1) -> Variant:
 	match typeof(patch):
 		TYPE_STRING:
 			var info = patch.split("!", true, 2)
-			var file: String = info[0]
+			var file: String = sources[info[0].to_int()]
 			var line: String = info[1]
 			var data: String = info[2]
-			return UString.str_to_var(data)
+			if explicit_type != -1:
+				return UString.str_to_type(data, explicit_type)
+			else:
+				return UString.str_to_var(data)
 		TYPE_DICTIONARY:
 			var out := {}
 			for k in patch:
-				patch[k] = patch_to_vars(patch[k])
+				patch[k] = patch_to_var(patch[k], sources, explicit_type)
 			return out
 		TYPE_ARRAY:
 			var out := []
 			for i in patch:
-				out.append(patch_to_vars(i))
+				out.append(patch_to_var(i, sources, explicit_type))
 			return out
+		_:
+			assert(false)
 	return null
 
 static func patch(target: Object, patch: Dictionary, sources: Array):
@@ -148,61 +168,26 @@ static func patch(target: Object, patch: Dictionary, sources: Array):
 				if target_type == TYPE_OBJECT:
 					patch(target[k], v, sources)
 				
-				elif target_type == TYPE_DICTIONARY:
-					assert(false)
-				
 				else:
-					# extract debug data, like line number
-					var info = v.split("!", true, 2)
-					var file: String = info[0]
-					var line: String = info[1]
-					var data: String = info[2]
-					# convert string to appropriate type
-					var value = UString.str_to_type(data, target_type)
+					var value = patch_to_var(v, sources)
 					if typeof(value) == target_type:
 						target[k] = value
 					else:
-						push_error("Couldn't convert '%s' for property %s. (%s:%s)" % [v, k, sources[file.to_int()], line])
+						push_error("Couldn't convert '%s' for property %s." % [v, k])
 			
 			elif v is Dictionary:
 				if target.has_method("_add_object"):
 					var new_obj = target._add_object(k, type)
-					patch(new_obj, v, sources)
 					if new_obj.has_method("_added"):
-						new_obj._added.call_deferred(target)
+						new_obj._added(target)
+				else:
+					push_error("Ignoring ", v)
 			
 			else:
 				if target.has_method("_add_property"):
-					target._add_property(k, patch_to_vars(v))
+					target._add_property(k, patch_to_var(v, sources))
 				else:
 					push_error("No %s in %s for %s." % [k, target, v])
-
-#static func patch(target: Object, patch: Dictionary, erase_patched := false) -> int:
-#	var lines_changed := 0
-#	for k in patch.keys():
-#		# special method for patching
-#		if target.has_method("_patch"):
-#			target._patch(k, patch[k])
-#			lines_changed += len(patch[k])
-#
-#		# does property exist in target?
-#		elif k in target:
-#			var p = patch[k]
-#			var t = target[k]
-#
-#			if patch[k] is Dictionary:
-#				lines_changed += patch(target[k], patch[k])
-#
-#			elif t != p:
-#				target[k] = patch[k]
-#				lines_changed += 1
-#				if erase_patched:
-#					patch.erase(k)
-#
-#		elif not erase_patched:
-#			push_error("Couldn't find '%s' in %s." % [k, target])
-#
-#	return lines_changed
 
 static func get_operator_value(v):
 	if v is Object:

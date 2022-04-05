@@ -213,11 +213,12 @@ func _str_to_value(line: Dictionary) -> Variant:
 func _is_list_item(s: String) -> bool:
 	return s.begins_with("- ") or s == "-"
 
-
+# attempt to display data as a .soda file
 func dict_to_str(dict: Dictionary) -> String:
 	var out := []
 	UDict.dig(dict, _strip)
-	_to_str(out, "", dict, 0, false)
+	_to_str(out, "", dict, 0, -1)
+	out.pop_front() # TODO: find out why first element is empty
 	return "\n".join(out)
 
 func _strip(x):
@@ -231,19 +232,18 @@ func _strip(x):
 			TYPE_STRING:
 				x[k] = x[k].split("!", true, 2)[-1].c_escape()
 
-func _to_str(out: Array, key: String, item: Variant, deep: int, first: bool):
+func _to_str(out: Array, key: String, item: Variant, deep: int, parent: int):
 	var head = "\t".repeat(max(0, deep-1))
 	match typeof(item):
 		TYPE_DICTIONARY:
-			var hline = _to_h_str(item)
-			if len(hline) < 40:
+			if parent == TYPE_ARRAY:
+				var hline = _to_h_str(item)
+#			if len(hline) < 40:
 				out.append("%s%s%s" % [head, key, hline])
 			else:
 				out.append("%s%s" % [head, key])
-				first = false
 				for k in item:
-					_to_str(out, k+": ", item[k], deep+1, first)
-					first = false
+					_to_str(out, k+": ", item[k], deep+1, TYPE_DICTIONARY)
 		
 		TYPE_ARRAY:
 			var hline = _to_h_str(item)
@@ -251,16 +251,11 @@ func _to_str(out: Array, key: String, item: Variant, deep: int, first: bool):
 				out.append("%s%s%s" % [head, key, hline])
 			else:
 				out.append("%s%s" % [head, key])
-				first = false
 				for i in item:
-					_to_str(out, "- ", i, deep+1, first)
-					first = false
+					_to_str(out, "- ", i, deep+1, TYPE_ARRAY)
 		
 		_:
-			if first:
-				out[-1] += "%s%s" % [key, item]
-			else:
-				out.append("%s  %s%s" % ["  ".repeat(max(0, deep)), key, item])
+			out.append("%s%s%s" % [head, key, item])
 
 func _to_h_str(item: Variant) -> String:
 	match typeof(item):

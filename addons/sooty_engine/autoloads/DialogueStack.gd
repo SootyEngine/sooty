@@ -68,12 +68,12 @@ func is_halted() -> bool:
 	return len(_halting_for) > 0
 
 func halt(halter: Object):
-	if not halter in _halting_for:
+	if not _execute_mode and not halter in _halting_for:
 		_halting_for.append(halter)
 		_halt_list_changed.emit()
 
 func unhalt(halter: Object):
-	if halter in _halting_for:
+	if not _execute_mode and halter in _halting_for:
 		_halting_for.erase(halter)
 		_halt_list_changed.emit()
 
@@ -161,10 +161,9 @@ func end(msg := ""):
 		last_end_message = msg
 		_started = false
 		_stack.clear()
-#		_ticked.clear()
-		_halting_for.clear()
-		_halt_list_changed.emit()
 		if not _execute_mode:
+			_halting_for.clear()
+			_halt_list_changed.emit()
 			ended.emit()
 			ended_w_msg.emit(msg)
 
@@ -173,24 +172,23 @@ func select_option(option: DialogueLine):
 	var o := option._data
 	if "then" in o:
 		_push(option._dialogue_id, "%OPTION%", o.then, STEP_CALL)
-	option_selected.emit(option)
+	if not _execute_mode:
+		option_selected.emit(option)
 
 func _pop():
 	var last: Dictionary = _stack.pop_back()
-#	_ticked.append(last)
 	
-	# let everyone know a flow ended
-	if last.type == STEP_GOTO:
+	# a flow ended
+	if not _execute_mode and last.type == STEP_GOTO:
 		flow_ended.emit(Soot.join_path([last.d_id, last.flow]))
 
 func _push(d_id: String, flow: String, lines: Array, type: int):
 	_stack.append({ d_id=d_id, flow=flow, lines=lines, type=type, step=0 })
 	
-	if not _execute_mode:
-		# let everyone know a flow started
-		if type == STEP_GOTO:
-			await get_tree().process_frame
-			flow_started.emit(Soot.join_path([d_id, flow]))
+	# a flow started
+	if not _execute_mode and type == STEP_GOTO:
+		await get_tree().process_frame
+		flow_started.emit(Soot.join_path([d_id, flow]))
 
 func _tick():
 	if not _execute_mode and _started:

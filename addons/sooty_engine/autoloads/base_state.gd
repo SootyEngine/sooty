@@ -27,6 +27,7 @@ func _ready() -> void:
 	child_entered_tree.connect(_child_added)
 	Mods.pre_loaded.connect(_clear_mods)
 	Mods.load_all.connect(_load_mods)
+	Mods.loaded.connect(_loaded_mods)
 
 func _clear_mods():
 	for child in get_children():
@@ -54,11 +55,13 @@ func _load_mods(mods: Array):
 	# install .data
 	for mod in mods:
 		var head = mod.dir.plus_file(subdir)
-		for data_path in UFile.get_files(head, ".data"):
+		for data_path in UFile.get_files(head, Soot.EXT_DATA):
 			mod.meta[subdir].append(data_path) # tell Mods what file has been installed
 			var state = DataParser.new().parse(data_path)
 			UObject.patch(self, state, [data_path])
-	
+
+func _loaded_mods():
+	print("DEFAULT STAE FOR %s." % _get_subdir())
 	_default = _get_state()
 
 func _reset():
@@ -111,15 +114,6 @@ func _reset_state():
 func _get_changed_states() -> Dictionary:
 	var current := _get_state()
 	return UDict.get_different(_default, current)
-
-#func _set_state(state: Dictionary):
-#
-#	for child_name in state:
-#		var child = get_node_or_null(child_name)
-#		if child != null:
-#			UObject.set_state(child, state)
-#		else:
-#			assert(false)
 
 func _get_state() -> Dictionary:
 	var out := {}

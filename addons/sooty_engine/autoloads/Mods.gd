@@ -67,6 +67,9 @@ func _update():
 		for i in len(meta[k]):
 			print("\t%s %s" % [i+1, meta[k][i].get_file()])
 	
+	# wait a little for things to initialize.
+	await  get_tree().process_frame
+	# alert everyone that mods were loaded.
 	loaded.emit()
 
 func _print_file(path: String):
