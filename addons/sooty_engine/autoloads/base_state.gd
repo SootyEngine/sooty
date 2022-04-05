@@ -44,7 +44,7 @@ func _load_mods(mods: Array):
 		for script_path in UFile.get_files(head, ".gd"):
 			var state = load(script_path).new()
 			if state is Node:
-				mod.meta[subdir].append(script_path)
+				mod.meta[subdir].append(script_path) # tell Mods what file has been installed
 				state.set_name(UFile.get_file_name(script_path))
 				add_child(state)
 			else:
@@ -55,7 +55,7 @@ func _load_mods(mods: Array):
 	for mod in mods:
 		var head = mod.dir.plus_file(subdir)
 		for data_path in UFile.get_files(head, ".data"):
-			mod.meta[subdir].append(data_path)
+			mod.meta[subdir].append(data_path) # tell Mods what file has been installed
 			var state = DataParser.new().parse(data_path)
 			UObject.patch(self, state, [data_path])
 	

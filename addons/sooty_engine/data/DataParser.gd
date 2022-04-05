@@ -132,6 +132,7 @@ func _finalize_line(line: Dictionary):
 	var split := _find_property_split(line.text)
 	if split != -1:
 		line.key = line.text.substr(0, split).strip_edges()
+#		line.key = _pack_line_index(line, line.key)
 		line.text = line.text.substr(split+1).strip_edges()
 		line.value = _str_to_value(line)
 	
@@ -165,8 +166,9 @@ func _finalize_line(line: Dictionary):
 					else:
 						print("Bad dict item: %s." % item)
 	
-	elif line.value is String and line.value:
-		line.value = _pack_line_index(line, line.value)
+	else:
+		if line.value is String and line.value:
+			line.value = _pack_line_index(line, line.value)
 	
 func _merge_list_items(list: Array) -> Variant:
 	var out = null
@@ -182,6 +184,7 @@ func _merge_list_items(list: Array) -> Variant:
 
 # add the line index to the front for error helping
 func _pack_line_index(line: Dictionary, text: String) -> String:
+#	return "X!%s" % text
 	return "%s!%s!%s" % [0, line.line, text]
 
 func _str_to_value(line: Dictionary) -> Variant:
@@ -199,7 +202,9 @@ func _str_to_value(line: Dictionary) -> Variant:
 			var p: PackedStringArray = part.split(":", true, 1)
 			var k := p[0].strip_edges()
 			var v := "" if len(p) == 1 else p[1].strip_edges()
-			out[k] = _pack_line_index(line, v)
+#			k = _pack_line_index(line, k)
+			v = _pack_line_index(line, v)
+			out[k] = v
 		return out
 	# leave alone
 	else:
@@ -209,3 +214,67 @@ func _is_list_item(s: String) -> bool:
 	return s.begins_with("- ") or s == "-"
 
 
+func dict_to_str(dict: Dictionary) -> String:
+	var out := []
+	UDict.dig(dict, _strip)
+	_to_str(out, "", dict, 0, false)
+	return "\n".join(out)
+
+func _strip(x):
+	for k in x:
+		match typeof(x[k]):
+			TYPE_ARRAY:
+				for i in len(x[k]):
+					if x[k][i] is String:
+						x[k][i] = x[k][i].split("!", true, 2)[-1].c_escape()
+				
+			TYPE_STRING:
+				x[k] = x[k].split("!", true, 2)[-1].c_escape()
+
+func _to_str(out: Array, key: String, item: Variant, deep: int, first: bool):
+	var head = "\t".repeat(max(0, deep-1))
+	match typeof(item):
+		TYPE_DICTIONARY:
+			var hline = _to_h_str(item)
+			if len(hline) < 40:
+				out.append("%s%s%s" % [head, key, hline])
+			else:
+				out.append("%s%s" % [head, key])
+				first = false
+				for k in item:
+					_to_str(out, k+": ", item[k], deep+1, first)
+					first = false
+		
+		TYPE_ARRAY:
+			var hline = _to_h_str(item)
+			if len(hline) < 40:
+				out.append("%s%s%s" % [head, key, hline])
+			else:
+				out.append("%s%s" % [head, key])
+				first = false
+				for i in item:
+					_to_str(out, "- ", i, deep+1, first)
+					first = false
+		
+		_:
+			if first:
+				out[-1] += "%s%s" % [key, item]
+			else:
+				out.append("%s  %s%s" % ["  ".repeat(max(0, deep)), key, item])
+
+func _to_h_str(item: Variant) -> String:
+	match typeof(item):
+		TYPE_ARRAY:
+			var out := []
+			for i in item:
+				out.append(_to_h_str(i))
+			return "[%s]" % ", ".join(out)
+		
+		TYPE_DICTIONARY:
+			var out := []
+			for k in item:
+				out.append("%s: %s" % [k, _to_h_str(item[k])])
+			return "{%s}" % ", ".join(out)
+		
+		_:
+			return str(item)

@@ -238,21 +238,19 @@ static func key_index(d: Dictionary, item) -> int:
 static func value_index(d:Dictionary, item) -> int:
 	return d.values().find(item)
 
-static func dig_list(list: Array, call: Callable, reverse: bool = false):
-	for item in list:
-		match typeof(item):
-			TYPE_DICTIONARY: dig(item, call, reverse)
-			TYPE_ARRAY: dig_list(item, call, reverse)
-
 # calls a function on every dict
-static func dig(d: Dictionary, call: Callable, reverse: bool = false):
-	if reverse:
-		call.call(d)
-	
-	for k in d:
-		match typeof(d[k]):
-			TYPE_DICTIONARY: dig(d[k], call, reverse)
-			TYPE_ARRAY: dig_list(d[k], call, reverse)
-	
-	if not reverse:
-		call.call(d)
+static func dig(d: Variant, call: Callable, reverse: bool = false):
+	match typeof(d):
+		TYPE_DICTIONARY:
+			if reverse:
+				call.call(d)
+			
+			for k in d:
+				dig(d[k], call, reverse)
+			
+			if not reverse:
+				call.call(d)
+		
+		TYPE_ARRAY:
+			for item in d:
+				dig(item, call, reverse)

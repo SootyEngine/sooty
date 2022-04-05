@@ -4,6 +4,7 @@ extends EditorSyntaxHighlighter
 const C_PROPERTY := Color.TAN
 const C_SYMBOL := Color(1, 1, 1, 0.25)
 const C_FIELD := Color.LIGHT_GRAY
+const C_OBJECT := Color.GOLD
 const C_LIST_ITEM := Color.SPRING_GREEN
 
 const C_ERROR := Color.TOMATO
@@ -84,9 +85,18 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 	# property name `:`
 	var a := _find_property_split(_text, i)
 	if a != -1:
-		_c(i, C_PROPERTY.darkened(_deep * .2))
+		var c := C_PROPERTY.darkened(_deep * .05)
+		c.h = wrapf(c.h - .2 * _deep, 0.0, 1.0)
+		_c(i, c)#C_PROPERTY.darkened(_deep * .2))
 		_c(a, C_SYMBOL)
 		_c(a+1, C_FIELD)
+		
+		# object initializer
+		var e = _text.find("=", i)
+		if e != -1 and e < a:
+			_c(e, C_SYMBOL)
+			_c(e+1, C_OBJECT)
+		
 		i = a + 1
 	
 	# multiline tag `""""`

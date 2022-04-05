@@ -242,6 +242,15 @@ static func split_chars(s: String) -> Array:
 		out.append(c)
 	return out
 
+static func count_leading(s: String, chr := " ") -> int:
+	var out := 0
+	for c in s:
+		if c == chr:
+			out += 1
+		else:
+			break
+	return out
+
 static func count_leading_tabs(s: String) -> int:
 	var out := 0
 	for c in s:
@@ -252,6 +261,21 @@ static func count_leading_tabs(s: String) -> int:
 #	out /= 4
 	return out
 
+static func get_key_var(s: String, split_on := ":") -> Array:
+	var i := s.find(split_on)
+	if i != -1:
+		var k := s.substr(0, i).strip_edges()
+		var v := s.substr(i+1).strip_edges()
+		return [k, v]
+	else:
+		return [s, ""]
+
+static func str_to_var(s: String) -> Variant:
+	var a := s.replace("_", "")
+	if a.is_valid_int(): return a.to_int() 
+	if a.is_valid_float(): return a.to_float()
+	return str2var(s)
+	
 static func str_to_type(s: String, type: int) -> Variant:
 	match type:
 		TYPE_NIL: return null

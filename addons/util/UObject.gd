@@ -92,30 +92,68 @@ static func get_state_properties(target: Variant) -> Array:
 			if target.has_method("_get_state_properties"):
 				return target._get_state_properties()
 			else:
-				return target.get_property_list()\
-					.filter(func(x): return x.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and x.name[0] != "_")\
-					.map(func(x): return x.name)
+				return _get_state_properties(target)
 		TYPE_DICTIONARY:
 			return target.keys()
 		_:
 			return []
 
+static func _get_state_properties(target: Object) -> Array:
+	return target.get_property_list()\
+		.filter(func(x): return x.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and x.name[0] != "_")\
+		.map(func(x): return x.name)
+
+# patches contain file index and line index for debug purposes
+# it keeps everything as a string until it's time to apply to an object
+# this will clean it all and auto convert strings to variants
+static func patch_to_vars(patch: Variant) -> Variant:
+	match typeof(patch):
+		TYPE_STRING:
+			var info = patch.split("!", true, 2)
+			var file: String = info[0]
+			var line: String = info[1]
+			var data: String = info[2]
+			return UString.str_to_var(data)
+		TYPE_DICTIONARY:
+			var out := {}
+			for k in patch:
+				patch[k] = patch_to_vars(patch[k])
+			return out
+		TYPE_ARRAY:
+			var out := []
+			for i in patch:
+				out.append(patch_to_vars(i))
+			return out
+	return null
+
 static func patch(target: Object, patch: Dictionary, sources: Array):
 	if target.has_method("_patch"):
 		for k in patch:
-			target._patch(k, patch[k], sources)
+			var v = patch[k]
+			var p = UString.get_key_var(k, "=")
+			k = p[0]
+			var type = p[1]
+			target._patch(k, type, v, sources)
 	
 	else:
 		for k in patch:
+			var v = patch[k]
+			var p = UString.get_key_var(k, "=")
+			k = p[0]
+			var type = p[1]
+			
 			if k in target:
 				var target_type = typeof(target[k])
 				# recursively check sub objects.
 				if target_type == TYPE_OBJECT:
-					patch(target[k], patch[k], sources)
+					patch(target[k], v, sources)
+				
+				elif target_type == TYPE_DICTIONARY:
+					assert(false)
 				
 				else:
 					# extract debug data, like line number
-					var info = patch[k].split("!", true, 2)
+					var info = v.split("!", true, 2)
 					var file: String = info[0]
 					var line: String = info[1]
 					var data: String = info[2]
@@ -124,9 +162,20 @@ static func patch(target: Object, patch: Dictionary, sources: Array):
 					if typeof(value) == target_type:
 						target[k] = value
 					else:
-						push_error("Couldn't convert '%s' for property %s. (%s:%s)" % [patch[k], k, sources[file.to_int()], line])
+						push_error("Couldn't convert '%s' for property %s. (%s:%s)" % [v, k, sources[file.to_int()], line])
+			
+			elif v is Dictionary:
+				if target.has_method("_add_object"):
+					var new_obj = target._add_object(k, type)
+					patch(new_obj, v, sources)
+					if new_obj.has_method("_added"):
+						new_obj._added.call_deferred(target)
+			
 			else:
-				push_error("No %s in %s." % [k, target])
+				if target.has_method("_add_property"):
+					target._add_property(k, patch_to_vars(v))
+				else:
+					push_error("No %s in %s for %s." % [k, target, v])
 
 #static func patch(target: Object, patch: Dictionary, erase_patched := false) -> int:
 #	var lines_changed := 0
@@ -331,9 +380,9 @@ static func get_class_from_name(name: String) -> Variant:
 		if item["class"] == name:
 			return load(item.path)
 	return null
-
-static func create(name: String, args := []) -> Variant:
-	var obj = get_class_from_name(name)
+	
+static func create(type: String, args := []) -> Variant:
+	var obj = get_class_from_name(type)
 	if obj != null:
 		match len(args):
 			0: return obj.new()
@@ -344,3 +393,15 @@ static func create(name: String, args := []) -> Variant:
 			5: return obj.new(args[0], args[1], args[2], args[3], args[4])
 			_: push_error("Not implemented.")
 	return null
+
+# force grab the class_name from the source code.
+static func _to_string_nice(obj: Object) -> String:
+	var c := obj.get_class()
+	var s: Script = obj.get_script()
+	for line in s.source_code.split("\n", false, 2):
+		if line.begins_with("class_name"):
+			c = line.split("class_name", true, 1)[1].strip_edges()
+			break
+	var p = var2str(get_state(obj))
+	p = p.replace(": ", ":").replace("\n", " ").replace('"', '').replace("{ ", "(").replace(" }", ")")
+	return "%s%s" % [c, p]
