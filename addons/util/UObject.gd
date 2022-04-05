@@ -162,6 +162,22 @@ static func patch(target: Object, patch: Dictionary, sources: Array):
 			k = p[0]
 			var type = p[1]
 			
+			# create if it didn't exist
+			if not k in target:
+				if v is Dictionary:
+					if target.has_method("_add_object"):
+						var new_obj = target._add_object(k, type)
+						if new_obj.has_method("_added"):
+							new_obj._added(target)
+					else:
+						push_error("Ignoring %s. No _add_object in %s." % [v, target])
+				
+				else:
+					if target.has_method("_add_property"):
+						target._add_property(k, patch_to_var(v, sources))
+					else:
+						push_error("No %s in %s for %s." % [k, target, v])
+			
 			if k in target:
 				var target_type = typeof(target[k])
 				# recursively check sub objects.
@@ -174,20 +190,6 @@ static func patch(target: Object, patch: Dictionary, sources: Array):
 						target[k] = value
 					else:
 						push_error("Couldn't convert '%s' for property %s." % [v, k])
-			
-			elif v is Dictionary:
-				if target.has_method("_add_object"):
-					var new_obj = target._add_object(k, type)
-					if new_obj.has_method("_added"):
-						new_obj._added(target)
-				else:
-					push_error("Ignoring ", v)
-			
-			else:
-				if target.has_method("_add_property"):
-					target._add_property(k, patch_to_var(v, sources))
-				else:
-					push_error("No %s in %s for %s." % [k, target, v])
 
 static func get_operator_value(v):
 	if v is Object:

@@ -4,12 +4,14 @@ class_name Soot
 
 const COMMENT := "# "
 
-# dialogue file ending
+# dialogue extension
 const EXT_DIALOGUE := ".soot"
-# data file ending
+# data extension
 const EXT_DATA := ".soda"
-# localication file ending
+# language file extension
 const EXT_LANG := ".sola"
+# markdown file extension
+const EXT_TEXT := ".soma" # for use with things like notes, creature databases...
 
 # flow control symbols
 const FLOW := "==="

@@ -25,12 +25,12 @@
 # Soot
 - [ ] Match arrays pattern.
 - [ ] Match dict pattern.
-- [ ] Reimplement `=` as a dialogue option for inclusion.
+- [x] Reimplement `+` as a dialogue option for inclusion.
 - [x] Change comments from `// ` to `# `.
 
 # Highlighter
-- [ ] Match statements on same line aren't colored.
-- [ ] = options isn't colored
+- [x] Match statements on same line aren't colored.
+- [x] `+` options isn't colored
 - [x] Colorize `/` in `=>` `==` paths.
 - [x] `=>` and `==` should by symbols.
 - [x] Colorize [and if else or == !=] in condition brackets {{}} as symbols.
@@ -62,7 +62,7 @@
     - [ ] Total time played.
 - [ ] Warn when starting a new game that progress will be lost.
 - [ ] Better HUD system for pause menu and such.
-    
+
 ### Captions
 - [x] Mouse over options to hover.
 - [x] Click an option to select.
@@ -82,7 +82,7 @@
 - [x] Use `/` instead of `.` for sub flows.
 
 # Localization
-- [ ] When generating a new .lsoot, check if one exists, and copy it's data, so the user doesn't have to rewrite it all.
+- [ ] When generating a new .sola, check if one exists, and copy it's data, so the user doesn't have to rewrite it all.
 
 # Other
 - [in progress] generate a node map so it's visible where everything is.

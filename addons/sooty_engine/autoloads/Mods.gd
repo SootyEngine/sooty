@@ -53,19 +53,23 @@ func _update():
 	load_all.emit(installed)
 	
 	# Display lists of what was added by the mods.
+	var loud := false
 	var meta := {}
 	for k in installed[0].meta.keys():
 		meta[k] = []
-	print("[Mods - %s]" % [len(installed)])
+	if loud:
+		print("[Mods - %s]" % [len(installed)])
 	for i in len(installed):
 		var mod = installed[i]
-		print("\t%s %s" % [i+1, mod.dir])
+		if loud:
+			print("\t%s %s" % [i+1, mod.dir])
 		for k in mod.meta:
 			meta[k].append_array(mod.meta[k])
-	for k in meta:
-		print("[%s - %s]" % [k.capitalize(), len(meta[k])])
-		for i in len(meta[k]):
-			print("\t%s %s" % [i+1, meta[k][i].get_file()])
+	if loud:
+		for k in meta:
+			print("[%s - %s]" % [k.capitalize(), len(meta[k])])
+			for i in len(meta[k]):
+				print("\t%s %s" % [i+1, meta[k][i].get_file()])
 	
 	# wait a little for things to initialize.
 	await  get_tree().process_frame

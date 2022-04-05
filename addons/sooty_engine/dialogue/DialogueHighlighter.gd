@@ -40,7 +40,7 @@ const C_FLOW_END := Color.TOMATO
 
 const C_CONDITION := Color.WHEAT
 const C_OPTION_FLAG := Color(0.25, 0.88, 0.82, 0.5)
-const C_OPTION_TEXT := Color.TAN
+const C_OPTION_TEXT := Color.WHEAT
 
 # strings
 const S_PROPERTY := "|"
@@ -155,31 +155,23 @@ func _h_conditional(from: int, to: int):
 			_c(off, C_ACTION_EVAL)
 		off += len(part)+1
 	
-#	if parts[0] in ["if", "elif", "else", "match", "not", "and", "or"]:
-#		var part = parts.pop_front()
-#		_c(off, C_SYMBOL)
-#		off += len(part)+1
-#		if part == "else":
-#			return
-#
-#	_c(off, C_ACTION_EVAL)
 	return
-	
-	var is_assign = len(parts)==3 and parts[1] in OP_ALL
-	var is_match := false
-	
-	for i in len(parts):
-		var part = parts[i]
-		
-		# match
-		if part.begins_with("*"):
-			part = part.substr(1)
-			state[off] = { color=C_SYMBOL }
-			is_match = true
-			off += 1
-		
-		_set_var_color(off, part)
-		off += len(part) + 1
+#
+#	var is_assign = len(parts)==3 and parts[1] in OP_ALL
+#	var is_match := false
+#
+#	for i in len(parts):
+#		var part = parts[i]
+#
+#		# match
+#		if part.begins_with("*"):
+#			part = part.substr(1)
+#			state[off] = { color=C_SYMBOL }
+#			is_match = true
+#			off += 1
+#
+#		_set_var_color(off, part)
+#		off += len(part) + 1
 
 func _h_flatline(default: Color, from: int):
 	var i := text.find(S_FLATLINE_START, from)
@@ -284,7 +276,7 @@ func _h_line(from: int, to: int):
 	elif t.begins_with(S_ACTION_EVAL):
 		_h_action_expression(text.find(S_ACTION_EVAL, from), to)
 	
-	# node options
+	# options
 	elif t.begins_with(S_OPTION):
 		var s := text.find(S_OPTION)
 		var c_option_icon = C_OPTION_TEXT
@@ -293,6 +285,23 @@ func _h_line(from: int, to: int):
 		_c(s+1, C_OPTION_TEXT)
 		_h_bbcode(s+1, to, C_OPTION_TEXT)
 		_h_flow()
+	
+	# options: add
+	elif t.begins_with(S_OPTION_ADD):
+		var s := text.find(S_OPTION_ADD)
+		var c_option_icon = C_OPTION_TEXT
+		c_option_icon.h = wrapf(c_option_icon.h + .5, 0.0, 1.0)
+		var c_option_add = C_OPTION_TEXT
+		c_option_add.h = wrapf(c_option_add.h + .5, 0.0, 1.0)
+		c_option_add.v = clampf(c_option_add.v - 0.25, 0.0, 1.0)
+		_c(s, c_option_icon, 1)
+		_c(s+1, c_option_add)
+		s = text.find("*", s)
+		if s != -1:
+			_c(s, C_SYMBOL)
+			_c(s+1, c_option_add)
+#		_h_bbcode(s+1, to, C_OPTION_TEXT)
+#		_h_flow()
 	
 	# flow actions
 	elif t.begins_with(Soot.FLOW_GOTO) or t.begins_with(Soot.FLOW_CALL):
@@ -365,8 +374,9 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 			_c(b, C_SYMBOL, len(S_COND_END))
 			_co(C_TEXT)
 			_h_conditional(a+len(S_COND_START), b-1)
-#			from = b+len(S_COND_END)
+			from = b+len(S_COND_END)
 		
+		# highlight line after conditional, in case of 'match'
 		_h_line(from, to if to>0 else len(text))
 		
 		var f := text.find('""""')

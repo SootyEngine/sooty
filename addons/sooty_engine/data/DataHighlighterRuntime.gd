@@ -4,7 +4,7 @@ extends SyntaxHighlighter
 const C_PROPERTY := Color.TAN
 const C_SYMBOL := Color(1, 1, 1, 0.25)
 const C_FIELD := Color.LIGHT_GRAY
-const C_OBJECT := Color.GOLD
+const C_OBJECT := Color.GREEN_YELLOW
 const C_LIST_ITEM := Color.SPRING_GREEN
 
 const C_ERROR := Color.TOMATO
