@@ -2,7 +2,7 @@
 extends Resource
 class_name Soot
 
-const COMMENT := "// "
+const COMMENT := "# "
 
 const FLOW := "==="
 const FLOW_GOTO := "=>"
