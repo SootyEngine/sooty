@@ -10,6 +10,8 @@ var b: Array[String] = ["ok", "yes"]
 func _run():
 	prints(a, typeof(a), UType.get_name_from_type(typeof(a)))
 	
+	DialogueLang.new()
+	
 	var c = "1234024"
 	print(str2var("123_4123_32"))
 	

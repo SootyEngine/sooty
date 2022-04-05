@@ -5,6 +5,7 @@ const CHECK_FILES_EVERY := 1 # seconds before checking if any script has changed
 signal reloaded_dialogue(dialogue: Dialogue)
 signal reloaded()
 
+var flags := []
 var cache := {}
 
 func _ready() -> void:

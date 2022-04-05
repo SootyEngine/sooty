@@ -1,8 +1,17 @@
-extends Node
+extends Resource
+class_name DialogueLang
 
 const S_LANG_ID := "#L:"
 const EXT := ".sola"
 
+func parse(path: String):
+	var data := DialogueParser.new().parse(path)
+	
+	for line in data.lines:
+		match line.type:
+			"text":
+				print(line)
+	
 	# generate unique ids
 #	var GENERATE_TRANSLATIONS := false
 #	if GENERATE_TRANSLATIONS:

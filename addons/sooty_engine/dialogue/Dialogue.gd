@@ -9,7 +9,7 @@ class_name Dialogue
 @export var last_modified := 0
 
 func _init(file: String):
-	id = UFile.get_file_name(file)#file.split("dialogue/", true, 1)[1].rsplit(".")[0]
+	id = UFile.get_file_name(file)
 	_parse_file(file)
 
 func patch(file: String):

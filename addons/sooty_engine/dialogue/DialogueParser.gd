@@ -9,6 +9,10 @@ const S_PROPERTY_HEAD := "|"
 
 var _file := ""
 var _last_speaker := ""
+var _ignore_flags := false
+
+func _init(ignore_flags := false) -> void:
+	_ignore_flags = ignore_flags
 
 func parse(file: String) -> Dictionary:
 	_file = file
@@ -25,15 +29,35 @@ func parse(file: String) -> Dictionary:
 	var multiline_head := ""
 	var multiline_depth := 0
 	var multiline := []
+	
+	var flags_pass := true
+	
 	while i < len(text_lines):
-		var uncommented := text_lines[i]
-		var id := ""
+		var current_line := text_lines[i]
 		var line := i
 		
+		# import time flags
+		# these prevent certain lines, depending on flags
+		if current_line.begins_with("\t#?"):
+			flags_pass = true
+			for flag in current_line.substr(3).strip_edges().split(" "):
+				if len(flag) and not flag in Dialogues.flags:
+					flags_pass = false
+					break
+			i += 1
+			continue
+		
+		# skip lines that didn't pass the flag.
+		elif not _ignore_flags and not flags_pass:
+			i += 1
+			continue
+		
 		# remove comment
+		var uncommented := current_line
 		if Soot.COMMENT in uncommented:
 			uncommented = uncommented.split(Soot.COMMENT, true, 1)[0]
 		
+		var id := ""
 		var stripped := uncommented.strip_edges()
 		
 		if '""""' in stripped:
