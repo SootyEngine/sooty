@@ -175,7 +175,9 @@ So instead of `Hey [$characters.bill.name].`, just `[$bname]` or whatever.
 ![](readme/data_2.png)
 
 # Tree View (wip)
-An alternative FileSystem, that let's you go to specific lines and view how files are connected.
+An alternative FileSystem, that let's you go to specific lines and view how files are connected.  
+
+Files have to be manually opened in editor once before they can be opened with TreeView.
 
 ![](readme/tree_view.png)
 
