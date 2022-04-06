@@ -21,8 +21,6 @@ A dialogue engine for Godot4 (alpha6).
 - [Getting Started](readme/getting_started.md)
 - [Writing Soot](readme/writing_soot.md)
 
-![](readme/code_preview.png)
-
 # <a name="bbcode"></a> Text and BBCode
 Checkout the BBCode section of [Writing Soot](readme/writing_soot.md#bbcode).
 
