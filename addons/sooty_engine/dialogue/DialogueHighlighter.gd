@@ -74,8 +74,12 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 	var stripped = text.strip_edges()
 	var out = state
 	
+	if text.begins_with("IGNORE"):
+		_c(0, Color.GREEN_YELLOW)
+		return out
+	
 	# flag line
-	if text.begins_with(S_FLAG):
+	elif text.begins_with(S_FLAG):
 		var drk = C_FLAG.darkened(.33)
 		_c(1, drk)
 		_c(1+len(S_FLAG), C_FLAG)
@@ -100,16 +104,16 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 		
 		# alternative line
 		# TODO: Remove
-		if stripped.begins_with("?"):
-			var start := text.find("?")
-			var end := text.find(" ", start+1)
-			_c(start, C_SYMBOL)
-			_c(start+1, Color.ORANGE)
-			for i in range(start+1, end):
-				if text[i] in ",:":
-					_c(i, C_SYMBOL)
-					_c(i+1, Color.ORANGE)
-			from = end+1
+#		if stripped.begins_with("?"):
+#			var start := text.find("?")
+#			var end := text.find(" ", start+1)
+#			_c(start, C_SYMBOL)
+#			_c(start+1, Color.ORANGE)
+#			for i in range(start+1, end):
+#				if text[i] in ",:":
+#					_c(i, C_SYMBOL)
+#					_c(i+1, Color.ORANGE)
+#			from = end+1
 			
 		_c(from, C_TEXT)
 		var to = _h_flatline(C_TEXT, from)
@@ -345,6 +349,12 @@ func _h_bbcode(from: int, to: int, default: Color):
 				# back to normal text color
 				_c(b+1, default)
 				i = b
+		
+		# markdown: * ** ***
+		elif text[i] == "*":
+			_c(i, C_SYMBOL)
+			_c(i+1, default)
+	
 		i += 1
 
 func _h_flow(from := 0):
@@ -441,7 +451,6 @@ func _h_line(from: int, to: int):
 	else:
 		# text
 		var i := _find_speaker_split(from)
-#		if ":" in text:
 		if i != -1:
 			var j = max(from, _find_speaker_start(i))
 			_c(j, C_SPEAKER)

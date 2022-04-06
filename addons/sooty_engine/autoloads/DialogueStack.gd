@@ -93,17 +93,16 @@ func start(id: String):
 		return
 	
 	# start dialogue
-	if Soot.is_path(id):
-		goto(id, STEP_GOTO)
+	goto(id)
 	
 	# go to first flow of dialogue
-	else:
-		var d := Dialogues.get_dialogue(id)
-		if not d.has_flows():
-			push_error("No flows in '%s'." % id)
-		else:
-			var first = Dialogues.get_dialogue(id).flows.keys()[0]
-			goto(Soot.join_path([id, first]), STEP_GOTO)
+#	else:
+#		var d := Dialogues.get_dialogue(id)
+#		if not d.has_flows():
+#			push_error("No flows in '%s'." % id)
+#		else:
+#			var first = Dialogues.get_dialogue(id).flows.keys()[0]
+#			goto(Soot.join_path([id, first]), STEP_GOTO)
 
 func can_do(command: String) -> bool:
 	return command.begins_with(Soot.FLOW_GOTO)\
@@ -144,12 +143,14 @@ func _goto(dia_flow: String, step_type: int = STEP_GOTO) -> bool:
 	var p := Soot.split_path(dia_flow)
 	var d_id := p[0]
 	var flow := p[1]
-	
-	if not Dialogues.find(d_id):
+	# dialogue exists?
+	var d: Dialogue = Dialogues.find(d_id)
+	if not d:
 		return false
 	
-	var d := Dialogues.get_dialogue(d_id)
-	if not d.has_flow(flow):
+	# flow exists?
+	var f: Dictionary = d.find(flow)
+	if not len(f):
 		return false
 	
 	var lines := d.get_flow_lines(flow)
@@ -286,7 +287,7 @@ func _pop_next_line() -> Dictionary:
 			_pop()
 			continue
 		
-		var dilg := Dialogues.get_dialogue(step_info.d_id)
+		var dilg: Dialogue = Dialogues.get_dialogue(step_info.d_id)
 		var line: Dictionary = dilg.get_line(step_info.lines[step_info.step])
 		var d_id: String = step_info.d_id
 		var flow: String = step_info.flow

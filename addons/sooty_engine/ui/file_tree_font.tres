@@ -1,0 +1,6 @@
+[gd_resource type="Font" load_steps=2 format=3 uid="uid://bmsy11yc4mft4"]
+
+[ext_resource type="FontData" uid="uid://dqx614s3tcalv" path="res://addons/sooty_engine/ui/FiraCode-Regular.ttf" id="1_jbtt2"]
+
+[resource]
+data/0 = ExtResource( "1_jbtt2" )

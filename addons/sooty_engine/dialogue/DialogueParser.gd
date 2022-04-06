@@ -10,6 +10,7 @@ const S_PROPERTY_HEAD := "|"
 var _last_speaker := ""
 var all_files := []
 var ignore_flags := false
+var has_IGNORE := false # if ignore flag exists, this dialogue won't be available.
 var d_id := ""
 var line_ids := {}
 
@@ -21,11 +22,15 @@ func parse(generate_lang := "") -> Dictionary:
 	var out_flows := {}
 	var out_lines := {}
 	var raw := []
+	has_IGNORE = false
 	
 	# load files
 	for i in len(all_files):
 		var file: String = all_files[i]
 		var f := _parse_file(file, i)
+		
+		if has_IGNORE:
+			return {}
 		
 		# merge dialogue
 		if file.ends_with(Soot.EXT_DIALOGUE):
@@ -176,6 +181,11 @@ func _parse_file(file: String, file_index := 0) -> Dictionary:
 	while i < len(text_lines):
 		var current_line := text_lines[i]
 		var line := i
+		
+		# ignore the file
+		if current_line.begins_with("IGNORE"):
+			has_IGNORE = true
+			return {}
 		
 		# import time flags
 		# these prevent certain lines, depending on flags

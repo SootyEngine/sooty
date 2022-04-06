@@ -178,8 +178,8 @@ static func save_to_resource(path: String, data = null) -> bool:
 static func load_from_resource(path: String, default: Variant = null) -> Variant:
 	var f := File.new()
 	if f.file_exists(path):
-		var res := load(path)
-		return res.get_meta("data")
+		var res: Resource = load(path)
+		return res.get_meta("data", default)
 	return default
 
 static func load_json(path: String, default = null) -> Variant:

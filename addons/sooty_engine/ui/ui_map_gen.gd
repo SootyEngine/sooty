@@ -1,7 +1,7 @@
 @tool
 extends Control
 
-@export var font: Font = preload("res://addons/visual_novel/fonts/font-r.tres")
+@export var font: Font = preload("res://addons/sooty_engine/ui/file_tree_font.tres")
 @export var _graph_edit: NodePath = "VBoxContainer/GraphEdit"
 @export var _b_rebuild: NodePath
 @onready var graph_edit: GraphEdit = get_node(_graph_edit)

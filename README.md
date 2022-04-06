@@ -1,7 +1,7 @@
-# Sooty `0.1` `Godot4`
-A dialogue engine for Godot4 (alpha5).
+# Sooty `0.1` `Godot4a6`
+A dialogue engine for Godot4 (alpha6).
 
-`WARNING: Currently under **heavy** construction.`
+`WARNING: Currently under **heavy** construction.`  
 ![](https://raw.githubusercontent.com/teebarjunk/sooty-example/main/README/preview.png)
 
 # Features
@@ -76,17 +76,17 @@ Script names are used internally as the `Dialogue` id. They contain *Flows*, whi
 ```
 // my_story.soot
 === START
-    Once upon a time.
-    => chapter_1
+	Once upon a time.
+	=> chapter_1
 
 === chapter_1
-    There lived a dog.
-    => other_chapters.chapter_2
+	There lived a dog.
+	=> other_chapters.chapter_2
 
 
 // other_chapters.soot
 === chapter_2
-    The dog was a fast runner.
+	The dog was a fast runner.
 ```
 
 # <a name="sola"></a> Language Files `.sola`  
@@ -196,10 +196,10 @@ extends Node
 var score := 0
 
 func my_score():
-    return "[b]%s[]" % score
+	return "[b]%s[]" % score
 
 func boost_score(amount := 1):
-    score += amount
+	score += amount
 
 
 # story.soot

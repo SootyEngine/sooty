@@ -9,10 +9,20 @@
 config_version=5
 
 _global_script_classes=[{
-"base": "Node",
-"class": &"Achieve",
+"base": "Resource",
+"class": &"BaseDataClass",
 "language": &"GDScript",
-"path": "res://states/achieve.gd"
+"path": "res://addons/sooty_engine/common/BaseDataClass.gd"
+}, {
+"base": "BaseDataClass",
+"class": &"BaseDataClassExtendable",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/common/BaseDataClassExtra.gd"
+}, {
+"base": "Resource",
+"class": &"BaseDataManagerClass",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/common/BaseDataManagerClass.gd"
 }, {
 "base": "Node",
 "class": &"BaseState",
@@ -25,9 +35,24 @@ _global_script_classes=[{
 "path": "res://addons/util/Config.gd"
 }, {
 "base": "Resource",
+"class": &"DataParser",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/data/DataParser.gd"
+}, {
+"base": "BaseDataClass",
+"class": &"DateTime",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/common/DateTime.gd"
+}, {
+"base": "Resource",
 "class": &"Dialogue",
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/dialogue/Dialogue.gd"
+}, {
+"base": "Resource",
+"class": &"DialogueLang",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/dialogue/DialogueLang.gd"
 }, {
 "base": "Resource",
 "class": &"DialogueLine",
@@ -43,6 +68,11 @@ _global_script_classes=[{
 "class": &"Emoji",
 "language": &"GDScript",
 "path": "res://addons/rich_text/Emoji.gd"
+}, {
+"base": "Node",
+"class": &"FE",
+"language": &"GDScript",
+"path": "res://addons/file_editor/comp/FE_Main.gd"
 }, {
 "base": "Node",
 "class": &"FE_BaseFile",
@@ -74,16 +104,6 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/file_editor/comp/FE_Files.gd"
 }, {
-"base": "Node",
-"class": &"FE_Main",
-"language": &"GDScript",
-"path": "res://addons/file_editor/comp/FE_Main.gd"
-}, {
-"base": "PopupMenu",
-"class": &"FE_OptionsMenu",
-"language": &"GDScript",
-"path": "res://addons/file_editor/FE_OptionsMenu.gd"
-}, {
 "base": "Resource",
 "class": &"FE_Util",
 "language": &"GDScript",
@@ -100,6 +120,11 @@ _global_script_classes=[{
 "path": "res://addons/rich_text/Markdown.gd"
 }, {
 "base": "Resource",
+"class": &"ModInfo",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/data/ModInfo.gd"
+}, {
+"base": "Resource",
 "class": &"PropList",
 "language": &"GDScript",
 "path": "res://addons/util/PropList.gd"
@@ -113,6 +138,11 @@ _global_script_classes=[{
 "class": &"RichTextLabel2",
 "language": &"GDScript",
 "path": "res://addons/rich_text/RichTextLabel2.gd"
+}, {
+"base": "Resource",
+"class": &"Soot",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/dialogue/Soot.gd"
 }, {
 "base": "Resource",
 "class": &"UDebug",
@@ -150,6 +180,11 @@ _global_script_classes=[{
 "path": "res://addons/util/UList.gd"
 }, {
 "base": "Resource",
+"class": &"UNode",
+"language": &"GDScript",
+"path": "res://addons/util/UNode.gd"
+}, {
+"base": "Resource",
 "class": &"UObject",
 "language": &"GDScript",
 "path": "res://addons/util/UObject.gd"
@@ -178,29 +213,40 @@ _global_script_classes=[{
 "class": &"UTween2D",
 "language": &"GDScript",
 "path": "res://addons/util/UTween2D.gd"
+}, {
+"base": "Node",
+"class": &"UType",
+"language": &"GDScript",
+"path": "res://addons/util/UType.gd"
 }]
 _global_script_class_icons={
-"Achieve": "",
+"BaseDataClass": "",
+"BaseDataClassExtendable": "",
+"BaseDataManagerClass": "",
 "BaseState": "",
 "Config": "",
+"DataParser": "",
+"DateTime": "",
 "Dialogue": "",
+"DialogueLang": "",
 "DialogueLine": "",
 "DialogueParser": "",
 "Emoji": "",
+"FE": "",
 "FE_BaseFile": "",
 "FE_Directory": "",
 "FE_Editor": "",
 "FE_Editors": "",
 "FE_File": "",
 "FE_Files": "",
-"FE_Main": "",
-"FE_OptionsMenu": "",
 "FE_Util": "",
 "FontHelper": "",
 "Markdown": "",
+"ModInfo": "",
 "PropList": "",
 "RichTextAnimation": "",
 "RichTextLabel2": "",
+"Soot": "",
 "UDebug": "",
 "UDict": "",
 "UError": "",
@@ -208,12 +254,14 @@ _global_script_class_icons={
 "UFlag": "",
 "UGroup": "",
 "UList": "",
+"UNode": "",
 "UObject": "",
 "URand": "",
 "UString": "",
 "UTime": "",
 "UTween": "",
-"UTween2D": ""
+"UTween2D": "",
+"UType": ""
 }
 
 [application]
@@ -225,13 +273,16 @@ config/features=PackedStringArray("4.0", "Vulkan Clustered")
 
 [autoload]
 
-Sooty="*res://addons/sooty_engine/autoloads/Sooty.gd"
-Saver="*res://addons/sys_state/autoloads/Saver.gd"
-Mods="*res://addons/sooty_engine/autoloads/Mods.gd"
-State="*res://addons/sooty_engine/autoloads/State.gd"
-Persistent="*res://addons/sooty_engine/autoloads/Persistent.gd"
-Notify="*res://addons/sys_notifications/autoloads/Notify.gd"
 Global="*res://addons/sooty_engine/autoloads/Global.gd"
+Mods="*res://addons/sooty_engine/autoloads/Mods.gd"
+Settings="*res://addons/sooty_engine/autoloads/Settings.gd"
+Scene="*res://addons/sooty_engine/autoloads/Scene.gd"
+Saver="*res://addons/sooty_engine/autoloads/Saver.gd"
+Persistent="*res://addons/sooty_engine/autoloads/Persistent.gd"
+State="*res://addons/sooty_engine/autoloads/State.gd"
+StringAction="*res://addons/sooty_engine/autoloads/StringAction.gd"
+Music="*res://addons/sooty_engine/autoloads/Music.gd"
+SFX="*res://addons/sooty_engine/autoloads/SFX.gd"
 Dialogues="*res://addons/sooty_engine/autoloads/Dialogues.gd"
 DialogueStack="*res://addons/sooty_engine/autoloads/DialogueStack.gd"
 
@@ -241,7 +292,7 @@ gdscript/warnings/integer_division=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/common_file_highlighters/plugin.cfg", "res://addons/sooty_engine/plugin.cfg", "res://addons/tool_button/plugin.cfg")
+enabled=PackedStringArray("res://addons/sooty_engine/plugin.cfg", "res://addons/tool_button/plugin.cfg")
 
 [input]
 

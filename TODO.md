@@ -7,8 +7,8 @@
 - [x] Quitting doesn't hide captions.
 
 # Bad Design
-- [ ] Persistent data loaded before mods loaded.
 - [ ] Optional obfuscation/encrypt for `soot` `soda` and save data?
+- [x] Persistent data loaded before mods loaded.
 
 # Sooty
 - [ ] Meta counter outputs:
@@ -26,6 +26,7 @@
 - [x] Move UI/console and fonts to `VisualNovel` addon.
 
 # *.soot Dialogue Files
+- [ ] `IGNORE` flag to skip files.
 - [ ] Match arrays pattern.
 - [ ] Match dict pattern.
 - [ ] Make flags work on nested data.
@@ -43,34 +44,40 @@
 - [x] Generate `.sola` files, for writing translations.
 
 # *.soda Data Files
-- [ ] Allow `:` paths inside key.
-- [ ] Translation key `prop_name-lang:`
+- [ ] Allow `:` or `.` paths inside single key.
 - [ ] Translation loading when mods are loaded.
 - [ ] Generate translation file that ignores objects/dicts/arrays.
-- [ ] `//` meta key.
+- [ ] `#meta:` meta keys.
+    - [ ] `#.:` to define a location all keys are inside. ie `#.: items`
 - [ ] `\,` escapes
 - [ ] Shortcuts for functions that take arguments.
+- [ ] `?` flag key.
 - [x] `$` shortcut key.
 - [x] `.soda` debug viewer.
 - [x] Dictionary -> `.soda` text function.
 - [x] Highlighter.
 - [x] Create data format file based on YAML.
+- [ ] ~~Translation key `prop_name-lang:`~~
 
 # *.soma Markdown File
 - [ ] Create file format based on Markdown for showing more complicated text like notebooks, item info, world story data...
 - [ ] `.soma` -> BBCode parser.
+- [ ] `text/` folder to load from.
 - [ ] Highlighter.
 
 # Highlighters
-- [x] `.sola` `<?>`
-- [x] `.soda` comments not working.
-- [x] `.soda` shortcuts.
+- `.soot`
+    - [x] Markdown * ** ***
 - [x] Match statements on same line aren't colored.
 - [x] `+` options isn't colored
 - [x] Colorize `/` in `=>` `==` paths.
 - [x] `=>` and `==` should by symbols.
 - [x] Colorize [and if else or == !=] in condition brackets {{}} as symbols.
-- [x] Auto apply script highlighter to .soot files.
+- `.sola`
+    - [x] `<?>`
+    - [x] comments not working.
+    - [x] shortcuts.
+- [x] Auto apply script highlighter to files.
 
 # UFile
 - [x] Add _on_files(dir: String, call: Callable) function. To make collecting on a pattern easier.
@@ -114,10 +121,13 @@
 # Docs
 - [ ]
 
+# TreeView
+- [ ] Change dead ends to black instead of red, to prevent confusing with `><` and `>><<`.
+
 # Printers
 - [x] Seperate text printers and options menu.
 
-# Parsing
+# Text Parsing
 - [ ] Printer that can show text across multiple captions.
 - [ ] Using RichTextEffect.pre_parse() for pre parsing strings.
 - [x] Use `/` instead of `.` for sub flows.

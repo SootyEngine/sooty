@@ -1,0 +1,129 @@
+IGNORE
+
+# Comments start with #.
+# Flows start with ===
+=== flow_node
+	
+	Text without a speaker. 
+	
+	# Speakers.
+	john: Text spoken by John.
+	: Text spoken by last speaker, John.
+	
+	# Markdown formatting.
+	Some *italic*, **bold** and ***bold italic*** text.
+	
+	# BBCode.
+	Some [b;tomato]bold red text[] and some [i;deep_sky_blue]italic blue text.[]
+	
+	# Inserting state values to text.
+	The current score is [$score;b;cyan].
+	
+	# Effecting the animation.
+	We can pause[wait] the text.
+	We can hold until the user presses something.[hold] And then show some more text.
+	We can [pace=2]speed up the speed of the speaker.[pace=0.25] Or slow it down.
+	
+	# Calling actions at points in the animation.
+	Actions can be called at a point [!@camera zoom 2.0]. Got it?
+	Like any other tag [!@camera zoom;!@camera shake;!~score += 20] you can combine multiple in one.
+	
+	# Multiline text.
+	""""
+	You can place *lots* of formatted text in one block.
+			*Tabs*
+				will
+					be
+						preserved.
+	
+	As will **whitespace**.
+	""""
+	
+	// Multiline with a speaker and condition.
+	paul: """" {{score > 20}}
+	I don't care what [b]they[] say, it's not happening.
+	
+		(He turned to look at the shore.)
+	
+	Not now, not ever.
+	""""
+	
+	# Flow control.
+	=> goto_flow # Goto a flow.
+	== call_flow # Call a flow, then return back to this line.
+	
+	# ~: State evaluation
+	~score += 20
+	~time.day += 1
+	
+	# $: State function shortcut.
+	$time.goto_next_day
+	$player.set_job baker tint:beige pay:12.50
+	
+	# @: Node function shortcut.
+	@camera shake x time:3.0 wait:true x:y # nodes_in_group("sa:camera").camera("shake", x, { "wait": true, "x": y})
+	@camera.shake x time:3.0 wait:true x:y # nodes_in_group("sa:camera").shake(x, { "wait": true, "x": y })
+	
+	# BBCode with actions.
+	Wait a minute, that means[!@camera.zoom 1;b;i;~score += 20] this was a...[!@camera.zoom] murder!
+	
+	# Conditions: if-elif-else
+	Line only shown if condition is met. {{score > 20}}
+	
+	{{score > 20}}
+		Multiple lines.
+		Together under one conditional.
+	{{elif score == 10}}
+		Score is ten.
+	{{else}}
+		A line to show instead.
+	
+	# Conditions: match
+	{{match time.weekday}}
+		{{MONDAY}} @sfx sad_audio
+		{{TUESDAY}} john: Glad [b]mondays[] over.
+		{{WEDNESDAY}} It's the middle of the week.
+		{{THURSDAY}}
+			john: The whole vibe shifts on thursday!
+		{{FRIDAY}} @sfx happy_audio
+			john: Aw yeah, friday!
+		{{_}} It's the weekend.
+	
+	# Options.
+	Text for an options menu.
+		- Option one. ((~choice = true)) => flow
+			A line to show after option 1 is chosen.
+		- Option two. ((~score += 10;;== add_to_flow;;~score -= 20))
+		- Option three. {{score > 20}} # Only shown on condition score > 20.
+		+ add_options_from_a_flow
+		+ *_flow # Append options from all flows ending with '_flow'.
+		+ flow_* # Append options from all flows starting with 'flow_'
+	
+	# Single line options.
+	# Don't do this though, as it's hard to read.
+	Where to? ((- West => west;;- East => east {{east.unlocked}};;- North => north))
+	
+	# Extra properties.
+	This text should be offset.
+		|x:20 y:30
+		|tint:red
+	
+	# Or, on a single line.
+	This text should be offset. ((|x:20 y:30 tint:red))
+
+# when loading a script, flags can be used to hide/show some lines.
+# found in Dialogues.flags = []
+# TODO
+=== import_flags
+	# special compiler flag test.
+	# must be on the first tab of a flow
+	#? lang:en
+	Text without a speaker. 
+		?fr Text without a speaker
+	#?
+	
+	# Speakers.
+	john: Text spoken by John.
+		?fr john: Text spoken by John.
+	
+	: Text spoken by last speaker, John.

@@ -5,7 +5,7 @@ signal pre_scene_changed()
 signal scene_changed()
 var current: Node
 var scenes := {}
-var _iter_current := 0
+var _goto: Callable # an overridable goto function, so you can use your own transition system.
 
 var id: String:
 	get: return UFile.get_file_name(current.scene_file_path)
@@ -14,14 +14,15 @@ func _ready() -> void:
 	await get_tree().process_frame
 	
 	Mods.load_all.connect(_load_mods)
-	
 	if not Engine.is_editor_hint():
-		await Mods.loaded
-		# call the start function when testing from editor
-		current = get_tree().current_scene
-		scene_changed.emit()
-		if current.has_method("_start"):
-			current._start(false)
+		Mods.loaded.connect(_first_load, CONNECT_ONESHOT)
+
+func _first_load():
+	# call the start function when testing from editor
+	current = get_tree().current_scene
+	scene_changed.emit()
+	if current.has_method("_start"):
+		current._start(false)
 
 func _get(property: StringName):
 	if current and current.has_method("_has") and current._has(property):
@@ -42,6 +43,13 @@ func get_main_scene_ids(sort := true) -> Array:
 func has(id: String) -> bool:
 	return id in scenes
 
+func find(id: String) -> String:
+	if id in scenes:
+		return scenes[id]
+	else:
+		UString.push_error_similar("No scene '%s'." % [id], id, scenes.keys())
+		return ""
+
 func create(id: String, parent: Node = null) -> Node:
 	if id in scenes:
 		var out: Node = load(scenes[id]).instantiate()
@@ -60,13 +68,10 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func goto(id: String, kwargs := {}):
-	if id in scenes:
-		DialogueStack.halt(self)
-		Fader.create(
-			change.bind(scenes[id]),
-			DialogueStack.unhalt.bind(self))
+	if _goto:
+		_goto.call(id, kwargs)
 	else:
-		UString.push_error_similar("Couldn't find scene '%s'." % id, id, scenes.keys())
+		change(id)
 
 # change scene with signals, and call start function
 func change(path: String, is_loading: bool = false):

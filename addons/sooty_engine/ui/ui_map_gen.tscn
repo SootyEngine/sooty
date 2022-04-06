@@ -41,7 +41,3 @@ offset_top = 67.0
 offset_right = 200.0
 offset_bottom = 267.0
 mouse_filter = 1
-__meta__ = {
-"_edit_layout_mode": 0,
-"_edit_use_custom_anchors": false
-}

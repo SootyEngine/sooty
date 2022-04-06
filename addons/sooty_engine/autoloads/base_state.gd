@@ -51,7 +51,7 @@ func _load_mods(mods: Array):
 		
 		var head = mod.dir.plus_file(subdir)
 		for script_path in UFile.get_files(head, ".gd"):
-			var state = load(script_path).new()
+			var state: Node = load(script_path).new()
 			if state is Node:
 				mod.meta[subdir].append(script_path) # tell Mods what file has been installed
 				state.set_name(UFile.get_file_name(script_path))
@@ -80,7 +80,6 @@ func _load_mods(mods: Array):
 					push_error("Trying to use the same shortcut '%s' for %s and %s." % [k, old, new])
 
 func _loaded_mods():
-	print("DEFAULT STAE FOR %s." % _get_subdir())
 	_default = _get_state()
 
 func _reset():
