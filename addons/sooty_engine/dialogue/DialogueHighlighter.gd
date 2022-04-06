@@ -47,7 +47,6 @@ const C_OPTION_TEXT := Color.WHEAT
 
 # strings
 const S_FLAG := "\t#?"
-const S_LANG := "<->"
 
 const S_PROPERTY := "|"
 const S_OPTION := "- "
@@ -88,9 +87,13 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 		return out
 	
 	# lang lines
-	elif text.begins_with(S_LANG):
+	elif text.begins_with(Soot.LANG):
 		_c(0, C_SYMBOL)
-		_c(len(S_LANG), C_LANG)
+		_c(len(Soot.LANG), C_LANG)
+	# gone lang lines 
+	elif text.begins_with(Soot.LANG_GONE):
+		_c(0, C_SYMBOL)
+		_c(len(Soot.LANG), Color.TOMATO)
 	
 	# normal lines
 	else:

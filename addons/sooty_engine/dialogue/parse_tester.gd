@@ -10,7 +10,7 @@ var b: Array[String] = ["ok", "yes"]
 func _run():
 #	prints(a, typeof(a), UType.get_name_from_type(typeof(a)))
 #	DialogueLang.new("res://dialogue/dummy.soot").parse()
-	var d := Dialogue.new("dummy", ["res://dialogue/dummy.soot"], [])
+	var d := Dialogue.new("dummy", ["res://dialogue/dummy.soot"], ["res://lang/dummy-fr.sola"])
 	d.generate_language_file("fr")
 #	UDict.log(d.lines)
 #	var c = "1234024"

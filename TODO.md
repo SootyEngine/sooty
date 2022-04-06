@@ -28,19 +28,23 @@
 # *.soot Dialogue Files
 - [ ] Match arrays pattern.
 - [ ] Match dict pattern.
+- [ ] Make flags work on nested data.
+- [x] Flags for ignoring lines.
 - [x] Multi file loading from mods. (not tested)
 - [x] Reimplement `+` as a dialogue option for merging external options.
 - [x] Change comments from `// ` to `# `.
 
 # *.sola Language Files
-- [ ] Generate `.sola` files with previous data, so nothing is lost.
-- [ ] Only merge as a `== flow call` if there are more than one.
+- [x] Keep old data even if it's line was removed.
+- [x] Generate `.sola` files with previous data, so nothing is lost.
+- [x] Only merge as a `== flow call` if there are more than one.
 - [x] Multiline id's.
 - [x] Load and merge langs files.
 - [x] Generate `.sola` files, for writing translations.
 
 # *.soda Data Files
 - [ ] Allow `:` paths inside key.
+- [ ] Translation key `prop_name-lang:`
 - [ ] `//` meta key.
 - [ ] `\,` escapes
 - [x] `$` shortcut key.
@@ -55,6 +59,8 @@
 - [ ] Highlighter.
 
 # Highlighters
+- [x] `.sola` `<?>`
+- [x] `.soda` comments not working.
 - [x] `.soda` shortcuts.
 - [x] Match statements on same line aren't colored.
 - [x] `+` options isn't colored

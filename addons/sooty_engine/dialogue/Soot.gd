@@ -17,6 +17,7 @@ const EXT_TEXT := ".soma" # for use with things like notes, creature databases..
 
 # flow control symbols
 const LANG := "<->"
+const LANG_GONE := "<?>" # translation that is currently missing. it's data will be kept around.
 const FLOW := "==="
 const FLOW_GOTO := "=>"
 const FLOW_CALL := "=="

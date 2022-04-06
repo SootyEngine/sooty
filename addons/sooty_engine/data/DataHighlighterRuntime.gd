@@ -3,6 +3,7 @@ extends SyntaxHighlighter
 
 const C_PROPERTY := Color.TAN
 const C_SYMBOL := Color(1, 1, 1, 0.25)
+const C_SYMBOL_LIGHT := Color(1, 1, 1, 0.4)
 const C_FIELD := Color.LIGHT_GRAY
 const C_OBJECT := Color.GREEN_YELLOW
 const C_LIST_ITEM := Color.SPRING_GREEN
@@ -120,6 +121,11 @@ func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 		if e != -1 and e < a:
 			_c(e, C_SYMBOL)
 			_c(e+1, C_OBJECT)
+		else:
+			e = _text.find("-", i)
+			if e != -1 and e < a:
+				_c(e, C_SYMBOL)
+				_c(e+1, C_SYMBOL)
 		
 		i = a + 1
 	
@@ -140,10 +146,12 @@ func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 		i = a
 	
 	# comment
-	a = _text.find("#", i)
+	a = _text.find("# ", 0)
 	if a != -1:
 		_c(a, C_SYMBOL)
-		i += 1
+		for k in _out.keys():
+			if k > a:
+				_out.erase(k)
 	
 	return _out
 

@@ -32,7 +32,7 @@ func reload():
 		UFile.save_json("res://dialogue_debug/%s.lines.json" % [id], lines, true)
 
 func generate_language_file(lang: String):
-	DialogueParser.new(id, files, langs).parse(lang)
+	DialogueParser.new(id, files).parse(lang)
 
 func was_modified() -> bool:
 	for file in modified_at:
