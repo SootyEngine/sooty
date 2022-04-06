@@ -47,6 +47,7 @@
 - [ ] Translation key `prop_name-lang:`
 - [ ] `//` meta key.
 - [ ] `\,` escapes
+- [ ] Shortcuts for functions that take arguments.
 - [x] `$` shortcut key.
 - [x] `.soda` debug viewer.
 - [x] Dictionary -> `.soda` text function.

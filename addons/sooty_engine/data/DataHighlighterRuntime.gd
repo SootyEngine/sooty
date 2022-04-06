@@ -92,6 +92,13 @@ func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 				deep += 1
 				clr = C_PROPERTY.darkened(deep * .05)
 				clr.h = wrapf(clr.h - .2 * deep, 0.0, 1.0)
+				
+			elif _text[i] == ".":
+				_c(i, C_SYMBOL)
+				_c(i+1, clr)
+				deep += 1
+				clr = C_PROPERTY.darkened(deep * .05)
+				clr.h = wrapf(clr.h - .2 * deep, 0.0, 1.0)
 			
 		return _out
 	

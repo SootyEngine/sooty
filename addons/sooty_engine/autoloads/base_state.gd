@@ -139,7 +139,7 @@ func _get_property_path(property: StringName) -> Array:
 	var p := str(property)
 	if p in _shortcuts:
 		p = _shortcuts[p]
-	return Array(p.split(":"))
+	return Array(p.split("."))
 	
 func _has(pname: StringName) -> bool:
 	var path := _get_property_path(pname)

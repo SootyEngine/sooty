@@ -154,7 +154,8 @@ Script names are used internally as the `Dialogue` id. They contain *Flows*, whi
 
 # Localization Files `.sola`  
 You can generate `.sola` files for translating text.  
-It allows for advanced replacements.
+It's getting robust.  
+It can handle replacing multiple lines with 1 or 1 line with mutiple.
 
 |`res://test.soot`|`res://test-fr.soot`|
 |--|--|
@@ -163,25 +164,15 @@ It allows for advanced replacements.
 # Data Files `.soda`
 Sooty has a custom file format based on YAML, but designed for Godot.  
 It has a built in highlighter, and works in Godot's main editor.  
-Store the files in `states` or `persistent` to have them autoload. Then access them like `State.characters.paul.name`.
-```
-# my_data.soda
-characters:
-    paul:
-        name: Paul
-        items=Inventory:
-            coin: 20
-            sword: 3
-        equip=Equipment:
-            head: helmet
+Store the files in `states` or `persistent` to have them autoload.
+- From Godot `State.characters.paul.name`.
+- From Sooty `$characters.paul.name`
 
-items:
-    coin: { name: Coin, slot_max: 1_000_000 }
-    sword: { name: Sword, cost: 100 }
-    helmet:
-        name: Helmet
-        wear_to: [head]
-```
+Shortcuts take the form `$name: path.to.object.or.property.or.function`, and allow accessing nested data more easily.  
+So instead of `Hey [$characters.bill.name].`, just `[$bname]` or whatever.  
+
+![](readme/data_1.png)
+![](readme/data_2.png)
 
 # Building/Exporting
 Make sure to include `*.soot,*.soda,*.sola` files when building.
