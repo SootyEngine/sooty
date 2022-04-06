@@ -10,6 +10,7 @@ func _init():
 func parse(path: String):
 	var lines := UFile.load_text(path).split("\n")
 	var dict_lines := []
+	var shortcuts := {}
 	var i := 0
 	
 	# convert text lines to info dicts
@@ -34,6 +35,14 @@ func parse(path: String):
 			stripped = stripped.substr(0, comment_index).strip_edges()
 		else:
 			had_comment = false
+		
+		# shortcut
+		if text.begins_with("$"):
+			var p := text.substr(1).split(":", true, 1)
+			var k := p[0].strip_edges()
+			var v := p[1].strip_edges()
+			shortcuts[k] = v
+			continue
 		
 		# start or end multiline
 		var mi := stripped.find('""""')
@@ -87,16 +96,19 @@ func parse(path: String):
 	
 	# collect tabbed lines
 	i = 0
-	var out := {}
+	var out_data := {}
 	while i < len(dict_lines):
 		var o = _collect_tabbed(dict_lines, i)
 		i = o[0]
 		var line: Dictionary = o[1]
 #		UDict.dig(line, _fix)
-		out[line.key] = line.value
+		out_data[line.key] = line.value
 	
 #	UDict.log(out)
-	return out
+	return {
+		shortcuts=shortcuts,
+		data=out_data
+	}
 
 #func _fix(d: Dictionary):
 #	if "value" in d and d.value is String:

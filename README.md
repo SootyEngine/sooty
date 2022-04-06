@@ -4,7 +4,7 @@ A dialogue engine for Godot4 (alpha5).
 `WARNING: Currently under **heavy** construction.`
 
 - *Visual Novel* template [here](https://github.com/teebarjunk/sooty-visual_novel).  
-- Example visual novel [here](https://github.com/teebarjunk/sooty-example).  
+- Example visual novel [here](https://github.com/teebarjunk/sooty-visual_novel-example).  
 
 ![](https://raw.githubusercontent.com/teebarjunk/sooty-example/main/README/preview.png)
 
@@ -152,11 +152,36 @@ Script names are used internally as the `Dialogue` id. They contain *Flows*, whi
     The dog was a fast runner.
 ```
 
-## Localization
-**TODO**  
-End of line comment of form `//#unique_line_id`<br>
-These can be auto generated.
+# Localization Files `.sola`  
+You can generate `.sola` files for translating text.  
+It allows for advanced replacements.
 
+|`res://test.soot`|`res://test-fr.soot`|
+|--|--|
+|![](readme/lang_1.png) | ![](readme/lang_2.png)|
+
+# Data Files `.soda`
+Sooty has a custom file format based on YAML, but designed for Godot.  
+It has a built in highlighter, and works in Godot's main editor.  
+Store the files in `states` or `persistent` to have them autoload. Then access them like `State.characters.paul.name`.
+```
+# my_data.soda
+characters:
+    paul:
+        name: Paul
+        items=Inventory:
+            coin: 20
+            sword: 3
+        equip=Equipment:
+            head: helmet
+
+items:
+    coin: { name: Coin, slot_max: 1_000_000 }
+    sword: { name: Sword, cost: 100 }
+    helmet:
+        name: Helmet
+        wear_to: [head]
+```
 
 # Building/Exporting
-Make sure to include `*.soot,*.cfg` files when building.
+Make sure to include `*.soot,*.soda,*.sola` files when building.

@@ -1,3 +1,4 @@
+@tool
 extends Node
 
 const CHECK_FILES_EVERY := 1 # seconds before checking if any script has changed.
@@ -5,31 +6,44 @@ const CHECK_FILES_EVERY := 1 # seconds before checking if any script has changed
 signal reloaded_dialogue(dialogue: Dialogue)
 signal reloaded()
 
-var flags := []
 var cache := {}
 
 func _ready() -> void:
 	Mods.pre_loaded.connect(_clear_mods)
 	Mods.load_all.connect(_load_mods)
 	
-	# timer chat checks if any files were modified.
-	var timer := Timer.new()
-	add_child(timer)
-	timer.timeout.connect(_timer)
-	timer.start(CHECK_FILES_EVERY)
+	if not Engine.is_editor_hint():
+		# timer chat checks if any files were modified.
+		var timer := Timer.new()
+		add_child(timer)
+		timer.timeout.connect(_timer)
+		timer.start(CHECK_FILES_EVERY)
 
 func _clear_mods():
 	cache.clear()
 
 func _load_mods(mods: Array):
 	var memory_before = OS.get_static_memory_usage()
+	var soot_paths := {}
+	var lang_paths := {}
+	
+	# collect all files by name, so they can be merged if from mods.
 	for mod in mods:
-		var head = mod.dir.plus_file("dialogue")
 		mod.meta["dialogues"] = []
-		for soot_path in UFile.get_files(head, Soot.EXT_DIALOGUE):
+		for soot_path in UFile.get_files(mod.dir.plus_file("dialogue"), Soot.EXT_DIALOGUE):
 			mod.meta.dialogues.append(soot_path)
-			var d := Dialogue.new(soot_path)
-			cache[d.id] = d
+			var id := UFile.get_file_name(soot_path)
+			UDict.append(soot_paths, id, soot_path)
+		
+		mod.meta["langs"] = []
+		for lang_path in UFile.get_files(mod.dir.plus_file("lang"), "-en" + Soot.EXT_LANG):
+			mod.meta.langs.append(lang_path)
+			var id := UFile.get_file_name(lang_path).rsplit("-", true, 1)[0]
+			UDict.append(lang_paths, id, lang_path)
+	
+	for id in soot_paths:
+		cache[id] = Dialogue.new(id, soot_paths[id], lang_paths.get(id, []))
+	
 	var memory_used = OS.get_static_memory_usage() - memory_before
 	prints("Dialogues:", String.humanize_size(memory_used))
 
@@ -56,7 +70,7 @@ func get_dialogue_ids() -> Dictionary:
 func _timer():
 	var modified := false
 	for d in cache.values():
-		if d.was_file_modified():
+		if d.was_modified():
 			print("Reloading dialogue: %s" % d.id)
 			d._reload()
 			reloaded_dialogue.emit(d)

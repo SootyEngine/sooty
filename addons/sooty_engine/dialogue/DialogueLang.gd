@@ -1,66 +1,43 @@
+@tool
 extends Resource
 class_name DialogueLang
 
-const S_LANG_ID := "#L:"
-const EXT := ".sola"
+var lang := "en"
 
-func parse(path: String):
-	var data := DialogueParser.new().parse(path)
-	
-	for line in data.lines:
-		match line.type:
-			"text":
-				print(line)
-	
-	# generate unique ids
-#	var GENERATE_TRANSLATIONS := false
-#	if GENERATE_TRANSLATIONS:
-#		var translations := []
-#		for k in out_lines:
-#			var step = out_lines[k]
-#			match step.type:
-#				"text", "option":
-#					if step.id == "":
-#						step.id = get_uid(out_lines)
-#						set_line_uid(text_lines, step.line, step.id)
-#					var f = step.get("from", "NONE")
-#					var t := Array(step.text.split("\n"))
-#					if len(t) != 1:
-#						t.push_front('""""')
-#						t.push_back('""""')
-#					t[0] = "%s: %s" % [f, t[0]]
-#					for i in len(t):
-#						t[i] = "\t#" + t[i]
-#					translations.append("#%s:\n%s\n\t%s: \n" % [step.id, "\n".join(t), f])
-		
-#		UFile.save_text(file, "\n".join(text_lines))
-#		print(UFile.change_extension(file, "lsoot"))
-#		UFile.save_text(UFile.change_extension(file, "lsoot"), "\n".join(translations))
+#func parse(flows: Dictionary, lines: Dictionary):
+#	# parse .soot
+#	var parser := DialogueParser.new([soot_path], [])
+#	parser.ignore_flags = true
+#	var soot_data := parser.parse()
+#	var soot_id := UFile.get_file_name(soot_path)
+#
+#	var raw_lines := UFile.load_text(soot_path).split("\n")
+#	var sola_file := []
+#	for id in ids:
+#		var line_info: Dictionary = ids[id]
+#		sola_file.append("<-> %s # %s @ %s" % [id, soot_path, line_info.line])
+#		sola_file.append("\t# %s" % [_clean_raw_line(raw_lines[line_info.line])])
+#		sola_file.append("\t")
+#		sola_file.append("")
+#
+#	var out := "\n".join(sola_file)
+#
+#	print(sola_path)
+#	UFile.save_text(sola_path, out)
+
+func _clean_raw_line(text: String) -> String:
+	if Soot.COMMENT_LANG in text:
+		text = text.split(Soot.COMMENT_LANG, true, 1)[0]
+	if Soot.COMMENT in text:
+		text = text.split(Soot.COMMENT, true, 1)[0]
+	return text.strip_edges()
+
+#func set_line_uid(lines: PackedStringArray, line: int, uid: String):
+#	if S_LANG_ID in lines[line]:
+#		var p := lines[line].split(S_LANG_ID, true, 1)
+#		lines[line] = p[0].strip_edges(false, true) + " #%s" % uid
+#	else:
+#		lines[line] = lines[line] + " #%s" % uid
 
 
-func set_line_uid(lines: PackedStringArray, line: int, uid: String):
-	if S_LANG_ID in lines[line]:
-		var p := lines[line].split(S_LANG_ID, true, 1)
-		lines[line] = p[0].strip_edges(false, true) + " #%s" % uid
-	else:
-		lines[line] = lines[line] + " #%s" % uid
-
-func get_uid(lines: Dictionary, size := 8) -> String:
-	var uid := get_id()
-	var safety := 100
-	while uid in lines:
-		uid = get_id()
-		safety -= 1
-		if safety <= 0:
-			push_error("Should never happen.")
-			break
-	return uid
-
-func get_id(size := 8) -> String:
-	var dict := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	var lenn := len(dict)
-	var out = ""
-	for i in size:
-		out += dict[randi() % lenn]
-	return out
 

@@ -1,12 +1,14 @@
 
 # Bugs
 - [ ] temp_save tries to save on editor quit.
+- [ ] .soot multiline strings `""""` have an issue with tabs.
 - [x] Changing scenes ends the stack.
 - [x] Reloading dialogue stopped working.
 - [x] Quitting doesn't hide captions.
 
 # Bad Design
 - [ ] Persistent data loaded before mods loaded.
+- [ ] Optional obfuscation/encrypt for `soot` `soda` and save data?
 
 # Sooty
 - [ ] Meta counter outputs:
@@ -17,18 +19,43 @@
     - [ ] Auto count possible routes.
     - [ ] Timer per route.
     - [ ] Characters in route.
+- [ ] Remove `.` from `EXT_*` properties.
 - [x] Rename Achievement to Award.
 - [x] Data parser.
 - [x] Container Awards, Tasks, and other things in collections, rather than state.
 - [x] Move UI/console and fonts to `VisualNovel` addon.
 
-# Soot
+# *.soot Dialogue Files
 - [ ] Match arrays pattern.
 - [ ] Match dict pattern.
-- [x] Reimplement `+` as a dialogue option for inclusion.
+- [x] Multi file loading from mods. (not tested)
+- [x] Reimplement `+` as a dialogue option for merging external options.
 - [x] Change comments from `// ` to `# `.
 
-# Highlighter
+# *.sola Language Files
+- [ ] Generate `.sola` files with previous data, so nothing is lost.
+- [ ] Only merge as a `== flow call` if there are more than one.
+- [x] Multiline id's.
+- [x] Load and merge langs files.
+- [x] Generate `.sola` files, for writing translations.
+
+# *.soda Data Files
+- [ ] Allow `:` paths inside key.
+- [ ] `//` meta key.
+- [ ] `\,` escapes
+- [x] `$` shortcut key.
+- [x] `.soda` debug viewer.
+- [x] Dictionary -> `.soda` text function.
+- [x] Highlighter.
+- [x] Create data format file based on YAML.
+
+# *.soma Markdown File
+- [ ] Create file format based on Markdown for showing more complicated text like notebooks, item info, world story data...
+- [ ] `.soma` -> BBCode parser.
+- [ ] Highlighter.
+
+# Highlighters
+- [x] `.soda` shortcuts.
 - [x] Match statements on same line aren't colored.
 - [x] `+` options isn't colored
 - [x] Colorize `/` in `=>` `==` paths.
@@ -80,9 +107,6 @@
 - [ ] Printer that can show text across multiple captions.
 - [ ] Using RichTextEffect.pre_parse() for pre parsing strings.
 - [x] Use `/` instead of `.` for sub flows.
-
-# Localization
-- [ ] When generating a new .sola, check if one exists, and copy it's data, so the user doesn't have to rewrite it all.
 
 # Other
 - [in progress] generate a node map so it's visible where everything is.

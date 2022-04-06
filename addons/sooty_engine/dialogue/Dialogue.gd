@@ -5,28 +5,25 @@ class_name Dialogue
 @export var flows := {}
 @export var lines := {}
 @export var errors := []
-@export var files := {}
-@export var last_modified := 0
+@export var files := []
+@export var langs := []
+@export var modified_at := {} # values are modified times
 
-func _init(file: String):
-	id = UFile.get_file_name(file)
-	_parse_file(file)
+func _init(id: String, files: Array, langs := []):
+	self.id = id
+	self.files = files
+	self.langs = langs
+	reload()
 
-func patch(file: String):
-	_parse_file(file)
-
-func _reload():
-	flows.clear()
-	lines.clear()
-	for file in files:
-		_parse_file(file)
-
-func _parse_file(file: String):
-	files[file] = UFile.get_modified_time(file)
+func reload():
+	# update all timers
+	for file in files + langs:
+		modified_at[file] = UFile.get_modified_time(file)
 	
-	var data := DialogueParser.new().parse(file)
-	UDict.merge(flows, data.flows)
-	UDict.merge(lines, data.lines)
+	# parse
+	var data := DialogueParser.new(id, files, langs).parse()
+	flows = data.flows
+	lines = data.lines
 #	UDict.log(out_flows)
 #	UDict.log(out_lines)
 	
@@ -34,9 +31,12 @@ func _parse_file(file: String):
 		UFile.save_json("res://dialogue_debug/%s.flows.json" % [id], flows, true)
 		UFile.save_json("res://dialogue_debug/%s.lines.json" % [id], lines, true)
 
-func was_file_modified() -> bool:
-	for file in files:
-		if files[file] != UFile.get_modified_time(file):
+func generate_language_file(lang: String):
+	DialogueParser.new(id, files, langs).parse(lang)
+
+func was_modified() -> bool:
+	for file in modified_at:
+		if modified_at[file] != UFile.get_modified_time(file):
 			return true
 	return false
 

@@ -3,6 +3,8 @@ extends Resource
 class_name Soot
 
 const COMMENT := "# "
+const COMMENT_LANG := "#id="
+const COMMENT_FLAG := "#?"
 
 # dialogue extension
 const EXT_DIALOGUE := ".soot"
@@ -14,6 +16,7 @@ const EXT_LANG := ".sola"
 const EXT_TEXT := ".soma" # for use with things like notes, creature databases...
 
 # flow control symbols
+const LANG := "<->"
 const FLOW := "==="
 const FLOW_GOTO := "=>"
 const FLOW_CALL := "=="

@@ -30,6 +30,8 @@ const C_VAR_CONSTANT := Color.DARK_GRAY
 const C_VAR_STATE_PROPERTY := Color.SPRING_GREEN
 
 const C_COMMENT := Color(1.0, 1.0, 1.0, 0.25)
+const C_COMMENT_LANG := Color(0.5, 1.0, 0.0, 0.5)
+
 const C_ACTION_EVAL := Color(0, 1, 0.5, 0.8)
 const C_ACTION_GROUP := Color.MEDIUM_PURPLE
 const C_ACTION_STATE := Color.DEEP_SKY_BLUE
@@ -141,6 +143,12 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 		for k in state.keys():
 			if k > index:
 				state.erase(k)
+	
+	# line id for lang
+	index = text.rfind(Soot.COMMENT_LANG)
+	if index != -1:
+		_c(index, C_SYMBOL)
+		_c(index+len(Soot.COMMENT_LANG), C_COMMENT_LANG)
 	
 	return state
 

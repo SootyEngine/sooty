@@ -7,6 +7,7 @@ signal changed_from_to(property: Array, from: Variant, to: Variant)
 
 var _silent := false # won't emit signals when changing things.
 var _changed := false # state has changed.
+var _shortcuts := {} # shorter keys to nested data. (ie: p = characters:player)
 var _default := {}
 var _children := []
 
@@ -30,6 +31,8 @@ func _ready() -> void:
 	Mods.loaded.connect(_loaded_mods)
 
 func _clear_mods():
+	_shortcuts.clear()
+	
 	for child in get_children():
 		remove_child(child)
 		child.queue_free()
@@ -58,7 +61,18 @@ func _load_mods(mods: Array):
 		for data_path in UFile.get_files(head, Soot.EXT_DATA):
 			mod.meta[subdir].append(data_path) # tell Mods what file has been installed
 			var state = DataParser.new().parse(data_path)
-			UObject.patch(self, state, [data_path])
+			
+			# patch state objects
+			UObject.patch(self, state.data, [data_path])
+			
+			# collect shortcuts
+			for k in state.shortcuts:
+				if not k in _shortcuts:
+					_shortcuts[k] = state.shortcuts[k]
+				else:
+					var new = state.shortcuts[k]
+					var old = _shortcuts[k]
+					push_error("Trying to use the same shortcut '%s' for %s and %s." % [k, old, new])
 
 func _loaded_mods():
 	print("DEFAULT STAE FOR %s." % _get_subdir())
@@ -121,27 +135,33 @@ func _get_state() -> Dictionary:
 		UDict.merge(out, UObject.get_state(child), true)
 	return out
 
-func _has(property: StringName) -> bool:
-	var path := str(property).split(".")
-	property = path[-1]
+func _get_property_path(property: StringName) -> Array:
+	var p := str(property)
+	if p in _shortcuts:
+		p = _shortcuts[p]
+	return Array(p.split(":"))
+	
+func _has(pname: StringName) -> bool:
+	var path := _get_property_path(pname)
+	var property = path[-1]
 	for m in _children:
 		var o = UObject.get_penultimate(m, path)
 		if o != null and property in o:
 			return true
 	return false
 
-func _get(property: StringName):
-	var path := str(property).split(".")
-	property = path[-1]
+func _get(pname: StringName):
+	var path := _get_property_path(pname)
+	var property = path[-1]
 	for m in _children:
 		var o = UObject.get_penultimate(m, path)
 		if o != null:
 			if property in o:
 				return o[property]
 
-func _set(property_path: StringName, value) -> bool:
-	var path := str(property_path).split(".")
-	var property := path[-1]
+func _set(pname: StringName, value) -> bool:
+	var path = _get_property_path(pname)
+	var property = path[-1]
 	for m in _children:
 		var o = UObject.get_penultimate(m, path)
 		if o != null and property in o:
@@ -158,7 +178,7 @@ func _set(property_path: StringName, value) -> bool:
 					changed_to.emit(path, new)
 					changed_from_to.emit(path, old, new)
 			return true
-	push_error("No %s in %s. (Attempted '%s = %s')" % [property_path, _get_state(), property, value])
+	push_error("No %s in %s. (Attempted '%s = %s')" % [pname, _get_state(), property, value])
 	return true
 
 func _get_all_of_type(type: Variant) -> Dictionary:

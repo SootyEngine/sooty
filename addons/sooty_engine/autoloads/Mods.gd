@@ -1,3 +1,4 @@
+@tool
 extends Node
 
 const USER_DIR := "user://mods"
@@ -72,7 +73,7 @@ func _update():
 				print("\t%s %s" % [i+1, meta[k][i].get_file()])
 	
 	# wait a little for things to initialize.
-	await  get_tree().process_frame
+	await get_tree().process_frame
 	# alert everyone that mods were loaded.
 	loaded.emit()
 

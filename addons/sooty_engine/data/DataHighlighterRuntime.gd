@@ -7,6 +7,9 @@ const C_FIELD := Color.LIGHT_GRAY
 const C_OBJECT := Color.GREEN_YELLOW
 const C_LIST_ITEM := Color.SPRING_GREEN
 
+const C_SHORTCUT_PROPERTY := Color.DEEP_SKY_BLUE
+const C_SHORTCUT_FIELD := Color.DEEP_PINK
+
 const C_ERROR := Color.TOMATO
 
 var _out := {}
@@ -74,6 +77,23 @@ func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 	_out = {}
 	_text = text
 	_deep = UString.count_leading_tabs(text)
+	
+	# shortcuts
+	if _text.begins_with("$"):
+		_c(0, C_SYMBOL)
+		_c(1, C_SHORTCUT_PROPERTY)
+		var clr = C_PROPERTY
+		var deep := 0
+		for i in range(2, len(_text)):
+			if _text[i] == ":":
+				_c(i, C_SYMBOL)
+				_c(i+1, clr)
+				deep += 1
+				clr = C_PROPERTY.darkened(deep * .05)
+				clr.h = wrapf(clr.h - .2 * deep, 0.0, 1.0)
+			
+		return _out
+	
 	var stripped = _text.strip_edges()
 	var i := 0
 	

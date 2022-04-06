@@ -41,6 +41,8 @@ func _editor_script_changed(s):
 				c.syntax_highlighter = soot_highlighter
 			elif rpath.ends_with(Soot.EXT_DATA):
 				c.syntax_highlighter = data_highlighter
+			elif rpath.ends_with(Soot.EXT_LANG):
+				c.syntax_highlighter = soot_highlighter
 
 func _exit_tree() -> void:
 	# remove .soot highlighter.
