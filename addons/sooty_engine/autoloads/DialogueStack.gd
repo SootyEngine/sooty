@@ -108,7 +108,9 @@ func start(id: String):
 func can_do(command: String) -> bool:
 	return command.begins_with(Soot.FLOW_GOTO)\
 		or command.begins_with(Soot.FLOW_CALL)\
-		or command.begins_with(Soot.FLOW_ENDD)
+		or command.begins_with(Soot.FLOW_PASS)\
+		or command.begins_with(Soot.FLOW_ENDD)\
+		or command.begins_with(Soot.FLOW_END_ALL)
 
 func do(command: String):
 	# => goto
@@ -117,13 +119,21 @@ func do(command: String):
 	# == call
 	elif command.begins_with(Soot.FLOW_CALL):
 		goto(command.trim_prefix(Soot.FLOW_CALL).strip_edges(), STEP_CALL)
-	# >< end
+	# __ pass
+	elif command.begins_with(Soot.FLOW_PASS):
+		# do nothing
+		pass
+	# >< end flow
 	elif command.begins_with(Soot.FLOW_ENDD):
-		end(command.trim_prefix(Soot.FLOW_ENDD).strip_edges())
+		_pop()
+	# >><< end dialogue
+	elif command.begins_with(Soot.FLOW_END_ALL):
+		end(command.trim_prefix(Soot.FLOW_END_ALL).strip_edges())
 	else:
 		push_error("Don't know what to do with '%s'." % command)
 
 func goto(dia_flow: String, step_type: int = STEP_GOTO) -> bool:
+	print("GOTO ", dia_flow)
 	return _goto(dia_flow, step_type)
 
 func _goto(dia_flow: String, step_type: int = STEP_GOTO) -> bool:
@@ -227,7 +237,13 @@ func _tick():
 				# call main stack, since this could be run in _execute_mode
 				DialogueStack._goto(line.line.call, STEP_CALL)
 			
+			"pass":
+				pass
+			
 			"end":
+				_pop()
+			
+			"end_all":
 				end(line.line.end)
 				break
 			

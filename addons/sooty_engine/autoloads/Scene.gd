@@ -16,6 +16,7 @@ func _ready() -> void:
 	Mods.load_all.connect(_load_mods)
 	
 	if not Engine.is_editor_hint():
+		await Mods.loaded
 		# call the start function when testing from editor
 		current = get_tree().current_scene
 		scene_changed.emit()

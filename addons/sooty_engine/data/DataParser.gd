@@ -37,8 +37,8 @@ func parse(path: String):
 			had_comment = false
 		
 		# shortcut
-		if text.begins_with("$"):
-			var p := text.substr(1).split(":", true, 1)
+		if text.begins_with("~~"):
+			var p := text.substr(len("~~")).split(":", true, 1)
 			var k := p[0].strip_edges()
 			var v := p[1].strip_edges()
 			shortcuts[k] = v

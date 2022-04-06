@@ -55,6 +55,7 @@ func parse(generate_lang := "") -> Dictionary:
 		lines=out_lines
 	}
 
+# generate a language file (.sola) from the current dialogue.
 func _generate_lang(lang: String, flows: Dictionary, lines: Dictionary, raw: Array):
 	var out_path := "res://lang/%s-%s%s" % [d_id, lang, Soot.EXT_LANG]
 	var text := []
@@ -471,7 +472,9 @@ func _process_line(line: Dictionary):
 	# flows
 	if t.begins_with(Soot.FLOW_GOTO): return _line_as_flow_goto(line)
 	if t.begins_with(Soot.FLOW_CALL): return _line_as_flow_call(line)
+	if t.begins_with(Soot.FLOW_PASS): return _line_as_flow_pass(line)
 	if t.begins_with(Soot.FLOW_ENDD): return _line_as_flow_end(line)
+	if t.begins_with(Soot.FLOW_END_ALL): return _line_as_flow_end_all(line)
 	# property
 	if t.begins_with(S_PROPERTY_HEAD): return _line_as_properties(line)
 	return _line_as_dialogue(line)
@@ -550,9 +553,17 @@ func _line_as_flow_call(line: Dictionary):
 	var p = line.M.text.split(Soot.FLOW_CALL, true, 1)
 	_add_flow_action(line, "call", p[1].strip_edges())
 
+func _line_as_flow_pass(line: Dictionary):
+	line.type = "pass"
+	line.end = line.M.text.trim_prefix(Soot.FLOW_PASS).strip_edges()
+
 func _line_as_flow_end(line: Dictionary):
 	line.type = "end"
 	line.end = line.M.text.trim_prefix(Soot.FLOW_ENDD).strip_edges()
+
+func _line_as_flow_end_all(line: Dictionary):
+	line.type = "end_all"
+	line.end = line.M.text.trim_prefix(Soot.FLOW_END_ALL).strip_edges()
 
 func _add_flow_action(line: Dictionary, type: String, f_action: String):
 	line.type = type

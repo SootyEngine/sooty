@@ -77,6 +77,11 @@
 - [x] file_exists_in_dir(): Check for a file inside a directory.
 - [x] get_file_in_dir(tail): Get a path to a possibly nested file ending in tail.
 
+# DialogueStack
+- [ ] `><` Should only end one flow.
+- [ ] `>><<` For ending dialogue.
+- [ ] `__` For pass/do nothing. (Useful for inserting lines later with `#id=insert_here`)
+
 # VisualNovel
 - [ ] Character can control string wrappes `"` (For phones and such.)
 - [ ] Create theme templates for captions + options.

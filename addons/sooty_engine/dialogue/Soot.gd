@@ -22,6 +22,8 @@ const FLOW := "==="
 const FLOW_GOTO := "=>"
 const FLOW_CALL := "=="
 const FLOW_ENDD := "><"
+const FLOW_PASS := "__"
+const FLOW_END_ALL := ">><<"
 
 const FLOW_PATH_DIVIDER := "/"
 
