@@ -29,6 +29,9 @@ func load_graph_state():
 	print("Loaded graph state.")
 
 func save_graph_state():
+	if not graph_edit:
+		graph_edit = get_node(_graph_edit)
+	
 	var out = UFile.load_from_resource("res://graph_layout.tres", {})
 	for child in graph_edit.get_children():
 		out[child.name] = child.position_offset
@@ -36,6 +39,9 @@ func save_graph_state():
 	print("Saved graph state.")
 
 func _update():
+	if not graph_edit:
+		graph_edit = get_node(_graph_edit)
+	
 	save_graph_state()
 	
 	all_graph_nodes.clear()
@@ -99,7 +105,8 @@ func _update():
 		if d_id in all_graph_nodes:
 			var flow_key := [d_id, flow]
 			if not flow_key in all_flow_buttons:
-				push_error("No flow key %s %s" % flow_key)
+				# TODO: Make this goto colored RED so it's obvious this goes nowhere.
+#				push_error("No flow key %s %s" % flow_key)
 				continue
 			var n: GraphNode = all_graph_nodes[d_id]
 			var flow_node: Node = all_flow_buttons[[d_id, flow]]
@@ -177,11 +184,11 @@ func _process_line(graph_node: GraphNode, dialogue: Dialogue, line: Dictionary):
 			var d_id: String = goto[0]
 			var flow: String = goto[1]
 			var clr := Color.YELLOW_GREEN if line.type == "goto" else Color.DEEP_SKY_BLUE
-			var text := flow if (d_id==dialogue.id) else goto_path + ("=>" if line.type == "goto" else "==")
+			var text := (flow if (d_id==dialogue.id) else goto_path) + ("=>" if line.type == "goto" else "==")
 			var button := _new_line_button(graph_node, dialogue, line, text, clr, HORIZONTAL_ALIGNMENT_RIGHT)
 			
 			# create ports
-			_add_slot(graph_node, Color.TRANSPARENT, Color.GREEN_YELLOW)
+			_add_slot(graph_node, Color.TRANSPARENT, Color.BLACK if (d_id==dialogue.id) else Color.GREEN_YELLOW)
 			
 			goto_nodes.append([goto_path, button])
 		
@@ -200,3 +207,5 @@ func _select_and_edit(path: String, line: int):
 			
 			var code_edit: CodeEdit = plugin.get_code_edit(path)
 			code_edit.set_caret_line(line)
+	else:
+		print("No plugin.")
