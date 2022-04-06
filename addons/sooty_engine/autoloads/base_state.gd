@@ -1,3 +1,4 @@
+@tool
 extends Node
 class_name BaseState
 
@@ -25,6 +26,10 @@ func _load_state(data: Dictionary):
 	_silent = false
 
 func _ready() -> void:
+	await get_tree().process_frame
+	_connect_to_signals()
+
+func _connect_to_signals():
 	child_entered_tree.connect(_child_added)
 	Mods.pre_loaded.connect(_clear_mods)
 	Mods.load_all.connect(_load_mods)

@@ -9,6 +9,7 @@ signal reloaded()
 var cache := {}
 
 func _ready() -> void:
+	await get_tree().process_frame
 	Mods.pre_loaded.connect(_clear_mods)
 	Mods.load_all.connect(_load_mods)
 	
@@ -72,7 +73,7 @@ func _timer():
 	for d in cache.values():
 		if d.was_modified():
 			print("Reloading dialogue: %s" % d.id)
-			d._reload()
+			d.reload()
 			reloaded_dialogue.emit(d)
 			modified = true
 	if modified:

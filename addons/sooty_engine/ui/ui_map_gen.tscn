@@ -1,59 +1,48 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://bltbp41qbcbu1"]
 
 [ext_resource type="Script" path="res://addons/sooty_engine/ui/ui_map_gen.gd" id="1_k02g5"]
-[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="2_dajy4"]
-[ext_resource type="Font" path="res://fonts/robotomono/robotomono_r.tres" id="2_ncd1c"]
 
-[node name="Node2D" type="Control"]
+[node name="map" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
 script = ExtResource( "1_k02g5" )
-font = ExtResource( "2_ncd1c" )
+_graph_edit = NodePath("VBoxContainer/GraphEdit")
+_graph_node_prefab = NodePath("VBoxContainer/GraphEdit/prefab")
+_b_rebuild = NodePath("VBoxContainer/HBoxContainer/rebuild")
 
-[node name="GraphEdit" type="GraphEdit" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+offset_right = 1024.0
+offset_bottom = 31.0
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="rebuild" type="Button" parent="VBoxContainer/HBoxContainer"]
+offset_right = 67.0
+offset_bottom = 31.0
+text = "Rebuild"
+
+[node name="GraphEdit" type="GraphEdit" parent="VBoxContainer"]
+offset_top = 35.0
+offset_right = 1024.0
+offset_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+scroll_offset = Vector2(0, -67)
 connection_lines_thickness = 1.0
 show_zoom_label = true
 
-[node name="prefab" type="GraphNode" parent="GraphEdit"]
+[node name="prefab" type="GraphNode" parent="VBoxContainer/GraphEdit"]
+offset_top = 67.0
 offset_right = 200.0
-offset_bottom = 200.0
+offset_bottom = 267.0
 mouse_filter = 1
-title = "dasd"
-slot/0/left_enabled = false
-slot/0/left_type = 0
-slot/0/left_color = Color(1, 1, 1, 1)
-slot/0/left_icon = null
-slot/0/right_enabled = false
-slot/0/right_type = 0
-slot/0/right_color = Color(1, 1, 1, 1)
-slot/0/right_icon = null
 __meta__ = {
 "_edit_layout_mode": 0,
 "_edit_use_custom_anchors": false
 }
-
-[node name="RichTextLabel" type="RichTextLabel" parent="GraphEdit/prefab"]
-offset_left = 18.0
-offset_top = 42.0
-offset_right = 182.0
-offset_bottom = 111.0
-theme_override_font_sizes/mono_font_size = 16
-theme_override_font_sizes/bold_italics_font_size = 16
-theme_override_font_sizes/italics_font_size = 16
-theme_override_font_sizes/bold_font_size = 16
-theme_override_font_sizes/normal_font_size = 16
-bbcode_enabled = true
-fit_content_height = true
-script = ExtResource( "2_dajy4" )
-bbcode = "[dim]1,234[] lines.
-[dim]~5[] minutes.
-[dim]mary, paul, john[]"
-alignment = 1
-
-[node name="ColorRect" type="ColorRect" parent="GraphEdit/prefab/RichTextLabel"]
-show_behind_parent = true
-anchor_right = 1.0
-anchor_bottom = 1.0
-color = Color(0, 0, 0, 0.25)

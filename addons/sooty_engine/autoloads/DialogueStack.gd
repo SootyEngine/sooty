@@ -27,6 +27,7 @@ func _init(em := false) -> void:
 
 func _ready():
 	if not Engine.is_editor_hint() and not _execute_mode:
+		await get_tree().process_frame
 		Saver._get_state.connect(_save_state)
 		Saver._set_state.connect(_load_state)
 		Saver.pre_load.connect(_game_loaded)

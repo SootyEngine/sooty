@@ -1,10 +1,11 @@
+@tool
 extends "res://addons/sooty_engine/autoloads/base_state.gd"
 
 func _get_subdir() -> String:
 	return "states"
 
-func _ready() -> void:
-	super._ready()
+func _connect_to_signals():
+	super._connect_to_signals()
 	Saver._get_state.connect(_save_state)
 	Saver._set_state.connect(_load_state)
 

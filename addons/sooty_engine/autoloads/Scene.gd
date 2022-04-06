@@ -11,18 +11,16 @@ var id: String:
 	get: return UFile.get_file_name(current.scene_file_path)
 
 func _ready() -> void:
-	if Engine.is_editor_hint():
-		return
+	await get_tree().process_frame
 	
 	Mods.load_all.connect(_load_mods)
 	
-	# call the start function when testing from editor
-	await get_tree().process_frame
-	
-	current = get_tree().current_scene
-	scene_changed.emit()
-	if current.has_method("_start"):
-		current._start(false)
+	if not Engine.is_editor_hint():
+		# call the start function when testing from editor
+		current = get_tree().current_scene
+		scene_changed.emit()
+		if current.has_method("_start"):
+			current._start(false)
 
 func _get(property: StringName):
 	if current and current.has_method("_has") and current._has(property):

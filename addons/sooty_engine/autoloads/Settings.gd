@@ -6,6 +6,7 @@ func _get_subdir() -> String:
 func _ready() -> void:
 	super._ready()
 	if not Engine.is_editor_hint():
+		await get_tree().process_frame
 		Saver._get_persistent.connect(_save_state)
 		Saver._set_persistent.connect(_load_state)
 		changed.connect(_trigger_save)

@@ -1,3 +1,4 @@
+@tool
 extends Node
 
 const DIR := "user://saves"
@@ -34,15 +35,17 @@ func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 func _ready() -> void:
+	await get_tree().process_frame
 	Mods.loaded.connect(_mods_loaded)
 	
 	var d := Directory.new()
 	if not d.dir_exists(DIR):
 		d.make_dir(DIR)
 	
-	add_child(_timer)
-	_timer.wait_time = 2.0
-	_timer.timeout.connect(_save_persistent)
+	if not Engine.is_editor_hint():
+		add_child(_timer)
+		_timer.wait_time = 2.0
+		_timer.timeout.connect(_save_persistent)
 
 func has_last_save() -> bool:
 	return _last_save_slot != "" and has_slot(_last_save_slot)

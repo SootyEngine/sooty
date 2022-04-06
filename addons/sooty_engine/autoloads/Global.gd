@@ -65,8 +65,6 @@ func _notification(what: int) -> void:
 		quit()
 
 func quit():
-	# TODO: Autosave.
-	await Saver.temp_save()
 	# TODO: Show quit screen with "Are you sure?" message.
 	get_tree().quit()
 

@@ -6,11 +6,17 @@ const SOOT_HIGHLIGHTER = preload("res://addons/sooty_engine/dialogue/DialogueHig
 const DATA_HIGHLIGHTER = preload("res://addons/sooty_engine/data/DataHighlighter.gd")
 var soot_highlighter := SOOT_HIGHLIGHTER.new()
 var data_highlighter := DATA_HIGHLIGHTER.new()
+#var mini_map
 
 func _enter_tree() -> void:
 	# load all autoloads in order.
 	for id in AUTOLOADS:
 		add_autoload_singleton(id, "res://addons/sooty_engine/autoloads/%s.gd" % id)
+	
+#	mini_map = preload("res://addons/sooty_engine/ui/ui_map_gen.tscn").instantiate()
+#	mini_map.is_plugin_hint = true
+#	mini_map.plugin = self
+#	add_control_to_bottom_panel(mini_map, "Dialogue")
 	
 	# add .soot to the allowed textfile extensions.
 	var es: EditorSettings = get_editor_interface().get_editor_settings()
@@ -26,6 +32,13 @@ func _enter_tree() -> void:
 	se.register_syntax_highlighter(data_highlighter)
 	# track scripts opened/closed to can add highliter.
 	se.editor_script_changed.connect(_editor_script_changed)
+
+# find a code editor for a given text file.
+func get_code_edit(path: String) -> CodeEdit:
+	for e in get_editor_interface().get_script_editor().get_open_script_editors():
+		if e.has_meta("_edit_res_path") and e.get_meta("_edit_res_path") == path:
+			return e.get_base_editor()
+	return null
 
 func _editor_script_changed(s):
 	# auto add highlighters
@@ -49,6 +62,5 @@ func _exit_tree() -> void:
 	get_editor_interface().get_script_editor().unregister_syntax_highlighter(soot_highlighter)
 	get_editor_interface().get_script_editor().unregister_syntax_highlighter(data_highlighter)
 	
-	for id in AUTOLOADS:
-		remove_autoload_singleton(id)
-	
+	for i in range(len(AUTOLOADS)-1, -1, -1):
+		remove_autoload_singleton(AUTOLOADS[i])

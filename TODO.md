@@ -45,6 +45,8 @@
 # *.soda Data Files
 - [ ] Allow `:` paths inside key.
 - [ ] Translation key `prop_name-lang:`
+- [ ] Translation loading when mods are loaded.
+- [ ] Generate translation file that ignores objects/dicts/arrays.
 - [ ] `//` meta key.
 - [ ] `\,` escapes
 - [ ] Shortcuts for functions that take arguments.
