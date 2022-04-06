@@ -50,13 +50,9 @@ func _update():
 	
 	UNode.remove_children(graph_edit)
 	
-#	var pos := Vector2.ZERO
 	var clr_gray := Color(.33, .33, .33, 1.0)
 	
 	for d_id in Dialogues.cache:
-#		if not d_id in ["demo", "demo2"]:
-#			continue
-		
 		var dialogue: Dialogue = Dialogues.cache[d_id]
 		var graph_node := GraphNode.new()
 		graph_edit.add_child(graph_node)
@@ -65,13 +61,7 @@ func _update():
 		graph_node.visible = true
 		graph_node.name = d_id
 		graph_node.title = d_id
-#		graph_node.position_offset = pos
 		graph_node.set_meta("port_index", 0)
-		
-#		pos.y += 220
-#		if pos.y > 220 * 10:
-#			pos.y = 0
-#			pos.x += 220
 		
 		all_graph_nodes[d_id] = graph_node
 		
@@ -183,12 +173,12 @@ func _process_line(graph_node: GraphNode, dialogue: Dialogue, line: Dictionary):
 			var goto = Soot.split_path(goto_path)
 			var d_id: String = goto[0]
 			var flow: String = goto[1]
-			var clr := Color.YELLOW_GREEN if line.type == "goto" else Color.DEEP_SKY_BLUE
+			var clr := Color.TOMATO if not Dialogues.has_flow(goto_path) else Color.YELLOW_GREEN
 			var text := (flow if (d_id==dialogue.id) else goto_path) + ("=>" if line.type == "goto" else "==")
 			var button := _new_line_button(graph_node, dialogue, line, text, clr, HORIZONTAL_ALIGNMENT_RIGHT)
 			
 			# create ports
-			_add_slot(graph_node, Color.TRANSPARENT, Color.BLACK if (d_id==dialogue.id) else Color.GREEN_YELLOW)
+			_add_slot(graph_node, Color.TRANSPARENT, Color.TOMATO if not Dialogues.has_flow(goto_path) else Color.BLACK if (d_id==dialogue.id) else Color.GREEN_YELLOW)
 			
 			goto_nodes.append([goto_path, button])
 		

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://addons/sooty_engine/ui/ui_map_gen.gd" id="1_k02g5"]
 
-[node name="Tree" type="Control"]
+[node name="TreeView" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 size_flags_horizontal = 3
