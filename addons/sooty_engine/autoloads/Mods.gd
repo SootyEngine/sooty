@@ -19,7 +19,9 @@ func _init():
 			_add_mod(mod, AUTO_INSTALL_USER_MODS)
 
 func _ready() -> void:
-	_update.call_deferred()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_load_mods()
 
 func get_user_mod_dirs() -> PackedStringArray:
 	return UFile.get_dirs("user://mods")
@@ -37,14 +39,14 @@ func get_uninstalled() -> Array:
 func install(dir: String):
 	if not mods[dir].installed:
 		mods[dir].installed = true
-		_update()
+		_load_mods()
 
 func uninstall(dir: String):
 	if mods[dir].installed:
 		mods[dir].installed = false
-		_update()
+		_load_mods()
 
-func _update():
+func _load_mods():
 	pre_loaded.emit()
 	
 	var installed := get_installed()
@@ -54,7 +56,7 @@ func _update():
 	load_all.emit(installed)
 	
 	# Display lists of what was added by the mods.
-	var loud := false
+	var loud := true
 	var meta := {}
 	for k in installed[0].meta.keys():
 		meta[k] = []

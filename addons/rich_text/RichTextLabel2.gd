@@ -125,6 +125,7 @@ func _gui_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 
 func _ready() -> void:
+	await get_tree().process_frame
 	_reload_config()
 	_redraw()
 

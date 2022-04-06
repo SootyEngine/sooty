@@ -4,19 +4,42 @@ extends EditorPlugin
 const AUTOLOADS := ["Global", "Mods", "Settings", "Scene", "Saver", "Persistent", "State", "StringAction", "Music", "SFX", "Dialogues", "DialogueStack"]
 const SOOT_HIGHLIGHTER = preload("res://addons/sooty_engine/dialogue/DialogueHighlighter.gd")
 const DATA_HIGHLIGHTER = preload("res://addons/sooty_engine/data/DataHighlighter.gd")
+const EDITOR = preload("res://addons/sooty_engine/ui/ui_map_gen.tscn")
 var soot_highlighter := SOOT_HIGHLIGHTER.new()
 var data_highlighter := DATA_HIGHLIGHTER.new()
-#var mini_map
+var editor
+
+#func _has_main_screen() -> bool:
+#	return true
+
+func _get_plugin_name() -> String:
+	return "Sooty"
+
+func _make_visible(visible: bool) -> void:
+	if editor:
+		editor.visible = visible
+
+func _get_plugin_icon() -> Texture2D:
+	return get_editor_interface().get_base_control().get_icon("Node", "EditorIcons")
 
 func _enter_tree() -> void:
 	# load all autoloads in order.
 	for id in AUTOLOADS:
 		add_autoload_singleton(id, "res://addons/sooty_engine/autoloads/%s.gd" % id)
 	
-#	mini_map = preload("res://addons/sooty_engine/ui/ui_map_gen.tscn").instantiate()
-#	mini_map.is_plugin_hint = true
-#	mini_map.plugin = self
-#	add_control_to_bottom_panel(mini_map, "Dialogue")
+#	editor = EDITOR.instantiate()
+#	editor.is_plugin_hint = true
+#	editor.plugin = self
+#	# Add the main panel to the editor's main viewport.
+#	get_editor_interface().get_editor_main_control().add_child(editor)
+#	# Hide the main panel. Very much required.
+#	_make_visible(false)
+
+	editor = preload("res://addons/sooty_engine/ui/ui_map_gen.tscn").instantiate()
+	editor.is_plugin_hint = true
+	editor.plugin = self
+	add_control_to_dock(EditorPlugin.DOCK_SLOT_LEFT_BR, editor)
+#	add_control_to_bottom_panel(editor, "Dialogue")
 	
 	# add .soot to the allowed textfile extensions.
 	var es: EditorSettings = get_editor_interface().get_editor_settings()
@@ -58,6 +81,12 @@ func _editor_script_changed(s):
 				c.syntax_highlighter = soot_highlighter
 
 func _exit_tree() -> void:
+#	if editor:
+#		editor.queue_free()
+	
+	if editor:
+		remove_control_from_docks(editor)
+	
 	# remove .soot highlighter.
 	get_editor_interface().get_script_editor().unregister_syntax_highlighter(soot_highlighter)
 	get_editor_interface().get_script_editor().unregister_syntax_highlighter(data_highlighter)

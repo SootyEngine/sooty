@@ -174,5 +174,10 @@ So instead of `Hey [$characters.bill.name].`, just `[$bname]` or whatever.
 ![](readme/data_1.png)
 ![](readme/data_2.png)
 
+# Tree View (wip)
+An alternative FileSystem, that let's you go to specific lines and view how files are connected.
+
+![](readme/tree_view.png)
+
 # Building/Exporting
 Make sure to include `*.soot,*.soda,*.sola` files when building.

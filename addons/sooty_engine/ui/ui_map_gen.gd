@@ -1,12 +1,10 @@
 @tool
-extends Node
+extends Control
 
 @export var font: Font = preload("res://addons/visual_novel/fonts/font-r.tres")
 @export var _graph_edit: NodePath = "VBoxContainer/GraphEdit"
-@export var _graph_node_prefab: NodePath
 @export var _b_rebuild: NodePath
 @onready var graph_edit: GraphEdit = get_node(_graph_edit)
-@onready var graph_node_prefab: GraphNode = get_node(_graph_node_prefab)
 @onready var b_rebuild: Button = get_node(_b_rebuild)
 
 var is_plugin_hint := false
@@ -17,43 +15,57 @@ var goto_nodes := []
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	if not Engine.is_editor_hint():
-		graph_edit.remove_child(graph_node_prefab)
-		await get_tree().process_frame
-		b_rebuild.pressed.connect(_update)
-		_update.call_deferred()
+	await get_tree().process_frame
+	graph_edit.end_node_move.connect(save_graph_state)
+	Mods.loaded.connect(_update)
+	b_rebuild.pressed.connect(_update)
+
+func load_graph_state():
+	var out = UFile.load_from_resource("res://graph_layout.tres", {})
+	for k in out:
+		var gn = graph_edit.get_node_or_null(k)
+		if gn:
+			gn.position_offset = out[k]
+	print("Loaded graph state.")
+
+func save_graph_state():
+	var out = UFile.load_from_resource("res://graph_layout.tres", {})
+	for child in graph_edit.get_children():
+		out[child.name] = child.position_offset
+	UFile.save_to_resource("res://graph_layout.tres", out)
+	print("Saved graph state.")
 
 func _update():
+	save_graph_state()
+	
 	all_graph_nodes.clear()
 	all_flow_buttons.clear()
 	goto_nodes.clear()
 	
 	UNode.remove_children(graph_edit)
 	
-	var pos := Vector2.ZERO
+#	var pos := Vector2.ZERO
 	var clr_gray := Color(.33, .33, .33, 1.0)
 	
-	print("DIALOGUES ", Dialogues.cache.keys())
-	
 	for d_id in Dialogues.cache:
-		if not d_id in ["demo", "demo2"]:
-			continue
+#		if not d_id in ["demo", "demo2"]:
+#			continue
 		
 		var dialogue: Dialogue = Dialogues.cache[d_id]
-		var graph_node: GraphNode = graph_node_prefab.duplicate()
+		var graph_node := GraphNode.new()
 		graph_edit.add_child(graph_node)
 		graph_node.size = Vector2(200.0, 0.0)
 		graph_node.minimum_size = Vector2(200.0, 0.0)
 		graph_node.visible = true
 		graph_node.name = d_id
 		graph_node.title = d_id
-		graph_node.position_offset = pos
+#		graph_node.position_offset = pos
 		graph_node.set_meta("port_index", 0)
 		
-		pos.y += 220
-		if pos.y > 220 * 10:
-			pos.y = 0
-			pos.x += 220
+#		pos.y += 220
+#		if pos.y > 220 * 10:
+#			pos.y = 0
+#			pos.x += 220
 		
 		all_graph_nodes[d_id] = graph_node
 		
@@ -61,12 +73,12 @@ func _update():
 			var flow: Dictionary = dialogue.flows[flow_id]
 			var control := _new_line_button(graph_node, dialogue, flow, "=== %s" % flow_id, Color.TAN, HORIZONTAL_ALIGNMENT_LEFT)
 			
-			var rt := RichTextLabel.new()
-			rt.set_text("Meta:")
-			rt.fit_content_height = true
-			rt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			rt.size_flags_vertical = Control.SIZE_EXPAND_FILL
-			control.add_child(rt)
+#			var rt := RichTextLabel.new()
+#			rt.set_text("Meta:")
+#			rt.fit_content_height = true
+#			rt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+#			rt.size_flags_vertical = Control.SIZE_EXPAND_FILL
+#			control.add_child(rt)
 			
 			_add_slot(graph_node, Color.TAN, Color.TRANSPARENT)
 			
@@ -85,6 +97,10 @@ func _update():
 		var flow = p[1]
 		# if dialogue exists.
 		if d_id in all_graph_nodes:
+			var flow_key := [d_id, flow]
+			if not flow_key in all_flow_buttons:
+				push_error("No flow key %s %s" % flow_key)
+				continue
 			var n: GraphNode = all_graph_nodes[d_id]
 			var flow_node: Node = all_flow_buttons[[d_id, flow]]
 			var goto_node: Node = g[1]
@@ -109,6 +125,7 @@ func _update():
 #	for i in range(1, len(rects)):
 #		bound = bound.merge(rects[i])
 #	graph.scroll_offset = bound.position - bound.size
+	load_graph_state()
 
 func _add_slot(graph_node: GraphNode, l: Color, r: Color):
 	var port_index: int = graph_node.get_meta("port_index")
@@ -168,12 +185,11 @@ func _process_line(graph_node: GraphNode, dialogue: Dialogue, line: Dictionary):
 			
 			goto_nodes.append([goto_path, button])
 		
-		_:
-			prints("Hmm", line.type, line)
+#		_:
+#			prints("Hmm", line.type, line)
 
 func _pressed(dialogue: Dialogue, file: int, line: int):
 	var path: String = dialogue.files[file]
-	prints("Pressed: ", path, line)
 	_select_and_edit(path, line)
 
 func _select_and_edit(path: String, line: int):

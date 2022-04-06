@@ -135,18 +135,16 @@ func _goto(dia_flow: String, step_type: int = STEP_GOTO) -> bool:
 	var d_id := p[0]
 	var flow := p[1]
 	
-	if not Dialogues.has_dialogue(d_id):
-		push_error("No dialogue %s." % d_id)
+	if not Dialogues.find(d_id):
 		return false
 	
 	var d := Dialogues.get_dialogue(d_id)
 	if not d.has_flow(flow):
-		push_error("No flow '%s' in '%s'." % [flow, d_id])
 		return false
 	
 	var lines := d.get_flow_lines(flow)
 	if not len(lines):
-		push_error("Can't find lines for %s." % flow)
+		push_error("Can't find lines for '%s'." % flow)
 		return false
 	
 	# if the stack is cleared, it means this was a "goto" not a "call"

@@ -2,14 +2,13 @@
 
 [ext_resource type="Script" path="res://addons/sooty_engine/ui/ui_map_gen.gd" id="1_k02g5"]
 
-[node name="map" type="Control"]
+[node name="Tree" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource( "1_k02g5" )
 _graph_edit = NodePath("VBoxContainer/GraphEdit")
-_graph_node_prefab = NodePath("VBoxContainer/GraphEdit/prefab")
 _b_rebuild = NodePath("VBoxContainer/HBoxContainer/rebuild")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
