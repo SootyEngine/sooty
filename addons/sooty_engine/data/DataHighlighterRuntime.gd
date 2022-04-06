@@ -80,12 +80,12 @@ func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 	_deep = UString.count_leading_tabs(text)
 	
 	# shortcuts
-	if _text.begins_with("$"):
+	if _text.begins_with("~~"):
 		_c(0, C_SYMBOL)
-		_c(1, C_SHORTCUT_PROPERTY)
+		_c(2, C_SHORTCUT_PROPERTY)
 		var clr = C_PROPERTY
 		var deep := 0
-		for i in range(2, len(_text)):
+		for i in range(3, len(_text)):
 			if _text[i] == ":":
 				_c(i, C_SYMBOL)
 				_c(i+1, clr)
@@ -105,6 +105,7 @@ func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 	var stripped = _text.strip_edges()
 	var i := 0
 	
+	# list item
 	if stripped.begins_with("- ") or stripped == "-":
 		i = _text.find("-")
 		_c(i, C_LIST_ITEM)
@@ -124,15 +125,22 @@ func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 		_c(a+1, C_FIELD)
 		
 		# object initializer
-		var e = _text.find("=", i)
-		if e != -1 and e < a:
-			_c(e, C_SYMBOL)
-			_c(e+1, C_OBJECT)
-		else:
-			e = _text.find("-", i)
-			if e != -1 and e < a:
-				_c(e, C_SYMBOL)
-				_c(e+1, C_SYMBOL)
+		for j in range(i, a):
+			match _text[j]:
+				"=":
+					_c(j, C_SYMBOL)
+					_c(j+1, C_OBJECT)
+				"?":
+					_c(j, C_SYMBOL)
+					_c(j+1, Color.TOMATO)
+#		var e = _text.find("=", i)
+#		if e != -1 and e < a:
+#		else:
+#			# flag
+#			e = _text.find("?", i)
+#			if e != -1 and e < a:
+#				_c(e, C_SYMBOL)
+#				_c(e+1, Color.TOMATO)
 		
 		i = a + 1
 	

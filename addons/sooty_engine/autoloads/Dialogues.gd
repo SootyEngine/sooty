@@ -13,12 +13,12 @@ func _ready() -> void:
 	Mods.pre_loaded.connect(_clear_mods)
 	Mods.load_all.connect(_load_mods)
 	
-	if not Engine.is_editor_hint():
-		# timer chat checks if any files were modified.
-		var timer := Timer.new()
-		add_child(timer)
-		timer.timeout.connect(_timer)
-		timer.start(CHECK_FILES_EVERY)
+#	if not Engine.is_editor_hint():
+	# timer chat checks if any files were modified.
+	var timer := Timer.new()
+	add_child(timer)
+	timer.timeout.connect(_timer)
+	timer.start(CHECK_FILES_EVERY)
 
 func _clear_mods():
 	cache.clear()

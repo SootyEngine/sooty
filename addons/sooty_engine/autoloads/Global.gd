@@ -2,13 +2,7 @@
 extends Node
 
 const VERSION := "0.1_alpha"
-var _flags: Dictionary = {}
-var flags: Array[String]:
-	get:
-		var out := []
-		for f in _flags:
-			out.append("%s:%s" % [f, _flags[f]])
-		return out
+var flags: Array[String] = [VERSION]
 
 signal started()
 signal ended()
