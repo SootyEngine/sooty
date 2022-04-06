@@ -69,10 +69,12 @@ Notice the [Visual Novel](https://github.com/teebarjunk/sooty-visual_novel-examp
 Script names are used internally as the `Dialogue` id. They contain *Flows*, which start with `===`.
 - `=>` Goto flow.
 - `==` Run flow, then continue from here.
-- `><` Ends the flow.
+- `><` Ends the current flow.
+- `>><<` End all flows.
+- `__` Pass. Does nothing. But has it's uses.
 
 ```
-// my_story.soot
+#my_story.soot
 === START
 	Once upon a time.
 	=> chapter_1
@@ -82,7 +84,7 @@ Script names are used internally as the `Dialogue` id. They contain *Flows*, whi
 	=> other_chapters.chapter_2
 
 
-// other_chapters.soot
+#other_chapters.soot
 === chapter_2
 	The dog was a fast runner.
 ```
@@ -93,14 +95,14 @@ It's becoming a robust system.
 It can handle replacing multiple lines with 1 or 1 line with mutiple.  
 And if lines are removed, they won't be lost or erased from the .sola file.
 
-|`res://test.soot`|`res://test-fr.soot`|
+|`res://test.soot`|`res://test-fr.sola`|
 |--|--|
 |![](readme/lang_1.png) | ![](readme/lang_2.png)|
 
 # <a name="soda"></a> Data Files `.soda`
 Sooty has a custom file format based on YAML, but designed for Godot.  
 It has a built in highlighter, and works in Godot's main editor.  
-Store the files in `states` or `persistent` to have them auto install.  
+Store the files in `states/` or `persistent/` to have them auto install.  
 
 They can be accessed:
 - In Godot, with `State`: `State.characters.paul.name`.
@@ -188,7 +190,7 @@ On startup, Sooty will add all scripts in this folder as children of the `State`
 All of their properties and functions are now accessible to the scripting system.
 
 ```
-# state.gd
+#state.gd
 extends Node
 
 var score := 0
@@ -200,7 +202,7 @@ func boost_score(amount := 1):
 	score += amount
 
 
-# story.soot
+#story.soot
 My score is [$my_score].
 $boost_score 1234567
 My score plus 1,234,567 is [$score].
