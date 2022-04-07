@@ -55,8 +55,9 @@ func has_flow(flow: String) -> bool:
 func find(flow: String) -> Dictionary:
 	if flow in flows:
 		return flows[flow]
-	UString.push_error_similar("No '%s' in '%s'." % [flow, id], flow, flows.keys())
-	return {}
+	else:
+		UString.push_error_similar("No '%s' in '%s'." % [flow, id], flow, flows.keys())
+		return {}
 
 func get_flow_lines(flow: String) -> Array[String]:
 	var out := []

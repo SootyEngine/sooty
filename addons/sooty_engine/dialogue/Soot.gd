@@ -28,9 +28,9 @@ const FLOW_END_ALL := ">><<"
 const FLOW_PATH_DIVIDER := "/"
 
 # called when the main game starts.
-const M_START := "MAIN" + FLOW_PATH_DIVIDER + "START"
+const M_START := "MAIN" + FLOW_PATH_DIVIDER + "start"
 # called when a flow ends.
-const M_FLOW_END := "MAIN" + FLOW_PATH_DIVIDER + "FLOW_END"
+const M_FLOW_END := "MAIN" + FLOW_PATH_DIVIDER + "flow_end"
 
 static func is_path(path: String) -> bool:
 	return FLOW_PATH_DIVIDER in path

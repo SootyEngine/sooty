@@ -74,8 +74,14 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 	var stripped = text.strip_edges()
 	var out = state
 	
-	if text.begins_with("IGNORE"):
-		_c(0, Color.GREEN_YELLOW)
+	# meta fields
+	if text.begins_with("#."):
+		_c(0, C_SYMBOL)
+		_c(2, Color.PALE_VIOLET_RED)
+		var i := text.find(":", 2)
+		if i != -1:
+			_c(i, C_SYMBOL)
+			_c(i+1, Color.PINK)
 		return out
 	
 	# flag line

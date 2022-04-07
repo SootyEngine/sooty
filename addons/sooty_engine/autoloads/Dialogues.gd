@@ -57,8 +57,9 @@ func has(id: String) -> bool:
 func find(id: String) -> Dialogue:
 	if id in cache:
 		return cache[id]
-	UString.push_error_similar("No dialogue %s." % id, id, cache.keys())
-	return null
+	else:
+		UString.push_error_similar("No dialogue %s." % id, id, cache.keys())
+		return null
 
 func has_flow(id: String) -> bool:
 	if not Soot.is_path(id):

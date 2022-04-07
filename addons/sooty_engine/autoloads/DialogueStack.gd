@@ -132,7 +132,6 @@ func do(command: String):
 		push_error("Don't know what to do with '%s'." % command)
 
 func goto(dia_flow: String, step_type: int = STEP_GOTO) -> bool:
-	print("GOTO ", dia_flow)
 	return _goto(dia_flow, step_type)
 
 func _goto(dia_flow: String, step_type: int = STEP_GOTO) -> bool:

@@ -79,6 +79,16 @@ func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 	_text = text
 	_deep = UString.count_leading_tabs(text)
 	
+	# meta fields
+	if text.begins_with("#."):
+		_c(0, C_SYMBOL)
+		_c(2, Color.PALE_VIOLET_RED)
+		var i := text.find(":", 2)
+		if i != -1:
+			_c(i, C_SYMBOL)
+			_c(i+1, Color.PINK)
+		return _out
+	
 	# shortcuts
 	if _text.begins_with("~~"):
 		_c(0, C_SYMBOL)

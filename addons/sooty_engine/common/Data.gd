@@ -13,3 +13,7 @@ func _to_string() -> String:
 
 func duplicate() -> Object:
 	return UObject.duplicate_object(self)
+
+# used for formatting.
+func get_string(id := "") -> String:
+	return ""

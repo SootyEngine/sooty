@@ -1,7 +1,8 @@
 
 # Bugs
-- [ ] temp_save tries to save on editor quit.
 - [ ] .soot multiline strings `""""` have an issue with tabs.
+- [ ] Caption name showsup a second before hiding.
+- [x] ~~temp_save tries to save on editor quit.~~
 - [x] Changing scenes ends the stack.
 - [x] Reloading dialogue stopped working.
 - [x] Quitting doesn't hide captions.
@@ -10,15 +11,11 @@
 - [ ] Optional obfuscation/encrypt for `soot` `soda` and save data?
 - [x] Persistent data loaded before mods loaded.
 
+# Docs
+- [ ] Create gitpages docs.
+- [ ] Move .md to gitpages.
+
 # Sooty
-- [ ] Meta counter outputs:
-    - [ ] Total estimated time.
-    - [ ] Total words.
-    - [ ] Total words per character.
-    - [ ] Total branches.
-    - [ ] Auto count possible routes.
-    - [ ] Timer per route.
-    - [ ] Characters in route.
 - [ ] Remove `.` from `EXT_*` properties.
 - [x] Rename Achievement to Award.
 - [x] Data parser.
@@ -26,10 +23,10 @@
 - [x] Move UI/console and fonts to `VisualNovel` addon.
 
 # *.soot Dialogue Files
-- [ ] `IGNORE` flag to skip files.
 - [ ] Match arrays pattern.
 - [ ] Match dict pattern.
 - [ ] Make flags work on nested data.
+- [x] `IGNORE` flag to skip files.
 - [x] Flags for ignoring lines.
 - [x] Multi file loading from mods. (not tested)
 - [x] Reimplement `+` as a dialogue option for merging external options.
@@ -44,14 +41,15 @@
 - [x] Generate `.sola` files, for writing translations.
 
 # *.soda Data Files
-- [ ] Allow `:` or `.` paths inside single key.
+- [ ] Soda files in `lang/` with language prefix: `vars-en.soda` for replacing states without adding any.
+- [ ] Allow or `.` paths inside single key.
 - [ ] Translation loading when mods are loaded.
 - [ ] Generate translation file that ignores objects/dicts/arrays.
 - [ ] `#meta:` meta keys.
     - [ ] `#.:` to define a location all keys are inside. ie `#.: items`
 - [ ] `\,` escapes
 - [ ] Shortcuts for functions that take arguments.
-- [ ] `?` flag key.
+- [x] `?` flag key.
 - [x] `$` shortcut key.
 - [x] `.soda` debug viewer.
 - [x] Dictionary -> `.soda` text function.
@@ -67,6 +65,7 @@
 
 # Highlighters
 - `.soot`
+    - [ ] Highlight `IGNORE` yellow
     - [x] Markdown * ** ***
 - [x] Match statements on same line aren't colored.
 - [x] `+` options isn't colored
@@ -80,16 +79,17 @@
 - [x] Auto apply script highlighter to files.
 
 # UFile
-- [x] Add _on_files(dir: String, call: Callable) function. To make collecting on a pattern easier.
-- [x] file_exists_in_dir(): Check for a file inside a directory.
-- [x] get_file_in_dir(tail): Get a path to a possibly nested file ending in tail.
+- [x] Add `_on_files(dir: String, call: Callable)` function. To make collecting on a pattern easier.
+- [x] `file_exists_in_dir()`: Check for a file inside a directory.
+- [x] `get_file_in_dir(tail)`: Get a path to a possibly nested file ending in tail.
 
 # DialogueStack
-- [ ] `><` Should only end one flow.
-- [ ] `>><<` For ending dialogue.
-- [ ] `__` For pass/do nothing. (Useful for inserting lines later with `#id=insert_here`)
+- [x] `><` Should only end one flow.
+- [x] `>><<` For ending dialogue.
+- [x] `__` For pass/do nothing. (Useful for inserting lines later with `#id=insert_here`)
 
 # VisualNovel
+- [ ] Use state objects to parse text/speaker. `_preparse_caption` `_preparse_caption_name`
 - [ ] Character can control string wrappes `"` (For phones and such.)
 - [ ] Create theme templates for captions + options.
 - [x] Include fonts folder.
@@ -122,7 +122,16 @@
 - [ ]
 
 # TreeView
+- [ ] Shrink minimap.
 - [ ] Change dead ends to black instead of red, to prevent confusing with `><` and `>><<`.
+- [ ] Meta counter outputs:
+    - [ ] Total estimated time.
+    - [ ] Total words.
+    - [ ] Total words per character.
+    - [ ] Total branches.
+    - [ ] Auto count possible routes.
+    - [ ] Timer per route.
+    - [ ] Characters in route.
 
 # Printers
 - [x] Seperate text printers and options menu.

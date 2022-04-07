@@ -29,7 +29,6 @@ func _patch_object(property: String, type: String) -> Object:
 
 # add a list of properties from DataParser
 func _patch_list_property(property: String, value: Variant):
-	print("ADD %s to %s." % [value, property])
 	UDict.append(_extra, property, value)
 
 # add a list of objects from DataParser

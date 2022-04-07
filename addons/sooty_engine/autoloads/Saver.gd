@@ -60,7 +60,7 @@ func _mods_loaded():
 	_last_save_slot = data.get("last_save_slot", _last_save_slot)
 	_set_persistent.emit(data)
 	loaded_persistent.emit()
-	print("Loaded Persistent to user://persistent.tres.")
+	print("Loaded Persistent from user://persistent.tres.")
 
 func save_persistent():
 	_timer.start()

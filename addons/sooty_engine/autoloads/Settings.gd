@@ -1,4 +1,4 @@
-extends "res://addons/sooty_engine/autoloads/base_state.gd"
+extends "res://addons/sooty_engine/autoloads/state_manager.gd"
 
 func _get_subdir() -> String:
 	return "settings"

@@ -19,7 +19,7 @@ func _init(d: String, inst: bool):
 	installed = inst
 	
 	if d == "res://":
-		name = "BASE_GAME_STATE"
+		name = "res://"
 	elif d.begins_with("res://addons/"):
 		name = d.trim_prefix("res://addons/")
 	else:

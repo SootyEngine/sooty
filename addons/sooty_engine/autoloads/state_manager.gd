@@ -39,14 +39,12 @@ func _ready() -> void:
 
 # called by DataParser if .soda sets something that doesn't exist.
 func _patch_property(key: String, patch: Variant):
-	print("Set p %s to %s" % [key, patch])
 	_monkey_patcher._data[key] = patch
 
 # called by DataParser if .soda sets something that doesn't exist.
 func _patch_object(key: String, type: String) -> Object:
 	var obj: Object = UObject.create(type) if type else PatchableData.new()
 	if obj:
-		print("Set O %s to %s" % [key, obj])
 		_monkey_patcher._data[key] = obj
 	return obj
 
@@ -86,7 +84,6 @@ func _load_mods(mods: Array):
 	
 	# collect all children in list.
 	_children = get_children()
-	print("CHILDREN FOR ", _get_subdir(), _children)
 	
 	# install data (.soda) to children.
 	for mod in mods:
