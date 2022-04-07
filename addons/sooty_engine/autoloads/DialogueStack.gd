@@ -1,7 +1,7 @@
 extends Node
 
 const MAX_STEPS_PER_TICK := 20 # Safety limit, in case of excessive loops.
-enum { STEP_GOTO, STEP_CALL, STEP_END }
+enum { STEP_GOTO, STEP_CALL, STEP_PASS, STEP_OPTION, STEP_BREAK, STEP_RETURN, STEP_IF, STEP_MATCH }
 
 signal started() # Dialogue starts up.
 signal ended() # Dialogue has ended.
@@ -30,9 +30,6 @@ func _ready():
 		await get_tree().process_frame
 		Saver._get_state.connect(_save_state)
 		Saver._set_state.connect(_load_state)
-		Saver.pre_load.connect(_game_loaded)
-		Global.started.connect(_game_started)
-		Global.ended.connect(_game_ended)
 		Dialogues.reloaded.connect(_dialogues_reloaded)
 
 func _save_state(state: Dictionary):
@@ -52,18 +49,6 @@ func _dialogues_reloaded():
 	_halting_for.clear()
 	_halt_list_changed.emit()
 	_stack = _last_tick_stack.duplicate(true)
-
-func _game_loaded():
-	end("LOADING")
-
-func _game_started():
-	if Dialogues.has_dialogue_flow(Soot.M_START):
-		execute(Soot.M_START)
-	else:
-		push_error("There is no '%s' flow." % Soot.M_START)
-
-func _game_ended():
-	end("GAME_ENDED")
 
 func is_halted() -> bool:
 	return len(_halting_for) > 0
@@ -131,6 +116,9 @@ func do(command: String):
 	else:
 		push_error("Don't know what to do with '%s'." % command)
 
+func stack(dia_flow: String) -> bool:
+	return _goto(dia_flow, STEP_CALL)
+
 func goto(dia_flow: String, step_type: int = STEP_GOTO) -> bool:
 	return _goto(dia_flow, step_type)
 
@@ -180,7 +168,7 @@ func end(msg := ""):
 func select_option(option: DialogueLine):
 	var o := option._data
 	if "then" in o:
-		_push(option._dialogue_id, "%OPTION%", o.then, STEP_CALL)
+		_push(option._dialogue_id, "%OPTION%", o.then, STEP_OPTION)
 	if not _execute_mode:
 		option_selected.emit(option)
 
@@ -188,14 +176,14 @@ func _pop():
 	var last: Dictionary = _stack.pop_back()
 	
 	# a flow ended
-	if not _execute_mode and last.type == STEP_GOTO:
+	if not _execute_mode and last.type in [STEP_GOTO, STEP_CALL]:
 		flow_ended.emit(Soot.join_path([last.d_id, last.flow]))
 
 func _push(d_id: String, flow: String, lines: Array, type: int):
 	_stack.append({ d_id=d_id, flow=flow, lines=lines, type=type, step=0 })
 	
 	# a flow started
-	if not _execute_mode and type == STEP_GOTO:
+	if not _execute_mode and type in [STEP_GOTO, STEP_CALL]:
 		await get_tree().process_frame
 		flow_started.emit(Soot.join_path([d_id, flow]))
 
@@ -299,7 +287,7 @@ func _pop_next_line() -> Dictionary:
 			var d := Dialogues.get_dialogue(d_id)
 			for i in len(line.conds):
 				if StringAction._test(line.conds[i]):
-					_push(d.id, flow, line.cond_lines[i], STEP_CALL)
+					_push(d.id, flow, line.cond_lines[i], STEP_IF)
 					return {}
 		
 		# match chain
@@ -308,7 +296,7 @@ func _pop_next_line() -> Dictionary:
 			for i in len(line.cases):
 				var case = line.cases[i]
 				if case == "_" or UType.is_equal(match_result, State._eval(case)):
-					_push(d_id, flow, line.case_lines[i], STEP_CALL)
+					_push(d_id, flow, line.case_lines[i], STEP_MATCH)
 					return {}
 		
 		# has a condition

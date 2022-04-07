@@ -6,11 +6,21 @@ var flags: Array[String] = [VERSION]
 
 signal started()
 signal ended()
-signal message(type: String, payload: Variant)
 signal added_to_group(node: Node, group: String)
 signal removed_from_group(node: Node, group: String)
+signal message(type: String, payload: Variant)
 
 var active_game := true
+
+func _init() -> void:
+	add_to_group("@.version")
+	add_to_group("@.msg")
+
+func version() -> String:
+	return VERSION
+
+func msg(type: String, payload: Variant = null):
+	message.emit(type, payload)
 
 @onready var config := Config.new("res://config.cfg") # the main config settings file. TODO: add reload option in settings
 var _screenshot: Image # a copy of the screen, for use in menus, or save system.
@@ -69,9 +79,6 @@ func start():
 func end():
 	active_game = false
 	ended.emit()
-
-func version():
-	return "[%s]%s[]" % [Color.TOMATO, VERSION]
 
 func snap_screenshot():
 	_screenshot = get_viewport().get_texture().get_image()

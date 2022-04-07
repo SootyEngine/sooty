@@ -10,6 +10,9 @@ var _goto: Callable # an overridable goto function, so you can use your own tran
 var id: String:
 	get: return UFile.get_file_name(current.scene_file_path)
 
+func _init() -> void:
+	add_to_group("@Scene")
+
 func _ready() -> void:
 	await get_tree().process_frame
 	
@@ -20,6 +23,7 @@ func _ready() -> void:
 func _first_load():
 	# call the start function when testing from editor
 	current = get_tree().current_scene
+	current.add_to_group("@scene")
 	scene_changed.emit()
 	if current.has_method("_start"):
 		current._start(false)
@@ -90,6 +94,7 @@ func change(path: String, is_loading: bool = false):
 	pre_scene_changed.emit()
 	await tree.process_frame
 	current = tree.current_scene
+	current.add_to_group("@scene")
 	scene_changed.emit()
 	if current.has_method("_start"):
 		current._start(is_loading)

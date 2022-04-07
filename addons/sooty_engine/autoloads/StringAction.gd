@@ -40,31 +40,14 @@ func do(command: String) -> Variant:
 		var converted_args := args.map(_str_to_var)
 		var group: String
 		
-		# sub method
+		# node function
 		if "." in method:
 			var p = method.split(".", true, 1)
-			group = p[0]
+			group = "@" + p[0]
 			method = p[1]
-			
-			# autoload
-			if UString.is_capitalized(group):
-				var autoload := get_node("/root/%s" % group)
-				if autoload != null:
-					return UObject.call_w_args(autoload, method, converted_args)
-#
-#				# check for a static class?
-#				else:
-#					var obj = UObject.get_class_from_name(group)
-#					if obj != null:
-#						return UObject.call_w_args(obj, method, converted_args)
-
-				else:
-					push_error("No autoload or static class '%s'." % group)
-					return null
-		
-		# group
+		# function
 		else:
-			group = "sa:" + method
+			group = "@." + method
 		
 		var nodes := Global.get_tree().get_nodes_in_group(group)
 		var got

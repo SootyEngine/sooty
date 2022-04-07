@@ -7,11 +7,12 @@ const CHAR_QUOTE_CLOSED := "”"
 const CHAR_INNER_QUOTE_OPENED := "‘"
 const CHAR_INNER_QUOTE_CLOSED := "’"
 
-static func as_string(v: Variant) -> String:
-	if v is Object and v.has_method("as_string"):
-		return v.as_string()
-	else:
-		return str(v)
+static func get_string(v: Variant, id: String, default := str(v)) -> String:
+	if v is Object and v.has_method("get_string"):
+		var got: String = v.get_string(id)
+		if got:
+			return got
+	return default
 
 # Replace "quotes" with “quotes”.
 static func fix_quotes(input: String) -> String:

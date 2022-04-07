@@ -27,16 +27,13 @@ const FLOW_END_ALL := ">><<"
 
 const FLOW_PATH_DIVIDER := "/"
 
-# called when the main game starts.
-const M_START := "MAIN" + FLOW_PATH_DIVIDER + "start"
-# called when a flow ends.
-const M_FLOW_END := "MAIN" + FLOW_PATH_DIVIDER + "flow_end"
-
 static func is_path(path: String) -> bool:
 	return FLOW_PATH_DIVIDER in path
 
-static func join_path(parts: Array) -> String:
-	return FLOW_PATH_DIVIDER.join(parts)
+static func join_path(a: Variant, b: String = "") -> String:
+	if a and b:
+		return FLOW_PATH_DIVIDER.join([a, b])
+	return FLOW_PATH_DIVIDER.join(a)
 
 static func split_path(path: String) -> PackedStringArray:
 	return path.split(FLOW_PATH_DIVIDER)
