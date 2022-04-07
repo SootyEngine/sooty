@@ -265,3 +265,16 @@ static func trim_empty(v: Variant):
 			else:
 				x.erase(k))
 	return out
+
+static func map(d: Dictionary, call: Callable) -> Dictionary:
+	var out := {}
+	for k in d:
+		d[k] = call.call(k, d[k])
+	return out
+
+static func filter(d: Dictionary, call: Callable) -> Dictionary:
+	var out := {}
+	for k in d:
+		if call.call(k, d[k]):
+			out[k] = d[k]
+	return out 

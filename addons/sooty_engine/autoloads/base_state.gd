@@ -6,12 +6,20 @@ signal changed(property: Array)
 signal changed_to(property: Array, to: Variant)
 signal changed_from_to(property: Array, from: Variant, to: Variant)
 
-var _silent := false # won't emit signals when changing things.
-var _changed := false # state has changed.
-var _shortcuts := {} # shorter keys to nested data. (ie: p = characters:player)
+# won't emit signals when changing things.
+var _silent := false
+# state has changed.
+var _changed := false
+# shorter keys to nested data. (ie: p = characters:player)
+var _shortcuts := {}
+# the default state, after all mods were installed.
 var _default := {}
+# all the child nodes
 var _children := []
+# a child to add data to if it has no where else to go.
+var _monkey_patcher: Node
 
+# overriden in State, Persistent and Settings.
 func _get_subdir() -> String:
 	assert(false)
 	return ""
@@ -26,32 +34,45 @@ func _load_state(data: Dictionary):
 	_silent = false
 
 func _ready() -> void:
-	child_entered_tree.connect(_child_added)
 	await get_tree().process_frame
 	_connect_to_signals()
 
+# called by DataParser if .soda sets something that doesn't exist.
+func _patch_property(key: String, patch: Variant):
+	print("Set p %s to %s" % [key, patch])
+	_monkey_patcher._data[key] = patch
+
+# called by DataParser if .soda sets something that doesn't exist.
+func _patch_object(key: String, type: String) -> Object:
+	var obj: Object = UObject.create(type) if type else PatchableData.new()
+	if obj:
+		print("Set O %s to %s" % [key, obj])
+		_monkey_patcher._data[key] = obj
+	return obj
+
 func _connect_to_signals():
-	Mods.pre_loaded.connect(_clear_mods)
 	Mods.load_all.connect(_load_mods)
 	Mods.loaded.connect(_loaded_mods)
 
-func _clear_mods():
-	_shortcuts.clear()
-	
-	for child in get_children():
-		remove_child(child)
-		child.queue_free()
-
 func _load_mods(mods: Array):
-	var subdir := _get_subdir()
+	# remove old shortcuts
+	_shortcuts.clear()
+	# remove old states
+	UNode.remove_children(self)
+	
+	# create monkey patcher to add spare properites to
+	_monkey_patcher = preload("res://addons/sooty_engine/autoloads/patchable_state.gd").new()
+	_monkey_patcher.name = "_monkey_patcher_"
 	
 	# init nodes from .gd scripts.
+	var subdir := _get_subdir()
 	for mod in mods:
 		mod.meta[subdir] = []
 		
 		var head = mod.dir.plus_file(subdir)
 		for script_path in UFile.get_files(head, ".gd"):
-			var state: Node = load(script_path).new()
+			var script = load(script_path)
+			var state = script.new()
 			if state is Node:
 				mod.meta[subdir].append(script_path) # tell Mods what file has been installed
 				state.set_name(UFile.get_file_name(script_path))
@@ -60,15 +81,22 @@ func _load_mods(mods: Array):
 				# TODO: Allow resources.
 				push_error("States must be node. Can't load %s." % script_path)
 	
-	# install .data
+	# add monkey patcher for missing properties.
+	add_child(_monkey_patcher)
+	
+	# collect all children in list.
+	_children = get_children()
+	print("CHILDREN FOR ", _get_subdir(), _children)
+	
+	# install data (.soda) to children.
 	for mod in mods:
 		var head = mod.dir.plus_file(subdir)
 		for data_path in UFile.get_files(head, Soot.EXT_DATA):
 			mod.meta[subdir].append(data_path) # tell Mods what file has been installed
-			var state = DataParser.new().parse(data_path)
+			var state = DataParser.parse(data_path)
 			
 			# patch state objects
-			UObject.patch(self, state.data, [data_path])
+			DataParser.patch(self, state.data, [data_path])
 			
 			# collect shortcuts
 			for k in state.shortcuts:
@@ -79,6 +107,7 @@ func _load_mods(mods: Array):
 					var old = _shortcuts[k]
 					push_error("Trying to use the same shortcut '%s' for %s and %s." % [k, old, new])
 
+# get the default state
 func _loaded_mods():
 	_default = _get_state()
 
@@ -87,6 +116,7 @@ func _reset():
 
 func _child_added(_n: Node):
 	_children = get_children()
+	print("CHILDREN ", _children)
 
 func _has_method(method: String) -> bool:
 	for node in _children:

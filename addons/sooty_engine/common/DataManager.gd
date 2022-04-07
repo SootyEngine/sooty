@@ -1,11 +1,14 @@
 extends Resource
-class_name BaseDataManagerClass
+class_name DataManager
 
 var _all: Dictionary = {}
 var _iter_current := 0
 
 func _init() -> void:
-	_connect.call_deferred()
+	_post_init.call_deferred()
+
+func _post_init():
+	Mods.pre_loaded.connect(func(): _all.clear())
 
 func get_total() -> int:
 	return len(_all)
@@ -15,9 +18,6 @@ func _get_state():
 
 func _set_state(state: Dictionary):
 	UObject.set_state(_all, state)
-
-func _connect():
-	Mods.pre_loaded.connect(func(): _all.clear())
 
 func _iter_init(arg):
 	_iter_current = 0
@@ -53,20 +53,9 @@ func find(id: String, error_action := "find") -> Variant:
 		UString.push_error_similar("Can't %s %s named %s." % [error_action, _get_data_class(), id], id, _all.keys())
 		return null
 
-func _add_object(key: String, type: String) -> Object:
+func _patch_object(key: String, type: String) -> Object:
 	_all[key] = UObject.create(type if type else _get_data_class())
 	return _all[key]
-
-#func _patch(key: String, type: String, patch: Variant, sources: Array):
-#	if type == "":
-#		type = _get_data_class()
-#
-#	# patch if it exists.
-#	if not key in _all:
-#		_all[key] = UObject.create(type)
-#		print("Created %s %s %s." % [type, key, _all[key]])
-#	print("Patching %s %s." % [type, key])
-#	UObject.patch(_all[key], patch, sources)
 
 func _to_string() -> String:
 	return UObject._to_string_nice(self)

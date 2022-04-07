@@ -27,20 +27,6 @@ func _enter_tree() -> void:
 	for id in AUTOLOADS:
 		add_autoload_singleton(id, "res://addons/sooty_engine/autoloads/%s.gd" % id)
 	
-#	editor = EDITOR.instantiate()
-#	editor.is_plugin_hint = true
-#	editor.plugin = self
-#	# Add the main panel to the editor's main viewport.
-#	get_editor_interface().get_editor_main_control().add_child(editor)
-#	# Hide the main panel. Very much required.
-#	_make_visible(false)
-
-	editor = preload("res://addons/sooty_engine/ui/ui_map_gen.tscn").instantiate()
-	editor.is_plugin_hint = true
-	editor.plugin = self
-	add_control_to_dock(EditorPlugin.DOCK_SLOT_LEFT_BR, editor)
-#	add_control_to_bottom_panel(editor, "Dialogue")
-	
 	# add .soot to the allowed textfile extensions.
 	var es: EditorSettings = get_editor_interface().get_editor_settings()
 	var fs = es.get_setting("docks/filesystem/textfile_extensions")
@@ -55,6 +41,13 @@ func _enter_tree() -> void:
 	se.register_syntax_highlighter(data_highlighter)
 	# track scripts opened/closed to can add highliter.
 	se.editor_script_changed.connect(_editor_script_changed)
+	
+	editor = preload("res://addons/sooty_engine/ui/ui_map_gen.tscn").instantiate()
+	editor.is_plugin_hint = true
+	editor.plugin = self
+	add_control_to_dock(EditorPlugin.DOCK_SLOT_LEFT_BR, editor)
+#	add_control_to_bottom_panel(editor, "Dialogue")
+	
 
 # find a code editor for a given text file.
 func get_code_edit(path: String) -> CodeEdit:

@@ -4,10 +4,7 @@ class_name DataParser
 
 const S_COMMENT := "#"
 
-func _init():
-	pass
-
-func parse(path: String):
+static func parse(path: String) -> Dictionary:
 	var lines := UFile.load_text(path).split("\n")
 	var dict_lines := []
 	var shortcuts := {}
@@ -110,11 +107,7 @@ func parse(path: String):
 		data=out_data
 	}
 
-#func _fix(d: Dictionary):
-#	if "value" in d and d.value is String:
-#		d.value = "%s!%s" % [d.line, d.value]
-
-func _collect_tabbed(dict_lines: Array, i: int) -> Array:
+static func _collect_tabbed(dict_lines: Array, i: int) -> Array:
 	var line = dict_lines[i]
 	i += 1
 	# collect tabbed
@@ -125,7 +118,7 @@ func _collect_tabbed(dict_lines: Array, i: int) -> Array:
 	_finalize_line(line)
 	return [i, line]
 
-func _find_property_split(text: String) -> int:
+static func _find_property_split(text: String) -> int:
 	for i in len(text):
 		match text[i]:
 			"{", "[": break
@@ -134,7 +127,7 @@ func _find_property_split(text: String) -> int:
 					return i
 	return -1
 	
-func _finalize_line(line: Dictionary):
+static func _finalize_line(line: Dictionary):
 	# starting with `-`?
 	if _is_list_item(line.text):
 		line.list_item = true
@@ -144,7 +137,6 @@ func _finalize_line(line: Dictionary):
 	var split := _find_property_split(line.text)
 	if split != -1:
 		line.key = line.text.substr(0, split).strip_edges()
-#		line.key = _pack_line_index(line, line.key)
 		line.text = line.text.substr(split+1).strip_edges()
 		line.value = _str_to_value(line)
 	
@@ -163,7 +155,7 @@ func _finalize_line(line: Dictionary):
 					list.append([l] if l.value else [])
 				else:
 					list[-1].append(l)
-			line.value = list.map(_merge_list_items)
+			line.value = list.map(func(x): return _merge_list_items(x))
 		# dict
 		else:
 			# not a dict, just a newline value
@@ -181,8 +173,8 @@ func _finalize_line(line: Dictionary):
 	else:
 		if line.value is String and line.value:
 			line.value = _pack_line_index(line, line.value)
-	
-func _merge_list_items(list: Array) -> Variant:
+
+static func _merge_list_items(list: Array) -> Variant:
 	var out = null
 	for i in len(list):
 		var item: Dictionary = list[i]
@@ -195,11 +187,11 @@ func _merge_list_items(list: Array) -> Variant:
 	return out
 
 # add the line index to the front for error helping
-func _pack_line_index(line: Dictionary, text: String) -> String:
+static func _pack_line_index(line: Dictionary, text: String) -> String:
 #	return "X!%s" % text
 	return "%s!%s!%s" % [0, line.line, text]
 
-func _str_to_value(line: Dictionary) -> Variant:
+static func _str_to_value(line: Dictionary) -> Variant:
 	var s: String = line.text
 	# list?
 	if UString.is_wrapped(s, "[", "]"):
@@ -216,24 +208,24 @@ func _str_to_value(line: Dictionary) -> Variant:
 			var v := "" if len(p) == 1 else p[1].strip_edges()
 #			k = _pack_line_index(line, k)
 			v = _pack_line_index(line, v)
-			out[k] = v
+			out[k] =  v
 		return out
 	# leave alone
 	else:
 		return s
 
-func _is_list_item(s: String) -> bool:
+static func _is_list_item(s: String) -> bool:
 	return s.begins_with("- ") or s == "-"
 
 # attempt to display data as a .soda file
-func dict_to_str(dict: Dictionary) -> String:
+static func dict_to_str(dict: Dictionary, with_type := false) -> String:
 	var out := []
-	UDict.dig(dict, _strip)
-	_to_str(out, "", dict, 0, -1)
+	UDict.dig(dict, func(x): _strip(x))
+	_to_str(out, "", dict, with_type, 0, -1)
 	out.pop_front() # TODO: find out why first element is empty
 	return "\n".join(out)
 
-func _strip(x):
+static func _strip(x):
 	for k in x:
 		match typeof(x[k]):
 			TYPE_ARRAY:
@@ -244,44 +236,142 @@ func _strip(x):
 			TYPE_STRING:
 				x[k] = x[k].split("!", true, 2)[-1].c_escape()
 
-func _to_str(out: Array, key: String, item: Variant, deep: int, parent: int):
+static func _to_str(out: Array, key: String, value: Variant, with_type: bool, deep: int, parent: int):
 	var head = "\t".repeat(max(0, deep-1))
-	match typeof(item):
+	match typeof(value):
 		TYPE_DICTIONARY:
 			if parent == TYPE_ARRAY:
-				var hline = _to_h_str(item)
-#			if len(hline) < 40:
+				var hline = _to_h_str(value, with_type)
 				out.append("%s%s%s" % [head, key, hline])
 			else:
 				out.append("%s%s" % [head, key])
-				for k in item:
-					_to_str(out, k+": ", item[k], deep+1, TYPE_DICTIONARY)
+				for k in value:
+					_to_str(out, k+": ", value[k], with_type, deep+1, TYPE_DICTIONARY)
 		
 		TYPE_ARRAY:
-			var hline = _to_h_str(item)
+			var hline = _to_h_str(value, with_type)
 			if len(hline) < 40:
 				out.append("%s%s%s" % [head, key, hline])
 			else:
 				out.append("%s%s" % [head, key])
-				for i in item:
-					_to_str(out, "- ", i, deep+1, TYPE_ARRAY)
+				for item in value:
+					_to_str(out, "- ", item, with_type, deep+1, TYPE_ARRAY)
 		
 		_:
-			out.append("%s%s%s" % [head, key, item])
+			if with_type:
+				out.append("%s%s%s" % [head, key, "%s(%s)" % [value, UType.get_name_from_type(typeof(value)) ]] )
+			else:
+				out.append("%s%s%s" % [head, key, value] )
 
-func _to_h_str(item: Variant) -> String:
-	match typeof(item):
+static func _to_h_str(value: Variant, with_type: bool) -> String:
+	match typeof(value):
 		TYPE_ARRAY:
 			var out := []
-			for i in item:
-				out.append(_to_h_str(i))
-			return "[%s]" % ", ".join(out)
+			for i in value:
+				out.append(_to_h_str(i, with_type))
+			return "[%s]" % [", ".join(out)]
 		
 		TYPE_DICTIONARY:
 			var out := []
-			for k in item:
-				out.append("%s: %s" % [k, _to_h_str(item[k])])
-			return "{%s}" % ", ".join(out)
+			for k in value:
+				out.append("%s: %s" % [k, _to_h_str(value[k], with_type)])
+			return "{%s}" % [", ".join(out)]
 		
 		_:
-			return str(item)
+			if with_type:
+				return "%s(%s)" % [value, UType.get_name_from_type(typeof(value)) ]
+			else:
+				return str(value)
+
+# patches contain file index and line index for debug purposes
+# it keeps everything as a string until it's time to apply to an object
+# this will clean it all and auto convert strings to variants
+static func patch_to_var(patch: Variant, sources: Array, explicit_type := -1) -> Variant:
+	match typeof(patch):
+		TYPE_STRING:
+			# reversing _pack_line_index
+			var info = patch.split("!", true, 2)
+			var file: String = sources[info[0].to_int()]
+			var line: String = info[1]
+			var data: String = info[2]
+			if explicit_type != -1:
+				return UString.str_to_type(data, explicit_type)
+			else:
+				return UString.str_to_var(data)
+		TYPE_DICTIONARY:
+			var out := {}
+			for k in patch:
+				out[k] = patch_to_var(patch[k], sources)
+			return out
+		TYPE_ARRAY:
+			var out := []
+			for item in patch:
+				out.append(patch_to_var(item, sources))
+			return out
+		_:
+			assert(false)
+	return null
+
+static func patch(target: Object, patch: Dictionary, sources: Array):
+	for k in patch:
+		var v = patch[k]
+		var p = UString.get_key_var(k, "=")
+		k = p[0]
+		var type = p[1]
+		
+		# create if it didn't exist
+		if not k in target:
+			if v is Dictionary:
+				if target.has_method("_patch_object"):
+					var new_obj: Object = target._patch_object(k, type)
+					if new_obj:
+						if new_obj.has_method("_added"):
+							new_obj._added(target)
+						patch(new_obj, v, sources)
+					else:
+						push_error("Couldn't create '%s' for %s." % [k, patch_to_var(v, sources)])
+				else:
+					push_error("No _patch_object() in %s. Ignoring %s." % [target, patch_to_var(v, sources)])
+			
+			elif v is Array:
+				for list_item_patch in v:
+					if list_item_patch is Dictionary:
+						if target.has_method("_patch_list_object"):
+							var new_obj: Object = target._patch_list_object(k, type)
+							if new_obj:
+								if new_obj.has_method("_added"):
+									new_obj._added(target)
+								patch(new_obj, list_item_patch, sources)
+							else:
+								push_error("Couldn't create '%s' for %s." % [k, patch_to_var(list_item_patch, sources)])
+						else:
+							push_error("No _patch_list_object() in %s. Ignoring %s." % [target, patch_to_var(list_item_patch, sources)])
+					
+					elif list_item_patch is Array:
+						push_error("Not implemented.")
+					
+					else:
+						if target.has_method("_patch_list_property"):
+							target._patch_list_property(k, patch_to_var(list_item_patch, sources))
+						else:
+							push_error("No _patch_list_property() in %s for %s." % [target, patch_to_var(list_item_patch, sources)])
+			else:
+				if target.has_method("_patch_property"):
+					target._patch_property(k, patch_to_var(v, sources))
+				else:
+					push_error("No '%s' or _patch_property() in %s for %s." % [k, target, patch_to_var(v, sources)])
+		
+		else:
+			_patch(target, k, v, sources)
+
+static func _patch(target: Object, property: String, patch: Variant, sources: Array):
+	var target_type = typeof(target[property])
+	# recursively check sub objects.
+	if target_type == TYPE_OBJECT:
+		patch(target[property], patch, sources)
+	else:
+		var value = patch_to_var(patch, sources)
+		if typeof(value) == target_type:
+			target[property] = value
+		else:
+			push_error("Couldn't convert '%s' for property %s." % [patch, property])

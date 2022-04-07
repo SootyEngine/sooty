@@ -1,8 +1,11 @@
-extends BaseDataClass
-class_name BaseDataClassExtendable
+extends Data
+class_name PatchableData
 
 const DEFAULT_FORMAT := "[b]{name}[]"
 var _extra := {}
+
+func get_class() -> String:
+	return "PatchableDataObject"
 
 func _init(d := {}):
 	UObject.set_state(self, d)
@@ -15,15 +18,25 @@ func _init(d := {}):
 func _get_state_properties() -> Array:
 	return UObject._get_state_properties(self) + _extra.keys()
 
-# called by UObject, typically.
-func _add_property(property: String, value: Variant):
-	print("ADD PROPERTY %s=%s to %s" % [property, value, self])
+# add a property from DataParser
+func _patch_property(property: String, value: Variant):
 	_extra[property] = value
 
-# called by UObject, typically.
-func _add_object(property: String, type: String) -> Object:
-	_extra[property] = UObject.create(type)
+# add an object from DataParser
+func _patch_object(property: String, type: String) -> Object:
+	_extra[property] = PatchableData.new() if type == "" else UObject.create(type)
 	return _extra[property]
+
+# add a list of properties from DataParser
+func _patch_list_property(property: String, value: Variant):
+	print("ADD %s to %s." % [value, property])
+	UDict.append(_extra, property, value)
+
+# add a list of objects from DataParser
+func _patch_list_object(property: String, type: String) -> Object:
+	var obj: Object = PatchableData.new() if type == "" else UObject.create(type)
+	UDict.append(_extra, property, obj)
+	return obj
 
 func _get(property: StringName):
 	if str(property) in _extra:

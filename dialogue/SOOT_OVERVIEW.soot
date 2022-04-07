@@ -39,7 +39,7 @@ IGNORE
 	As will **whitespace**.
 	""""
 	
-	// Multiline with a speaker and condition.
+	# Multiline with a speaker and condition.
 	paul: """" {{score > 20}}
 	I don't care what [b]they[] say, it's not happening.
 	

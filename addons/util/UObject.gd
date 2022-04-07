@@ -60,6 +60,12 @@ const GLOBAL_SCOPE_METHODS := [
 static func get_class_name(o: Object) -> String:
 	return o.get_script().resource_path.get_file().split(".", true, 1)[0]
 
+static func duplicate_object(input: Object) -> Object:
+	var classname := get_class_name(input)
+	var output = create(classname)
+	set_state(output, get_state(input))
+	return output
+
 # looks for an object of given type
 # call(player, HealthInfo) would look for "var health:HealthInfo" and return a reference to it.
 static func get_first_property_of_object_type(target: Object, object_type: Variant):
@@ -73,7 +79,13 @@ static func get_state(target: Variant) -> Variant:
 	if target is Object and target.has_method("_get_state"):
 		return target._get_state()
 	elif target is Array:
-		return target.map(func(x): return get_state(x))
+		var out = []
+		for item in target:
+			if typeof(item) in [TYPE_OBJECT, TYPE_DICTIONARY, TYPE_ARRAY]:
+				out.append(get_state(item))
+			else:
+				out.append(item)
+		return out
 	else:
 		var out := {}
 		for k in get_state_properties(target):
@@ -117,79 +129,6 @@ static func _get_state_properties(target: Object) -> Array:
 	return target.get_property_list()\
 		.filter(func(x): return x.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and x.name[0] != "_")\
 		.map(func(x): return x.name)
-
-# patches contain file index and line index for debug purposes
-# it keeps everything as a string until it's time to apply to an object
-# this will clean it all and auto convert strings to variants
-static func patch_to_var(patch: Variant, sources: Array, explicit_type := -1) -> Variant:
-	match typeof(patch):
-		TYPE_STRING:
-			var info = patch.split("!", true, 2)
-			var file: String = sources[info[0].to_int()]
-			var line: String = info[1]
-			var data: String = info[2]
-			if explicit_type != -1:
-				return UString.str_to_type(data, explicit_type)
-			else:
-				return UString.str_to_var(data)
-		TYPE_DICTIONARY:
-			var out := {}
-			for k in patch:
-				patch[k] = patch_to_var(patch[k], sources, explicit_type)
-			return out
-		TYPE_ARRAY:
-			var out := []
-			for i in patch:
-				out.append(patch_to_var(i, sources, explicit_type))
-			return out
-		_:
-			assert(false)
-	return null
-
-static func patch(target: Object, patch: Dictionary, sources: Array):
-	if target.has_method("_patch"):
-		for k in patch:
-			var v = patch[k]
-			var p = UString.get_key_var(k, "=")
-			k = p[0]
-			var type = p[1]
-			target._patch(k, type, v, sources)
-	
-	else:
-		for k in patch:
-			var v = patch[k]
-			var p = UString.get_key_var(k, "=")
-			k = p[0]
-			var type = p[1]
-			
-			# create if it didn't exist
-			if not k in target:
-				if v is Dictionary:
-					if target.has_method("_add_object"):
-						var new_obj = target._add_object(k, type)
-						if new_obj.has_method("_added"):
-							new_obj._added(target)
-					else:
-						push_error("Ignoring %s. No _add_object in %s." % [v, target])
-				
-				else:
-					if target.has_method("_add_property"):
-						target._add_property(k, patch_to_var(v, sources))
-					else:
-						push_error("No %s in %s for %s." % [k, target, v])
-			
-			if k in target:
-				var target_type = typeof(target[k])
-				# recursively check sub objects.
-				if target_type == TYPE_OBJECT:
-					patch(target[k], v, sources)
-				
-				else:
-					var value = patch_to_var(v, sources)
-					if typeof(value) == target_type:
-						target[k] = value
-					else:
-						push_error("Couldn't convert '%s' for property %s." % [v, k])
 
 static func get_operator_value(v):
 	if v is Object:
@@ -362,15 +301,27 @@ static func _parse_method_arguments(s: String) -> Dictionary:
 			out[k].default = str2var(v[1].strip_edges())
 	return out
 
-static func get_class_from_name(name: String) -> Variant:
+static func get_all_class_names() -> Array[String]:
+	# should be faster than _global_script_classes
+	return ProjectSettings.get_setting("_global_script_class_icons").keys()
+	
+static func get_class_from_name(classname: String) -> Variant:
+	# TODO: cache this?
 	for item in ProjectSettings.get_setting("_global_script_classes"):
-		if item["class"] == name:
+		if item["class"] == classname:
 			return load(item.path)
 	return null
-	
-static func create(type: String, args := []) -> Variant:
-	var obj = get_class_from_name(type)
-	if obj != null:
+
+# does a class_name exist?
+static func can_create(classname: String) -> bool:
+	return classname in get_all_class_names()
+
+# create a custom built in object by class_name
+static func create(classname: String, args := []) -> Variant:
+	var obj = get_class_from_name(classname)
+	if obj == null:
+		UString.push_error_similar("No class_name '%s'." % classname, classname, get_all_class_names())
+	else:
 		match len(args):
 			0: return obj.new()
 			1: return obj.new(args[0])

@@ -1,5 +1,5 @@
 @tool
-extends BaseDataClass
+extends Data
 class_name DateTime
 
 func get_class() -> String:

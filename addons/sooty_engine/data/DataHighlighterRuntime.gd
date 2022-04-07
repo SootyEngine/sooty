@@ -161,7 +161,7 @@ func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 		i = a
 	
 	# comment
-	a = _text.find("# ", 0)
+	a = _text.find("#", 0)
 	if a != -1:
 		_c(a, C_SYMBOL)
 		for k in _out.keys():

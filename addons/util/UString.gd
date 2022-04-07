@@ -283,6 +283,34 @@ static func str_to_var(s: String) -> Variant:
 	# string
 	return s
 
+# converts strings in comma seperated field to a type
+static func str_to_array(s: String, type: int) -> Array:
+	return Array(s.split(",")).map(func(x): return str_to_type(x.strip_edges(), type))
+
+static func str_to_color(s: String) -> Color:
+	var out := Color.WHITE
+	# from name?
+	var i := out.find_named_color(s)
+	if i != -1:
+		return out.get_named_color(i)
+	# from hex?
+	if s.is_valid_html_color():
+		return Color(s)
+	# from floats?
+	if "," in s:
+		# form (0,0,0,0)
+		if is_wrapped(s, "(", ")"):
+			s = unwrap(s, "(", ")")
+		# floats?
+		return _set_type(out, str_to_array(s, TYPE_FLOAT))
+	push_error("Can't convert '%s' to color." % s)
+	return out
+
+static func _set_type(v: Variant, vals: Array) -> Variant:
+	for i in len(vals):
+		v[i] = vals[i]
+	return v
+
 static func str_to_type(s: String, type: int) -> Variant:
 	match type:
 		TYPE_NIL: return null
@@ -290,19 +318,19 @@ static func str_to_type(s: String, type: int) -> Variant:
 		TYPE_INT: return s.replace("_", "").to_int()
 		TYPE_FLOAT: return s.replace("_", "").to_float()
 		TYPE_STRING: return s
-#		TYPE_VECTOR2: return "Vector2"
-#		TYPE_VECTOR2I: return "Vector2i"
+		TYPE_VECTOR2: return _set_type(Vector2.ZERO, str_to_array(s, TYPE_FLOAT))
+		TYPE_VECTOR2I: return _set_type(Vector2i.ZERO, str_to_array(s, TYPE_INT))
 #		TYPE_RECT2: return "Rect2"
 #		TYPE_RECT2I: return "Rect2i"
-#		TYPE_VECTOR3: return "Vector3"
-#		TYPE_VECTOR3I: return "Vector3i"
+		TYPE_VECTOR3: return _set_type(Vector3.ZERO, str_to_array(s, TYPE_FLOAT))
+		TYPE_VECTOR3I: return _set_type(Vector3i.ZERO, str_to_array(s, TYPE_INT))
 #		TYPE_TRANSFORM2D: return "Transform2D"
 #		TYPE_PLANE: return "Plane"
 #		TYPE_QUATERNION: return "Quaternion"
 #		TYPE_AABB: return "AABB"
 #		TYPE_BASIS: return "Basis"
 #		TYPE_TRANSFORM3D: return "Transform3D"
-		TYPE_COLOR: return Color(s)
+		TYPE_COLOR: return str_to_color(s)
 		TYPE_STRING_NAME: return StringName(s)
 		TYPE_NODE_PATH: return NodePath(s)
 #		TYPE_RID: return "RID"

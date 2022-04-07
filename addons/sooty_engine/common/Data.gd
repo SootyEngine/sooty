@@ -1,5 +1,5 @@
-extends Resource
-class_name BaseDataClass
+extends RefCounted
+class_name Data
 
 func _init(d := {}):
 	UObject.set_state(self, d)
@@ -10,3 +10,6 @@ func _post_init():
 
 func _to_string() -> String:
 	return UObject._to_string_nice(self)
+
+func duplicate() -> Object:
+	return UObject.duplicate_object(self)
