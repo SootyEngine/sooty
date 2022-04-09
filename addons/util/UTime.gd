@@ -1,4 +1,4 @@
 @tool
-extends Resource
+extends RefCounted
 class_name UTime
 

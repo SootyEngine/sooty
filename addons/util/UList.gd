@@ -1,4 +1,5 @@
 @tool
+extends RefCounted
 class_name UList
 
 # works like python list[begin:end]

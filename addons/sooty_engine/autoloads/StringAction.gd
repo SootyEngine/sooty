@@ -1,4 +1,4 @@
-#@tool
+@tool
 extends Node
 
 #const OP_ASSIGN := ["=", "+=", "-=", "*=", "/="]
@@ -9,45 +9,86 @@ const OP_LOGICAL := ["and", "or", "not", "&&", "||", "!"]
 const OP_ALL := OP_ASSIGN + OP_RELATION + OP_ARITHMETIC + OP_LOGICAL
 const BUILT_IN := ["true", "false", "null"]
 
+var _commands := {}
+
+func add_command(call: Variant, desc := "", id := ""):
+	var obj: Object = call.get_object() if call is Callable else call[0]
+	var method: String = call.get_method() if call is Callable else call[1]
+	id = id if id else method
+	var args = UObject.get_arg_info(obj, method)
+	var arg_names := args.map(func(x): return "%s:%s" % [x.name, UType.get_name_from_type(x.type)])
+	print("> '%s' [%s]: %s" % [id, " ".join(arg_names), desc])
+	_commands[id] = {
+		call=call,
+		desc=desc,
+		args=args
+	}
+
 func do(command: String) -> Variant:
-	# state method
+	# $ state function
 	if command.begins_with("$"):
-		var call = command.substr(1)
-		var args := UString.split_on_spaces(call)
-		var method = args.pop_front()
-		var converted_args := args.map(_str_to_var)
-		return State._call(method, converted_args)
+		return do_state_action(command)
 	
 	# node path method
-	elif command.begins_with("^"):
-		var call = command.substr(1)
-		var args := UString.split_on_spaces(call)
-		var head = args.pop_front()
-		if "." in head:
-			var p = args.pop_front().rsplit(".", true, 1)
-			var node_path = p[0].replace(",", ".")
-			var target := Global.get_tree().current_scene.get_node(node_path)
-			var method = p[1]
-			return UObject.call_w_args(target, method, args)
-		else:
-			push_error("Not implemented.")
+	elif command.begins_with(">"):
+		return do_command(command)
 	
 	# group function
 	elif command.begins_with("@"):
-		var call = command.substr(1)
-		var args := UString.split_on_spaces(call)
-		var action = args.pop_front()
-		var converted_args := args.map(_str_to_var)
-		return do_group_action(action, converted_args)
+		return do_group_action(command)
 	
 	# evaluate
 	elif command.begins_with("~"):
-		return State._eval(command.substr(1))
+		return do_eval(command)
 	
 	else:
 		return State._eval(command)
 
-func do_group_action(action: String, args: Array):
+# > command
+func do_command(command: String):
+	if command.begins_with(">"):
+		command = command.substr(1).strip_edges()
+	var args := UString.split_outside(command, " ")
+	command = args.pop_front()
+	return do_command_w_args(command, args, true)
+
+# > command
+func do_command_w_args(command: String, args: Array, as_string_args := false):
+	if command.begins_with(">"):
+		command = command.substr(1).strip_edges()
+	
+	if command in _commands:
+		var info: Dictionary = _commands[command]
+		return UObject.call_w_kwargs(info.call, args, as_string_args, info.args)
+	else:
+		push_error("No command '%s'." % command)
+		return null
+
+# ~actions
+func do_eval(eval: String):
+	if eval.begins_with("~"):
+		eval = eval.substr(1).strip_edges()
+	return State._eval(eval)
+
+# $state
+func do_state_action(action: String):
+	if action.begins_with("$"):
+		action = action.substr(1).strip_edges()
+	var args := UString.split_outside(action, " ")
+	var method = args.pop_front()
+#	var converted_args := args.map(_str_to_var)
+	return State._call(method, args, true)
+
+# @actions
+func do_group_action(action: String):
+	if action.begins_with("@"):
+		action = action.substr(1)
+	var args := UString.split_outside(action, " ")
+	action = args.pop_front()
+	return do_group_action_w_args(action, args, true)
+
+# @actions
+func do_group_action_w_args(action: String, args: Array, as_string_args := false):
 	if action.begins_with("@"):
 		action = action.substr(1)
 	
@@ -65,7 +106,7 @@ func do_group_action(action: String, args: Array):
 	var got
 	if len(nodes):
 		for node in nodes:
-			got = UObject.call_w_args(node, action, args)
+			got = UObject.call_w_kwargs([node, action], args, as_string_args)
 		return got
 	else:
 		push_error("No nodes in group %s for %s(%s)." % [group, action, args])
@@ -77,7 +118,7 @@ func _test(expression: String) -> bool:
 
 func _pipe(value: Variant, pipes: String) -> Variant:
 	for pipe in pipes.split("|"):
-		var args = UString.split_on_spaces(pipe)
+		var args = UString.split_outside(pipe, " ")#UString.split_on_spaces(pipe)
 		var method = args.pop_front()
 		if State._has_method(method):
 			value = State._call(method, [value] + args.map(State._eval))

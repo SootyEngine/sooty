@@ -1,4 +1,5 @@
 @tool
+extends RefCounted
 class_name UError
 
 static func warning(error: int, msg: String = "") -> bool:

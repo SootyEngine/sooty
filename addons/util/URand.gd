@@ -1,5 +1,5 @@
 @tool
-extends Resource
+extends RefCounted
 class_name URand
 # lot's of 'noise' and 'fbm' stuff taken from https://github.com/keijiro/
 

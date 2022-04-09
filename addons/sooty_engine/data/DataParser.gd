@@ -20,7 +20,7 @@ static func parse(path: String) -> Dictionary:
 	
 	while i < len(lines):
 		var text := lines[i]
-		var deep = UString.count_leading_tabs(text)
+		var deep = UString.count_leading(text, "\t")
 		var stripped := text.strip_edges()
 		var line_index := i
 		i += 1

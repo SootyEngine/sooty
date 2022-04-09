@@ -1,5 +1,5 @@
 @tool
-extends SootStack
+extends Flow
 
 const CHECK_FILES_EVERY := 1 # seconds before checking if any script has changed.
 
@@ -8,6 +8,10 @@ signal caption(from: String, text: String)
 
 var dialogues := {}
 var lines := {} # all lines from all files
+var file_scanner: FileModifiedScanner
+
+func _init() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 
 func _ready() -> void:
 	reloaded.connect(_reloaded)
@@ -15,20 +19,24 @@ func _ready() -> void:
 	await get_tree().process_frame
 	Mods.load_all.connect(_load_mods)
 	
-	if not Engine.is_editor_hint():
-	# timer chat checks if any files were modified.
-		var timer := Timer.new()
-		add_child(timer)
-		timer.timeout.connect(_check_for_modified)
-		timer.start(CHECK_FILES_EVERY)
+	# timer checks if any files were modified.
+	if file_scanner:
+		file_scanner.queue_free()
+	
+	file_scanner = FileModifiedScanner.new()
+	add_child(file_scanner)
+	file_scanner.modified.connect(_files_modified)
+
+func _files_modified():
+	file_scanner.update_times()
+	Mods._load_mods()
 
 func _process(_delta: float) -> void:
 	_tick()
 
 func _on_step(step: Dictionary):
 	match step.type:
-		"flag": caption.emit("", step.flag, step)
-		"prop": caption.emit(step.name, step.value, step)
+		"text": caption.emit(step.get("name", ""), step.text, step)
 		"action": StringAction.do(step.action)
 
 func _reloaded():
@@ -42,20 +50,27 @@ func _load_mods(mods: Array):
 	var memory_before = OS.get_static_memory_usage()
 	var soot_blocks := {}
 	var lang_paths := {}
+	var all_files := []
 	
 	# collect all files by name, so they can be merged if from mods.
 	for mod in mods:
 		mod.meta["dialogues"] = []
-		for soot_path in UFile.get_files(mod.dir.plus_file("dialogue"), Soot.EXT_DIALOGUE):
+		var soot_files := UFile.get_files(mod.dir.plus_file("dialogue"), "." + Soot.EXT_DIALOGUE)
+		all_files.append_array(soot_files)
+		print(soot_files)
+		for soot_path in soot_files:
 			mod.meta.dialogues.append(soot_path)
 			DialogueParser.new()._parse(soot_path, dialogues, lines)
 		
 		mod.meta["langs"] = []
-		for lang_path in UFile.get_files(mod.dir.plus_file("lang"), "-en" + Soot.EXT_LANG):
+		var lang_files := UFile.get_files(mod.dir.plus_file("lang"), "-en." + Soot.EXT_LANG)
+		all_files += Array(lang_files)
+		for lang_path in lang_files:
 			mod.meta.langs.append(lang_path)
 			var id := UFile.get_file_name(lang_path).rsplit("-", true, 1)[0]
 			UDict.append(lang_paths, id, lang_path)
 	
+	file_scanner.set_files(all_files)
 	UDict.log(dialogues)
 	
 	if UFile.exists("res://dialogue_debug"):
@@ -173,30 +188,3 @@ func _get_options(ids: Array, output: Array, depth: int):
 #				continue
 #
 #			out.append(DialogueLine.new(_dialogue_id, opdata))
-
-func _check_for_modified():
-	return
-#	var modified := false
-#	for d in cache.values() + ignored:
-#		if d.was_modified():
-#			print("Reloading dialogue: %s" % d.id)
-#			d.reload()
-#			if d.has_IGNORE:
-#				# remove from main cache
-#				if d in cache.values():
-#					cache.erase(d.id)
-#				# add to ignored list
-#				if not d in ignored:
-#					ignored.append(d)
-#			else:
-#				# add to main cache
-#				if not d in cache.values():
-#					cache[d.id] = d
-#				# remove from ignored list
-#				if d in ignored:
-#					ignored.erase(d)
-#				# alert others
-#			reloaded_dialogue.emit(d)
-#			modified = true
-#	if modified:
-#		reloaded.emit()

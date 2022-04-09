@@ -1,5 +1,5 @@
 @tool
-extends Resource
+extends RefCounted
 class_name UGroup
 
 static func get_dict(group: String) -> Dictionary:

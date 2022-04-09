@@ -1,11 +1,21 @@
 @tool
-extends Resource
+extends RefCounted
 class_name UString
 
 const CHAR_QUOTE_OPENED := "“"
 const CHAR_QUOTE_CLOSED := "”"
 const CHAR_INNER_QUOTE_OPENED := "‘"
 const CHAR_INNER_QUOTE_CLOSED := "’"
+
+static func express(s: String, base_instance: Object = null, default = null) -> Variant:
+	var e := Expression.new()
+	if not UError.error(e.parse(s)):
+		var got = e.execute([], base_instance)
+		if not e.has_execute_failed():
+			return got
+		else:
+			push_error(e.get_error_text())
+	return default
 
 static func get_string(v: Variant, id: String, default := str(v)) -> String:
 	if v is Object and v.has_method("get_string"):
@@ -92,6 +102,41 @@ static func extract(s: String, head: String, tail: String, strip_edges: bool = t
 	else:
 		return {outside=s, inside=""}
 
+# split, but not if inside something
+static func split_outside(s: String, split_on: String) -> Array:
+	var out := []
+	var open := {}
+	var last := 0
+	var i := 0
+	while i < len(s):
+		match s[i]:
+			"{": _tick(open, "{")
+			"}": _tick(open, "{", -1)
+			"[": _tick(open, "[")
+			"]": _tick(open, "[", -1)
+			"(": _tick(open, "(")
+			")": _tick(open, "(", -1)
+		if not len(open) and begins_at(s, split_on, i):
+			out.append(s.substr(last, i-last))
+			i += len(split_on)
+			last = i
+		else:
+			i += 1
+	if last < len(s):
+		out.append(s.substr(last, i-last))
+	return out
+
+static func _tick(d: Dictionary, key, amount: int = 1):
+	d[key] = d[key] + amount if key in d else amount
+	if d[key] == 0:
+		d.erase(key)
+
+static func begins_at(s: String, head: String, at: int) -> bool:
+	for i in len(head):
+		if not s[at+i] == head[i]:
+			return false
+	return true
+
 static func split_between(s: String, head: String, tail = null) -> PackedStringArray:
 	var out := PackedStringArray()
 	tail = head if tail == null else tail
@@ -170,28 +215,28 @@ static func split_on_next(s: String, items: Array) -> Array:
 	return [token, token_str, left_over]
 
 # splits a string on spaces, respecting wrapped strings.
-static func split_on_spaces(s: String) -> Array:
-	var out := [""]
-	var in_quotes := false
-	for c in s:
-		if c == '"':
-			if in_quotes:
-				in_quotes = false
-				out[-1] += '"'
-			else:
-				in_quotes = true
-				if out[-1] == "":
-					out[-1] += '"'
-				else:
-					out.append('"')
-		
-		elif c == " " and not in_quotes:
-			if out[-1] != "":
-				out.append("")
-		
-		else:
-			out[-1] += c
-	return out
+#static func split_on_spaces(s: String) -> Array:
+#	var out := [""]
+#	var in_quotes := false
+#	for c in s:
+#		if c == '"':
+#			if in_quotes:
+#				in_quotes = false
+#				out[-1] += '"'
+#			else:
+#				in_quotes = true
+#				if out[-1] == "":
+#					out[-1] += '"'
+#				else:
+#					out.append('"')
+#
+#		elif c == " " and not in_quotes:
+#			if out[-1] != "":
+#				out.append("")
+#
+#		else:
+#			out[-1] += c
+#	return out
 
 static func is_capitalized(s: String) -> bool:
 	return s[0] == s[0].to_upper()
@@ -252,15 +297,15 @@ static func count_leading(s: String, chr := " ") -> int:
 			break
 	return out
 
-static func count_leading_tabs(s: String) -> int:
-	var out := 0
-	for c in s:
-		match c:
-			"\t": out += 1#4
-#			" ": out += 1
-			_: break
-#	out /= 4
-	return out
+#static func count_leading_tabs(s: String) -> int:
+#	var out := 0
+#	for c in s:
+#		match c:
+#			"\t": out += 1#4
+##			" ": out += 1
+#			_: break
+##	out /= 4
+#	return out
 
 static func get_key_var(s: String, split_on := ":") -> Array:
 	var i := s.find(split_on)
@@ -289,8 +334,8 @@ static func str_to_array(s: String, type: int) -> Array:
 	return Array(s.split(",")).map(func(x): return str_to_type(x.strip_edges(), type))
 
 static func str_to_color(s: String) -> Color:
-	var out := Color.WHITE
 	# from name?
+	var out := Color.WHITE
 	var i := out.find_named_color(s)
 	if i != -1:
 		return out.get_named_color(i)
@@ -303,16 +348,26 @@ static func str_to_color(s: String) -> Color:
 		if is_wrapped(s, "(", ")"):
 			s = unwrap(s, "(", ")")
 		# floats?
-		return _set_type(out, str_to_array(s, TYPE_FLOAT))
+		return _set_type(Color.WHITE, str_to_array(s, TYPE_FLOAT))
 	push_error("Can't convert '%s' to color." % s)
 	return out
+
+static func str_to_dict(s: String) -> Dictionary:
+	if is_wrapped(s, "{", "}"):
+		return express(s)
+	else:
+		var out := {}
+		for part in split_outside(s, " "):
+			var kv = part.split(":")
+			out[kv[0].strip_edges()] = str_to_var(kv[1].strip_edges())
+		return out
 
 static func _set_type(v: Variant, vals: Array) -> Variant:
 	for i in len(vals):
 		v[i] = vals[i]
 	return v
 
-static func str_to_type(s: String, type: int) -> Variant:
+static func str_to_type(s: String, type: int, default = null) -> Variant:
 	match type:
 		TYPE_NIL: return null
 		TYPE_BOOL: return s == "true"
@@ -338,7 +393,7 @@ static func str_to_type(s: String, type: int) -> Variant:
 #		TYPE_OBJECT: return "Object"
 #		TYPE_CALLABLE: return "Callable"
 #		TYPE_SIGNAL: return "Signal"
-#		TYPE_DICTIONARY: return "Dictionary"
+		TYPE_DICTIONARY: return str_to_dict(s)
 #		TYPE_ARRAY: return "Array"
 #		TYPE_PACKED_BYTE_ARRAY: return "PackedByteArray"
 #		TYPE_PACKED_INT32_ARRAY: return "PackedInt32Array"
@@ -350,5 +405,6 @@ static func str_to_type(s: String, type: int) -> Variant:
 #		TYPE_PACKED_VECTOR3_ARRAY: return "PackedVector3Array"
 #		TYPE_PACKED_COLOR_ARRAY: return "PackedColorArray"
 	
-	push_error("Non implemented '%s' to %s." % [s, UType.get_name_from_type(type)])
-	return str2var(s)
+	push_error("Non implemented '%s' String to %s." % [s, UType.get_name_from_type(type)])
+	
+	return express(s)

@@ -1,8 +1,9 @@
 @tool
+extends RefCounted
 class_name UFile
 
-const EXT_IMAGE := [".png", ".jpg", ".jpeg", ".webp"]
-const EXT_AUDIO := [".mp3", ".wav", ".ogg"]
+const EXT_IMAGE := ["png", "jpg", "jpeg", "webp"]
+const EXT_AUDIO := ["mp3", "wav", "ogg"]
 
 static func get_user_dir() -> String:
 	if not OS.is_debug_build():
@@ -131,7 +132,7 @@ static func save_node(path: String, node: Node) -> bool:
 # allows loading external assets if in "user://"
 static func load2(path: String, default = null) -> Variant:
 	if path.begins_with(get_user_dir()):
-		var ext = "." + path.get_extension().to_lower()
+		var ext = path.get_extension().to_lower()
 		if ext in EXT_IMAGE:
 			return load_image(path, default) 
 		elif ext in EXT_AUDIO:

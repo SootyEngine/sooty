@@ -1,5 +1,5 @@
 @tool
-extends Resource
+extends RefCounted
 class_name UObject
 
 const GLOBAL_SCOPE_METHODS := [
@@ -144,84 +144,78 @@ static func get_operator_value(v):
 			return v._operator_get()
 	return v
 
-static func callablev(c: Callable, args: Array) -> Variant:
-	match len(args):
-		0: return c.call()
-		1: return c.call(args[0])
-		2: return c.call(args[0], args[1])
-		3: return c.call(args[0], args[1], args[2])
-		4: return c.call(args[0], args[1], args[2], args[3])
-		5: return c.call(args[0], args[1], args[2], args[3], args[4])
-		6: return c.call(args[0], args[1], args[2], args[3], args[4], args[5])
-		_:
-			push_error("NOT IMPLEMENTED.")
-			return null
-
 # Properly divides an array as arguments for a function. Like python.
-static func call_w_args(target: Object, method: String, in_args: Array = []) -> Variant:
-	var obj = target
-	
-	if "." in method:
-		var parts := method.split(".")
-		for i in len(parts)-1:
-			if parts[i] in obj:
-				obj = obj[parts[i]]
-			else:
-				push_error("No method '%s(%s)' in %s." % [method, in_args, target])
-		method = parts[-1]
-	
-	if not obj.has_method(method):
-		push_error("No method '%s(%s)' in %s." % [method, in_args, obj])
-		return
-	
-	var arg_info = get_method_arg_info(obj, method)
+static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := false, arg_info = null) -> Variant:
+	var obj: Object = call.get_object() if call is Callable else call[0]
+	var method: String = call.get_method() if call is Callable else call[1]
+	if arg_info == null:
+		arg_info = get_arg_info(obj, method)
 	
 	# no args mean it was probably not a script function but a built in
-	if arg_info == null:
+	if not len(arg_info):
 		return obj.callv(method, in_args)
 	
-	var old := in_args.duplicate(true)
+#	var old := in_args.duplicate(true)
 	var new := in_args.duplicate(true)
 	var out := []
-	var kwargs := {}
-	
-	# pop last dictionary, regardless
-	if len(new) and new[-1] is Dictionary:
-		if "kwargs" in arg_info:
-			kwargs = new.pop_back()
+	var kwargs
+	var has_kwargs := false
+	# are kwargs wanted?
+	if len(new) and arg_info[-1].name == "kwargs":
+		# is last string a dict?
+		if as_string_args:
+			if new[-1] is String and ":" in new[-1]:
+				kwargs = new.pop_back()
+				has_kwargs = true
+		# is last item a dict?
 		else:
-			new.pop_back()
-		
+			if new[-1] is Dictionary:
+				kwargs = new.pop_back()
+				has_kwargs = true
+	
+	# strings to their type
+	if as_string_args:
+		# convert leading arguments
+		for i in len(new):
+			new[i] = UString.str_to_type(in_args[i], arg_info[i].type)
+		# convert kwargs
+		if has_kwargs:
+			kwargs = UString.str_to_type(kwargs, TYPE_DICTIONARY, arg_info[-1].get("default", {}))
+	
 	# add the initial values up front
-	for property in arg_info:
-		if property in ["args", "kwargs"]:
+	for arg in arg_info:
+		if arg.name in ["args", "kwargs"]:
 			break
+		
 		elif len(new):
-			var v = new.pop_front()
-#			if arg_info[property].type != typeof(v):
-#				var d = arg_info[property].get("default", null)
-#				push_error("call_w_args: Wrong type '%' (%s) given for '%s'. Using default (%s) instead." % [arg_info[property].type_name, v, property, d ])
-#				out.append(d)
-#			else:
-			out.append(v)
-		else:
-			out.append(arg_info[property].get("default", null))
+			out.append(new.pop_front())
+		
+		# pad the arguments with their defaults, so kwarg can always be at the end
+		elif "default" in arg:
+			out.append(arg.default)
+		
+		elif has_kwargs:
+			push_error("For kwargs to work, you need default values.")
+			out.append(null)
 	
+	# TODO: allow leftover array to be passed as second last argument if kwargs, or last if no kwargs
 	# insert the array
-	if "args" in arg_info:
-		if len(new):
-			out.append(new)
-		else:
-			out.append(arg_info.args.get("default", []))
+#	if "args" in arg_info:
+#		if len(new):
+#			out.append(new)
+#		else:
+#			out.append(arg_info.args.get("default", []))
 	
 	# pop back in the kwargs
-	if "kwargs" in arg_info:
+	if has_kwargs:
 		out.append(kwargs)
 	
 #	print(method.to_upper())
 #	for i in len(out):
 #		print("\t* %s\t\t%s\t\t%s" % [old[i] if i < len(old) else "??", out[i], arg_info.values()[i]])
-	var got = obj.callv(method, out)
+	
+	
+	var got = obj.callv(method, out)# callablev(call, out) if call is Callable else obj.callv(method, out)
 #	prints("CALLV:", method, out, got)
 	return got
 
@@ -254,26 +248,36 @@ static func try_get_at(d: Variant, path: Array, default = null) -> Variant:
 	else:
 		return default
 
-static func get_method_arg_info(obj: Object, meth: String) -> Variant:
-	var methods = get_methods(obj) # TODO: Cache.
-	return null if methods == null or not meth in methods else methods[meth]
+static func get_arg_info(obj: Variant, meth: String) -> Array:
+	return get_method_info(obj, meth).get("args", [])
 
-static func get_methods(obj: Object) -> Variant:
+# godot keeps dict key order, so we can return 
+static func get_method_info(obj: Variant, meth: String) -> Dictionary:
+	var methods = get_methods(obj) # TODO: Cache.
+	return methods.get(meth, {})
+#	return null if methods == null or not meth in methods else methods[meth]
+
+static func get_methods(obj: Variant) -> Dictionary:
 	var script = obj.get_script()
-	if script == null:
-		return null
 	var out := {}
-	for line in script.source_code.split("\n", false):
-		if line.begins_with("func "):
-			var p = line.substr(5).split("(")
-			var fname = p[0]
-			var args = _parse_method_arguments(p[1].rsplit(")")[0])
-			out[fname] = args
+	if script:
+		for line in script.source_code.split("\n", false):
+			if line.begins_with("func "):
+				var p = line.substr(5).split("(")
+				var fname = p[0]
+				var end = p[1].rsplit(")")
+				var sargs = end[0]
+				var returns = end[1].split(":", true, 1)[0].strip_edges()
+				var args = _parse_method_arguments(sargs, obj)
+				# TODO: get return type
+				returns = UType.get_type_from_name(returns.trim_prefix("->").strip_edges())
+				out[fname] = {args=args, returns=returns}
 	return out
 
-static func _parse_method_arguments(s: String) -> Dictionary:
+# convert a string of arguments to argument info
+static func _parse_method_arguments(s: String, obj: Variant = null) -> Array:
 	if s.strip_edges() == "":
-		return {}
+		return []
 	
 	var args = [["", ""]]
 	var open := {}
@@ -297,16 +301,25 @@ static func _parse_method_arguments(s: String) -> Dictionary:
 			")": UDict.tick(open, "(", -1)
 		args[-1][0 if in_name else 1] += c
 	
-	var out := {}
+	var out := []
 	for i in len(args):
-		var k = args[i][0].strip_edges()
-		var v = args[i][1].split("=", true, 1)
-		var type_name = v[0].strip_edges()
-		out[k] = {}
-		out[k].type_name = type_name
-		out[k].type = UType.get_type_from_name(type_name)
-		if len(v) == 2:
-			out[k].default = str2var(v[1].strip_edges())
+		var name = args[i][0].strip_edges()
+		var value = args[i][1].split("=", true, 1)
+		var type := TYPE_NIL
+		var type_name: String = value[0].strip_edges()
+		# no explicit type given, but a value exists?
+		# let's assume
+		var arg_info: = { name=name, type=type }
+		if len(value) == 2:
+			arg_info.default = UString.express(value[1].strip_edges(), obj)
+		
+		if type_name:
+			arg_info.type = UType.get_type_from_name(type_name)
+		
+		elif "default" in arg_info:
+			arg_info.type = typeof(arg_info.default)
+		
+		out.append(arg_info)
 	return out
 
 static func get_all_class_names() -> Array[String]:
@@ -339,6 +352,19 @@ static func create(classname: String, args := []) -> Variant:
 			5: return obj.new(args[0], args[1], args[2], args[3], args[4])
 			_: push_error("Not implemented.")
 	return null
+
+static func callablev(c: Callable, args: Array) -> Variant:
+	match len(args):
+		0: return c.call()
+		1: return c.call(args[0])
+		2: return c.call(args[0], args[1])
+		3: return c.call(args[0], args[1], args[2])
+		4: return c.call(args[0], args[1], args[2], args[3])
+		5: return c.call(args[0], args[1], args[2], args[3], args[4])
+		6: return c.call(args[0], args[1], args[2], args[3], args[4], args[5])
+		_:
+			push_error("NOT IMPLEMENTED.")
+			return null
 
 # force grab the class_name from the source code.
 static func _to_string_nice(obj: Object) -> String:

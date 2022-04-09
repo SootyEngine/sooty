@@ -89,7 +89,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 	_out = {}
 	_text = text
-	_deep = UString.count_leading_tabs(text)
+	_deep = UString.count_leading(text, "\t")
 	
 	# meta fields
 	if text.begins_with("#."):

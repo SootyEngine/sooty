@@ -1,5 +1,5 @@
 @tool
-extends Resource
+extends RefCounted
 class_name UTween
 
 static func find_ease(s: Variant) -> int:

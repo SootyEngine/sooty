@@ -88,7 +88,7 @@ func _load_mods(mods: Array):
 	# install data (.soda) to children.
 	for mod in mods:
 		var head = mod.dir.plus_file(subdir)
-		for data_path in UFile.get_files(head, Soot.EXT_DATA):
+		for data_path in UFile.get_files(head, "." + Soot.EXT_DATA):
 			mod.meta[subdir].append(data_path) # tell Mods what file has been installed
 			var state = DataParser.parse(data_path)
 			
@@ -127,15 +127,13 @@ func _get_method_parent(method: String) -> String:
 			return node.name
 	return ""
 
-func _call(method: String, args: Array = [], default = null) -> Variant:
+func _call(method: String, args: Array = [], as_string_args := false, default = null) -> Variant:
 	if "." in method:
 		var p := method.rsplit(".", true, 1)
 		method = p[1]
-		if p[0] == "scene":
-			return UObject.call_w_args(get_tree().current_scene, method, args)
-		elif _has(p[0]):
+		if _has(p[0]):
 			var target = _get(p[0])
-			return UObject.call_w_args(target, method, args)
+			return UObject.call_w_kwargs([target, method], args, as_string_args)
 		else:
 			push_error("No property '%s' in state." % p[0])
 			return default
@@ -149,7 +147,7 @@ func _call(method: String, args: Array = [], default = null) -> Variant:
 	# call the first method we find
 	for node in _children:
 		if node.has_method(method):
-			return UObject.call_w_args(node, method, args)
+			return UObject.call_w_kwargs([node, method], args, as_string_args)
 	
 	return default
 

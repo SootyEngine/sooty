@@ -22,7 +22,7 @@
     - [x] Change `text` lines to `keyval`.
     - [x] Handle DialogueLine in VisualNovel.
 
-- [ ] Remove `.` from `EXT_*` properties.
+- [x] Remove `.` from `EXT_*` properties.
 - [x] Rename Achievement to Award.
 - [x] Data parser.
 - [x] Container Awards, Tasks, and other things in collections, rather than state.
@@ -132,8 +132,9 @@
 
 # VisualNovel
 - [ ] Use state objects to parse text/speaker. `_preparse_caption` `_preparse_caption_name`
-- [ ] Character can control string wrappes `"` (For phones and such.)
-- [ ] Create theme templates for captions + options.
+- [ ] ~~Create theme templates for captions + options.~~
+- [x] Character can control string wrappes `"` (For phones and such.)
+- [x] Captions use node function `@show_caption`
 - [x] Include fonts folder.
 - [x] Include input mapping in main project.
 - [x] UI screen that hides when dialogue is shown.

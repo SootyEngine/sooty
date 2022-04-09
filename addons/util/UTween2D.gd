@@ -1,5 +1,5 @@
 @tool
-extends Resource
+extends RefCounted
 class_name UTween2D
 
 const DEFAULT_UNIT := 16.0

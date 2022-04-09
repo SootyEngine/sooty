@@ -1,5 +1,5 @@
 @tool
-extends Resource
+extends RefCounted
 class_name UNode
 
 static func dig(node: Node, call: Callable):

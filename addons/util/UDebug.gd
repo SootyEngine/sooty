@@ -1,5 +1,5 @@
 @tool
-extends Resource
+extends RefCounted
 class_name UDebug
 
 func print_table(items: Array):

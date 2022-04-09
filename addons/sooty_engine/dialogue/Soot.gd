@@ -1,5 +1,5 @@
 @tool
-extends Resource
+extends RefCounted
 class_name Soot
 
 const COMMENT := "# "
@@ -7,13 +7,13 @@ const COMMENT_LANG := "#id="
 const COMMENT_FLAG := "#?"
 
 # dialogue extension
-const EXT_DIALOGUE := ".soot"
+const EXT_DIALOGUE := "soot"
 # data extension
-const EXT_DATA := ".soda"
+const EXT_DATA := "soda"
 # language file extension
-const EXT_LANG := ".sola"
+const EXT_LANG := "sola"
 # markdown file extension
-const EXT_TEXT := ".soma" # for use with things like notes, creature databases...
+const EXT_TEXT := "soma" # for use with things like notes, creature databases...
 
 # flow control symbols
 const LANG := "<->"

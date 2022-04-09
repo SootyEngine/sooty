@@ -1,8 +1,8 @@
-extends Node
-class_name SootStack
+extends Waiter
+class_name Flow
 
 const MAX_STEPS_PER_TICK := 20 # Safety limit, in case of excessive loops.
-enum { S_GOTO, S_CALL, S_PASS, S_OPTION, S_BREAK, S_RETURN, S_IF, S_MATCH }
+enum { S_GOTO, S_CALL, S_PASS, S_OPTION, S_BREAK, S_RETURN, S_IF, S_MATCH, S_LIST }
 
 signal started() # Dialogue starts up.
 signal ended() # Dialogue has ended.
@@ -13,13 +13,14 @@ signal flow_started(id: String)
 signal flow_ended(id: String)
 signal on_step(step: Dictionary)
 signal selected(id: String) # used with select_option
-signal waiting_list_changed()
 
 @export var last_end_message := ""
+@export var current_dialogue := ""
 @export var _started := false
 @export var _stack := [] # current stack of flows, so we can return to a position in a previous flow.
-@export var _waiting_for := [] # objects that want the flow to _break
 @export var _last_tick_stack := [] # stack of the previous tick, used for saving and rollback.
+
+@export var _list_states := {}
 
 func _get_state() -> Dictionary:
 	return {stack=_last_tick_stack, started=_started, last_end_message=last_end_message}
@@ -28,23 +29,6 @@ func _set_state(state: Dictionary):
 	_stack = state.stack
 	_started = state.started
 	last_end_message = state.last_end_message
-
-func is_waiting() -> bool:
-	return len(_waiting_for) > 0
-
-func wait(waiter: Object):
-	if not waiter in _waiting_for:
-		_waiting_for.append(waiter)
-		waiting_list_changed.emit()
-
-func unwait(waiter: Object):
-	if waiter in _waiting_for:
-		_waiting_for.erase(waiter)
-		waiting_list_changed.emit()
-
-func clear_waiting_list():
-	_waiting_for.clear()
-	waiting_list_changed.emit()
 
 func is_active() -> bool:
 	return len(_stack) != 0
@@ -108,7 +92,7 @@ func _goto(id: String, step_type: int = S_GOTO) -> bool:
 			while len(_stack):
 				_pop()
 		
-		_push(step_type, id)
+		_push(step_type, id, _get_step(id).then)
 		return true
 	else:
 		push_error("No step %s." % id)
@@ -127,7 +111,7 @@ func end(msg := ""):
 func select_option(id: String):
 	var option := _get_step(id)
 	if "then" in option:
-		_push(S_OPTION, id)
+		_push(S_OPTION, id, option.then)
 	selected.emit(id)
 
 func _pop():
@@ -136,12 +120,12 @@ func _pop():
 	if last.type in [S_GOTO, S_CALL]:
 		_flow_ended(last.id)
 
-func _push(type: int, id: String, key: String="then"):
-	_stack.append({ type=type, id=id, key=key, step=0 })
-	print(_stack)
+func _push(type: int, id: String, list: Array):# key: String="then"):
+	_stack.append({ type=type, id=id, steps=list.duplicate() })# id=id, key=key, step=0 })
 	
 	# a flow started
 	if type in [S_GOTO, S_CALL]:
+		current_dialogue = Soot.split_path(id)[0]
 		_flow_started.call_deferred(id)
 
 func _flow_started(id: String):
@@ -172,25 +156,33 @@ func _tick():
 			break
 		
 		var step := _pop_next_step()
-		print("STEP ", step)
-		
 		if step:
 			_on_step(step)
 			on_step.emit(step)
 			
 			match step.type:
-				"goto": _goto(step.goto, S_GOTO)
-				"call": _goto(step.call, S_CALL)
-				"action", "flag", "prop": pass
-#				"action": on_action.emit(step.action)
-#				"flag": on_flag.emit(step.flag)
-#				"prop": on_property.emit(step.prop, step.value)
+				"goto":
+					var goto = step.goto
+					if not Soot.is_path(goto):
+						goto = Soot.join_path([current_dialogue, goto])
+					_goto(goto, S_GOTO)
+				
+				"call":
+					var call = step.call
+					if not Soot.is_path(call):
+						call = Soot.join_path([current_dialogue, goto])
+					_goto(call, S_CALL)
+				
+				"action", "text":
+					pass
 				
 				"pass":
 					passed_w_msg.emit(step.msg)
 					pass
 				
-				"end": _pop()
+				"end":
+					_pop()
+				
 				"end_all":
 					end(step.end)
 					break
@@ -217,25 +209,19 @@ func _pop_next_step() -> Dictionary:
 		
 		# remove last step, and potentially end the flow.
 		var step_info: Dictionary = _stack[-1]
-		var steps: Array = _get_step(step_info.id).get(step_info.key, "then")
-		if step_info.step >= len(steps):
+		# _get_step(step_info.id).get(step_info.key, "then")
+		if not len(step_info.steps):#.step:# >= len(steps):
 			_pop()
 			continue
 		
-		var step: Dictionary = _get_step(steps[step_info.step]) 
-		step_info.step += 1
-#		var dilg: Dialogue = Dialogues.get_dialogue(step_info.d_id)
-#		var line: Dictionary = dilg.get_line(lines[step_info.step])
-#		var d_id: String = step_info.d_id
-#		var flow: String = step_info.flow
-		
-#		var out := {d_id=d_id, flow=flow, line=line}
+		var step: Dictionary = _get_step(step_info.steps.pop_front())
+#		step_info.step += 1
 		
 		# 'if' 'elif' 'else' chain
 		if step.type == "if":
 			for i in len(step.conds):
 				if StringAction._test(step.conds[i]):
-					_push(S_IF, "cond_lines_%s" % i)
+					_push(S_IF, step.M.id, step.cond_lines[i])
 					return {}
 		
 		# match chain
@@ -244,7 +230,7 @@ func _pop_next_step() -> Dictionary:
 			for i in len(step.cases):
 				var case = step.cases[i]
 				if case == "_" or UType.is_equal(match_result, State._eval(case)):
-					_push(S_MATCH, "case_lines_%s" % i)
+					_push(S_MATCH, step.M.id, step.case_lines[i])
 					return {}
 		
 		# has a condition
@@ -252,6 +238,51 @@ func _pop_next_step() -> Dictionary:
 			if StringAction._test(step.cond):
 				return step
 		
+		elif step.type == "list":
+			var id: String = step.M.id
+			var list: Array = step.list
+			var lstep_id: String
+			var tot := len(list)
+			match step.list_type:
+				# just go through all steps, then loop around
+				"":
+					if not id in _list_states:
+						_list_states[id] = 0
+					else:
+						_list_states[id] = wrapi(_list_states[id] + 1, 0, tot)
+					lstep_id = list[_list_states[id]]
+					_push(S_LIST, step.M.id, [lstep_id])
+				# pick a random step. never the same one twice.
+				"rand":
+					if not id in _list_states:
+						_list_states[id] = randi() % tot
+					elif tot > 1:
+						while true:
+							var next := randi() % tot
+							if next != _list_states[id]:
+								_list_states[id] = next
+								break
+					lstep_id = list[_list_states[id]]
+					_push(S_LIST, step.M.id, [lstep_id])
+				# stop at last element.
+				"stop":
+					if not id in _list_states:
+						_list_states[id] = 0
+					elif _list_states[id] < tot-1:
+						_list_states[id] += 1
+					lstep_id = list[_list_states[id]]
+					_push(S_LIST, step.M.id, [lstep_id])
+				# skip when finished.
+				"skip":
+					if not id in _list_states:
+						_list_states[id] = 0
+					elif _list_states[id] < tot:
+						_list_states[id] += 1
+					if _list_states[id] < tot:
+						lstep_id = list[_list_states[id]]
+						_push(S_LIST, step.M.id, [lstep_id])
+			print(_list_states)
+			return {}
 		else:
 			return step
 	

@@ -66,11 +66,11 @@ func _editor_script_changed(s):
 			e = e as ScriptEditorBase
 			var c: CodeEdit = e.get_base_editor()
 			var rpath: String = e.get_meta("_edit_res_path")
-			if rpath.ends_with(Soot.EXT_DIALOGUE):
+			if rpath.ends_with("." + Soot.EXT_DIALOGUE):
 				c.syntax_highlighter = soot_highlighter
-			elif rpath.ends_with(Soot.EXT_DATA):
+			elif rpath.ends_with("." + Soot.EXT_DATA):
 				c.syntax_highlighter = data_highlighter
-			elif rpath.ends_with(Soot.EXT_LANG):
+			elif rpath.ends_with("." + Soot.EXT_LANG):
 				c.syntax_highlighter = soot_highlighter
 
 func _exit_tree() -> void:

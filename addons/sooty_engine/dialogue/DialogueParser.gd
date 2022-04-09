@@ -67,7 +67,7 @@ var _last_speaker := ""
 
 # generate a language file (.sola) from the current dialogue.
 #func _generate_lang(d_id: String, lang: String, flows: Dictionary, lines: Dictionary, raw: Array):
-#	var out_path := "res://lang/%s-%s%s" % [d_id, lang, Soot.EXT_LANG]
+#	var out_path := "res://lang/%s-%s.%s" % [d_id, lang, Soot.EXT_LANG]
 #	var text := []
 #	var existing := {}
 #
@@ -311,37 +311,38 @@ func _parse(file_path: StringName, dialogues: Dictionary, all_lines: Dictionary)
 		for i in len(new_list):
 			var flow: Dictionary = new_list[i]
 			if flow.type in ["flow", "lang", "lang_gone"]:
-				# only keep flows with steps
-				# ignore empty ones
-				if flow.then:
-					_clean(flow)
-					var flow_id = Soot.join_path([block.meta.id, flow.M.id])
-					if flow_id in _all_lines:
-						push_error("Same flow more than once '%s'." % flow_id)
-					_all_lines[flow_id] = flow
-					block.flows.append(flow_id)
-					
-					var d_id: String = block.meta.id
-					if not d_id in _dialogues:
-						_dialogues[d_id] = {
-							flows=[]
-						}
-					print("ADD FLOW ", flow_id)
-					_dialogues[d_id].flows.append(flow_id)
+				_check_flow(block, flow)
 					
 			else:
 				meta_flow.then.append(flow)
 		
-		if meta_flow.then:
-			_clean(meta_flow)
-			var id := Soot.join_path([block.meta.id, meta_flow.M.id])
-			if id in _all_lines:
-				push_error("Same flow more than once '%s'." % id)
-			_all_lines[id] = meta_flow
+		_check_flow(block, meta_flow)
+#		if meta_flow.then:
+#			_clean(meta_flow)
+#			var id := Soot.join_path([block.meta.id, meta_flow.M.id])
+#			if id in _all_lines:
+#				push_error("Same flow more than once '%s'." % id)
+#			_all_lines[id] = meta_flow
 		
 		block.erase("line_list")
 	
 	return blocks
+
+func _check_flow(block: Dictionary, flow: Dictionary):
+	# only keep flows with steps
+	# ignore empty ones
+	if flow.then:
+		_clean(flow)
+		var flow_id = Soot.join_path([block.meta.id, flow.M.id])
+		if flow_id in _all_lines:
+			push_error("Same flow more than once '%s'." % flow_id)
+		_all_lines[flow_id] = flow
+		block.flows.append(flow_id)
+		
+		var d_id: String = block.meta.id
+		if not d_id in _dialogues:
+			_dialogues[d_id] = { flows=[] }
+		_dialogues[d_id].flows.append(flow_id)
 
 #func _merge_lang(lang_flows: Dictionary, lang_lines: Dictionary, out_flows: Dictionary, out_lines: Dictionary):
 #	for flow in lang_flows.values():
@@ -440,7 +441,7 @@ func _clean(line: Dictionary) -> String:
 		"option":
 			if "then" in line:
 				_clean_array(line.then)
-		"prop", "flag":
+		"text":
 			if "options" in line:
 				_clean_array(line.options)
 		"cond":
@@ -519,22 +520,22 @@ func _process_line(line: Dictionary):
 	if t.begins_with("|>"): return _line_as_option(line)
 	if t.begins_with("+>"): return _line_as_option(line)
 	# list
-	if t.begins_with("(("): return _line_as_list(line)
+	if t.begins_with("{["): return _line_as_list(line)
 	# actions
+	if t.begins_with(">"): return _line_as_action(line)
 	if t.begins_with("~"): return _line_as_action(line)
 	if t.begins_with("$"): return _line_as_action(line)
-	if t.begins_with("#"): return _line_as_action(line)
 	if t.begins_with("@"): return _line_as_action(line)
 	# flows
-	if t.begins_with(Soot.FLOW_GOTO): return _line_as_flow_goto(line)
-	if t.begins_with(Soot.FLOW_CALL): return _line_as_flow_call(line)
-	if t.begins_with(Soot.FLOW_PASS): return _line_as_flow_pass(line)
-	if t.begins_with(Soot.FLOW_ENDD): return _line_as_flow_end(line)
-	if t.begins_with(Soot.FLOW_END_ALL): return _line_as_flow_end_all(line)
-	if t.begins_with(Soot.FLOW_CHECKPOINT): return _line_as_flow_checkpoint(line)
-	if t.begins_with(Soot.FLOW_BACK): return _line_as_flow_back(line)
+	if t.begins_with(Soot.FLOW_GOTO): return _line_as_flow_action(line, "goto", Soot.FLOW_GOTO)
+	if t.begins_with(Soot.FLOW_CALL): return _line_as_flow_action(line, "call", Soot.FLOW_CALL)
+	if t.begins_with(Soot.FLOW_PASS): return _line_as_flow_action(line, "pass", Soot.FLOW_PASS)
+	if t.begins_with(Soot.FLOW_ENDD): return _line_as_flow_action(line, "end", Soot.FLOW_ENDD)
+	if t.begins_with(Soot.FLOW_END_ALL): return _line_as_flow_action(line, "end_all", Soot.FLOW_END_ALL)
+	if t.begins_with(Soot.FLOW_CHECKPOINT): return _line_as_flow_action(line, "check_point", Soot.FLOW_CHECKPOINT)
+	if t.begins_with(Soot.FLOW_BACK): return _line_as_flow_action(line, "back", Soot.FLOW_BACK)
 	# otherwise it is dialogue
-	return _line_as_prop_or_flag(line)
+	return _line_as_text(line)
 
 func _line_as_condition(line: Dictionary):
 	line.type = "cond"
@@ -592,7 +593,8 @@ func _line_as_option(line: Dictionary):
 		var p = line.M.text.split(Soot.FLOW_GOTO, true, 1)
 		line.M.text = p[0].strip_edges()
 		var fstep := _new_line_flat(line, 10_000)
-		_add_flow_action(fstep, "goto", p[1].strip_edges())
+		fstep.type = "goto"
+		fstep.goto = p[1].strip_edges()
 		lines.append(fstep)
 	
 	line.type = "option"
@@ -602,44 +604,14 @@ func _line_as_option(line: Dictionary):
 		line.then = lines
 
 func _line_as_list(line: Dictionary):
-	var list_type = line.M.text.trim_prefix("((").split("))", true, 1)[0]
+	var list_type = line.M.text.trim_prefix("{[").split("]}", true, 1)[0]
 	line.type = "list"
 	line.list_type = list_type
 	line.list = line.M.tabbed
 
-func _line_as_flow_goto(line: Dictionary):
-	var p = line.M.text.strip_prefix(Soot.FLOW_GOTO).strip_edges()
-	_add_flow_action(line, "goto", p[1].strip_edges())
-
-func _line_as_flow_call(line: Dictionary):
-	var p = line.M.text.strip_prefix(Soot.FLOW_CALL).strip_edges()
-	_add_flow_action(line, "call", p[1].strip_edges())
-
-func _line_as_flow_pass(line: Dictionary):
-	line.type = "pass"
-	line.end = line.M.text.trim_prefix(Soot.FLOW_PASS).strip_edges()
-
-func _line_as_flow_end(line: Dictionary):
-	line.type = "end"
-	line.end = line.M.text.trim_prefix(Soot.FLOW_ENDD).strip_edges()
-
-func _line_as_flow_end_all(line: Dictionary):
-	line.type = "end_all"
-	line.end = line.M.text.trim_prefix(Soot.FLOW_END_ALL).strip_edges()
-
-func _line_as_flow_checkpoint(line: Dictionary):
-	line.type = "checkpoint"
-	line.end = line.M.text.trim_prefix(Soot.FLOW_CHECKPOINT).strip_edges()
-
-func _line_as_flow_back(line: Dictionary):
-	line.type = "back"
-	line.end = line.M.text.trim_prefix(Soot.FLOW_BACK).strip_edges()
-
-func _add_flow_action(line: Dictionary, type: String, f_action: String):
+func _line_as_flow_action(line: Dictionary, type: String, head: String):
 	line.type = type
-	# if full path wasn't typed out, add file id as head.
-	line[type] = f_action# if Soot.is_path(f_action) else Soot.join_path([line.M.d_id, f_action])
-	return line
+	line[type] = line.M.text.trim_prefix(head).strip_edges()
 
 func _line_as_action(line: Dictionary):
 	line.type = "action"
@@ -658,17 +630,16 @@ func _line_as_lang(line: Dictionary, gone := false):
 	line.M.id = line.M.text.substr(len(Soot.LANG)).strip_edges()
 	line.then = line.M.tabbed
 
-func _line_as_prop_or_flag(line: Dictionary):
+func _line_as_text(line: Dictionary):
 	var text: String = line.M.text
+	line.type = "text"
 	
 	var speaker_split := _find_speaker_split(text, 0)
 	if speaker_split == -1:
-		line.type = "flag"
-		line.flag = line.M.text
+		line.text = line.M.text
 	
 	else:
 		var p := text.split(":", true, 1)
-		line.type = "prop"
 		line.name = text.substr(0, speaker_split).strip_edges().replace("\\:", ":")
 		line.M.text = text.substr(speaker_split+1, len(text)-speaker_split).strip_edges()
 		
@@ -687,7 +658,7 @@ func _line_as_prop_or_flag(line: Dictionary):
 		else:
 			_last_speaker = line.name
 		
-		line.val = line.M.text.replace("\\:", ":")
+		line.text = line.M.text.replace("\\:", ":")
 	
 	var options := []
 #	var lines := []
@@ -741,7 +712,7 @@ func _extract_properties(line: Dictionary):
 	var p := UString.extract(line.M.text, "((", "))")
 	line.M.text = p.outside
 	if p.inside:
-		for item in UString.split_on_spaces(p.inside):
+		for item in UString.split_outside(p.inside, " "):#UString.split_on_spaces(p.inside):
 			if ":" in item:
 				var kv = item.split(":", true, 1)
 				var k = kv[0].strip_edges()
@@ -752,10 +723,6 @@ func _extract_properties(line: Dictionary):
 					line[k] = v
 			else:
 				UDict.append(line, "flags", item)
-		print(line)
-
-#func _extract_action(line: Dictionary) -> bool:
-#	return _extract(line, "[[", "]]", "action")
 
 func _extract_conditional(line: Dictionary) -> bool:
 	return _extract(line, "{{", "}}", "cond")
