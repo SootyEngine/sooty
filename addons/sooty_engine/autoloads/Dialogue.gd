@@ -4,7 +4,7 @@ extends Flow
 const CHECK_FILES_EVERY := 1 # seconds before checking if any script has changed.
 
 signal reloaded()
-signal caption(from: String, text: String)
+signal caption(text: String, line: Dictionary)
 
 var dialogues := {}
 var lines := {} # all lines from all files
@@ -36,7 +36,9 @@ func _process(_delta: float) -> void:
 
 func _on_step(step: Dictionary):
 	match step.type:
-		"text": caption.emit(step.get("name", ""), step.text, step)
+		"text":
+			print(step)
+			caption.emit(step.text, step)
 		"action": StringAction.do(step.action)
 
 func _reloaded():

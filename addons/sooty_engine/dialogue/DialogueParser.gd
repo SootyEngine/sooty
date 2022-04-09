@@ -462,6 +462,7 @@ func _clean(line: Dictionary) -> String:
 		
 		if line.M.id in _all_lines:
 			push_error("Line id collision for %s." % line.M.id)
+		print(line)
 		_all_lines[line.M.id] = line
 	
 	# erase non essential keys from Meta.
@@ -604,7 +605,7 @@ func _line_as_option(line: Dictionary):
 		line.then = lines
 
 func _line_as_list(line: Dictionary):
-	var list_type = line.M.text.trim_prefix("{[").split("]}", true, 1)[0]
+	var list_type = UString.unwrap(line.M.text, "{[", "]}").strip_edges()# line.M.text.trim_prefix("---").strip_edges()#.split("]}", true, 1)[0]
 	line.type = "list"
 	line.list_type = list_type
 	line.list = line.M.tabbed
@@ -633,32 +634,8 @@ func _line_as_lang(line: Dictionary, gone := false):
 func _line_as_text(line: Dictionary):
 	var text: String = line.M.text
 	line.type = "text"
+	line.text = line.M.text
 	
-	var speaker_split := _find_speaker_split(text, 0)
-	if speaker_split == -1:
-		line.text = line.M.text
-	
-	else:
-		var p := text.split(":", true, 1)
-		line.name = text.substr(0, speaker_split).strip_edges().replace("\\:", ":")
-		line.M.text = text.substr(speaker_split+1, len(text)-speaker_split).strip_edges()
-		
-		# get action
-		if "(" in line.name:
-			var a := UString.extract(line.name, "(", ")", true)
-			line.name = a.outside
-			var action := []
-			for part in a.inside.split(";"):
-				action.append("@%s.%s" % [line.name, part])
-			line.action = action
-		
-		# remember last speaker
-		if line.name.strip_edges() == "":
-			line.name = _last_speaker
-		else:
-			_last_speaker = line.name
-		
-		line.text = line.M.text.replace("\\:", ":")
 	
 	var options := []
 #	var lines := []
@@ -672,17 +649,10 @@ func _line_as_text(line: Dictionary):
 	
 	if options:
 		line.options = options
+	
+	print(line)
 
-func _find_speaker_split(text: String, from: int) -> int:
-	var in_bbcode := false
-	for i in range(from, len(text)):
-		match text[i]:
-			"[": in_bbcode = true
-			"]": in_bbcode = false
-			":":
-				if not in_bbcode and (i==0 or text[i-1] != "\\"):
-					return i
-	return -1
+
 
 func _extract_flat_lines_and_id(line: Dictionary) -> Array:
 	var out := []

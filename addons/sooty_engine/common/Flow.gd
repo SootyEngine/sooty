@@ -20,10 +20,10 @@ signal selected(id: String) # used with select_option
 @export var _stack := [] # current stack of flows, so we can return to a position in a previous flow.
 @export var _last_tick_stack := [] # stack of the previous tick, used for saving and rollback.
 
-@export var _list_states := {}
+@export var states := {}
 
 func _get_state() -> Dictionary:
-	return {stack=_last_tick_stack, started=_started, last_end_message=last_end_message}
+	return {stack=_last_tick_stack, started=_started, last_end_message=last_end_message, states=states}
 
 func _set_state(state: Dictionary):
 	_stack = state.stack
@@ -187,10 +187,6 @@ func _tick():
 					end(step.end)
 					break
 				
-				"array":
-					match step.array_type:
-						_: print("GOT ARRAY ", step)
-				
 				_: push_warning("Huh? %s %s" % [step.keys(), step])
 	
 	# emit start trigger
@@ -238,52 +234,69 @@ func _pop_next_step() -> Dictionary:
 			if StringAction._test(step.cond):
 				return step
 		
+		# special list function
 		elif step.type == "list":
 			var id: String = step.M.id
 			var list: Array = step.list
-			var lstep_id: String
-			var tot := len(list)
-			match step.list_type:
-				# just go through all steps, then loop around
-				"":
-					if not id in _list_states:
-						_list_states[id] = 0
-					else:
-						_list_states[id] = wrapi(_list_states[id] + 1, 0, tot)
-					lstep_id = list[_list_states[id]]
-					_push(S_LIST, step.M.id, [lstep_id])
-				# pick a random step. never the same one twice.
-				"rand":
-					if not id in _list_states:
-						_list_states[id] = randi() % tot
-					elif tot > 1:
-						while true:
-							var next := randi() % tot
-							if next != _list_states[id]:
-								_list_states[id] = next
-								break
-					lstep_id = list[_list_states[id]]
-					_push(S_LIST, step.M.id, [lstep_id])
-				# stop at last element.
-				"stop":
-					if not id in _list_states:
-						_list_states[id] = 0
-					elif _list_states[id] < tot-1:
-						_list_states[id] += 1
-					lstep_id = list[_list_states[id]]
-					_push(S_LIST, step.M.id, [lstep_id])
-				# skip when finished.
-				"skip":
-					if not id in _list_states:
-						_list_states[id] = 0
-					elif _list_states[id] < tot:
-						_list_states[id] += 1
-					if _list_states[id] < tot:
-						lstep_id = list[_list_states[id]]
-						_push(S_LIST, step.M.id, [lstep_id])
-			print(_list_states)
+			var lstep_id := get_list_item(step.list_type, id, list)
+			if lstep_id:
+				_push(S_LIST, step.M.id, [lstep_id])
 			return {}
+		
 		else:
 			return step
 	
 	return {}
+
+func _replace_text_lists(text: String, id: String) -> String:
+	var parts := Array(text.split("|")).map(func(x: String): return x.strip_edges())
+	var type = parts.pop_front()
+	return get_list_item(id, type, parts)
+
+# for strings with "{list_type|item|item|item}" pattern
+# this selects an item based on the list_type
+func replace_list_text(id: String, text: String) -> String:
+	return UString.replace_between(text, "{", "}", _replace_text_lists.bind(id))
+
+# return an item from a list, and changes the lists state for next time
+func get_list_item(id: String, type: String, list: Array) -> String:
+	var tot := len(list)
+	match type:
+		# just go through all steps, then loop around
+		"":
+			if not id in states:
+				states[id] = 0
+			else:
+				states[id] = wrapi(states[id] + 1, 0, tot)
+			return list[states[id]]
+		
+		# pick a random step. never the same one twice.
+		"rand":
+			if not id in states:
+				states[id] = randi() % tot
+			elif tot > 1:
+				while true:
+					var next := randi() % tot
+					if next != states[id]:
+						states[id] = next
+						break
+			return list[states[id]]
+		
+		# stop at last element.
+		"stop":
+			if not id in states:
+				states[id] = 0
+			elif states[id] < tot-1:
+				states[id] += 1
+			return list[states[id]]
+		
+		# hide when finished.
+		"hide":
+			if not id in states:
+				states[id] = 0
+			elif states[id] < tot:
+				states[id] += 1
+			if states[id] < tot:
+				return list[states[id]]
+	
+	return ""

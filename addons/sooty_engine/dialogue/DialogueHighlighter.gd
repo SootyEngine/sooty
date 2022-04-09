@@ -48,6 +48,7 @@ const C_OPTION_TEXT := Color.WHEAT
 
 # strings
 const S_FLAG := "\t#?"
+const S_BLOCK_SEPERATOR := "---"
 
 #const S_PROPERTY := "-"
 const S_OPTION := "|>"
@@ -59,8 +60,8 @@ const S_STATE_FUNC := "$"
 
 const S_FLATLINE := "||"
 
-const S_SELECTOR_START := "{["
-const S_SELECTOR_END := "]}"
+const S_LIST_START := "{["
+const S_LIST_END := "]}"
 const S_COND_START := "{{"
 const S_COND_END := "}}"
 
@@ -109,7 +110,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 		_c(len(Soot.LANG), Color.TOMATO)
 	
 	# new document
-	elif text.begins_with("---"):
+	elif text.begins_with(S_BLOCK_SEPERATOR):
 		_c(0, Color.ORANGE)
 	
 	# normal lines
@@ -335,10 +336,21 @@ func _h_conditional(from: int, to: int, begins_with: bool):
 func _h_bbcode(from: int, to: int, default: Color):
 	var i := from
 	while i < to:
-		if text[i] == "[":
-			var b := text.find("]", i+1)
-			if b != -1:
-				var inner := text.substr(i+1, b-i-1)
+		if text[i] == "{":
+			var end := text.find("}", i+1)
+			if end != -1:
+				# colorize open and close tags
+				_c(i, C_SYMBOL)
+				_h_text_feature(i+1, end, default)
+				_c(end, C_SYMBOL)
+				# back to normal text color
+				_c(end+1, default)
+				i = end
+			
+		elif text[i] == "[":
+			var end := text.find("]", i+1)
+			if end != -1:
+				var inner := text.substr(i+1, end-i-1)
 				var off = i + 1
 				for tag in inner.split(";"):
 					if tag.begins_with("!"):
@@ -363,10 +375,10 @@ func _h_bbcode(from: int, to: int, default: Color):
 					off += 1
 				# colorize open and close tags
 				_c(i, C_SYMBOL)
-				_c(b, C_SYMBOL)
+				_c(end, C_SYMBOL)
 				# back to normal text color
-				_c(b+1, default)
-				i = b
+				_c(end+1, default)
+				i = end
 		
 		# markdown: * ** ***
 		elif text[i] == "*":
@@ -486,15 +498,15 @@ func _h_line(from: int, to: int):
 #			_c(from, C_SYMBOL)
 #			_set_var_color(j, text.substr(j))
 		
-		# selector lines
-		if part.begins_with(S_SELECTOR_START):
+		# list lines
+		if part.begins_with(S_LIST_START):
 			# head tag
 			_c(from, C_SYMBOL)
 			_c(from+1, Color(Color.LIGHT_SALMON, .5))
 			# inner
-			_c(from+2, Color.LIGHT_SALMON)
+			_c(from+len(S_LIST_START), Color.LIGHT_SALMON)
 			
-			var end := part.find(S_SELECTOR_END, len(S_SELECTOR_START))
+			var end := part.find(S_LIST_END, len(S_LIST_START))
 			if end != -1:
 				# tail tag
 				_c(from+end, Color(Color.LIGHT_SALMON, .5))
@@ -574,7 +586,23 @@ func _h_line(from: int, to: int):
 			_h_bbcode(from, to, C_TEXT)
 		
 		from = next_from
-	
+
+func _h_text_feature(from: int, to: int, text_color: Color):
+	var inner := text.substr(from, to-from)
+	var parts := inner.split("|")
+	for i in len(parts):
+		var part := parts[i]
+		if i == 0:
+#			_c(from, Color.ORANGE.darkened(.33))
+			_c(from, Color.ORANGE)
+#			_c(from+len(part)-1, Color.ORANGE.darkened(.33))
+		else:
+			_c(from, text_color)
+			_h_bbcode(from, from+len(part)+1, text_color)
+		from += len(part)
+		_c(from, C_SYMBOL)
+		from += 1
+
 func _find_speaker_split(s: String) -> int:#from: int) -> int:
 	var in_bbcode := false
 	for i in len(s):#range(from, len(text)):

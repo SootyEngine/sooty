@@ -218,9 +218,11 @@ static func _is_list_item(s: String) -> bool:
 	return s.begins_with("- ") or s == "-"
 
 # attempt to display data as a .soda file
-static func dict_to_str(dict: Dictionary, with_type := false) -> String:
+static func dict_to_str(dict: Dictionary, with_type := false, strip := false) -> String:
 	var out := []
-	UDict.dig(dict, func(x): _strip(x))
+	dict = dict.duplicate(true)
+	if strip:
+		UDict.dig(dict, func(x): _strip(x))
 	_to_str(out, "", dict, with_type, 0, -1)
 	out.pop_front() # TODO: find out why first element is empty
 	return "\n".join(out)
