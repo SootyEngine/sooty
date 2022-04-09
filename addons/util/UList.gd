@@ -11,6 +11,12 @@ static func part(a: Array, begin: int = 0, end=null) -> Array:
 #	if a is Array:
 	return a.slice(begin, end)
 
+static func all_items_of_type(list: Array, type: int) -> bool:
+	for i in len(list):
+		if typeof(list[i]) != type:
+			return false
+	return true
+
 static func list(thing: Variant) -> Array:
 	match typeof(thing):
 		TYPE_NIL: return []

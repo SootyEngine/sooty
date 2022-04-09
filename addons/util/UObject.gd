@@ -60,6 +60,14 @@ const GLOBAL_SCOPE_METHODS := [
 static func get_class_name(o: Object) -> String:
 	return o.get_script().resource_path.get_file().split(".", true, 1)[0]
 
+# find a child of type
+static func find_child_of_type(parent: Node, child_type: Variant) -> Node:
+	for i in parent.get_child_count():
+		var c := parent.get_child(i)
+		if c is child_type:
+			return c
+	return null
+
 static func duplicate_object(input: Object) -> Object:
 	var classname := get_class_name(input)
 	var output = create(classname)

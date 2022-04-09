@@ -238,10 +238,11 @@ static func _strip(x):
 
 static func _to_str(out: Array, key: String, value: Variant, with_type: bool, deep: int, parent: int):
 	var head = "\t".repeat(max(0, deep-1))
-	match typeof(value):
+	var type := typeof(value)
+	match type:
 		TYPE_DICTIONARY:
-			if parent == TYPE_ARRAY:
-				var hline = _to_h_str(value, with_type)
+			var hline = _to_h_str(value, with_type)
+			if len(hline) <= deep * 40 or parent == TYPE_ARRAY:
 				out.append("%s%s%s" % [head, key, hline])
 			else:
 				out.append("%s%s" % [head, key])
@@ -250,7 +251,7 @@ static func _to_str(out: Array, key: String, value: Variant, with_type: bool, de
 		
 		TYPE_ARRAY:
 			var hline = _to_h_str(value, with_type)
-			if len(hline) < 40:
+			if len(hline) <= deep * 40 or UList.all_items_of_type(value, TYPE_STRING):
 				out.append("%s%s%s" % [head, key, hline])
 			else:
 				out.append("%s%s" % [head, key])
@@ -258,10 +259,19 @@ static func _to_str(out: Array, key: String, value: Variant, with_type: bool, de
 					_to_str(out, "- ", item, with_type, deep+1, TYPE_ARRAY)
 		
 		_:
+			if type == TYPE_STRING and _has_special_char(value):
+				value = "``%s``" % value
+			
 			if with_type:
-				out.append("%s%s%s" % [head, key, "%s(%s)" % [value, UType.get_name_from_type(typeof(value)) ]] )
+				out.append("%s%s%s" % [head, key, "%s(%s)" % [value, UType.get_name_from_type(type) ]] )
 			else:
 				out.append("%s%s%s" % [head, key, value] )
+
+static func _has_special_char(value: String) -> bool:
+	for c in value:
+		if c in "[]{}":
+			return true
+	return false
 
 static func _to_h_str(value: Variant, with_type: bool) -> String:
 	match typeof(value):

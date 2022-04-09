@@ -159,7 +159,7 @@ func _process_lines(graph_node: GraphNode, dialogue: Dialogue, line: Dictionary,
 
 func _process_line(graph_node: GraphNode, dialogue: Dialogue, line: Dictionary):
 	match line.type:
-		"text":
+		"keyval":
 			_process_lines(graph_node, dialogue, line, "options")
 		
 		"option":

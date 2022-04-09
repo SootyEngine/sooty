@@ -11,7 +11,12 @@ static func get_user_dir() -> String:
 			return dir + "/data/"
 	return "user://"
 
-# Check if file exists at this location.
+# Check if anything exists at this path.
+static func exists(path: String) -> bool:
+	var d := Directory.new()
+	return d.file_exists(path) or d.dir_exists(path)
+
+# Check if file exists at this path.
 static func file_exists(path: String) -> bool:
 	return File.new().file_exists(path)
 

@@ -36,27 +36,9 @@ func do(command: String) -> Variant:
 	elif command.begins_with("@"):
 		var call = command.substr(1)
 		var args := UString.split_on_spaces(call)
-		var method = args.pop_front()
+		var action = args.pop_front()
 		var converted_args := args.map(_str_to_var)
-		var group: String
-		
-		# node function
-		if "." in method:
-			var p = method.split(".", true, 1)
-			group = "@" + p[0]
-			method = p[1]
-		# function
-		else:
-			group = "@." + method
-		
-		var nodes := Global.get_tree().get_nodes_in_group(group)
-		var got
-		if len(nodes):
-			for node in nodes:
-				got = UObject.call_w_args(node, method, converted_args)
-			return got
-		else:
-			push_error("No nodes in group %s for %s(%s)." % [group, method, converted_args])
+		return do_group_action(action, converted_args)
 	
 	# evaluate
 	elif command.begins_with("~"):
@@ -64,6 +46,29 @@ func do(command: String) -> Variant:
 	
 	else:
 		return State._eval(command)
+
+func do_group_action(action: String, args: Array):
+	if action.begins_with("@"):
+		action = action.substr(1)
+	
+	var group: String
+	# node call
+	if "." in action:
+		var p = action.split(".", true, 1)
+		group = "@" + p[0]
+		action = p[1]
+	# function call
+	else:
+		group = "@." + action
+	
+	var nodes := Global.get_tree().get_nodes_in_group(group)
+	var got
+	if len(nodes):
+		for node in nodes:
+			got = UObject.call_w_args(node, action, args)
+		return got
+	else:
+		push_error("No nodes in group %s for %s(%s)." % [group, action, args])
 
 func _test(expression: String) -> bool:
 	var got := true if State._eval(expression) else false

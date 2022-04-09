@@ -20,6 +20,18 @@ var _deep := 0
 func _c(i: int, clr: Color):
 	_out[i] = { color=clr }
 
+func _hl_string_w_special(from: int) -> int:
+	var start := _text.find("``", from)
+	if start != -1:
+		_c(start, C_SYMBOL)
+		_c(start+2, C_FIELD)
+		var end := _text.find("``", start+2)
+		if end != -1:
+			_c(end, C_SYMBOL)
+			return end+2
+		return start+3
+	return -1
+
 func _hl_dict(from: int) -> int:
 	var a := _text.find("{", from)
 	if a != -1:
@@ -159,6 +171,11 @@ func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 	if a != -1:
 		_c(a, C_SYMBOL)
 		i = a + 4
+	
+	# special string
+	a = _hl_string_w_special(i)
+	if a != -1:
+		i = a
 	
 	# dict
 	a = _hl_dict(i)

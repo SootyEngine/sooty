@@ -2,141 +2,146 @@
 extends Resource
 class_name DialogueParser
 
-const DEBUG_KEEP_DICTS := false # don't clean useless info from steps?
 const REWRITE := 6 # total times rewritten from scrath :{
 
-const S_PROPERTY_HEAD := "|"
+var _dialogues := {}
+var _all_lines := {}
 
+var _last_id := ""
+var _last_id_count := 0
 var _last_speaker := ""
-var all_files := []
-var ignore_flags := false
-var has_IGNORE := false # if ignore flag exists, this dialogue won't be available.
-var d_id := ""
-var line_ids := {}
 
-func _init(dialogue_id: String, files: Array, langs := []):
-	d_id = dialogue_id 
-	all_files = files + langs
+#var all_files := []
+#var ignore_flags := false
+#var d_id := ""
+#var line_ids := {}
 
-func parse(generate_lang := "") -> Dictionary:
-	var out_flows := {}
-	var out_lines := {}
-	var raw := []
-	has_IGNORE = false
-	
-	# load files
-	for i in len(all_files):
-		var file: String = all_files[i]
-		var f := _parse_file(file, i)
-		
-		if has_IGNORE:
-			return {}
-		
-		# merge dialogue
-		if file.ends_with(Soot.EXT_DIALOGUE):
-			# keep track of raw unprocessed text lines
-			# for use with lang file generator
-			raw.append(f.raw)
-			
-			for k in f.flows:
-				if k in out_flows:
-					push_error("hmm? %s" % k)
-				out_flows[k] = f.flows[k]
-			
-			for k in f.lines:
-				if k in out_lines:
-					push_error("hmm? %s" % k)
-				out_lines[k] = f.lines[k]
-		
-		# merge languages
-		elif file.ends_with(Soot.EXT_LANG):
-			_merge_lang(f.flows, f.lines, out_flows, out_lines)
-	
-	if len(generate_lang):
-		_generate_lang(generate_lang, out_flows, out_lines, raw)
-	
-	return {
-		flows=out_flows,
-		lines=out_lines
-	}
+#func _init(dialogue_id: String, files: Array, langs := []):
+#	d_id = dialogue_id 
+#	all_files = files + langs
+
+#func parse(file: String) -> Dictionary:
+#	var out: Array[Dictionary] = []
+#	var out_flows := {}
+#	var out_lines := {}
+#	var out_metas := {}
+#	var out_raw := []
+#
+#	# load files
+#	for i in len(all_files):
+#		var file: String = all_files[i]
+#		var original_text := UFile.load_text(file)
+#		var text_lines := original_text.split("\n")
+#		var blocks := _parse_file(text_lines, i)
+#
+#		# merge dialogue
+#		if file.ends_with(Soot.EXT_DIALOGUE):
+#			# keep track of raw unprocessed text lines
+#			# for use with lang file generator
+#			out_raw.append(text_lines)
+#
+#			for block in blocks:
+#				# merge flows
+#				for flow_id in block.flows:
+#					if flow_id in out_flows:
+#						push_error("hmm? %s" % flow_id)
+#					out_flows[flow_id] = block.flows[flow_id]
+#
+#				# merge lines
+#				for line_id in block.lines:
+#					if line_id in out_lines:
+#						push_error("hmm? %s" % line_id)
+#					out_lines[line_id] = block.lines[line_id]
+#
+#		# merge languages
+##		elif file.ends_with(Soot.EXT_LANG):
+##			_merge_lang(f.flows, f.lines, out_flows, out_lines)
+#
+##	if len(generate_lang):
+##		_generate_lang(generate_lang, out_flows, out_lines, out_raw)
+#
+#	return {
+#		flows=out_flows,
+#		lines=out_lines
+#	}
 
 # generate a language file (.sola) from the current dialogue.
-func _generate_lang(lang: String, flows: Dictionary, lines: Dictionary, raw: Array):
-	var out_path := "res://lang/%s-%s%s" % [d_id, lang, Soot.EXT_LANG]
-	var text := []
-	var existing := {}
-	
-	# has existing data?
-	if UFile.file_exists(out_path):
-		existing = _parse_file(out_path)
-	
-	for id in lines:
-		if "!" in id:
-			continue
-		
-		var line_info: Dictionary = lines[id]
-		if line_info.type in ["text"]:
-			var soot_path: String = all_files[line_info.M.file]
-			# are there multiple lines with this id?
-			if _has_lines_with_same_id(id, lines):
-				var multi_lines: Array = _get_lines_with_same_id(id, lines)[0]
-				var last_line:int = multi_lines[-1].M.line
-				# display header showing file and line indices
-				text.append("%s %s # %s @ %s - %s" % [Soot.LANG, id, soot_path, line_info.M.line, last_line])
-				# display comment of original text
-				for ml_info in multi_lines:
-					var raw_text: String = raw[ml_info.M.file][ml_info.M.line]
-					text.append("\t# %s" % [_clean_raw_line_for_lang(raw_text)])
-			else:
-				# header showing file and line index
-				text.append("%s %s # %s @ %s" % [Soot.LANG, id, soot_path, line_info.M.line])
-				# display a comment of original text
-				var raw_text: String = raw[line_info.M.file][line_info.M.line]
-				text.append("\t# %s" % [_clean_raw_line_for_lang(raw_text)])
-			
-			# grab existing line
-			if existing and id in existing.flows:
-				for line_id in existing.flows[id].then:
-					var li = existing.lines[line_id]
-					text.append(existing.raw[li.M.line])
-			
-			else:
-				text.append("\t")
-			
-			text.append("")
-	
-	# add removed lines, in case they come back
-	if existing:
-		for id in existing.flows:
-			if not id in lines:
-				var flow_info: Dictionary = existing.flows[id]
-				var flow_line: String = existing.raw[flow_info.M.line]
-				var last_info := flow_line.split("#", true, 1)[-1].strip_edges()
-				var old_file := last_info.split("@", true, 1)[0].strip_edges()
-				text.append("# %s doesn't exist in %s anymore." % [id, old_file])
-				var similar := UString.find_most_similar(id, lines.keys().filter(func(x): return not "!" in x))
-				if similar:
-					text.append("# Did you mean: %s?" % [", ".join(similar)])
-				text.append("# Sooty will keep this flow in case it comes back.")
-				text.append("# To remove it: Erase %s %s from %s." % [Soot.LANG, id, out_path])
-				text.append("%s %s # REMOVED: %s" % [Soot.LANG_GONE, id, last_info])
-				for line_id in flow_info.then:
-					var li = existing.lines[line_id]
-					text.append(existing.raw[li.M.line])
-				text.append("")
-	
-	var out_text := "\n".join(text)
-	UFile.save_text(out_path, out_text)
-	if existing:
-		print("Updated lang file at: %s." % out_path)
-	else:
-		print("Created lang file at: %s." % out_path)
+#func _generate_lang(d_id: String, lang: String, flows: Dictionary, lines: Dictionary, raw: Array):
+#	var out_path := "res://lang/%s-%s%s" % [d_id, lang, Soot.EXT_LANG]
+#	var text := []
+#	var existing := {}
+#
+#	# has existing data?
+#	if UFile.file_exists(out_path):
+#		existing = _parse_file(out_path)
+#
+#	for id in lines:
+#		if "!" in id:
+#			continue
+#
+#		var line_info: Dictionary = lines[id]
+#		if line_info.type in ["keyval"]:
+#			var soot_path: String = all_files[line_info.M.file]
+#			# are there multiple lines with this id?
+#			if _has_lines_with_same_id(id, lines):
+#				var multi_lines: Array = _get_lines_with_same_id(id, lines)[0]
+#				var last_line:int = multi_lines[-1].M.line
+#				# display header showing file and line indices
+#				text.append("%s %s # %s @ %s - %s" % [Soot.LANG, id, soot_path, line_info.M.line, last_line])
+#				# display comment of original text
+#				for ml_info in multi_lines:
+#					var raw_text: String = raw[ml_info.M.file][ml_info.M.line]
+#					text.append("\t# %s" % [_clean_raw_line_for_lang(raw_text)])
+#			else:
+#				# header showing file and line index
+#				text.append("%s %s # %s @ %s" % [Soot.LANG, id, soot_path, line_info.M.line])
+#				# display a comment of original text
+#				var raw_text: String = raw[line_info.M.file][line_info.M.line]
+#				text.append("\t# %s" % [_clean_raw_line_for_lang(raw_text)])
+#
+#			# grab existing line
+#			if existing and id in existing.flows:
+#				for line_id in existing.flows[id].then:
+#					var li = existing.lines[line_id]
+#					text.append(existing.raw[li.M.line])
+#
+#			else:
+#				text.append("\t")
+#
+#			text.append("")
+#
+#	# add removed lines, in case they come back
+#	if existing:
+#		for id in existing.flows:
+#			if not id in lines:
+#				var flow_info: Dictionary = existing.flows[id]
+#				var flow_line: String = existing.raw[flow_info.M.line]
+#				var last_info := flow_line.split("#", true, 1)[-1].strip_edges()
+#				var old_file := last_info.split("@", true, 1)[0].strip_edges()
+#				text.append("# %s doesn't exist in %s anymore." % [id, old_file])
+#				var similar := UString.find_most_similar(id, lines.keys().filter(func(x): return not "!" in x))
+#				if similar:
+#					text.append("# Did you mean: %s?" % [", ".join(similar)])
+#				text.append("# Sooty will keep this flow in case it comes back.")
+#				text.append("# To remove it: Erase %s %s from %s." % [Soot.LANG, id, out_path])
+#				text.append("%s %s # REMOVED: %s" % [Soot.LANG_GONE, id, last_info])
+#				for line_id in flow_info.then:
+#					var li = existing.lines[line_id]
+#					text.append(existing.raw[li.M.line])
+#				text.append("")
+#
+#	var out_text := "\n".join(text)
+#	UFile.save_text(out_path, out_text)
+#	if existing:
+#		print("Updated lang file at: %s." % out_path)
+#	else:
+#		print("Created lang file at: %s." % out_path)
 
-func _has_lines_with_same_id(id: String, lines: Dictionary) -> bool:
+func _has_lines_with_same_id(id: StringName, lines: Dictionary) -> bool:
 	return ("%s!0" % id) in lines
 
 # returns list with lines, and list with ids
-func _get_lines_with_same_id(id: String, lines: Dictionary) -> Array:
+func _get_lines_with_same_id(id: StringName, lines: Dictionary) -> Array:
 	var out := [[lines[id]], [id]]
 	var index := 0
 	var safety := 1000
@@ -158,12 +163,14 @@ func _clean_raw_line_for_lang(text: String) -> String:
 		text = text.split(Soot.COMMENT, true, 1)[0]
 	return text.strip_edges()
 
-func _parse_file(file: String, file_index := 0) -> Dictionary:
-	var out_flows := {}
-	var out_lines := {}
-	var original_text := UFile.load_text(file)
+func _parse(file_path: StringName, dialogues: Dictionary, all_lines: Dictionary) -> Array:
+	_dialogues = dialogues
+	_all_lines = all_lines
+	
+	var original_text := UFile.load_text(file_path)
 	var text_lines := original_text.split("\n")
-	var dict_lines := []
+	var blocks := []
+	var current: Dictionary
 	
 	var in_multiline := false
 	var multiline_id := ""
@@ -182,11 +189,39 @@ func _parse_file(file: String, file_index := 0) -> Dictionary:
 		var current_line := text_lines[i]
 		var line := i
 		
-		# ignore the file
-		if current_line.begins_with("IGNORE"):
-			has_IGNORE = true
-			return {}
+		# start of document?
+		if i == 0 or current_line.strip_edges() == "---":
+			current = {
+				meta = {
+					# use file path as default id
+					id=UFile.get_file_name(file_path),
+					# file this block is from
+					file=file_path,
+					# line in file
+					line=i,
+					# block index
+					block=len(blocks)
+				},
+				flows = [],
+				lines = [],
+				line_list = []
+			}
+			blocks.append(current)
+			
+			if not i == 0:
+				i += 1
+				continue
 		
+		# meta lines
+		if current_line.begins_with("#."):
+			var meta := current_line.trim_prefix("#.").split(":", true, 1)
+			var k := meta[0].strip_edges()
+			var v = meta[1].strip_edges() if len(meta) == 2 else true
+			current.meta[k] = v
+			i += 1
+			continue
+		
+		# TODO: move down to step level
 		# import time flags
 		# these prevent certain lines, depending on flags
 		if current_line.begins_with("\t#?"):
@@ -199,17 +234,17 @@ func _parse_file(file: String, file_index := 0) -> Dictionary:
 			continue
 		
 		# skip lines that didn't pass the flag.
-		elif not ignore_flags and not flags_pass:
+		elif not flags_pass:
 			i += 1
 			continue
 		
 		# get id for language files
-		var id := ""
+#		var id := ""
 		var uncommented := current_line
-		if Soot.COMMENT_LANG in uncommented:
-			var p := uncommented.split(Soot.COMMENT_LANG, true, 1)
-			uncommented = p[0]
-			id = p[1].strip_edges()
+#		if Soot.COMMENT_LANG in uncommented:
+#			var p := uncommented.split(Soot.COMMENT_LANG, true, 1)
+#			uncommented = p[0]
+#			id = p[1].strip_edges()
 		
 		# remove comment
 		if Soot.COMMENT in uncommented:
@@ -220,12 +255,12 @@ func _parse_file(file: String, file_index := 0) -> Dictionary:
 		if '""""' in stripped:
 			in_multiline = not in_multiline
 			if not in_multiline:
-				id = multiline_id
+#				id = multiline_id
 				line = multiline_line
 				stripped = multiline_head.replace("%TEXT_HERE%", "\n".join(multiline))
 				multiline = []
 			else:
-				multiline_id = id
+#				multiline_id = id
 				multiline_line = i
 				multiline_head = uncommented.replace('""""', '%TEXT_HERE%').strip_edges()
 				multiline_deep = UString.count_leading(text_lines[i], "\t")
@@ -239,208 +274,212 @@ func _parse_file(file: String, file_index := 0) -> Dictionary:
 		# ignore empty lines
 		elif len(stripped):
 			var deep := UString.count_leading(text_lines[i], "\t")
-			if len(id):
-				# multiline
-				if id == "+":
-					id = "%s!%s" % [last_id, multi_id_index]
-					multi_id_index += 1
-				else:
-					last_id = id
-				
-				if id in line_ids:
-					push_error("Two lines using the same id. %s" % id)
-				else:
-					# remember id, so we don't collide with it later
-					line_ids[id] = true
+#			if len(id):
+#				# multiline
+#				if id == "+":
+#					id = "%s!%s" % [last_id, multi_id_index]
+#					multi_id_index += 1
+#				else:
+#					last_id = id
 			
 			# create data for each line
-			dict_lines.append(_new_line(stripped, d_id, file_index, id, line, deep))
-			# unflatten tabbed lines that may exist on the main line ((wrapped in double brackets))
-			var flat_lines := _extract_flat_lines(dict_lines[-1])
-			dict_lines.append_array(flat_lines)
+			var lines: Array = current.line_list
+			lines.append(_new_line(stripped, file_path, line, deep))
+			# unflatten tabbed lines that may exist on the main line
+			# seperated || by || double || bars
+			var flat_lines := _extract_flat_lines_and_id(lines[-1])
+			lines.append_array(flat_lines)
 		
 		i += 1
 	
-	# collect tabs, recursively.
-	i = 0
-	var new_list := []
-	while i < len(dict_lines):
-		var o = _collect_tabbed(dict_lines, i)
-		i = o[0]
-		new_list.append(o[1])
+	for block in blocks:
+		# collect tabs, recursively.
+		var old_list: Array = block.line_list
+		var new_list: Array = block.lines
+		i = 0
+		while i < len(old_list):
+			var o = _collect_tabbed(old_list, i)
+			i = o[0]
+			new_list.append(o[1])
+		
+		# the meta flow collects untabbed lines
+		var meta_flow := _new_line("", file_path, 0, 0)
+		_line_as_flow(meta_flow)
+		meta_flow.M.line = block.meta.line
+		
+		# collect flows
+		for i in len(new_list):
+			var flow: Dictionary = new_list[i]
+			if flow.type in ["flow", "lang", "lang_gone"]:
+				# only keep flows with steps
+				# ignore empty ones
+				if flow.then:
+					_clean(flow)
+					var flow_id = Soot.join_path([block.meta.id, flow.M.id])
+					if flow_id in _all_lines:
+						push_error("Same flow more than once '%s'." % flow_id)
+					_all_lines[flow_id] = flow
+					block.flows.append(flow_id)
+					
+					var d_id: String = block.meta.id
+					if not d_id in _dialogues:
+						_dialogues[d_id] = {
+							flows=[]
+						}
+					print("ADD FLOW ", flow_id)
+					_dialogues[d_id].flows.append(flow_id)
+					
+			else:
+				meta_flow.then.append(flow)
+		
+		if meta_flow.then:
+			_clean(meta_flow)
+			var id := Soot.join_path([block.meta.id, meta_flow.M.id])
+			if id in _all_lines:
+				push_error("Same flow more than once '%s'." % id)
+			_all_lines[id] = meta_flow
+		
+		block.erase("line_list")
 	
-	for i in len(new_list):
-		var item: Dictionary = new_list[i]
-		if item.type in ["flow", "lang", "lang_gone"]:
-			# only keep flows with steps
-			# ignore empty ones
-			if item.then:
-				_clean(item, out_lines)
-				out_flows[item.id] = item
-	
-	return {
-		flows=out_flows,
-		lines=out_lines,
-		raw=text_lines
-	}
+	return blocks
 
-func _merge_lang(lang_flows: Dictionary, lang_lines: Dictionary, out_flows: Dictionary, out_lines: Dictionary):
-	for flow in lang_flows.values():
-		var replace_id: String = flow.id
-		
-		# remove line
-		if not replace_id in out_lines:
-			if flow.type != "lang_gone":
-				print("Line %s wasn't there!?" % replace_id)
-			continue
-		
-		# get old lines nad their ids
-		var old_lines_and_ids: Array
-		if _has_lines_with_same_id(replace_id, out_lines):
-			old_lines_and_ids = _get_lines_with_same_id(replace_id, out_lines)
-		else:
-			old_lines_and_ids = [out_lines[replace_id], [replace_id]]
-		
-		# remove old lines
-		for id in old_lines_and_ids[1]:
-			out_lines.erase(id)
-		
-		var old_lines = old_lines_and_ids[0]
-		var new_lines = []
-		# install as a flow call (== flow) if there is more than one line
-		if len(flow.then) > 1:
-			# the flow.id is same as line id from original file
-			var new_flow_id: String = "lang_%s" % flow.id
-			# add lang flow to main flow list
-			out_flows[new_flow_id] = flow
-			
-			# install a call in it's place
-			out_lines[replace_id] = {
-				"type": "call",
-				"call": Soot.join_path([d_id, new_flow_id]),
-				"M": {
-					"d_id": flow.M.d_id,
-					"file": flow.M.file,
-					"line": flow.M.line,
-					"lang": true # this line came from a .sola file
-				}
-			}
-			
-			# install flow lines
-			for line_id in flow.then:
-				if line_id in out_lines:
-					print("Line %s existed! Shouldn't happen!" % line_id)
-				out_lines[line_id] = lang_lines[line_id]
-				new_lines.append(lang_lines[line_id])
-		
-		# install as a single line replace
-		else:
-			out_lines[replace_id] = lang_lines[flow.then[0]]
-			new_lines.append(lang_lines[flow.then[0]])
-		
-		print("REPLACED ", old_lines[0], "<->", new_lines)
+#func _merge_lang(lang_flows: Dictionary, lang_lines: Dictionary, out_flows: Dictionary, out_lines: Dictionary):
+#	for flow in lang_flows.values():
+#		var replace_id: String = flow.id
+#
+#		# remove line
+#		if not replace_id in out_lines:
+#			if flow.type != "lang_gone":
+#				print("Line %s wasn't there!?" % replace_id)
+#			continue
+#
+#		# get old lines nad their ids
+#		var old_lines_and_ids: Array
+#		if _has_lines_with_same_id(replace_id, out_lines):
+#			old_lines_and_ids = _get_lines_with_same_id(replace_id, out_lines)
+#		else:
+#			old_lines_and_ids = [out_lines[replace_id], [replace_id]]
+#
+#		# remove old lines
+#		for id in old_lines_and_ids[1]:
+#			out_lines.erase(id)
+#
+#		var old_lines = old_lines_and_ids[0]
+#		var new_lines = []
+#		# install as a flow call (== flow) if there is more than one line
+#		if len(flow.then) > 1:
+#			# the flow.id is same as line id from original file
+#			var new_flow_id: String = "lang_%s" % flow.id
+#			# add lang flow to main flow list
+#			out_flows[new_flow_id] = flow
+#
+#			# install a call in it's place
+#			out_lines[replace_id] = {
+#				"type": "call",
+#				"call": Soot.join_path([d_id, new_flow_id]),
+#				"M": {
+#					"d_id": flow.M.d_id,
+#					"file": flow.M.file,
+#					"line": flow.M.line,
+#					"lang": true # this line came from a .sola file
+#				}
+#			}
+#
+#			# install flow lines
+#			for line_id in flow.then:
+#				if line_id in out_lines:
+#					print("Line %s existed! Shouldn't happen!" % line_id)
+#				out_lines[line_id] = lang_lines[line_id]
+#				new_lines.append(lang_lines[line_id])
+#
+#		# install as a single line replace
+#		else:
+#			out_lines[replace_id] = lang_lines[flow.then[0]]
+#			new_lines.append(lang_lines[flow.then[0]])
+#
+#		print("REPLACED ", old_lines[0], "<->", new_lines)
 
-func _new_line_flat(parent: Dictionary, index: int, text := "", id := "") -> Dictionary:
-	var out := _new_line_child(parent, text, id)
-	if "flat" in parent:
-		out.flat = "%s %s" % [parent.flat, index]
-	else:
-		out.flat = "%s" % index
+func _new_line_flat(parent: Dictionary, index: int, text := "") -> Dictionary:
+	var out := _new_line_child(parent, text)
+#	if "flat" in parent:
+#		out.flat = "%s %s" % [parent.flat, index]
+#	else:
+#		out.flat = "%s" % index
 	return out
 
-func _new_line_child(parent: Dictionary, text := "", id := "") -> Dictionary:
-	return _new_line(text, parent.M.d_id, parent.M.file, id, parent.M.line, parent.M.deep+1)
+func _new_line_child(parent: Dictionary, text := "") -> Dictionary:
+	return _new_line(text, parent.M.file, parent.M.line, parent.M.deep+1)
 
-func _new_line(text: String, d_id: String, file: int, id: String, line: int, deep: int) -> Dictionary:
+func _new_line(text: String, file: StringName, line: int, deep: int) -> Dictionary:
 	return {
 		"M"={ # meta data
 			"text"=text, # original text, stripped
-			"id"=id, # unique id, used for translations
+			"id"="", # unique id, used for translations
 			"deep"=deep, # how many tabs
 			"tabbed"=[], # lines tabbed below this one
-			"d_id"=d_id, # dialogue
 			"file"=file, # file index
 			"line"=line # index of line in file
 		},
-		"type"="_", # type of line
+		"type"="", # type of line
 	}
 
-func _clean_array(lines: Array, out_lines: Dictionary):
+func _clean_array(lines: Array):
 	for i in len(lines):
-		if DEBUG_KEEP_DICTS: # DEBUG SANITY
-			_clean(lines[i], out_lines)
-		else:
-			lines[i] = _clean(lines[i], out_lines)
+		lines[i] = _clean(lines[i])
 
-func _clean_nested_array(lines_list: Array, out_lines: Dictionary):
+func _clean_nested_array(lines_list: Array):
 	for i in len(lines_list):
-		_clean_array(lines_list[i], out_lines)
+		_clean_array(lines_list[i])
 
-func _clean(line: Dictionary, out_lines: Dictionary) -> String:
-	var id: String = line.M.id
-	if not len(id):
-		seed(hash(line.M.text))
-		id = _get_uid()
-		line_ids[id] = true # add to list so we don't collide
-	
-	if "flat" in line.M:
-		id += "_%s" % [line.M.flat]
-#		line.erase("flat")
-	
+func _clean(line: Dictionary) -> String:
 	match line.type:
 		"flow", "lang", "lang_gone":
-			_clean_array(line.then, out_lines)
-			return id
-
+			_clean_array(line.then)
+		"list":
+			_clean_array(line.list)
 		"option":
 			if "then" in line:
-				_clean_array(line.then, out_lines)
-#		"goto", "call":
-#			_erase(line, ["text"])
-		"text":
+				_clean_array(line.then)
+		"prop", "flag":
 			if "options" in line:
-				_clean_array(line.options, out_lines)
-#		"action":
-#			_erase(line, ["text"])
+				_clean_array(line.options)
 		"cond":
 			match line.cond_type:
-				"if": _clean_nested_array(line.cond_lines, out_lines)
-				"match": _clean_nested_array(line.case_lines, out_lines)
+				"if": _clean_nested_array(line.cond_lines)
+				"match": _clean_nested_array(line.case_lines)
 			line.type = line.cond_type
+		
 		_: pass
+	
+	# generate id and add to line list
+	if not line.type in ["flow", "lang", "lang_gone"]:
+		if line.M.id:
+			pass
+		else:
+			seed(hash(line.M.text))
+			line.M.id = _get_uid(_all_lines)
+		
+		if line.M.id in _all_lines:
+			push_error("Line id collision for %s." % line.M.id)
+		_all_lines[line.M.id] = line
 	
 	# erase non essential keys from Meta.
 	for k in line.M.keys():
-		if not k in ["d_id", "file", "line", "id"]:
+		if not k in ["file", "line", "id", "block"]:
 			line.M.erase(k)
 	
-	if id in out_lines:
-		var old = out_lines[id]
-		push_error("%s Line at %s %s replaced with %s" % [all_files[line.file], id, old, line])
-	out_lines[id] = line
-	return id
+	return line.M.id
 
 func _collect_tabbed(dict_lines: Array, i: int) -> Array:
 	var line = dict_lines[i]
-#	_extract_properties(line)
+	_extract_properties(line)
 	i += 1
 	# collect tabbed
 	while i < len(dict_lines) and dict_lines[i].M.deep > line.M.deep:
 		var o = _collect_tabbed(dict_lines, i)
 		line.M.tabbed.append(o[1])
 		i = o[0]
-		
-	# get properties
-	for j in range(len(line.M.tabbed)-1, -1, -1):
-		if line.M.tabbed[j].type == "prop":
-			var props: Dictionary = line.M.tabbed[j].prop
-			if not "prop" in line:
-				line.prop = props
-			else:
-				for k in props:
-					line.prop[k] = props[k]
-			line.M.tabbed.remove_at(j)
-
+	
 	# combine if-elif-else
 	var new_tabbed := []
 	for j in len(line.M.tabbed):
@@ -467,13 +506,20 @@ func _collect_tabbed(dict_lines: Array, i: int) -> Array:
 
 func _process_line(line: Dictionary):
 	var t: String = line.M.text
+	# ===
 	if t.begins_with(Soot.FLOW): return _line_as_flow(line)
+	# <->
 	if t.begins_with(Soot.LANG): return _line_as_lang(line)
+	# <?>
 	if t.begins_with(Soot.LANG_GONE): return _line_as_lang(line, true)
+	# {{}}
 	if t.begins_with("{{"): return _line_as_condition(line)
 	_extract_conditional(line)
 	# option
-	if t.begins_with("- "): return _line_as_option(line)
+	if t.begins_with("|>"): return _line_as_option(line)
+	if t.begins_with("+>"): return _line_as_option(line)
+	# list
+	if t.begins_with("(("): return _line_as_list(line)
 	# actions
 	if t.begins_with("~"): return _line_as_action(line)
 	if t.begins_with("$"): return _line_as_action(line)
@@ -485,9 +531,10 @@ func _process_line(line: Dictionary):
 	if t.begins_with(Soot.FLOW_PASS): return _line_as_flow_pass(line)
 	if t.begins_with(Soot.FLOW_ENDD): return _line_as_flow_end(line)
 	if t.begins_with(Soot.FLOW_END_ALL): return _line_as_flow_end_all(line)
-	# property
-	if t.begins_with(S_PROPERTY_HEAD): return _line_as_properties(line)
-	return _line_as_dialogue(line)
+	if t.begins_with(Soot.FLOW_CHECKPOINT): return _line_as_flow_checkpoint(line)
+	if t.begins_with(Soot.FLOW_BACK): return _line_as_flow_back(line)
+	# otherwise it is dialogue
+	return _line_as_prop_or_flag(line)
 
 func _line_as_condition(line: Dictionary):
 	line.type = "cond"
@@ -532,7 +579,7 @@ func _line_as_condition(line: Dictionary):
 		line.cond_lines = [line.M.tabbed]
 
 func _line_as_option(line: Dictionary):
-	_extract_action(line)
+#	_extract_action(line)
 	
 	# extract flow lines
 	var lines := []
@@ -544,23 +591,28 @@ func _line_as_option(line: Dictionary):
 	if Soot.FLOW_GOTO in line.M.text:
 		var p = line.M.text.split(Soot.FLOW_GOTO, true, 1)
 		line.M.text = p[0].strip_edges()
-		var i = 10_000
-		var fstep := _new_line_flat(line, i)
+		var fstep := _new_line_flat(line, 10_000)
 		_add_flow_action(fstep, "goto", p[1].strip_edges())
 		lines.append(fstep)
 	
 	line.type = "option"
-	line.text = line.M.text.substr(1).strip_edges()
+	line.text = line.M.text.substr(len("|>")).strip_edges()
 	
 	if lines:
 		line.then = lines
 
+func _line_as_list(line: Dictionary):
+	var list_type = line.M.text.trim_prefix("((").split("))", true, 1)[0]
+	line.type = "list"
+	line.list_type = list_type
+	line.list = line.M.tabbed
+
 func _line_as_flow_goto(line: Dictionary):
-	var p = line.M.text.rsplit(Soot.FLOW_GOTO, true, 1)
+	var p = line.M.text.strip_prefix(Soot.FLOW_GOTO).strip_edges()
 	_add_flow_action(line, "goto", p[1].strip_edges())
 
 func _line_as_flow_call(line: Dictionary):
-	var p = line.M.text.split(Soot.FLOW_CALL, true, 1)
+	var p = line.M.text.strip_prefix(Soot.FLOW_CALL).strip_edges()
 	_add_flow_action(line, "call", p[1].strip_edges())
 
 func _line_as_flow_pass(line: Dictionary):
@@ -575,72 +627,77 @@ func _line_as_flow_end_all(line: Dictionary):
 	line.type = "end_all"
 	line.end = line.M.text.trim_prefix(Soot.FLOW_END_ALL).strip_edges()
 
+func _line_as_flow_checkpoint(line: Dictionary):
+	line.type = "checkpoint"
+	line.end = line.M.text.trim_prefix(Soot.FLOW_CHECKPOINT).strip_edges()
+
+func _line_as_flow_back(line: Dictionary):
+	line.type = "back"
+	line.end = line.M.text.trim_prefix(Soot.FLOW_BACK).strip_edges()
+
 func _add_flow_action(line: Dictionary, type: String, f_action: String):
 	line.type = type
 	# if full path wasn't typed out, add file id as head.
-	line[type] = f_action if Soot.is_path(f_action) else Soot.join_path([line.M.d_id, f_action])
+	line[type] = f_action# if Soot.is_path(f_action) else Soot.join_path([line.M.d_id, f_action])
 	return line
 
 func _line_as_action(line: Dictionary):
 	line.type = "action"
 	line.action = line.M.text.strip_edges()
 
-func _line_as_properties(line: Dictionary):
-	var properties := {}
-	for prop in line.M.text.substr(len("|")).split(" "):
-		var p = prop.split(":", true, 1)
-		properties[p[0]] = p[1]
-	line.type = "prop"
-	line.prop = properties
-
 func _line_as_flow(line: Dictionary):
 	_last_speaker = ""
 	line.type = "flow"
-	line.id = line.M.text.substr(len(Soot.FLOW)).strip_edges()
+	line.M.id = line.M.text.substr(len(Soot.FLOW)).strip_edges()
 	line.then = line.M.tabbed
 
 # creates a flow, that will then be 'called' like `== d8997d` instead of whatever line was there.
 func _line_as_lang(line: Dictionary, gone := false):
 	_last_speaker = ""
 	line.type = "lang_gone" if gone else "lang"
-	line.id = line.M.text.substr(len(Soot.LANG)).strip_edges()
+	line.M.id = line.M.text.substr(len(Soot.LANG)).strip_edges()
 	line.then = line.M.tabbed
 
-func _line_as_dialogue(line: Dictionary):
+func _line_as_prop_or_flag(line: Dictionary):
 	var text: String = line.M.text
-	line.type = "text"
-	var i := _find_speaker_split(text, 0)
-	if i != -1:
+	
+	var speaker_split := _find_speaker_split(text, 0)
+	if speaker_split == -1:
+		line.type = "flag"
+		line.flag = line.M.text
+	
+	else:
 		var p := text.split(":", true, 1)
-		line.from = text.substr(0, i).strip_edges().replace("\\:", ":")
-		line.M.text = text.substr(i+1, len(text)-i).strip_edges()
+		line.type = "prop"
+		line.name = text.substr(0, speaker_split).strip_edges().replace("\\:", ":")
+		line.M.text = text.substr(speaker_split+1, len(text)-speaker_split).strip_edges()
 		
 		# get action
-		if "(" in line.from:
-			var a := UString.extract(line.from, "(", ")", true)
-			line.from = a.outside
+		if "(" in line.name:
+			var a := UString.extract(line.name, "(", ")", true)
+			line.name = a.outside
 			var action := []
 			for part in a.inside.split(";"):
-				action.append("@%s.%s" % [line.from, part])
+				action.append("@%s.%s" % [line.name, part])
 			line.action = action
 		
 		# remember last speaker
-		if line.from.strip_edges() == "":
-			line.from = _last_speaker
+		if line.name.strip_edges() == "":
+			line.name = _last_speaker
 		else:
-			_last_speaker = line.from
-	
-	line.text = line.M.text.replace("\\:", ":")
+			_last_speaker = line.name
+		
+		line.val = line.M.text.replace("\\:", ":")
 	
 	var options := []
-	var lines := []
+#	var lines := []
 	for tabbed_line in line.M.tabbed:
 		match tabbed_line.type:
 			"option": options.append(tabbed_line)
-			_: lines.append(tabbed_line)
+#			_: lines.append(tabbed_line)
 	
-	if lines:
-		line.lines = lines
+#	if lines:
+#		line.lines = lines
 	
 	if options:
 		line.options = options
@@ -656,19 +713,49 @@ func _find_speaker_split(text: String, from: int) -> int:
 					return i
 	return -1
 
-func _extract_flat_lines(line: Dictionary) -> Array:
+func _extract_flat_lines_and_id(line: Dictionary) -> Array:
 	var out := []
-	if _extract(line, "((", "))", "flat_lines"):
-		var p = line.M.flat_lines.split(";;")
-		for i in len(p):
-			var out_line := _new_line_flat(line, i, p[i].strip_edges(), "")
-			# recursively check.
-			out.append(out_line)
-			out.append_array(_extract_flat_lines(out_line))
+	var parts = Array(line.M.text.split("||")).map(func(x): return UString.extract(x.strip_edges(), "#{", "}"))
+	var in_out: Dictionary = parts.pop_front()
+	
+	line.M.text = in_out.outside
+	_set_line_id(line, in_out.inside)
+	
+	for i in len(parts):
+		in_out = parts[i]
+		var out_line := _new_line_flat(line, i, in_out.outside)
+		_set_line_id(out_line, in_out.inside)
+		out.append(out_line)
 	return out
 
-func _extract_action(line: Dictionary) -> bool:
-	return _extract(line, "[[", "]]", "action")
+func _set_line_id(line: Dictionary, id: String):
+	if id == "+":
+		line.M.id = "%s!%s" % [_last_id, _last_id_count]
+		_last_id_count += 1
+	else:
+		line.M.id = id
+		_last_id = id
+		_last_id_count = 0
+
+func _extract_properties(line: Dictionary):
+	var p := UString.extract(line.M.text, "((", "))")
+	line.M.text = p.outside
+	if p.inside:
+		for item in UString.split_on_spaces(p.inside):
+			if ":" in item:
+				var kv = item.split(":", true, 1)
+				var k = kv[0].strip_edges()
+				var v = kv[1].strip_edges()
+				if "," in v:
+					line[k] = v.split(",")
+				else:
+					line[k] = v
+			else:
+				UDict.append(line, "flags", item)
+		print(line)
+
+#func _extract_action(line: Dictionary) -> bool:
+#	return _extract(line, "[[", "]]", "action")
 
 func _extract_conditional(line: Dictionary) -> bool:
 	return _extract(line, "{{", "}}", "cond")
@@ -676,7 +763,7 @@ func _extract_conditional(line: Dictionary) -> bool:
 func _extract(line: Dictionary, head: String, tail: String, key: String) -> bool:
 	var p := UString.extract(line.M.text, head, tail)
 	line.M.text = p.outside
-	if p.inside != "":
+	if p.inside:
 		line.M[key] = p.inside
 		return true
 	return false
@@ -698,7 +785,7 @@ func _extract(line: Dictionary, head: String, tail: String, key: String) -> bool
 #		tokens.append([f[0], left_over])
 #	return [left_side, tokens]
 
-func _get_uid() -> String:
+func _get_uid(line_ids: Dictionary) -> String:
 	var uid := _get_id()
 	var safety := 100
 	while uid in line_ids:
@@ -712,7 +799,7 @@ func _get_uid() -> String:
 func _get_id() -> String:
 	var dict := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	var lenn := len(dict)
-	var out = ""
+	var out := ""
 	for i in 5:
 		out += dict[randi() % lenn]
 	return out
