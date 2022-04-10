@@ -535,7 +535,9 @@ func _process_line(line: Dictionary):
 	if t.begins_with(Soot.FLOW_END_ALL): return _line_as_flow_action(line, "end_all", Soot.FLOW_END_ALL)
 	if t.begins_with(Soot.FLOW_CHECKPOINT): return _line_as_flow_action(line, "check_point", Soot.FLOW_CHECKPOINT)
 	if t.begins_with(Soot.FLOW_BACK): return _line_as_flow_action(line, "back", Soot.FLOW_BACK)
-	# otherwise it is dialogue
+	# text insert
+	if t.begins_with("&"): return _line_as_text_insert(line)
+	# otherwise it is text
 	return _line_as_text(line)
 
 func _line_as_condition(line: Dictionary):
@@ -636,18 +638,33 @@ func _line_as_lang(line: Dictionary, gone := false):
 	line.M.id = line.M.text.substr(len(Soot.LANG)).strip_edges()
 	line.then = line.M.tabbed
 
+func _line_as_text_insert(line: Dictionary):
+	var text = line.M.text.trim_prefix("&").split("=")
+	line.type = "insert"
+	line.key = text[0].strip_edges()
+	line.val = text[1].strip_edges()
+
 func _line_as_text(line: Dictionary):
 	var text: String = line.M.text
-	line.type = "text"
-	line.text = line.M.text
-	
-	
 	var options := []
-#	var lines := []
+	var inserts := {}
 	for tabbed_line in line.M.tabbed:
 		match tabbed_line.type:
 			"option": options.append(tabbed_line)
+			"insert": inserts[tabbed_line.key] = tabbed_line.val
 #			_: lines.append(tabbed_line)
+	
+	# format the insert keys with eachother
+	for key in inserts:
+		inserts[key] = inserts[key].format(inserts, "&_")
+	# format the main text with the inserts
+	text = text.format(inserts, "&_")
+	
+	line.type = "text"
+	line.text = text
+	
+	print(line.text)
+	print(inserts)
 	
 #	if lines:
 #		line.lines = lines

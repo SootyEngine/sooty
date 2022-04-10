@@ -2,7 +2,9 @@
 extends EditorScript
 
 func _run():
-	print(File.new().get_modified_time("res://dialogue"))
+	print("as &x ok".format({x="tes"}, "&_"))
+	
+#	print(File.new().get_modified_time("res://dialogue"))
 #	var test := TestClass.new()
 #	StringAction.add_command(test.testy)
 #	var got = StringAction.do_command("> testy")

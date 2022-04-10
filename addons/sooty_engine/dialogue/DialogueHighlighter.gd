@@ -13,6 +13,7 @@ const OP_ALL := OP_RELATIONS + OP_ASSIGNMENTS + OP_EVALS + OP_KEYWORDS
 
 # colors
 const C_TEXT := Color.GAINSBORO
+const C_TEXT_INSERT := Color.PALE_GREEN
 const C_SPEAKER := Color(1, 1, 1, 0.5)
 const C_TAG := Color(1, 1, 1, .5)
 const C_SYMBOL := Color(1, 1, 1, 0.33)
@@ -51,8 +52,10 @@ const S_FLAG := "\t#?"
 const S_BLOCK_SEPERATOR := "---"
 
 #const S_PROPERTY := "-"
-const S_OPTION := "|>"
+const S_OPTION := "|>"# ">>>"# "|>"
 const S_OPTION_ADD := "+>"
+
+const S_TEXT_INSERT := "&"
 
 const S_EVAL := "~"
 const S_GROUP_FUNC := "@"
@@ -157,6 +160,15 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 #				_h_line(f, to if to>0 else len(text))
 			
 #			else:
+			if text.strip_edges().begins_with(S_TEXT_INSERT):
+				from = text.find(S_TEXT_INSERT, from)
+				_c(from, C_SYMBOL)
+				_c(from+1, C_TEXT_INSERT)
+				var e := text.find("=", from)
+				if e != -1:
+					_c(e, C_SYMBOL)
+					from = e+1
+			
 			_h_line(from, len(text))
 			
 			var f = text.find('""""')
@@ -380,6 +392,14 @@ func _h_bbcode(from: int, to: int, default: Color):
 				_c(end+1, default)
 				i = end
 		
+		elif text[i] == "&":
+			_c(i, C_SYMBOL)
+			_c(i+1, C_TEXT_INSERT)
+			i += 1
+			while i < to and text[i] in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789":
+				i += 1
+			_c(i, default)
+		
 		# markdown: * ** ***
 		elif text[i] == "*":
 			_c(i, C_SYMBOL)
@@ -524,7 +544,7 @@ func _h_line(from: int, to: int):
 		
 		# options
 		elif part.begins_with(S_OPTION):
-			_c(from, C_SYMBOL)
+			_c(from, Color(C_OPTION_TEXT, .5))
 			_c(from+len(S_OPTION), C_OPTION_TEXT)
 			_h_bbcode(from+len(S_OPTION), to, C_OPTION_TEXT)
 			_h_flow()

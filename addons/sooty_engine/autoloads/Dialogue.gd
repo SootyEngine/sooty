@@ -12,6 +12,23 @@ var file_scanner: FileModifiedScanner
 
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group("@Dialogue")
+	add_to_group("@.chose")
+	add_to_group("@.reset_choice")
+	add_to_group("@.reset_list")
+	selected.connect(_choose)
+
+# check if a choise was made
+func chose(id: String) -> bool:
+	return states.get(id, 0) > 0
+
+# clear choice count
+func reset_choice(id: String):
+	states.erase(id)
+
+# increase the tick count for this choice
+func _choose(id: String):
+	UDict.tick(states, id)
 
 func _ready() -> void:
 	reloaded.connect(_reloaded)

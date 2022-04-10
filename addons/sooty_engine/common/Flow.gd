@@ -262,6 +262,9 @@ func _replace_text_lists(text: String, id: String) -> String:
 func replace_list_text(id: String, text: String) -> String:
 	return UString.replace_between(text, "{", "}", _replace_text_lists.bind(id))
 
+func reset_list(id: String):
+	states.erase(id)
+
 # return an item from a list, and changes the lists state for next time
 func get_list_item(id: String, type: String, list: Array) -> String:
 	var tot := len(list)
