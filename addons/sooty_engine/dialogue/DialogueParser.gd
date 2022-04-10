@@ -438,7 +438,7 @@ func _clean(line: Dictionary) -> String:
 			_clean_array(line.then)
 		"list":
 			_clean_array(line.list)
-		"option":
+		"option", "call":
 			if "then" in line:
 				_clean_array(line.then)
 		"text":
@@ -462,7 +462,7 @@ func _clean(line: Dictionary) -> String:
 		
 		if line.M.id in _all_lines:
 			push_error("Line id collision for %s." % line.M.id)
-		print(line)
+		
 		_all_lines[line.M.id] = line
 	
 	# erase non essential keys from Meta.
@@ -605,7 +605,7 @@ func _line_as_option(line: Dictionary):
 		line.then = lines
 
 func _line_as_list(line: Dictionary):
-	var list_type = UString.unwrap(line.M.text, "{[", "]}").strip_edges()# line.M.text.trim_prefix("---").strip_edges()#.split("]}", true, 1)[0]
+	var list_type = UString.unwrap(line.M.text, "{[", "]}").strip_edges()
 	line.type = "list"
 	line.list_type = list_type
 	line.list = line.M.tabbed
@@ -613,6 +613,11 @@ func _line_as_list(line: Dictionary):
 func _line_as_flow_action(line: Dictionary, type: String, head: String):
 	line.type = type
 	line[type] = line.M.text.trim_prefix(head).strip_edges()
+	
+	# calls can be inline, for use with {[]} list pattern.
+	if type == "call":
+		if line.M.tabbed:
+			line.then = line.M.tabbed
 
 func _line_as_action(line: Dictionary):
 	line.type = "action"
@@ -649,10 +654,6 @@ func _line_as_text(line: Dictionary):
 	
 	if options:
 		line.options = options
-	
-	print(line)
-
-
 
 func _extract_flat_lines_and_id(line: Dictionary) -> Array:
 	var out := []

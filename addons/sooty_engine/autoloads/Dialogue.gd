@@ -36,9 +36,7 @@ func _process(_delta: float) -> void:
 
 func _on_step(step: Dictionary):
 	match step.type:
-		"text":
-			print(step)
-			caption.emit(step.text, step)
+		"text": caption.emit(step.text, step)
 		"action": StringAction.do(step.action)
 
 func _reloaded():
@@ -59,7 +57,7 @@ func _load_mods(mods: Array):
 		mod.meta["dialogues"] = []
 		var soot_files := UFile.get_files(mod.dir.plus_file("dialogue"), "." + Soot.EXT_DIALOGUE)
 		all_files.append_array(soot_files)
-		print(soot_files)
+		
 		for soot_path in soot_files:
 			mod.meta.dialogues.append(soot_path)
 			DialogueParser.new()._parse(soot_path, dialogues, lines)

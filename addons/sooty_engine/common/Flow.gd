@@ -2,7 +2,7 @@ extends Waiter
 class_name Flow
 
 const MAX_STEPS_PER_TICK := 20 # Safety limit, in case of excessive loops.
-enum { S_GOTO, S_CALL, S_PASS, S_OPTION, S_BREAK, S_RETURN, S_IF, S_MATCH, S_LIST }
+enum { S_GOTO, S_CALL, S_CALL_INLINE, S_PASS, S_OPTION, S_BREAK, S_RETURN, S_IF, S_MATCH, S_LIST }
 
 signal started() # Dialogue starts up.
 signal ended() # Dialogue has ended.
@@ -168,9 +168,13 @@ func _tick():
 					_goto(goto, S_GOTO)
 				
 				"call":
+					# does call have it's own lines? used by {[list]} pattern
+					if "then" in step:
+						_push(S_CALL_INLINE, step.M.id, step.then)
+					# use current_dialogue as parent, if none exists
 					var call = step.call
 					if not Soot.is_path(call):
-						call = Soot.join_path([current_dialogue, goto])
+						call = Soot.join_path([current_dialogue, call])
 					_goto(call, S_CALL)
 				
 				"action", "text":
