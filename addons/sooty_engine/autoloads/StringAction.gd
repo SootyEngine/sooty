@@ -24,7 +24,38 @@ func add_command(call: Variant, desc := "", id := ""):
 		args=args
 	}
 
+func test(t: String) -> bool:
+	if UString.is_wrapped(t, "(", ")"):
+		t = UString.unwrap(t, "(", ")")
+	# does at least one action pass?
+	for action in UString.split_outside(t, " or "):
+		if _test(action):
+			return true
+	return false
+
+# do all actions pass?
+func _test(t: String) -> bool:
+	for action in UString.split_outside(t, " and "):
+		if UString.is_wrapped(action, "(", ")"):
+			if not test(action):
+				return false
+		else:
+			var got: bool
+			if action.begins_with("not "):
+				action = action.trim_prefix("not ")
+				got = false if do(action) else true
+			else:
+				got = true if do(action) else false
+			
+			if got:
+				continue
+			else:
+				return false
+	return true
+
 func do(command: String) -> Variant:
+	print(command)
+	
 	# $ state function
 	if command.begins_with("$"):
 		return do_state_action(command)
@@ -42,10 +73,16 @@ func do(command: String) -> Variant:
 		return do_eval(command)
 	
 	else:
-		return State._eval(command)
+		return do_eval(command)
+
+# ~actions
+func do_eval(eval: String) -> Variant:
+	if eval.begins_with("~"):
+		eval = eval.substr(1).strip_edges()
+	return State._eval(eval)
 
 # > command
-func do_command(command: String):
+func do_command(command: String) -> Variant:
 	if command.begins_with(">"):
 		command = command.substr(1).strip_edges()
 	var args := UString.split_outside(command, " ")
@@ -53,7 +90,7 @@ func do_command(command: String):
 	return do_command_w_args(command, args, true)
 
 # > command
-func do_command_w_args(command: String, args: Array, as_string_args := false):
+func do_command_w_args(command: String, args: Array, as_string_args := false) -> Variant:
 	if command.begins_with(">"):
 		command = command.substr(1).strip_edges()
 	
@@ -64,14 +101,8 @@ func do_command_w_args(command: String, args: Array, as_string_args := false):
 		push_error("No command '%s'." % command)
 		return null
 
-# ~actions
-func do_eval(eval: String):
-	if eval.begins_with("~"):
-		eval = eval.substr(1).strip_edges()
-	return State._eval(eval)
-
 # $state
-func do_state_action(action: String):
+func do_state_action(action: String) -> Variant:
 	if action.begins_with("$"):
 		action = action.substr(1).strip_edges()
 	var args := UString.split_outside(action, " ")
@@ -80,7 +111,8 @@ func do_state_action(action: String):
 	return State._call(method, args, true)
 
 # @actions
-func do_group_action(action: String):
+# while it can call many members of a group, it returns the last non null value it gets
+func do_group_action(action: String) -> Variant:
 	if action.begins_with("@"):
 		action = action.substr(1)
 	var args := UString.split_outside(action, " ")
@@ -88,7 +120,8 @@ func do_group_action(action: String):
 	return do_group_action_w_args(action, args, true)
 
 # @actions
-func do_group_action_w_args(action: String, args: Array, as_string_args := false):
+# while it can call many members of a group, it returns the last non null value it gets
+func do_group_action_w_args(action: String, args: Array, as_string_args := false) -> Variant:
 	if action.begins_with("@"):
 		action = action.substr(1)
 	
@@ -103,18 +136,16 @@ func do_group_action_w_args(action: String, args: Array, as_string_args := false
 		group = "@." + action
 	
 	var nodes := Global.get_tree().get_nodes_in_group(group)
-	var got
+	var out: Variant
 	if len(nodes):
 		for node in nodes:
-			got = UObject.call_w_kwargs([node, action], args, as_string_args)
-		return got
+			var got = UObject.call_w_kwargs([node, action], args, as_string_args)
+			if got != null:
+				out = got
+		return out
 	else:
 		push_error("No nodes in group %s for %s(%s)." % [group, action, args])
-
-func _test(expression: String) -> bool:
-	var got := true if State._eval(expression) else false
-#	print("_test(%s) == %s" % [expression, got])
-	return got
+		return null
 
 func _pipe(value: Variant, pipes: String) -> Variant:
 	for pipe in pipes.split("|"):

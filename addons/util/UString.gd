@@ -108,15 +108,19 @@ static func split_outside(s: String, split_on: String) -> Array:
 	var open := {}
 	var last := 0
 	var i := 0
+	var in_quotes := false
+	var in_s_quotes := false
 	while i < len(s):
 		match s[i]:
+			'"': in_quotes = not in_quotes
+			"'": in_s_quotes = not in_s_quotes
 			"{": _tick(open, "{")
 			"}": _tick(open, "{", -1)
 			"[": _tick(open, "[")
 			"]": _tick(open, "[", -1)
 			"(": _tick(open, "(")
 			")": _tick(open, "(", -1)
-		if not len(open) and begins_at(s, split_on, i):
+		if not in_quotes and not in_s_quotes and not len(open) and begins_at(s, split_on, i):
 			out.append(s.substr(last, i-last))
 			i += len(split_on)
 			last = i
@@ -133,7 +137,9 @@ static func _tick(d: Dictionary, key, amount: int = 1):
 
 static func begins_at(s: String, head: String, at: int) -> bool:
 	for i in len(head):
-		if not s[at+i] == head[i]:
+#		if at+i > len(head):
+#			return false
+		if at+i >= len(s) or not s[at+i] == head[i]:
 			return false
 	return true
 

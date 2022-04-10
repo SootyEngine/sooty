@@ -2,7 +2,18 @@
 extends EditorScript
 
 func _run():
-	print("as &x ok".format({x="tes"}, "&_"))
+#	UNode.remove_children(State)
+#	State.add_child(preload("res://addons/visual_novel/states/simple_vn.gd").new())
+#	State._children = State.get_children()
+	for test in [
+			"$get_b and $get_opb"
+		]:
+			var got = StringAction.test(test)
+			print(test)
+			print("\t\t", got)
+#		print(test)
+	
+#	print("as &x ok".format({x="tes"}, "&_"))
 	
 #	print(File.new().get_modified_time("res://dialogue"))
 #	var test := TestClass.new()

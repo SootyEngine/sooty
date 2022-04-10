@@ -113,7 +113,6 @@ func _reset():
 
 func _child_added(_n: Node):
 	_children = get_children()
-	print("CHILDREN ", _children)
 
 func _has_method(method: String) -> bool:
 	for node in _children:
@@ -135,20 +134,15 @@ func _call(method: String, args: Array = [], as_string_args := false, default = 
 			var target = _get(p[0])
 			return UObject.call_w_kwargs([target, method], args, as_string_args)
 		else:
-			push_error("No property '%s' in state." % p[0])
+			push_error("No function '%s' in %s at '%s'." % [p[0], _get_subdir(), method])
 			return default
 	
-	# first check if it's a property
-	if len(args) == 0:
-		for node in _children:
-			if method in node:
-				return node[method]
-	
 	# call the first method we find
-	for node in _children:
-		if node.has_method(method):
-			return UObject.call_w_kwargs([node, method], args, as_string_args)
+	for state in _children:
+		if state.has_method(method):
+			return UObject.call_w_kwargs([state, method], args, as_string_args)
 	
+	push_error("No function '%s' in %s." % [method, _get_subdir()])
 	return default
 
 func _reset_state():

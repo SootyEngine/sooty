@@ -11,6 +11,8 @@ const OP_EVALS := ["if", "elif", "else", "match", "rand"]
 const OP_KEYWORDS := ["and", "or", "not"]
 const OP_ALL := OP_RELATIONS + OP_ASSIGNMENTS + OP_EVALS + OP_KEYWORDS
 
+const SYMBOL_ALPHA := .5
+
 # colors
 const C_TEXT := Color.GAINSBORO
 const C_TEXT_INSERT := Color.PALE_GREEN
@@ -21,23 +23,14 @@ const C_SYMBOL := Color(1, 1, 1, 0.33)
 const C_FLAG := Color.SALMON
 const C_LANG := Color.YELLOW_GREEN
 
-const C_PROPERTY := Color(1, 1, 1, .25)
-const C_VAR_BOOL := Color.AQUAMARINE
-const C_VAR_FLOAT := Color.DARK_TURQUOISE
-const C_VAR_INT := Color.DARK_TURQUOISE
-const C_VAR_STR := Color.CADET_BLUE
-const C_VAR_CONSTANT := Color.DARK_GRAY
-const C_VAR_STATE_PROPERTY := Color.SPRING_GREEN
-
 const C_COMMENT := Color(1.0, 1.0, 1.0, 0.25)
 const C_COMMENT_LANG := Color(0.5, 1.0, 0.0, 0.5)
 
-#const C_ACTION_EVAL := Color(0, 1, 0.5, 0.8)
-const C_ACTION_GROUP := Color.MEDIUM_PURPLE
-const C_ACTION_STATE := Color.DEEP_SKY_BLUE
-
-const C_EVAL := Color(0, 1, 0.5, 0.8)
+const C_NODE_ACTION := Color.DEEP_SKY_BLUE
+const C_STATE_ACTION := Color.ORCHID
+const C_EVAL := Color.LIGHT_GREEN
 const C_EVAL_TAG := Color(0, 1, 0.5, 0.8*.5)
+const C_COMMAND := Color.GOLD
 
 const C_FLOW := Color.WHEAT
 const C_FLOW_GOTO := Color.TAN
@@ -52,14 +45,15 @@ const S_FLAG := "\t#?"
 const S_BLOCK_SEPERATOR := "---"
 
 #const S_PROPERTY := "-"
-const S_OPTION := "|>"# ">>>"# "|>"
+const S_OPTION := ">>>"# "|>"
 const S_OPTION_ADD := "+>"
 
 const S_TEXT_INSERT := "&"
 
 const S_EVAL := "~"
-const S_GROUP_FUNC := "@"
-const S_STATE_FUNC := "$"
+const S_STATE_ACTION := "$"
+const S_NODE_ACTION := "@"
+const S_COMMAND := ">"
 
 const S_FLATLINE := "||"
 
@@ -215,140 +209,112 @@ static func split_string(s: String) -> Array:
 			out[-1] += c
 	return out
 
-#func _co(clr: Color, offset := 0):
-#	state[index] = {color=clr}
-#	index += offset
-
-func _c(i: int, clr: Color):#, offset := 0):
-#	index = i
+func _c(i: int, clr: Color):
 	state[i] = {color=clr}
-#	_co(clr, offset)
 
-func _set_var_color(i: int, v: String, is_function := false, func_color := C_EVAL):
-	if UString.is_wrapped(v, "<<", ">>"):
-		_c(i, C_EVAL_TAG)
-		_c(i+2, C_EVAL)
-		_c(i+len(v)-2, C_EVAL_TAG)
-	elif " " in v:
-		var off := i
-		for part in v.split(" "):
-			_set_var_color(off, part)
-			off += len(part) + 1
+func _set_var_color(from: int, v: String, is_action := false, index := 0, action_color := Color.WHITE):
+	if is_action and index == 0:
+		# only highlight last part
+		_c(from, Color(action_color, SYMBOL_ALPHA))
+		var d := v.rfind(".")
+		if d != -1:
+			_c(from+1, action_color.darkened(.25))
+			_c(from+1+d, action_color)
+		else:
+			_c(from+1, action_color)
+	
+	elif UString.is_wrapped(v, "<<", ">>"):
+		_c(from, C_EVAL_TAG)
+		_c(from+2, C_EVAL)
+		_c(from+len(v)-2, C_EVAL_TAG)
+	
 	# dict key
 	elif ":" in v:
 		var p := v.split(":", true, 1)
-		_c(i, C_PROPERTY)
-		_c(i+len(p[0]), C_SYMBOL)
-		_set_var_color(i+len(p[0])+1, p[1])
+		_c(from, C_SYMBOL)
+#		_c(from, Color(action_color, SYMBOL_ALPHA))
+		_c(from+len(p[0]), C_SYMBOL)
+		_set_var_color(from+len(p[0])+1, p[1], false, index, action_color)
+	
 	# array
 	elif "," in v:
-		var off := i
-		for part in v.split(","):
-			_set_var_color(off, part)
+		var off := from
+		var parts := v.split(",")
+		for i in len(parts):
+			var part := parts[i]
+			_set_var_color(off, part, false, index, action_color)
 			off += len(part)
 			state[off] = {color=C_SYMBOL}
 			off += 1
+	
 	# match "default"
 	elif v in ["_", "==", "!=", "=", "+=", "-=", ">", ">=", "<", "<="]:
-		_c(i, C_SYMBOL)
-	# state property
-	elif v.begins_with("$"):
-		# only highlight last part
-		var d := v.rfind(".")
-		_c(i, C_VAR_STATE_PROPERTY.darkened(.25))
-		if d != -1:
-			_c(i+d+1, C_VAR_STATE_PROPERTY)
-		else:
-			_c(i+1, C_VAR_STATE_PROPERTY)
-	elif v.begins_with("@") or is_function:
-		# only highlight last part
-		var d := v.rfind(".")
-		_c(i, func_color.darkened(.25))
-		if d != -1:
-			_c(i+d, func_color)
-		else:
-			_c(i, func_color)
-	elif v.is_valid_int():
-		_c(i, C_VAR_INT)
-	elif v.is_valid_float():
-		_c(i, C_VAR_FLOAT)
-	elif v in ["true", "false", "null"]:
-		_c(i, C_VAR_BOOL)
-	elif v == v.to_upper():
-		_c(i, C_VAR_CONSTANT)
+		_c(from, C_SYMBOL)
+	
 	else:
-		_c(i, C_VAR_STR)
+		var clr := action_color
+		clr.h = wrapf(clr.h - .05, 0.0, 1.0)
+		if index % 2 != 0:
+			clr = clr.lightened(.77)
+		else:
+			clr = clr.lightened(.22)
+		_c(from,clr)
 
-func _h_action(from: int, to: int, c: Color):
+func _h_action(from: int, to: int):
 	_c(from, C_SYMBOL)
 	var inner := text.substr(from, to-from)
-	var parts := split_string(inner)
-	for i in len(parts):
-		var part = parts[i]
-		_set_var_color(from, part, i==0, c)
+	var parts = UString.split_outside(inner, " ")
+	var color = C_EVAL
+	
+	if inner.begins_with(S_NODE_ACTION):
+		color = C_NODE_ACTION
+	elif inner.begins_with(S_STATE_ACTION):
+		color = C_STATE_ACTION
+	elif inner.begins_with(S_COMMAND):
+		color = C_COMMAND
+	else:
+		_h_eval(from, to)
+		return
+	
+	var index := 0
+	for part in parts:
+		_set_var_color(from, part, true, index, color)
+		if index == 0 and len(part) == 1:
+			pass
+		else:
+			index += 1
 		from += len(part) + 1
 
-func _h_action_expression(from: int, to: int):
-	_c(from, C_SYMBOL)
-	_c(from+1, C_EVAL)
-	for i in range(from+1, to):
-		if text[i] in ",.[](){}\"'-+=<>":
-			_c(i, C_SYMBOL)
-			_c(i+1, C_EVAL)
+func _h_eval(from: int, to: int):
+	if text[from] == S_EVAL:
+		_c(from, Color(C_EVAL, SYMBOL_ALPHA))
+		_c(from+1, C_EVAL)
+	else:
+		_c(from, C_EVAL)
+#	for i in range(from+1, to):
+#		if text[i] in ",.[](){}\"'-+=<>":
+#			_c(i, C_SYMBOL)
+#			_c(i+1, C_EVAL)
 
 func _h_conditional(from: int, to: int, begins_with: bool):
 	var inner := text.substr(from, to-from)
 	var off := from
-	for part in inner.split(" "):
-		if part in OP_ALL:
-			_c(from, C_EVAL_TAG)
-		else:
-			_c(from, C_EVAL)
-		from += len(part)+1
-	return
-#
-#	var is_assign = len(parts)==3 and parts[1] in OP_ALL
-#	var is_match := false
-#
-#	for i in len(parts):
-#		var part = parts[i]
-#
-#		# match
-#		if part.begins_with("*"):
-#			part = part.substr(1)
-#			state[off] = { color=C_SYMBOL }
-#			is_match = true
-#			off += 1
-#
-#		_set_var_color(off, part)
-#		off += len(part) + 1
+	for OR in UString.split_outside(inner, " OR "):
+		for AND in UString.split_outside(OR, " AND "):
+			_h_action(from, from + len(AND))
+			from += len(AND)
+			_c(from, C_SYMBOL)
+			from += len(" AND ")
 
-#func _h_flatline(default: Color, from: int):
-#	return from
-#	var i := text.find(S_FLATLINE_START, from)
-#	if i != -1:
-#		var j := text.find(S_FLATLINE_END, i+len(S_FLATLINE_START))
-#		if j != -1:
-#			_c(i+len(S_FLATLINE_START), C_TEXT)
-#
-#			var inner := text.substr(i+len(S_FLATLINE_START), j-i-len(S_FLATLINE_START))
-#			var off := i+len(S_FLATLINE_START)
-#			for part in inner.split(S_FLATLINE):
-#				_h_line(off, off+len(part))
-#				off += len(part)
-#				_c(off, C_SYMBOL)
-#				off += len(S_FLATLINE)
-#
-#			# opening symbol
-#			_c(i, C_SYMBOL)
-#			# closing symbol
-#			_c(j, C_SYMBOL)
-#	return i
-	
+		from += len(" OR ")
+	return
+
 func _h_bbcode(from: int, to: int, default: Color):
 	var i := from
 	while i < to:
-		if text[i] == "{":
+		if text[i] == "#":
+			break
+		elif text[i] == "{":# and (i != 0 and text[i-1] != "#"):
 			var end := text.find("}", i+1)
 			if end != -1:
 				# colorize open and close tags
@@ -371,13 +337,13 @@ func _h_bbcode(from: int, to: int, default: Color):
 						off += 1
 					# colorize action tags
 					if tag.begins_with(S_EVAL):
-						_h_action(off, off+len(tag), C_EVAL)
+						_h_action(off, off+len(tag))
 #					elif tag.begins_with(S_ACTION_NODE):
 #						_h_action(off, off+len(tag), C_ACTION_NODE)
-					elif tag.begins_with(S_GROUP_FUNC):
-						_h_action(off, off+len(tag), C_ACTION_GROUP)
-					elif tag.begins_with(S_STATE_FUNC):
-						_h_action(off, off+len(tag), C_ACTION_STATE)
+					elif tag.begins_with(S_NODE_ACTION):
+						_h_action(off, off+len(tag))
+					elif tag.begins_with(S_STATE_ACTION):
+						_h_action(off, off+len(tag))
 					# colorize normal tags
 					else:
 						_c(off, C_TAG)
@@ -455,13 +421,13 @@ func _h_line(from: int, to: int):
 		if part.begins_with(S_COND_START):
 			# head tag {{
 			_c(from, C_SYMBOL)
-			_c(from+1, C_EVAL_TAG)
+#			_c(from+1, C_EVAL_TAG)
 			
 			var e := part.find(S_COND_END)
 			if e != -1:
 				to = from + e
 				# tail tag }}
-				_c(to, C_EVAL_TAG)
+#				_c(to, C_EVAL_TAG)
 				_c(to+1, C_SYMBOL)
 				# condition
 				_h_conditional(from + len(S_COND_START), to, true)
@@ -484,7 +450,7 @@ func _h_line(from: int, to: int):
 		var start := part.find("#{")
 		if start != -1:
 			_c(from+start, C_SYMBOL)
-			_c(from+start+len("#{"), Color.CYAN)
+			_c(from+start+len("#{"), Color(Color.CYAN, .5))
 			
 			var end := part.find("}", start)
 			if end != -1:
@@ -532,15 +498,18 @@ func _h_line(from: int, to: int):
 				_c(from+end, Color(Color.LIGHT_SALMON, .5))
 				_c(from+end+1, C_SYMBOL)
 		
-		# state calls
-		elif part.begins_with(S_STATE_FUNC):
-			_h_action(from, to, C_ACTION_STATE)
-		# group calls
-		elif part.begins_with(S_GROUP_FUNC):
-			_h_action(from, to, C_ACTION_GROUP)
-		# eval calls
+		# state actions
+		elif part.begins_with(S_STATE_ACTION):
+			_h_action(from, to)
+		# node actions
+		elif part.begins_with(S_NODE_ACTION):
+			_h_action(from, to)
+		# commands
+		elif part.begins_with(S_COMMAND):
+			_h_action(from, to)
+		# evals
 		elif part.begins_with(S_EVAL):
-			_h_action_expression(from, to)
+			_h_eval(from, to)
 		
 		# options
 		elif part.begins_with(S_OPTION):
