@@ -146,6 +146,10 @@
 - [x] Remove SE_SootScene
 
 ## UI
+- Captions
+    - [ ] Seperate'indicator' into it's own agnostic scenes
+    - [ ] Seperate 'speaker' and 'caption' field into their own seperate scenes
+
 - Notifications
     - [ ] Task/Quest notification.
     - [ ] Inventory gained/lost.

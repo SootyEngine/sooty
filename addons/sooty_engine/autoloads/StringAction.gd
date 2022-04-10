@@ -54,7 +54,8 @@ func _test(t: String) -> bool:
 	return true
 
 func do(command: String) -> Variant:
-	print(command)
+	if command.begins_with("*"):
+		return to_var(command)
 	
 	# $ state function
 	if command.begins_with("$"):
@@ -74,6 +75,25 @@ func do(command: String) -> Variant:
 	
 	else:
 		return do_eval(command)
+
+func to_var(s: String) -> Variant:
+	if s.begins_with("*"):
+		s = s.substr(1)
+	var out := []
+	for part in UString.split_outside(s, " "):
+		# dictionary key
+		if ":" in part:
+			if not out[-1] is Dictionary:
+				out.append({})
+			var kv = part.split(":", true, 1)
+			out[-1][kv[0].strip_edges()] = to_var(kv[1].strip_edges())
+		# array
+		elif "," in part:
+			out.append(Array(part.split(",")).map(to_var))
+		# other
+		else:
+			out.append(UString.str_to_var(part))
+	return out[0] if len(out) == 1 else out
 
 # ~actions
 func do_eval(eval: String) -> Variant:

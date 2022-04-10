@@ -527,6 +527,7 @@ func _process_line(line: Dictionary):
 	if t.begins_with("~"): return _line_as_action(line)
 	if t.begins_with("$"): return _line_as_action(line)
 	if t.begins_with("@"): return _line_as_action(line)
+	if t.begins_with("*"): return _line_as_action(line)
 	# flows
 	if t.begins_with(Soot.FLOW_GOTO): return _line_as_flow_action(line, "goto", Soot.FLOW_GOTO)
 	if t.begins_with(Soot.FLOW_CALL): return _line_as_flow_action(line, "call", Soot.FLOW_CALL)

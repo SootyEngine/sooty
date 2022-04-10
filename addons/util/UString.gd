@@ -336,7 +336,7 @@ static func str_to_var(s: String) -> Variant:
 	return s
 
 # converts strings in comma seperated field to a type
-static func str_to_array(s: String, type: int) -> Array:
+static func str_to_array(s: String, type: int = -1) -> Array:
 	return Array(s.split(",")).map(func(x): return str_to_type(x.strip_edges(), type))
 
 static func str_to_color(s: String) -> Color:
@@ -375,6 +375,7 @@ static func _set_type(v: Variant, vals: Array) -> Variant:
 
 static func str_to_type(s: String, type: int, default = null) -> Variant:
 	match type:
+		-1: return express(s)
 		TYPE_NIL: return null
 		TYPE_BOOL: return s == "true"
 		TYPE_INT: return s.replace("_", "").to_int()

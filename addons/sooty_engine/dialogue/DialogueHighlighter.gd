@@ -31,6 +31,7 @@ const C_STATE_ACTION := Color.ORCHID
 const C_EVAL := Color.LIGHT_GREEN
 const C_EVAL_TAG := Color(0, 1, 0.5, 0.8*.5)
 const C_COMMAND := Color.GOLD
+const C_VAR_SHORTCUT := Color.CADET_BLUE
 
 const C_FLOW := Color.WHEAT
 const C_FLOW_GOTO := Color.TAN
@@ -213,9 +214,14 @@ func _c(i: int, clr: Color):
 	state[i] = {color=clr}
 
 func _set_var_color(from: int, v: String, is_action := false, index := 0, action_color := Color.WHITE):
+#	if (is_action and index == 0) or v[0] == "*":
+#		_c(from, Color(action_color, SYMBOL_ALPHA))
+	if not len(v):
+		return
+	
 	if is_action and index == 0:
-		# only highlight last part
 		_c(from, Color(action_color, SYMBOL_ALPHA))
+		# only highlight last part
 		var d := v.rfind(".")
 		if d != -1:
 			_c(from+1, action_color.darkened(.25))
@@ -231,10 +237,10 @@ func _set_var_color(from: int, v: String, is_action := false, index := 0, action
 	# dict key
 	elif ":" in v:
 		var p := v.split(":", true, 1)
-		_c(from, C_SYMBOL)
-#		_c(from, Color(action_color, SYMBOL_ALPHA))
+#		_c(from, C_SYMBOL)
+		_c(from, Color(action_color, .75))
 		_c(from+len(p[0]), C_SYMBOL)
-		_set_var_color(from+len(p[0])+1, p[1], false, index, action_color)
+		_set_var_color(from+len(p[0])+1, p[1], false, 0, action_color)
 	
 	# array
 	elif "," in v:
@@ -244,7 +250,7 @@ func _set_var_color(from: int, v: String, is_action := false, index := 0, action
 			var part := parts[i]
 			_set_var_color(off, part, false, index, action_color)
 			off += len(part)
-			state[off] = {color=C_SYMBOL}
+			_c(off, C_SYMBOL)
 			off += 1
 	
 	# match "default"
@@ -252,19 +258,28 @@ func _set_var_color(from: int, v: String, is_action := false, index := 0, action
 		_c(from, C_SYMBOL)
 	
 	else:
+		if v[0] == "*":
+			_c(from, Color(action_color, SYMBOL_ALPHA))
+			from += 1
+			
 		var clr := action_color
 		clr.h = wrapf(clr.h - .05, 0.0, 1.0)
 		if index % 2 != 0:
 			clr = clr.lightened(.77)
 		else:
 			clr = clr.lightened(.22)
-		_c(from,clr)
+		_c(from, clr)
+	
 
 func _h_action(from: int, to: int):
 	_c(from, C_SYMBOL)
 	var inner := text.substr(from, to-from)
-	var parts = UString.split_outside(inner, " ")
+	print("[%s]" % inner)
+	if not len(inner):
+		return
+	
 	var color = C_EVAL
+	var index := 0
 	
 	if inner.begins_with(S_NODE_ACTION):
 		color = C_NODE_ACTION
@@ -272,11 +287,14 @@ func _h_action(from: int, to: int):
 		color = C_STATE_ACTION
 	elif inner.begins_with(S_COMMAND):
 		color = C_COMMAND
+	elif inner.begins_with("*"):
+		color = C_VAR_SHORTCUT
+		index += 2
 	else:
 		_h_eval(from, to)
 		return
 	
-	var index := 0
+	var parts = UString.split_outside(inner, " ")
 	for part in parts:
 		_set_var_color(from, part, true, index, color)
 		if index == 0 and len(part) == 1:
@@ -299,15 +317,26 @@ func _h_eval(from: int, to: int):
 func _h_conditional(from: int, to: int, begins_with: bool):
 	var inner := text.substr(from, to-from)
 	var off := from
-	for OR in UString.split_outside(inner, " OR "):
-		for AND in UString.split_outside(OR, " AND "):
-			_h_action(from, from + len(AND))
-			from += len(AND)
+	
+	for k in ["IF ", "ELIF ", "ELSE", "MATCH "]:
+		if inner.begins_with(k):
 			_c(from, C_SYMBOL)
-			from += len(" AND ")
-
-		from += len(" OR ")
-	return
+			inner = inner.trim_prefix(k)
+			from += len(k)
+			break
+	
+	var meta_actions := UString.split_outside(inner, " OR ")
+	for i in len(meta_actions):
+		var actions := UString.split_outside(meta_actions[i], " AND ")
+		for j in len(actions):
+			_h_action(from, from + len(actions[j]))
+			from += len(actions[j])
+			if j < len(actions)-1:
+				_c(from, C_SYMBOL)
+				from += len(" AND ")
+		if i < len(meta_actions)-1:
+			_c(from, C_SYMBOL)
+			from += len(" OR ")
 
 func _h_bbcode(from: int, to: int, default: Color):
 	var i := from
@@ -428,7 +457,7 @@ func _h_line(from: int, to: int):
 				to = from + e
 				# tail tag }}
 #				_c(to, C_EVAL_TAG)
-				_c(to+1, C_SYMBOL)
+				_c(to, C_SYMBOL)
 				# condition
 				_h_conditional(from + len(S_COND_START), to, true)
 				from += e + len(S_COND_END) + 1
@@ -438,13 +467,13 @@ func _h_line(from: int, to: int):
 				part = ""
 		# line ending with a condition.
 		elif part.ends_with(S_COND_END):
-			_c(to-len(S_COND_END), C_SYMBOL) # }} symbol
 			var s := part.rfind(S_COND_START, to)
 			if s != -1:
 				_c(from+s, C_SYMBOL)
 				_h_conditional(from+s + len(S_COND_START), to - len(S_COND_END), false)
 				to = from+s
 				part = text.substr(from, to-from)
+			_c(to-len(S_COND_END), C_SYMBOL) # }} symbol
 		
 		# language tag
 		var start := part.find("#{")
