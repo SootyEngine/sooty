@@ -83,7 +83,7 @@ func to_var(s: String) -> Variant:
 	for part in UString.split_outside(s, " "):
 		# dictionary key
 		if ":" in part:
-			if not out[-1] is Dictionary:
+			if not len(out) or not out[-1] is Dictionary:
 				out.append({})
 			var kv = part.split(":", true, 1)
 			out[-1][kv[0].strip_edges()] = to_var(kv[1].strip_edges())

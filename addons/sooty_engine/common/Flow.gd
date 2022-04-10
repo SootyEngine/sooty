@@ -1,3 +1,4 @@
+@tool
 extends Waiter
 class_name Flow
 
@@ -13,6 +14,8 @@ signal flow_started(id: String)
 signal flow_ended(id: String)
 signal on_step(step: Dictionary)
 signal selected(id: String) # used with select_option
+
+var _lines := {} # all lines from all files
 
 @export var last_end_message := ""
 @export var current_dialogue := ""
@@ -39,10 +42,11 @@ func get_current() -> Dictionary:
 func start(id: String):
 	if is_active():
 		push_warning("Already started.")
-		return
+		return false
 	
 	# start dialogue
 	goto(id)
+	return true
 
 func can_do(command: String) -> bool:
 	return command.begins_with(Soot.FLOW_GOTO)\
@@ -77,22 +81,20 @@ func stack(id: String) -> bool:
 func goto(id: String) -> bool:
 	return _goto(id, S_GOTO)
 
-func _has_step(id: String) -> bool:
-	assert(false)
-	return false
+func _has_line(id: String) -> bool:
+	return id in _lines
 
-func _get_step(id: String) -> Dictionary:
-	assert(false)
-	return {}
+func _get_line(id: String) -> Dictionary:
+	return _lines[id]
 
 func _goto(id: String, step_type: int = S_GOTO) -> bool:
-	if _has_step(id):
+	if _has_line(id):
 		# if the stack is cleared, it means this was a "goto" not a "call"
 		if step_type == S_GOTO:
 			while len(_stack):
 				_pop()
 		
-		_push(step_type, id, _get_step(id).then)
+		_push(step_type, id, _get_line(id).then)
 		return true
 	else:
 		push_error("No step %s." % id)
@@ -109,7 +111,7 @@ func end(msg := ""):
 
 # select an option, adding it's lines to the stack
 func select_option(id: String):
-	var option := _get_step(id)
+	var option := _get_line(id)
 	if "then" in option:
 		_push(S_OPTION, id, option.then)
 	selected.emit(id)
@@ -137,7 +139,20 @@ func _flow_ended(id: String):
 func _on_step(step: Dictionary):
 	pass
 
-func _tick():
+# run through the flow and return the last line
+# to_value will attempt to convert it from a line to something else
+func execute(id: String) -> Variant:
+	var out := { line={}, value=null }
+	if start(id):
+		var safety := 100
+		while safety > 0 and is_active():
+			out.line = _tick()
+			safety -= 1
+		match out.line.get("type"):
+			"action": out.value = StringAction.do(out.line.action)
+	return out
+
+func _tick() -> Dictionary:
 	if _started:
 		# has finished?
 		if not len(_stack):
@@ -149,14 +164,16 @@ func _tick():
 			tick.emit()
 	
 	var safety := MAX_STEPS_PER_TICK
+	var step := {}
 	while _started and len(_stack) and not is_waiting():
 		safety -= 1
 		if safety <= 0:
 			push_error("Tripped safety! Increase MAX_STEPS_PER_TICK if necessary.", safety)
 			break
 		
-		var step := _pop_next_step()
-		if step:
+		var next_step := _pop_next_step()
+		if next_step:
+			step = next_step
 			_on_step(step)
 			on_step.emit(step)
 			
@@ -197,6 +214,8 @@ func _tick():
 	if not _started and len(_stack):
 		_started = true
 		started.emit()
+	
+	return step
 
 func _pop_next_step() -> Dictionary:
 	# only show lines that pass their {{condition}}.
@@ -214,7 +233,7 @@ func _pop_next_step() -> Dictionary:
 			_pop()
 			continue
 		
-		var step: Dictionary = _get_step(step_info.steps.pop_front())
+		var step: Dictionary = _get_line(step_info.steps.pop_front())
 #		step_info.step += 1
 		
 		# 'if' 'elif' 'else' chain
@@ -307,3 +326,46 @@ func get_list_item(id: String, type: String, list: Array) -> String:
 				return list[states[id]]
 	
 	return ""
+
+func line_has_options(line: Dictionary) -> bool:
+	return "options" in line
+
+func line_has_condition(line: Dictionary) -> bool:
+	return "cond" in line
+
+func line_passes_condition(line: Dictionary) -> bool:
+	return StringAction._test(line.cond)
+
+func line_get_options(line: Dictionary) -> Array:
+	var out_lines := []
+	if line_has_options(line):
+		_get_options(line.options, out_lines, 0)
+	return out_lines
+
+func _get_options(ids: Array, output: Array, depth: int):
+	if depth > 4:
+		push_error("Possible loop!?")
+		return
+	
+	for i in len(ids):
+		var line: Dictionary = _get_line(ids[i])
+		var passed := not line_has_condition(line) or line_passes_condition(line)
+		match line.get("flag", ""):
+			"++":
+				# recursively collect options from other flows
+				if passed:
+					var flow_id: String = line.text
+					var flow_step_ids: Array = _get_line(flow_id).then
+					_get_options(flow_step_ids, output, depth+1)
+			_:
+				output.append({id=ids[i], line=line, passed=passed})
+#		if "flow" in opdata:
+#			if opdata.flow == "call":
+#				var fid: String = opdata.call
+#				var flines := Dialogues.get_flow_lines(fid)
+#				_get_options(flines, output, only_passing, depth+1)
+#		else:
+#			if only_passing and "cond" in opdata and not StringAction.test(opdata.cond):
+#				continue
+#
+#			out.append(DialogueLine.new(_dialogue_id, opdata))

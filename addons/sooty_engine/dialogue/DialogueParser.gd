@@ -653,22 +653,14 @@ func _line_as_text(line: Dictionary):
 		match tabbed_line.type:
 			"option": options.append(tabbed_line)
 			"insert": inserts[tabbed_line.key] = tabbed_line.val
-#			_: lines.append(tabbed_line)
 	
 	# format the insert keys with eachother
 	for key in inserts:
 		inserts[key] = inserts[key].format(inserts, "&_")
-	# format the main text with the inserts
 	text = text.format(inserts, "&_")
 	
 	line.type = "text"
 	line.text = text
-	
-	print(line.text)
-	print(inserts)
-	
-#	if lines:
-#		line.lines = lines
 	
 	if options:
 		line.options = options

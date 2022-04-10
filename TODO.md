@@ -33,14 +33,16 @@
 
 # *.soot Dialogue Files
 - [ ] define step types in Soot
-- [ ] Don't be file bound.
-    - [ ] Let multiple files contribute to the same dialogue.
-    - [ ] And let a single file contribute to multiple dialogues.
+- [ ] inserts for choices
+- [ ] inserts for actions?
+- [x] Don't be file bound.
+    - [x] Let multiple files contribute to the same dialogue.
+    - [x] And let a single file contribute to multiple dialogues.
 - [x] `|>` as 'option' head
 - [x] `+>` as 'add options' head
-- [ ] `||` as 'underline' divider
-- [ ] `((array_type))` array pattern
-    - [ ] line array pattern
+- [x] `||` as 'underline' divider
+- [x] `((array_type))` array pattern
+    - [x] line array pattern
         ```
         (())
             line 1
@@ -55,7 +57,7 @@
         text line ((array_type | option1 | option2 | option 3)) other text. ((array_type|option 1|option2|option3)).
         ```
     - [ ] text selector pattern nesting (DO LATER.)
-- [ ] `==` same line pattern
+- [x] `==` same line pattern
     ```
     my text
     ==

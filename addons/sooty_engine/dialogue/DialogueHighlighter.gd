@@ -55,6 +55,7 @@ const S_EVAL := "~"
 const S_STATE_ACTION := "$"
 const S_NODE_ACTION := "@"
 const S_COMMAND := ">"
+const S_VAROUT := "*"
 
 const S_FLATLINE := "||"
 
@@ -274,7 +275,7 @@ func _set_var_color(from: int, v: String, is_action := false, index := 0, action
 func _h_action(from: int, to: int):
 	_c(from, C_SYMBOL)
 	var inner := text.substr(from, to-from)
-	print("[%s]" % inner)
+	
 	if not len(inner):
 		return
 	
@@ -527,16 +528,20 @@ func _h_line(from: int, to: int):
 				_c(from+end, Color(Color.LIGHT_SALMON, .5))
 				_c(from+end+1, C_SYMBOL)
 		
-		# state actions
+		# $state actions
 		elif part.begins_with(S_STATE_ACTION):
 			_h_action(from, to)
-		# node actions
+		# @node actions
 		elif part.begins_with(S_NODE_ACTION):
 			_h_action(from, to)
-		# commands
+		# > commands
 		elif part.begins_with(S_COMMAND):
 			_h_action(from, to)
-		# evals
+		# *var
+		elif part.begins_with(S_VAROUT):
+			_h_action(from, to)
+		
+		# ~evals
 		elif part.begins_with(S_EVAL):
 			_h_eval(from, to)
 		

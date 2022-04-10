@@ -5,12 +5,16 @@ func _run():
 #	UNode.remove_children(State)
 #	State.add_child(preload("res://addons/visual_novel/states/simple_vn.gd").new())
 #	State._children = State.get_children()
-	for test in [
-			"$get_b and $get_opb"
-		]:
-			var got = StringAction.test(test)
-			print(test)
-			print("\t\t", got)
+	var f := Flow.new()
+	f._lines = Dialogue._lines
+	var got = f.execute("empty_scene/getit")
+	print("GOT ", got.value)
+#	for test in [
+#			"$get_b and $get_opb"
+#		]:
+#			var got = StringAction.test(test)
+#			print(test)
+#			print("\t\t", got)
 #		print(test)
 	
 #	print("as &x ok".format({x="tes"}, "&_"))
