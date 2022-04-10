@@ -35,6 +35,7 @@
 - [ ] define step types in Soot
 - [ ] inserts for choices
 - [ ] inserts for actions?
+
 - [x] Don't be file bound.
     - [x] Let multiple files contribute to the same dialogue.
     - [x] And let a single file contribute to multiple dialogues.
@@ -75,6 +76,13 @@
 - [x] Multi file loading from mods. (not tested)
 - [x] Reimplement `+` as a dialogue option for merging external options.
 - [x] Change comments from `// ` to `# `.
+
+## Flow
+- [ ] move 'if' and 'match' to custom functions 
+## DialogueStack
+- [x] `><` Should only end one flow.
+- [x] `>><<` For ending dialogue.
+- [x] `__` For pass/do nothing. (Useful for inserting lines later with `#id=insert_here`)
 
 # *.sola Language Files
 - [x] Keep old data even if it's line was removed.
@@ -126,11 +134,6 @@
 - [x] Add `_on_files(dir: String, call: Callable)` function. To make collecting on a pattern easier.
 - [x] `file_exists_in_dir()`: Check for a file inside a directory.
 - [x] `get_file_in_dir(tail)`: Get a path to a possibly nested file ending in tail.
-
-# DialogueStack
-- [x] `><` Should only end one flow.
-- [x] `>><<` For ending dialogue.
-- [x] `__` For pass/do nothing. (Useful for inserting lines later with `#id=insert_here`)
 
 # VisualNovel
 - [ ] Use state objects to parse text/speaker. `_preparse_caption` `_preparse_caption_name`

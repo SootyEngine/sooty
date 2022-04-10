@@ -25,6 +25,9 @@ var _lines := {} # all lines from all files
 
 @export var states := {}
 
+func _init(lines := {}):
+	_lines = lines
+
 func _get_state() -> Dictionary:
 	return {stack=_last_tick_stack, started=_started, last_end_message=last_end_message, states=states}
 
@@ -149,6 +152,7 @@ func execute(id: String) -> Variant:
 			out.line = _tick()
 			safety -= 1
 		match out.line.get("type"):
+			"text": out.value = out.line.text
 			"action": out.value = StringAction.do(out.line.action)
 	return out
 
@@ -239,18 +243,32 @@ func _pop_next_step() -> Dictionary:
 		# 'if' 'elif' 'else' chain
 		if step.type == "if":
 			for i in len(step.conds):
-				if StringAction._test(step.conds[i]):
+				if StringAction.test(step.conds[i]):
 					_push(S_IF, step.M.id, step.cond_lines[i])
 					return {}
 		
 		# match chain
 		elif step.type == "match":
-			var match_result = State._eval(step.match)
+			var match_result := Array(step.match.split(" AND "))
+			for i in len(match_result):
+				var m = match_result[i]
+				match_result[i] = StringAction.do(m)
+			
+			print("MATCH: ", match_result)
+#			var match_result = State._eval(step.match)
 			for i in len(step.cases):
-				var case = step.cases[i]
-				if case == "_" or UType.is_equal(match_result, State._eval(case)):
-					_push(S_MATCH, step.M.id, step.case_lines[i])
-					return {}
+				var case = step.cases[i].split(" OR ")
+				for subcase in case:
+					subcase = Array(subcase.split(" AND "))
+					for i in len(subcase):
+						var sc = subcase[i]
+						subcase[i] = StringAction.do(sc)
+					print("\tCASE: %s == %s?" % [subcase, match_result])
+					if UType.is_equal(subcase[0], "_") or match_result == subcase:
+						print("\t\tGOOD!")
+#				if case == "_" or UType.is_equal(match_result, State._eval(case)):
+						_push(S_MATCH, step.M.id, step.case_lines[i])
+						return {}
 		
 		# has a condition
 		elif "cond" in step:

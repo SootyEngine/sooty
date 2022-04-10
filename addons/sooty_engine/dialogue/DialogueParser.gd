@@ -549,20 +549,20 @@ func _line_as_condition(line: Dictionary):
 	var cond: String = line.M.cond
 	
 	# if-elif-else condition
-	if cond.begins_with("if "):
+	if cond.begins_with("IF "):
 		line.cond_type = "if"
-		line.cond = cond.substr(len("if ")).strip_edges()
-	elif cond.begins_with("elif "):
+		line.cond = cond.substr(len("IF ")).strip_edges()
+	elif cond.begins_with("ELIF "):
 		line.cond_type = "elif"
-		line.cond = cond.substr(len("elif ")).strip_edges()
+		line.cond = cond.substr(len("ELIF ")).strip_edges()
 	elif cond == "else":
 		line.cond_type = "else"
 		line.cond = "true"
 	
 	# match condition
-	elif cond.begins_with("match "):
+	elif cond.begins_with("MATCH "):
 		line.cond_type = "match"
-		line.match = line.M.cond.trim_prefix("match ").strip_edges()
+		line.match = line.M.cond.trim_prefix("MATCH ").strip_edges()
 		line.cases = []
 		line.case_lines = []
 		for tabbed_line in line.M.tabbed:

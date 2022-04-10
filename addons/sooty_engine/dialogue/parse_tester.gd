@@ -5,8 +5,10 @@ func _run():
 #	UNode.remove_children(State)
 #	State.add_child(preload("res://addons/visual_novel/states/simple_vn.gd").new())
 #	State._children = State.get_children()
-	var f := Flow.new()
-	f._lines = Dialogue._lines
+	Mods._load_mods()
+#	await Mods.loaded
+#	print(["x", "y", "z"] == ["x", "y", "z"])
+	var f := Flow.new(Dialogue._lines)
 	var got = f.execute("empty_scene/getit")
 	print("GOT ", got.value)
 #	for test in [
