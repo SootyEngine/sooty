@@ -1,11 +1,10 @@
 extends Data
 class_name PatchableData
+func get_class() -> String:
+	return "PatchableData"
 
 const DEFAULT_FORMAT := "[b]{name}[]"
 var _extra := {}
-
-func get_class() -> String:
-	return "PatchableDataObject"
 
 func _init(d := {}):
 	UObject.set_state(self, d)
