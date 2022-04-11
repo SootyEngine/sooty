@@ -14,7 +14,3 @@ func _set(property: StringName, value) -> bool:
 
 func _get_state():
 	return UObject.get_state(_data)
-
-# call a method for all groups
-func all(group: String, method: String, args: Array):
-	get_tree().call_group_flags(SceneTree.GROUP_CALL_REALTIME, group, method, args)

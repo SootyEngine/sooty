@@ -32,6 +32,16 @@
 - [ ] `Mods` add signal `collect_mods` which will request paths, instead of current system.
 - [x] Custom `Bool` class for managing a single state bool.
 
+# StringActions
+@node `shortcut`
+$flow or parent object of flow `eval`
+$@flow or parent object of flow `shortcut`
+~state `eval`
+~@state `shortcut`
+*var `shortcut`
+@~ node eval
+remove `>` command and just use `@`
+
 # *.soot Dialogue Files
 - [ ] `.` key for state parent object?
 - [ ] define step types in Soot

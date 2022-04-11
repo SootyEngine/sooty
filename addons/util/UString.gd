@@ -109,18 +109,20 @@ static func split_outside(s: String, split_on: String) -> Array:
 	var last := 0
 	var i := 0
 	var in_quotes := false
-	var in_s_quotes := false
+	var in_single_quotes := false
+	var in_back_quotes := false
 	while i < len(s):
 		match s[i]:
 			'"': in_quotes = not in_quotes
-			"'": in_s_quotes = not in_s_quotes
+			"'": in_single_quotes = not in_single_quotes
+			"`": in_back_quotes = not in_back_quotes
 			"{": _tick(open, "{")
 			"}": _tick(open, "{", -1)
 			"[": _tick(open, "[")
 			"]": _tick(open, "[", -1)
 			"(": _tick(open, "(")
 			")": _tick(open, "(", -1)
-		if not in_quotes and not in_s_quotes and not len(open) and begins_at(s, split_on, i):
+		if not in_quotes and not in_single_quotes and not in_back_quotes and not len(open) and begins_at(s, split_on, i):
 			out.append(s.substr(last, i-last))
 			i += len(split_on)
 			last = i
@@ -294,6 +296,23 @@ static func split_chars(s: String) -> Array:
 		out.append(c)
 	return out
 
+static func begins_with_any(s: String, any: Array) -> bool:
+	for item in any:
+		if s.begins_with(item):
+			return true
+	return false
+
+static func get_leading_symbols(s: String) -> String:
+	var out := ""
+	for c in s:
+		if c in " 	":
+			pass
+		elif c in "~!@#$%^&*?<>{}()[]:":
+			out += c
+		else:
+			break
+	return out
+
 static func count_leading(s: String, chr := " ") -> int:
 	var out := 0
 	for c in s:
@@ -373,9 +392,18 @@ static func _set_type(v: Variant, vals: Array) -> Variant:
 		v[i] = vals[i]
 	return v
 
+const S2T_DONT_CONVERT := -123_456
+const S2T_BUILT_IN := -321_456
+const S2T_EXPRESSION = -654_321
+const S2T_STR_TO_VAR := -456_123
+
 static func str_to_type(s: String, type: int, default = null) -> Variant:
 	match type:
-		-1: return express(s)
+		S2T_DONT_CONVERT: return s
+		S2T_BUILT_IN: return str2var(s)
+		S2T_EXPRESSION: return express(s)
+		S2T_STR_TO_VAR: return str_to_var(s)
+		
 		TYPE_NIL: return null
 		TYPE_BOOL: return s == "true"
 		TYPE_INT: return s.replace("_", "").to_int()
@@ -413,5 +441,4 @@ static func str_to_type(s: String, type: int, default = null) -> Variant:
 #		TYPE_PACKED_COLOR_ARRAY: return "PackedColorArray"
 	
 	push_error("Non implemented '%s' String to %s." % [s, UType.get_name_from_type(type)])
-	
-	return express(s)
+	return null

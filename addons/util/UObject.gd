@@ -138,6 +138,19 @@ static func _get_state_properties(target: Object) -> Array:
 		.filter(func(x): return x.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and x.name[0] != "_")\
 		.map(func(x): return x.name)
 
+static func get_script_methods(target: Object, skip_private := true, skip_get := true, skip_set := true) -> Dictionary:
+	var out := {}
+	for m in target.get_method_list():
+		if m.flags & METHOD_FLAG_FROM_SCRIPT != 0 and not m.name[0] == "@":
+			if skip_private and m.name[0] == "_":
+				continue
+			if skip_get and m.name.begins_with("get_"):
+				continue
+			if skip_set and m.name.begins_with("set_"):
+				continue
+			out[m.name] = m
+	return out
+
 static func get_operator_value(v):
 	if v is Object:
 		if v.has_method("_operator_get"):
@@ -155,11 +168,18 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 	if not len(arg_info):
 		return obj.callv(method, in_args)
 	
-#	var old := in_args.duplicate(true)
 	var new := in_args.duplicate(true)
 	var out := []
 	var kwargs
 	var has_kwargs := false
+	
+	# too many arguments?
+	if len(new) > len(arg_info):
+		var left_over := []
+		while len(new) > len(arg_info):
+			left_over.append(new.pop_back())
+		push_error("Passed too many arguments to %s. Trimming %s." % [method, left_over])
+	
 	# are kwargs wanted?
 	if len(new) and arg_info[-1].name == "kwargs":
 		# is last string a dict?
@@ -178,9 +198,12 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 		# convert leading arguments
 		for i in len(new):
 			new[i] = UString.str_to_type(in_args[i], arg_info[i].type)
+			prints("%s -> %s == %s" % [in_args[i], arg_info[i].type, new[i]])
 		# convert kwargs
 		if has_kwargs:
 			kwargs = UString.str_to_type(kwargs, TYPE_DICTIONARY, arg_info[-1].get("default", {}))
+	
+	print("OK ", in_args, new)
 	
 	# add the initial values up front
 	for arg in arg_info:
@@ -216,7 +239,7 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 	
 	
 	var got = obj.callv(method, out)# callablev(call, out) if call is Callable else obj.callv(method, out)
-#	prints("CALLV:", method, out, got)
+	prints("CALLV:", method, out, got)
 	return got
 
 # find second last dictionary/object in a nested structure
@@ -305,7 +328,7 @@ static func _parse_method_arguments(s: String, obj: Variant = null) -> Array:
 	for i in len(args):
 		var name = args[i][0].strip_edges()
 		var value = args[i][1].split("=", true, 1)
-		var type := TYPE_NIL
+		var type: int = UString.S2T_STR_TO_VAR
 		var type_name: String = value[0].strip_edges()
 		# no explicit type given, but a value exists?
 		# let's assume

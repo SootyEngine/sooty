@@ -155,9 +155,10 @@ func execute(id: String) -> Variant:
 		while safety > 0 and is_active():
 			out.line = _tick()
 			safety -= 1
+		# try to get the value of a step
 		match out.line.get("type"):
 			"text": out.value = out.line.text
-			"action": out.value = StringAction.do(out.line.action)
+			"do": out.value = StringAction.do(out.line.do)
 	return out
 
 func _tick() -> Dictionary:
@@ -202,7 +203,7 @@ func _tick() -> Dictionary:
 						call = Soot.join_path([current_dialogue, call])
 					_goto(call, S_CALL)
 				
-				"action", "text":
+				"do", "text":
 					pass
 				
 				"pass":

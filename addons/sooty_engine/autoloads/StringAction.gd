@@ -10,6 +10,7 @@ const OP_ALL := OP_ASSIGN + OP_RELATION + OP_ARITHMETIC + OP_LOGICAL
 const BUILT_IN := ["true", "false", "null"]
 
 var _commands := {}
+var _expr := Expression.new()
 
 func add_command(call: Variant, desc := "", id := ""):
 	var obj: Object = call.get_object() if call is Callable else call[0]
@@ -61,19 +62,23 @@ func do(command: String, default: String = "~") -> Variant:
 	if command == "_":
 		return "_"
 	
-	if command[0] in ">*$@~":
-		return _do(command[0], command)
-	else:
+	var head := UString.get_leading_symbols(command)
+	if head in Soot.ALL_DOINGS:
+		return _do(head, command)
+	elif default in Soot.ALL_DOINGS:
 		return _do(default, command)
+	else:
+		push_error("No 'do' symbol: %s." % default)
+		return null
 
 func _do(head: String, command: String):
 	match head:
 		"*": return to_var(command)
-		"$": return do_state_action(command)
-		">": return do_command(command)
-		"@": return do_group_action(command)
-		"~": return do_eval(command)
+		"$", "$:", "$)": return do_state_action(command)
+		"@", "@:", "@)": return do_group_action(command)
+		"~", "~:", "~)": return do_state_action(command)
 
+# vars are kept as strings, so can be auto type converted
 func to_var(s: String) -> Variant:
 	if s.begins_with("*"):
 		s = s.substr(1)
@@ -84,65 +89,88 @@ func to_var(s: String) -> Variant:
 			if not len(out) or not out[-1] is Dictionary:
 				out.append({})
 			var kv = part.split(":", true, 1)
-			out[-1][kv[0].strip_edges()] = to_var(kv[1].strip_edges())
+			out[-1][kv[0].strip_edges()] = kv[1].strip_edges()
 		# array
 		elif "," in part:
-			out.append(Array(part.split(",")).map(to_var))
+			out.append(Array(part.split(",")))
 		# other
 		else:
-			out.append(UString.str_to_var(part))
+			out.append(part)
 	out = out[0] if len(out) == 1 else out
 	return out
 
-# ~actions
-func do_eval(eval: String) -> Variant:
-	if eval.begins_with("~"):
-		eval = eval.substr(1).strip_edges()
-	return State._eval(eval)
-
-# > command
-func do_command(command: String) -> Variant:
-	if command.begins_with(">"):
-		command = command.substr(1).strip_edges()
-	var args := UString.split_outside(command, " ")
-	command = args.pop_front()
-	return do_command_w_args(command, args, true)
-
-# > command
-func do_command_w_args(command: String, args: Array, as_string_args := false) -> Variant:
-	if command.begins_with(">"):
-		command = command.substr(1).strip_edges()
-	
-	if command in _commands:
-		var info: Dictionary = _commands[command]
-		return UObject.call_w_kwargs(info.call, args, as_string_args, info.args)
-	else:
-		push_error("No command '%s'." % command)
-		return null
-
-# $state
+# $state $)state $:state
 func do_state_action(action: String) -> Variant:
 	if action.begins_with("$"):
 		action = action.substr(1).strip_edges()
-	var args := UString.split_outside(action, " ")
-	var method = args.pop_front()
-#	var converted_args := args.map(_str_to_var)
-	return State._call(method, args, true)
+	return _do_eval_or_func(action, State, false)
 
-# @actions
+# ~self ~)self ~:self
+func do_self_action(action: String, context: Variant) -> Variant:
+	if action.begins_with("~"):
+		action = action.substr(1).strip_edges()
+	return _do_eval_or_func(action, context, false)
+
 # while it can call many members of a group, it returns the last non null value it gets
+# @actions
 func do_group_action(action: String) -> Variant:
 	if action.begins_with("@"):
-		action = action.substr(1)
+		action = action.substr(1).strip_edges()
+	
+	var is_eval := false
+	if action.begins_with(":"):
+		is_eval = true
+		action = action.substr(1).strip_edges()
+	elif action.begins_with(")"):
+		is_eval = false
+		action = action.substr(1).strip_edges()
+	
+	if is_eval:
+		return do_group_eval(action)
+	else:
+		return do_group_func(action)
+
+# @:
+func do_group_eval(eval: String) -> Variant:
+	if eval.begins_with("@"):
+		eval = eval.substr(1).strip_edges()
+	
+	var group: String
+	# node call
+	if "." in eval:
+		var p = eval.split(".", true, 1)
+		group = "@" + p[0]
+		eval = p[1]
+	# function call
+	else:
+		group = "@." + eval
+	
+	var nodes := Global.get_tree().get_nodes_in_group(group)
+	if len(nodes):
+		var out: Variant
+		for node in nodes:
+			var got = _do_eval(eval, node)
+			if got != null:
+				out = got
+		return out
+	else:
+		push_error("No nodes in group %s for eval '%s'." % [group, eval])
+		return null
+
+# @)
+func do_group_func(action: String) -> Variant:
+	if action.begins_with("@"):
+		action = action.substr(1).strip_edges()
+	
 	var args := UString.split_outside(action, " ")
 	action = args.pop_front()
-	return do_group_action_w_args(action, args, true)
+	return do_group_func_w_args(action, args, true)
 
 # @actions
 # while it can call many members of a group, it returns the last non null value it gets
-func do_group_action_w_args(action: String, args: Array, as_string_args := false) -> Variant:
+func do_group_func_w_args(action: String, args: Array, as_string_args := false) -> Variant:
 	if action.begins_with("@"):
-		action = action.substr(1)
+		action = action.substr(1).strip_edges()
 	
 	var group: String
 	# node call
@@ -155,8 +183,8 @@ func do_group_action_w_args(action: String, args: Array, as_string_args := false
 		group = "@." + action
 	
 	var nodes := Global.get_tree().get_nodes_in_group(group)
-	var out: Variant
 	if len(nodes):
+		var out: Variant
 		for node in nodes:
 			var got = UObject.call_w_kwargs([node, action], args, as_string_args)
 			if got != null:
@@ -224,6 +252,79 @@ func _str_to_var(s: String) -> Variant:
 		return s.to_int()
 	# must be a string?
 	return s
+
+func _do_eval_or_func(action: String, context: Variant, is_eval := true):
+	# eval
+	if action.begins_with(":"):
+		action = action.substr(1).strip_edges()
+		is_eval = true
+	# func
+	elif action.begins_with(")"):
+		action = action.substr(1).strip_edges()
+		is_eval = false
+	
+	if is_eval:
+		return _do_eval(action, context)
+	else:
+		return _do_func(action, context)
+
+func _do_func(action: String, context: Object) -> Variant:
+	var args := UString.split_outside(action, " ")
+	var method: String = args.pop_front()
+	prints("FUNC", method, args)
+	if context.has_method("_call"):
+		return context._call(method, args, true)
+	else:
+		return UObject.call_w_kwargs([context, method], args, true)
+
+func _context_has(context: Object, property: String) -> bool:
+	if context.has_method("_has"):
+		return context._has(property)
+	else:
+		return property in context
+
+func _do_eval(eval: String, context: Variant, default = null) -> Variant:
+	# state_manager modified this to make it work with all it's child functions
+	if context.has_method("_preprocess_eval"):
+		eval = context._preprocess_eval(eval)
+	
+	# state shortcut
+	eval = eval.replace("$", "State.")
+	
+	# assignments?
+	for op in StringAction.OP_ASSIGN:
+		if op in eval:
+			var p := eval.split(op, true, 1)
+			var property := p[0].strip_edges()
+			if _context_has(context, property):
+				var old_val = context[property]
+				var new_val = _do_eval(p[1].strip_edges(), context)
+				match op:
+					" = ": context[property] = new_val
+					" += ": context[property] = old_val + new_val
+					" -= ": context[property] = old_val - new_val
+					" *= ": context[property] = old_val * new_val
+					" /= ": context[property] = old_val / new_val
+				return context[property]
+			else:
+				push_error("No property '%s' in %s." % [property, context])
+				return default
+#
+#	# pipes
+#	if "|" in expression:
+#		var p := expression.split("|", true, 1)
+#		var got = _eval(p[0])
+#		return StringAction._pipe(got, p[1])
+	
+	if _expr.parse(eval, []) != OK:
+		push_error("Failed _eval('%s'): %s." % [eval, _expr.get_error_text()])
+	else:
+		var result = _expr.execute([], context, false)
+		if _expr.has_execute_failed():
+			push_error("Failed _eval('%s'): %s." % [eval, _expr.get_error_text()])
+		else:
+			return result
+	return default
 
 # x = do_something(true, custom_func(0), sin(rotation))
 # BECOMES

@@ -190,7 +190,7 @@ func _parse(file_path: StringName, dialogues: Dictionary, all_lines: Dictionary)
 		var line := i
 		
 		# start of document?
-		if i == 0 or current_line.strip_edges() == "---":
+		if i == 0 or current_line.strip_edges() == Soot.SEPERATOR:
 			current = {
 				meta = {
 					# use file path as default id
@@ -520,17 +520,12 @@ func _process_line(line: Dictionary):
 	if t.begins_with("{{"): return _line_as_condition(line)
 	if t.begins_with("{("): return _line_as_condition(line, true)
 	# option
-	if t.begins_with(">>>"): return _line_as_option(line)
-	if t.begins_with("+>>"): return _line_as_option(line)
+	if t.begins_with(Soot.FLOW_CHOICE): return _line_as_choice(line, Soot.FLOW_CHOICE)
+	if t.begins_with(Soot.FLOW_CHOICE_ADD): return _line_as_choice(line, Soot.FLOW_CHOICE_ADD)
 	# list
 	if t.begins_with("{["): return _line_as_list(line)
 	# actions
-	if t.begins_with(">"): return _line_as_action(line)
-	if t.begins_with("~"): return _line_as_action(line)
-	if t.begins_with("$"): return _line_as_action(line)
-	if t.begins_with("@"): return _line_as_action(line)
-	if t.begins_with("*"): return _line_as_action(line)
-#	if t.begins_with("."): return _line_as_action(line)
+	if UString.begins_with_any(t, Soot.ALL_DOINGS): return _line_as_doing(line)
 	# flows
 	if t.begins_with(Soot.FLOW_GOTO): return _line_as_flow_action(line, "goto", Soot.FLOW_GOTO)
 	if t.begins_with(Soot.FLOW_CALL): return _line_as_flow_action(line, "call", Soot.FLOW_CALL)
@@ -540,7 +535,7 @@ func _process_line(line: Dictionary):
 	if t.begins_with(Soot.FLOW_CHECKPOINT): return _line_as_flow_action(line, "check_point", Soot.FLOW_CHECKPOINT)
 	if t.begins_with(Soot.FLOW_BACK): return _line_as_flow_action(line, "back", Soot.FLOW_BACK)
 	# text insert
-	if t.begins_with("&"): return _line_as_text_insert(line)
+	if t.begins_with(Soot.TEXT_INSERT): return _line_as_text_insert(line)
 	# otherwise it is text
 	return _line_as_text(line)
 
@@ -592,7 +587,7 @@ func _line_as_condition(line: Dictionary, is_case := false):
 		line.conds = [line.cond]
 		line.cond_lines = [line.M.tabbed]
 
-func _line_as_option(line: Dictionary):
+func _line_as_choice(line: Dictionary, type := ""):
 	# extract flow lines
 	var lines := []
 	for li in line.M.tabbed:
@@ -609,7 +604,7 @@ func _line_as_option(line: Dictionary):
 		lines.append(fstep)
 	
 	line.type = "option"
-	line.text = line.M.text.trim_prefix(">>>").strip_edges()
+	line.text = line.M.text.trim_prefix(Soot.FLOW_CHOICE).strip_edges()
 	
 	if lines:
 		line.then = lines
@@ -629,9 +624,9 @@ func _line_as_flow_action(line: Dictionary, type: String, head: String):
 		if line.M.tabbed:
 			line.then = line.M.tabbed
 
-func _line_as_action(line: Dictionary):
-	line.type = "action"
-	line.action = line.M.text.strip_edges()
+func _line_as_doing(line: Dictionary):
+	line.type = "do"
+	line.do = line.M.text.strip_edges()
 
 func _line_as_flow(line: Dictionary):
 	_last_speaker = ""
@@ -647,7 +642,7 @@ func _line_as_lang(line: Dictionary, gone := false):
 	line.then = line.M.tabbed
 
 func _line_as_text_insert(line: Dictionary):
-	var text = line.M.text.trim_prefix("&").split("=")
+	var text = line.M.text.trim_prefix(Soot.TEXT_INSERT).split("=")
 	line.type = "insert"
 	line.key = text[0].strip_edges()
 	line.val = text[1].strip_edges()

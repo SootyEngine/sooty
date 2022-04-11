@@ -15,9 +15,15 @@ signal changed_from_to(property: Array, from: Variant, to: Variant)
 # the default state, after all mods were installed.
 @export var _default := {}
 # all the child nodes
-@export var _children := []
+@export var _states := []
 # a child to add data to if it has no where else to go.
 var _monkey_patcher: Node
+# 
+@export var _calls := {}
+@export var _call_names := {}
+
+func get_method_names() -> Array:
+	return _calls.keys()
 
 # overriden in State, Persistent and Settings.
 func _get_subdir() -> String:
@@ -84,7 +90,7 @@ func _load_mods(mods: Array):
 	add_child(_monkey_patcher)
 	
 	# collect all children in list.
-	_children = get_children()
+	_init_states()
 	
 	# install data (.soda) to children.
 	for mod in mods:
@@ -105,6 +111,21 @@ func _load_mods(mods: Array):
 					var old = _shortcuts[k]
 					push_error("Trying to use the same shortcut '%s' for %s and %s." % [k, old, new])
 
+func _init_states():
+	# 
+	_states = get_children()
+	
+	_calls.clear()
+	_call_names.clear()
+	
+	# collect methods in a way where they can all be called from the state
+	for state in _states:
+		var methods = UObject.get_script_methods(state)
+		for method in methods:
+			_call_names[method] = "_calls.%s.call(" % method
+			_calls[method] = Callable(state, method)
+#			print("%s contributed method '%s'." % [child.name, method])
+
 # get the default state
 func _loaded_mods():
 	_default = _get_state()
@@ -112,20 +133,15 @@ func _loaded_mods():
 func _reset():
 	UObject.set_state(self, _default)
 
-func _child_added(_n: Node):
-	_children = get_children()
-
 func _has_method(method: String) -> bool:
-	for node in _children:
-		if node.has_method(method):
-			return true
-	return false
+	return method in _calls
 
-func _get_method_parent(method: String) -> String:
-	for node in _children:
-		if node.has_method(method):
-			return node.name
-	return ""
+func _get_method_parent(method: String) -> Node:
+	return _calls[method].get_object()
+
+# preprocess an eval, so it can call all methods of children
+func _preprocess_eval(eval: String) -> String:
+	return eval.format(_call_names, "_(")
 
 func _call(method: String, args: Array = [], as_string_args := false, default = null) -> Variant:
 	if "." in method:
@@ -138,12 +154,16 @@ func _call(method: String, args: Array = [], as_string_args := false, default = 
 			push_error("No function '%s' in %s at '%s'." % [p[0], _get_subdir(), method])
 			return default
 	
+	if method in _calls:
+		print("CALL ", method, args)
+		return UObject.call_w_kwargs(_calls[method], args, as_string_args)
 	# call the first method we find
-	for state in _children:
-		if state.has_method(method):
-			return UObject.call_w_kwargs([state, method], args, as_string_args)
+#	for state in _children:
+#		if 
+#		if state.has_method(method):
+#			return UObject.call_w_kwargs([state, method], args, as_string_args)
 	
-	push_error("No function '%s' in %s." % [method, _get_subdir()])
+	push_error("No function '%s' in %s. %s" % [method, _get_subdir(), get_method_names()])
 	return default
 
 func _reset_state():
@@ -155,8 +175,8 @@ func _get_changed_states() -> Dictionary:
 
 func _get_state() -> Dictionary:
 	var out := {}
-	for child in _children:
-		UDict.merge(out, UObject.get_state(child), true)
+	for state in _states:
+		UDict.merge(out, UObject.get_state(state), true)
 	return out
 
 func _get_property_path(property: StringName) -> Array:
@@ -168,8 +188,8 @@ func _get_property_path(property: StringName) -> Array:
 func _has(pname: StringName) -> bool:
 	var path := _get_property_path(pname)
 	var property = path[-1]
-	for m in _children:
-		var o = UObject.get_penultimate(m, path)
+	for state in _states:
+		var o = UObject.get_penultimate(state, path)
 		if o != null and property in o:
 			return true
 	return false
@@ -177,8 +197,8 @@ func _has(pname: StringName) -> bool:
 func _get(pname: StringName):
 	var path := _get_property_path(pname)
 	var property = path[-1]
-	for m in _children:
-		var o = UObject.get_penultimate(m, path)
+	for state in _states:
+		var o = UObject.get_penultimate(state, path)
 		if o != null:
 			if property in o:
 				return o[property]
@@ -186,8 +206,8 @@ func _get(pname: StringName):
 func _set(pname: StringName, value) -> bool:
 	var path = _get_property_path(pname)
 	var property = path[-1]
-	for m in _children:
-		var o = UObject.get_penultimate(m, path)
+	for state in _states:
+		var o = UObject.get_penultimate(state, path)
 		if o != null and property in o:
 			var old = o.get(property)
 			if typeof(value) != typeof(old):

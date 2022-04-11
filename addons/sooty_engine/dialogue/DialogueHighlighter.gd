@@ -5,11 +5,11 @@ func _get_name() -> String:
 	return "Soot"
 
 # operators
-const OP_RELATIONS := ["==", "!=", "<", "<=", ">", ">="]
-const OP_ASSIGNMENTS := ["=", "+=", "-="]
-const OP_EVALS := ["if", "elif", "else", "match", "rand"]
-const OP_KEYWORDS := ["and", "or", "not"]
-const OP_ALL := OP_RELATIONS + OP_ASSIGNMENTS + OP_EVALS + OP_KEYWORDS
+#const OP_RELATIONS := ["==", "!=", "<", "<=", ">", ">="]
+#const OP_ASSIGNMENTS := ["=", "+=", "-="]
+#const OP_EVALS := ["if", "elif", "else", "match", "rand"]
+#const OP_KEYWORDS := ["and", "or", "not"]
+#const OP_ALL := OP_RELATIONS + OP_ASSIGNMENTS + OP_EVALS + OP_KEYWORDS
 
 const SYMBOL_ALPHA := .5
 
@@ -27,11 +27,9 @@ const C_COMMENT := Color(1.0, 1.0, 1.0, 0.25)
 const C_COMMENT_LANG := Color(0.5, 1.0, 0.0, 0.5)
 
 const C_NODE_ACTION := Color.DEEP_SKY_BLUE
-const C_STATE_ACTION := Color.ORCHID
-const C_EVAL := Color.LIGHT_GREEN
-const C_EVAL_TAG := Color(0, 1, 0.5, 0.8*.5)
-const C_COMMAND := Color.GOLD
-const C_VAR_SHORTCUT := Color.CADET_BLUE
+const C_STATE_ACTION := Color.MEDIUM_PURPLE
+const C_CONTEXT_ACTION := Color.YELLOW_GREEN
+const C_VAROUT := Color.ORANGE
 
 const C_FLOW := Color.WHEAT
 const C_FLOW_GOTO := Color.TAN
@@ -43,24 +41,7 @@ const C_OPTION_TEXT := Color.WHEAT
 
 # strings
 const S_FLAG := "\t#?"
-const S_BLOCK_SEPERATOR := "---"
 
-#const S_PROPERTY := "-"
-const S_OPTION := ">>>"# "|>"
-const S_OPTION_ADD := "+>"
-
-const S_TEXT_INSERT := "&"
-
-const S_EVAL := "~"
-const S_STATE_ACTION := "$"
-const S_NODE_ACTION := "@"
-const S_COMMAND := ">"
-const S_VAROUT := "*"
-
-const S_FLATLINE := "||"
-
-const S_TEXT_LIST_START := "<"
-const S_TEXT_LIST_END := ">"
 
 const S_LIST_START := "{<"
 const S_LIST_END := ">}"
@@ -114,7 +95,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 		_c(len(Soot.LANG), Color.TOMATO)
 	
 	# new document
-	elif text.begins_with(S_BLOCK_SEPERATOR):
+	elif text.begins_with(Soot.SEPERATOR):
 		_c(0, Color.ORANGE)
 	
 	# normal lines
@@ -133,9 +114,8 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 #					_c(i, C_SYMBOL)
 #					_c(i+1, Color.ORANGE)
 #			from = end+1
-			
+		
 		_c(from, C_TEXT)
-#		var to = _h_flatline(C_TEXT, from)
 		
 		# flow
 		if text.begins_with(Soot.FLOW):
@@ -143,28 +123,10 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 			_c(len(Soot.FLOW), C_FLOW)
 		
 		else:
-			# condition
-#			var a := text.find(S_COND_START)
-#			var b := text.rfind(S_COND_END)
-#			var f := from
-#			if a != -1 and b != -1:
-#				_c(a, C_SYMBOL)
-#				_c(b, C_SYMBOL)
-#				_c(b+len(S_COND_END), C_TEXT)
-#				_h_conditional(a+len(S_COND_START), b-1)
-#				f = b+len(S_COND_END)
-#
-#				# highlight line before conditional
-#				_h_line(from, a)
-#
-#				# highlight line after conditional, in case of 'match'
-#				_h_line(f, to if to>0 else len(text))
-			
-#			else:
-			if text.strip_edges().begins_with(S_TEXT_INSERT):
-				from = text.find(S_TEXT_INSERT, from)
+			if text.strip_edges().begins_with(Soot.TEXT_INSERT):
+				from = text.find(Soot.TEXT_INSERT, from)
 				_c(from, C_SYMBOL)
-				_c(from+1, C_TEXT_INSERT)
+				_c(from+1, Soot.TEXT_INSERT)
 				var e := text.find("=", from)
 				if e != -1:
 					_c(e, C_SYMBOL)
@@ -219,34 +181,16 @@ static func split_string(s: String) -> Array:
 func _c(i: int, clr: Color):
 	state[i] = {color=clr}
 
-func _set_var_color(from: int, v: String, is_action := false, index := 0, action_color := Color.WHITE):
-#	if (is_action and index == 0) or v[0] == "*":
-#		_c(from, Color(action_color, SYMBOL_ALPHA))
+func _h_var(from: int, v: String, index := 0, action_color := Color.WHITE):
 	if not len(v):
 		return
 	
-	if is_action and index == 0:
-		_c(from, Color(action_color, SYMBOL_ALPHA))
-		# only highlight last part
-		var d := v.rfind(".")
-		if d != -1:
-			_c(from+1, action_color.darkened(.25))
-			_c(from+1+d, action_color)
-		else:
-			_c(from+1, action_color)
-	
-	elif UString.is_wrapped(v, "<<", ">>"):
-		_c(from, C_EVAL_TAG)
-		_c(from+2, C_EVAL)
-		_c(from+len(v)-2, C_EVAL_TAG)
-	
 	# dict key
-	elif ":" in v:
+	if ":" in v:
 		var p := v.split(":", true, 1)
-#		_c(from, C_SYMBOL)
-		_c(from, Color(action_color, .75))
+		_c(from, Color(action_color, .5))
 		_c(from+len(p[0]), C_SYMBOL)
-		_set_var_color(from+len(p[0])+1, p[1], false, 0, action_color)
+		_h_var(from+len(p[0])+1, p[1], 0, action_color)
 	
 	# array
 	elif "," in v:
@@ -254,7 +198,7 @@ func _set_var_color(from: int, v: String, is_action := false, index := 0, action
 		var parts := v.split(",")
 		for i in len(parts):
 			var part := parts[i]
-			_set_var_color(off, part, false, index, action_color)
+			_h_var(off, part, index, action_color)
 			off += len(part)
 			_c(off, C_SYMBOL)
 			off += 1
@@ -267,60 +211,83 @@ func _set_var_color(from: int, v: String, is_action := false, index := 0, action
 		if v[0] == "*":
 			_c(from, Color(action_color, SYMBOL_ALPHA))
 			from += 1
-			
-		var clr := action_color
-		clr.h = wrapf(clr.h - .05, 0.0, 1.0)
-		if index % 2 != 0:
-			clr = clr.lightened(.77)
-		else:
-			clr = clr.lightened(.22)
-		_c(from, clr)
+		
+		_c(from, action_color)
 
-func _h_action(from: int, to: int, is_case := false):
-	_c(from, C_SYMBOL)
+func _h_action_var(from: int, to: int):
 	var inner := text.substr(from, to-from)
-	
-	if not len(inner):
-		return
-	
-	var color = C_EVAL
-	var index := 0
-	
-	if inner.begins_with(S_NODE_ACTION):
-		color = C_NODE_ACTION
-	elif inner.begins_with(S_STATE_ACTION):
-		color = C_STATE_ACTION
-	elif inner.begins_with(S_COMMAND):
-		color = C_COMMAND
-	elif inner.begins_with(S_EVAL):
-		_h_eval(from, to)
-		return
-	elif inner.begins_with(S_VAROUT) or is_case:
-		color = C_VAR_SHORTCUT
-		index += 2
-	else:
-		_h_eval(from, to)
-		return
-	
 	var parts = UString.split_outside(inner, " ")
 	for part in parts:
-		_set_var_color(from, part, true, index, color)
-		if index == 0 and len(part) == 1:
-			pass
-		else:
+		_h_var(from, part, 0, C_VAROUT)
+		from += len(part)+1
+
+const A := "@"
+func _h_action(from: int, to: int, is_case := false):
+	var inner := text.substr(from, to-from)
+	if inner:
+		var color = C_CONTEXT_ACTION
+		var index := 0
+		var head = UString.get_leading_symbols(inner)
+		match head:
+			# *
+			Soot.DO_VAR: _h_action_var(from, to)
+			
+			# @) @
+			Soot.DO_NODE_FUNC: _h_action_shortcut(1, from, to, C_NODE_ACTION)
+			# @:
+			Soot.DO_NODE_EVAL: _h_action_eval(2, from, to, C_NODE_ACTION)
+			
+			# ~)
+			Soot.DO_SELF_FUNC: _h_action_shortcut(2, from, to, C_CONTEXT_ACTION)
+			# ~: ~
+			Soot.DO_SELF_EVAL: _h_action_eval(1, from, to, C_CONTEXT_ACTION)
+			
+			# $)
+			Soot.DO_STATE_FUNC: _h_action_shortcut(2, from, to, C_STATE_ACTION)
+			# $ $:
+			Soot.DO_STATE_EVAL: _h_action_eval(1, from, to, C_STATE_ACTION)
+
+func _h_action_shortcut(head_len: int, from: int, to: int, color: Color):
+	_c(from, C_SYMBOL)
+	from += head_len
+	var inner := text.substr(from, to-from)
+	var parts = UString.split_outside(inner, " ")
+	var index := 0
+	for i in len(parts):
+		var part = parts[i]
+		if len(part):
+			if index == 0:
+				_c(from, color)
+				for j in len(part):
+					if part[j] == ".":
+						color.s -= .1
+						color = UClr.hue_shift(color, -.075)
+						_c(from+j, C_SYMBOL)
+						_c(from+j+1, color)
+				color.s = .25
+				color = UClr.hue_shift(color, .5)
+			else:
+				_h_var(from, part, index, color)
 			index += 1
 		from += len(part) + 1
 
-func _h_eval(from: int, to: int):
-	if text[from] == S_EVAL:
-		_c(from, Color(C_EVAL, SYMBOL_ALPHA))
-		_c(from+1, C_EVAL)
-	else:
-		_c(from, C_EVAL)
-#	for i in range(from+1, to):
-#		if text[i] in ",.[](){}\"'-+=<>":
-#			_c(i, C_SYMBOL)
-#			_c(i+1, C_EVAL)
+func _h_action_eval(head_len: int, from: int, to: int, color: Color):
+	_c(from, C_SYMBOL)
+	from += head_len
+	var t_color = color
+	_c(from, t_color)
+	for i in range(from+1, to):
+		if text[i] == ".":
+			t_color.s -= .1
+			t_color = UClr.hue_shift(t_color, -.075)
+		elif text[i] == "(":
+			t_color.s = .25
+			t_color = UClr.hue_shift(t_color, .5)
+		elif text[i] == ")":
+			t_color = color
+		if text[i] in ",.[](){}\"'`-+=<>":
+			_c(i, C_SYMBOL)
+			_c(i+1, t_color)
 
 func _h_conditional(from: int, to: int, is_case := false):
 	var inner := text.substr(from, to-from)
@@ -351,8 +318,8 @@ func _h_bbcode(from: int, to: int, default: Color):
 	while i < to:
 		if text[i] == "#":
 			break
-		elif text[i] == S_TEXT_LIST_START:
-			var end := text.find(S_TEXT_LIST_END, i+1)
+		elif text[i] == Soot.TEXT_LIST_START:
+			var end := text.find(Soot.TEXT_LIST_END, i+1)
 			if end != -1:
 				# colorize open and close tags
 				_c(i, C_SYMBOL)
@@ -373,15 +340,8 @@ func _h_bbcode(from: int, to: int, default: Color):
 						_c(off, C_SYMBOL)
 						off += 1
 					# colorize action tags
-					if tag.begins_with(S_EVAL):
+					if UString.begins_with_any(tag, Soot.ALL_DOINGS):
 						_h_action(off, off+len(tag))
-					elif tag.begins_with(S_NODE_ACTION):
-						_h_action(off, off+len(tag))
-					elif tag.begins_with(S_STATE_ACTION):
-						_h_action(off, off+len(tag))
-					elif tag.begins_with(S_VAROUT):
-						_h_action(off, off+len(tag))
-					# colorize normal tags
 					else:
 						_c(off, C_TAG)
 					off += len(tag)
@@ -395,9 +355,12 @@ func _h_bbcode(from: int, to: int, default: Color):
 				_c(end+1, default)
 				i = end
 		
-		elif text[i] == "&":
+		elif text[i] == Soot.TEXT_INSERT:
 			_c(i, C_SYMBOL)
 			_c(i+1, C_TEXT_INSERT)
+			# TODO: look ahead a bit, and don't highlight more than needs to be
+			# ie while next_line.begins_with("&")
+			#		end = a
 			i += 1
 			while i < to and text[i] in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789":
 				i += 1
@@ -434,7 +397,7 @@ func _h_flow(from := 0):
 
 func _h_properties(from: int, to: int):
 	for part in text.substr(from, to-from).split(" "):
-		_set_var_color(from, part)
+		_h_var(from, part)
 		from += len(part) + 1
 
 func _h_line(from: int, to: int):
@@ -444,7 +407,7 @@ func _h_line(from: int, to: int):
 	from += len_old - len(t)
 	t = t.strip_edges(false, true)
 	
-	var parts := t.split(S_FLATLINE)
+	var parts := t.split(Soot.TAB_SAME_LINE)
 	
 	for part in parts:
 		var next_from = from + len(part) + 2
@@ -554,37 +517,24 @@ func _h_line(from: int, to: int):
 				_c(from+end+1, C_SYMBOL)
 		
 		# $state actions
-		elif part.begins_with(S_STATE_ACTION):
+		elif UString.begins_with_any(part, Soot.ALL_DOINGS):
 			_h_action(from, to)
-		# @node actions
-		elif part.begins_with(S_NODE_ACTION):
-			_h_action(from, to)
-		# > commands
-		elif part.begins_with(S_COMMAND):
-			_h_action(from, to)
-		# *var
-		elif part.begins_with(S_VAROUT):
-			_h_action(from, to)
-		
-		# ~evals
-		elif part.begins_with(S_EVAL):
-			_h_eval(from, to)
 		
 		# options
-		elif part.begins_with(S_OPTION):
+		elif part.begins_with(Soot.FLOW_CHOICE):
 			_c(from, Color(C_OPTION_TEXT, .5))
-			_c(from+len(S_OPTION), C_OPTION_TEXT)
-			_h_bbcode(from+len(S_OPTION), to, C_OPTION_TEXT)
+			_c(from+len(Soot.FLOW_CHOICE), C_OPTION_TEXT)
+			_h_bbcode(from+len(Soot.FLOW_CHOICE), to, C_OPTION_TEXT)
 			_h_flow()
 		
 		# options: add
-		elif part.begins_with(S_OPTION_ADD):
+		elif part.begins_with(Soot.FLOW_CHOICE_ADD):
 			var c_option_add = C_OPTION_TEXT
 			c_option_add.h = wrapf(c_option_add.h - .22, 0.0, 1.0)
 			c_option_add.v = clampf(c_option_add.v - 0.25, 0.0, 1.0)
 			_c(from, C_SYMBOL)
-			_c(from+len(S_OPTION_ADD), c_option_add)
-			var s := text.find("*", from+len(S_OPTION_ADD))
+			_c(from+len(Soot.FLOW_CHOICE_ADD), c_option_add)
+			var s := text.find("*", from+len(Soot.FLOW_CHOICE_ADD))
 			if s != -1:
 				_c(s, C_SYMBOL)
 				_c(s+1, c_option_add)
