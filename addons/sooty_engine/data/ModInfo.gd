@@ -1,18 +1,17 @@
 extends Resource
 class_name ModInfo
-
 func get_class() -> String:
 	return "ModInfo"
 
-var dir := ""
-var name := ""
-var author := ""
-var version := ""
-var priority := 0
+@export var dir := ""
+@export var name := ""
+@export var author := ""
+@export var version := ""
+@export var priority := 0
 
-var installed := false
+@export var installed := false
 
-var meta := {}
+@export var meta := {}
 
 func _init(d: String, inst: bool):
 	dir = d

@@ -54,7 +54,10 @@ func _test(t: String) -> bool:
 	return true
 
 func do(command: String) -> Variant:
-	if command.begins_with("*"):
+	if command == "_":
+		return "_"
+	
+	elif command.begins_with("*"):
 		return to_var(command)
 	
 	# $ state function

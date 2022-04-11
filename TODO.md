@@ -29,13 +29,13 @@
 - [x] Move UI/console and fonts to `VisualNovel` addon.
 
 # State
-- [ ] Custom `Bool` class for managing a single state bool.
+- [ ] `Mods` add signal `collect_mods` which will request paths, instead of current system.
+- [x] Custom `Bool` class for managing a single state bool.
 
 # *.soot Dialogue Files
 - [ ] define step types in Soot
 - [ ] inserts for choices
 - [ ] inserts for actions?
-
 - [x] Don't be file bound.
     - [x] Let multiple files contribute to the same dialogue.
     - [x] And let a single file contribute to multiple dialogues.
@@ -136,6 +136,7 @@
 - [x] `get_file_in_dir(tail)`: Get a path to a possibly nested file ending in tail.
 
 # VisualNovel
+- [ ] Seperate UI from backend.
 - [ ] Use state objects to parse text/speaker. `_preparse_caption` `_preparse_caption_name`
 - [ ] ~~Create theme templates for captions + options.~~
 - [x] Character can control string wrappes `"` (For phones and such.)

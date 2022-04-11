@@ -472,9 +472,9 @@ func _h_line(from: int, to: int):
 			if s != -1:
 				_c(from+s, C_SYMBOL)
 				_h_conditional(from+s + len(S_COND_START), to - len(S_COND_END), false)
+				_c(to-len(S_COND_END), C_SYMBOL) # }} symbol
 				to = from+s
 				part = text.substr(from, to-from)
-			_c(to-len(S_COND_END), C_SYMBOL) # }} symbol
 		
 		# language tag
 		var start := part.find("#{")

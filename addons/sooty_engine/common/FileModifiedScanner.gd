@@ -1,3 +1,4 @@
+@tool
 extends Timer
 class_name FileModifiedScanner
 # checks if files were modified, and emits a signal if so.
@@ -13,7 +14,6 @@ func _ready() -> void:
 func set_files(f: Array):
 	files = f
 	update_times()
-	print("got files ", files, time_left)
 
 func _timeout():
 	if was_modified():

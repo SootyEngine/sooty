@@ -7,15 +7,15 @@ signal changed_to(property: Array, to: Variant)
 signal changed_from_to(property: Array, from: Variant, to: Variant)
 
 # won't emit signals when changing things.
-var _silent := false
+@export var _silent := false
 # state has changed.
-var _changed := false
+@export var _changed := false
 # shorter keys to nested data. (ie: p = characters:player)
-var _shortcuts := {}
+@export var _shortcuts := {}
 # the default state, after all mods were installed.
-var _default := {}
+@export var _default := {}
 # all the child nodes
-var _children := []
+@export var _children := []
 # a child to add data to if it has no where else to go.
 var _monkey_patcher: Node
 
@@ -68,7 +68,8 @@ func _load_mods(mods: Array):
 		mod.meta[subdir] = []
 		
 		var head = mod.dir.plus_file(subdir)
-		for script_path in UFile.get_files(head, ".gd"):
+		var script_paths := UFile.get_files(head, ".gd")
+		for script_path in script_paths:
 			var script = load(script_path)
 			var state = script.new()
 			if state is Node:

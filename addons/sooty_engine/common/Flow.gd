@@ -15,7 +15,7 @@ signal flow_ended(id: String)
 signal on_step(step: Dictionary)
 signal selected(id: String) # used with select_option
 
-var _lines := {} # all lines from all files
+@export var _lines := {} # all lines from all files
 
 @export var last_end_message := ""
 @export var current_dialogue := ""
@@ -24,6 +24,7 @@ var _lines := {} # all lines from all files
 @export var _last_tick_stack := [] # stack of the previous tick, used for saving and rollback.
 
 @export var states := {}
+@export var last_line := {}
 
 func _init(lines := {}):
 	_lines = lines
@@ -36,8 +37,10 @@ func _set_state(state: Dictionary):
 	_started = state.started
 	last_end_message = state.last_end_message
 
+# ideal way of testing if there is flow.
+# _started is false for the first tick, for race condition reasons.
 func is_active() -> bool:
-	return len(_stack) != 0
+	return _started or len(_stack) != 0
 
 func get_current() -> Dictionary:
 	return _stack[-1] if len(_stack) else {}
@@ -48,6 +51,7 @@ func start(id: String):
 		return false
 	
 	# start dialogue
+	last_line = {}
 	goto(id)
 	return true
 
@@ -168,32 +172,32 @@ func _tick() -> Dictionary:
 			tick.emit()
 	
 	var safety := MAX_STEPS_PER_TICK
-	var step := {}
 	while _started and len(_stack) and not is_waiting():
 		safety -= 1
 		if safety <= 0:
 			push_error("Tripped safety! Increase MAX_STEPS_PER_TICK if necessary.", safety)
 			break
 		
-		var next_step := _pop_next_step()
-		if next_step:
-			step = next_step
-			_on_step(step)
-			on_step.emit(step)
+		var next_line := _pop_stack_line()
+		if next_line:
+			last_line = next_line
+			var line := next_line
+			_on_step(line)
+			on_step.emit(line)
 			
-			match step.type:
+			match line.type:
 				"goto":
-					var goto = step.goto
+					var goto = line.goto
 					if not Soot.is_path(goto):
 						goto = Soot.join_path([current_dialogue, goto])
 					_goto(goto, S_GOTO)
 				
 				"call":
 					# does call have it's own lines? used by {[list]} pattern
-					if "then" in step:
-						_push(S_CALL_INLINE, step.M.id, step.then)
+					if "then" in line:
+						_push(S_CALL_INLINE, line.M.id, line.then)
 					# use current_dialogue as parent, if none exists
-					var call = step.call
+					var call = line.call
 					if not Soot.is_path(call):
 						call = Soot.join_path([current_dialogue, call])
 					_goto(call, S_CALL)
@@ -202,26 +206,26 @@ func _tick() -> Dictionary:
 					pass
 				
 				"pass":
-					passed_w_msg.emit(step.msg)
+					passed_w_msg.emit(line.msg)
 					pass
 				
 				"end":
 					_pop()
 				
 				"end_all":
-					end(step.end)
+					end(line.end)
 					break
 				
-				_: push_warning("Huh? %s %s" % [step.keys(), step])
+				_: push_warning("Huh? %s %s" % [line.keys(), line])
 	
 	# emit start trigger
 	if not _started and len(_stack):
 		_started = true
 		started.emit()
 	
-	return step
+	return last_line
 
-func _pop_next_step() -> Dictionary:
+func _pop_stack_line() -> Dictionary:
 	# only show lines that pass their {{condition}}.
 	var safety := 1000
 	while len(_stack):
@@ -232,60 +236,58 @@ func _pop_next_step() -> Dictionary:
 		
 		# remove last step, and potentially end the flow.
 		var step_info: Dictionary = _stack[-1]
-		# _get_step(step_info.id).get(step_info.key, "then")
-		if not len(step_info.steps):#.step:# >= len(steps):
+		if not len(step_info.steps):
 			_pop()
 			continue
 		
-		var step: Dictionary = _get_line(step_info.steps.pop_front())
-#		step_info.step += 1
+		var step_id: String = step_info.steps.pop_front()
+		var line: Dictionary = _get_line(step_id)
 		
 		# 'if' 'elif' 'else' chain
-		if step.type == "if":
-			for i in len(step.conds):
-				if StringAction.test(step.conds[i]):
-					_push(S_IF, step.M.id, step.cond_lines[i])
+		if line.type == "if":
+			for i in len(line.conds):
+				if StringAction.test(line.conds[i]):
+					_push(S_IF, line.M.id, line.cond_lines[i])
 					return {}
 		
 		# match chain
-		elif step.type == "match":
-			var match_result := Array(step.match.split(" AND "))
+		elif line.type == "match":
+			var match_result := Array(line.match.split(" AND "))
 			for i in len(match_result):
 				var m = match_result[i]
 				match_result[i] = StringAction.do(m)
 			
-			print("MATCH: ", match_result)
+#			print("MATCH: ", match_result)
 #			var match_result = State._eval(step.match)
-			for i in len(step.cases):
-				var case = step.cases[i].split(" OR ")
+			for i in len(line.cases):
+				var case = line.cases[i].split(" OR ")
 				for subcase in case:
 					subcase = Array(subcase.split(" AND "))
 					for i in len(subcase):
 						var sc = subcase[i]
 						subcase[i] = StringAction.do(sc)
-					print("\tCASE: %s == %s?" % [subcase, match_result])
+#					print("\tCASE: %s == %s?" % [subcase, match_result])
 					if UType.is_equal(subcase[0], "_") or match_result == subcase:
-						print("\t\tGOOD!")
-#				if case == "_" or UType.is_equal(match_result, State._eval(case)):
-						_push(S_MATCH, step.M.id, step.case_lines[i])
+#						print("\t\tGOOD!")
+						_push(S_MATCH, line.M.id, line.case_lines[i])
 						return {}
 		
 		# has a condition
-		elif "cond" in step:
-			if StringAction._test(step.cond):
-				return step
+		elif "cond" in line:
+			if StringAction._test(line.cond):
+				return line
 		
 		# special list function
-		elif step.type == "list":
-			var id: String = step.M.id
-			var list: Array = step.list
-			var lstep_id := get_list_item(step.list_type, id, list)
+		elif line.type == "list":
+			var id: String = line.M.id
+			var list: Array = line.list
+			var lstep_id := get_list_item(id, line.list_type, list)
 			if lstep_id:
-				_push(S_LIST, step.M.id, [lstep_id])
+				_push(S_LIST, line.M.id, [lstep_id])
 			return {}
 		
 		else:
-			return step
+			return line
 	
 	return {}
 
@@ -342,6 +344,9 @@ func get_list_item(id: String, type: String, list: Array) -> String:
 				states[id] += 1
 			if states[id] < tot:
 				return list[states[id]]
+		
+		_:
+			push_error("Unknown list type '%s'." % type)
 	
 	return ""
 

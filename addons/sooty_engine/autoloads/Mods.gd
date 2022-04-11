@@ -8,7 +8,7 @@ signal pre_loaded()
 signal load_all(list: Array)
 signal loaded()
 
-var mods := {}
+@export var mods := {}
 
 func _init():
 	_add_mod("res://", true)
@@ -46,7 +46,10 @@ func uninstall(dir: String):
 		mods[dir].installed = false
 		_load_mods()
 
-func _load_mods():
+func load_mods(loud := false):
+	_load_mods(loud)
+
+func _load_mods(loud := false):
 	pre_loaded.emit()
 	
 	var installed := get_installed()
@@ -56,7 +59,6 @@ func _load_mods():
 	load_all.emit(installed)
 	
 	# Display lists of what was added by the mods.
-	var loud := true
 	if loud:
 		var meta := {}
 		for k in installed[0].meta.keys():

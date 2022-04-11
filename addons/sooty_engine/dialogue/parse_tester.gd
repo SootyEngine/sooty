@@ -5,12 +5,16 @@ func _run():
 #	UNode.remove_children(State)
 #	State.add_child(preload("res://addons/visual_novel/states/simple_vn.gd").new())
 #	State._children = State.get_children()
-	Mods._load_mods()
+	Mods.load_mods()
 #	await Mods.loaded
 #	print(["x", "y", "z"] == ["x", "y", "z"])
+	
 	var f := Flow.new(Dialogue._lines)
-	var got = f.execute("empty_scene/getit")
-	print("GOT ", got.value)
+	for i in 14:
+		State["time.days"] += 1
+		var got = f.execute("empty_scene/getit")
+		prints("GOT", got.value, State.time.days)
+	
 #	for test in [
 #			"$get_b and $get_opb"
 #		]:

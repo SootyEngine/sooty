@@ -516,7 +516,7 @@ func _process_line(line: Dictionary):
 	if t.begins_with(Soot.LANG_GONE): return _line_as_lang(line, true)
 	# {{}}
 	if t.begins_with("{{"): return _line_as_condition(line)
-	_extract_conditional(line)
+	_extract_condition(line)
 	# option
 	if t.begins_with("|>"): return _line_as_option(line)
 	if t.begins_with("+>"): return _line_as_option(line)
@@ -543,10 +543,10 @@ func _process_line(line: Dictionary):
 
 func _line_as_condition(line: Dictionary):
 	line.type = "cond"
-	line.cond_type = "if"
-	_extract_conditional(line)
+	line.cond_type = "if" # by default they are if, so no need for typing it out
+	_extract_condition(line)
 	
-	var cond: String = line.M.cond
+	var cond: String = line.cond
 	
 	# if-elif-else condition
 	if cond.begins_with("IF "):
@@ -555,19 +555,19 @@ func _line_as_condition(line: Dictionary):
 	elif cond.begins_with("ELIF "):
 		line.cond_type = "elif"
 		line.cond = cond.substr(len("ELIF ")).strip_edges()
-	elif cond == "else":
+	elif cond == "ELSE":
 		line.cond_type = "else"
 		line.cond = "true"
 	
 	# match condition
 	elif cond.begins_with("MATCH "):
 		line.cond_type = "match"
-		line.match = line.M.cond.trim_prefix("MATCH ").strip_edges()
+		line.match = line.cond.trim_prefix("MATCH ").strip_edges()
 		line.cases = []
 		line.case_lines = []
 		for tabbed_line in line.M.tabbed:
 			if tabbed_line.type == "cond":
-				line.cases.append(tabbed_line.M.cond)
+				line.cases.append(tabbed_line.cond)
 				line.case_lines.append(tabbed_line.M.tabbed)
 				
 				# treat leftover as an unprocessed line now.
@@ -580,7 +580,7 @@ func _line_as_condition(line: Dictionary):
 					line.case_lines[-1].push_front(tabbed_line)
 	
 	if line.cond_type == "if":
-		line.conds = [line.M.cond]
+		line.conds = [line.cond]
 		line.cond_lines = [line.M.tabbed]
 
 func _line_as_option(line: Dictionary):
@@ -705,16 +705,11 @@ func _extract_properties(line: Dictionary):
 			else:
 				UDict.append(line, "flags", item)
 
-func _extract_conditional(line: Dictionary) -> bool:
-	return _extract(line, "{{", "}}", "cond")
-
-func _extract(line: Dictionary, head: String, tail: String, key: String) -> bool:
-	var p := UString.extract(line.M.text, head, tail)
-	line.M.text = p.outside
+func _extract_condition(line: Dictionary):
+	var p = UString.extract(line.M.text, "{{", "}}")
 	if p.inside:
-		line.M[key] = p.inside
-		return true
-	return false
+		line.M.text = p.outside
+		line.cond = p.inside
 
 #func _trailing_tokens(s: String, splitters: Array) -> Array:
 #	var f := UString.split_on_next(s, splitters)

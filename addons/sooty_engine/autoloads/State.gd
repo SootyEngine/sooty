@@ -55,7 +55,7 @@ func _eval(expression: String, default = null) -> Variant:
 #		return StringAction._pipe(got, p[1])
 	
 	var global = StringAction._globalize_functions(expression).strip_edges()
-	prints("(%s) >>> (%s)" %[expression, global])
+	#prints("Globalized: (%s) >>> (%s)" %[expression, global])
 	
 	if _expr.parse(global, []) != OK:
 		push_error(_expr.get_error_text() + ": " + expression)

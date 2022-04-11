@@ -6,9 +6,7 @@ const CHECK_FILES_EVERY := 1 # seconds before checking if any script has changed
 signal reloaded()
 signal caption(text: String, line: Dictionary)
 
-var dialogues := {}
-
-var file_scanner: FileModifiedScanner
+@export var dialogues := {}
 
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -35,16 +33,8 @@ func _ready() -> void:
 	
 	await get_tree().process_frame
 	Mods.load_all.connect(_load_mods)
-	
-	# timer checks if any files were modified.
-	if file_scanner:
-		file_scanner.queue_free()
-	
-	file_scanner = FileModifiedScanner.new()
-	add_child(file_scanner)
-	file_scanner.modified.connect(_files_modified)
 
-func _files_modified():
+func _files_modified(file_scanner: FileModifiedScanner):
 	file_scanner.update_times()
 	Mods._load_mods()
 
@@ -87,13 +77,20 @@ func _load_mods(mods: Array):
 			var id := UFile.get_file_name(lang_path).rsplit("-", true, 1)[0]
 			UDict.append(lang_paths, id, lang_path)
 	
+	# timer checks if any files were modified.
+	UNode.remove_children(self)
+	var file_scanner := FileModifiedScanner.new()
+	file_scanner.set_name("FileScanner")
+	add_child(file_scanner)
+	file_scanner.modified.connect(_files_modified.bind(file_scanner))
 	file_scanner.set_files(all_files)
-	UDict.log(dialogues)
 	
+	# save states for debuging
 	if UFile.exists("res://dialogue_debug"):
 		UFile.save_text("res://dialogue_debug/_dialogues.soda", DataParser.dict_to_str(dialogues))
 		UFile.save_text("res://dialogue_debug/_all_lines.soda", DataParser.dict_to_str(_lines))
 	
+	# probably not accurate
 	var memory_used = OS.get_static_memory_usage() - memory_before
 	prints("Dialogues:", String.humanize_size(memory_used))
 
