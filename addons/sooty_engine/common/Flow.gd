@@ -252,22 +252,26 @@ func _pop_stack_line() -> Dictionary:
 		
 		# match chain
 		elif line.type == "match":
-			var match_result := Array(line.match.split(" AND "))
+			var match_result = Array(line.match.split(" AND "))
 			for i in len(match_result):
 				var m = match_result[i]
 				match_result[i] = StringAction.do(m)
+			# not an array?
+			if len(match_result) == 1:
+				match_result = match_result[0]
+			# TODO: if an array of objects, merge them into a super object!?
 			
 #			print("MATCH: ", match_result)
-#			var match_result = State._eval(step.match)
 			for i in len(line.cases):
 				var case = line.cases[i].split(" OR ")
 				for subcase in case:
 					subcase = Array(subcase.split(" AND "))
 					for i in len(subcase):
 						var sc = subcase[i]
-						subcase[i] = StringAction.do(sc)
-#					print("\tCASE: %s == %s?" % [subcase, match_result])
-					if UType.is_equal(subcase[0], "_") or match_result == subcase:
+						subcase[i] = StringAction.do(sc, "*")
+					var passes = _compare_list(match_result, subcase)
+#					print("\tCASE: %s == %s? %s!" % [subcase, match_result, passes])
+					if passes:
 #						print("\t\tGOOD!")
 						_push(S_MATCH, line.M.id, line.case_lines[i])
 						return {}
@@ -290,6 +294,29 @@ func _pop_stack_line() -> Dictionary:
 			return line
 	
 	return {}
+
+func _compare_list(m, v) -> bool:
+	for i in len(v):
+		if _compare(m, v[i]):
+			return true
+	return false
+	
+func _compare(match_val: Variant, case_val: Variant) -> bool:
+	var match_type := typeof(match_val)
+	var case_type := typeof(case_val)
+	if match_type in [TYPE_DICTIONARY, TYPE_OBJECT] and case_type == TYPE_DICTIONARY:
+		for property in case_val:
+			# default/ignore argument
+			if UType.same_type_and_value(case_val[property], "_"):
+				continue
+			# no property, or aren't equal?
+			if not property in match_val or not UType.same_type_and_value(case_val[property], match_val[property]):
+				return false
+		return true
+	elif match_type == case_type:
+		return match_val == case_val
+	else:
+		return false
 
 func _replace_text_lists(text: String, id: String) -> String:
 	var parts := Array(text.split("|")).map(func(x: String): return x.strip_edges())

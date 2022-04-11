@@ -10,10 +10,8 @@ func _run():
 #	print(["x", "y", "z"] == ["x", "y", "z"])
 	
 	var f := Flow.new(Dialogue._lines)
-	for i in 14:
-		State["time.days"] += 1
-		var got = f.execute("empty_scene/getit")
-		prints("GOT", got.value, State.time.days)
+	var got = f.execute("empty_scene/getit")
+	prints("GOT", got.value, State.time.days)
 	
 #	for test in [
 #			"$get_b and $get_opb"

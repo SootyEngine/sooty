@@ -59,10 +59,15 @@ const S_VAROUT := "*"
 
 const S_FLATLINE := "||"
 
-const S_LIST_START := "{["
-const S_LIST_END := "]}"
+const S_TEXT_LIST_START := "<"
+const S_TEXT_LIST_END := ">"
+
+const S_LIST_START := "{<"
+const S_LIST_END := ">}"
 const S_COND_START := "{{"
 const S_COND_END := "}}"
+const S_CASE_START := "{("
+const S_CASE_END := ")}"
 
 const S_PROP_START := "(("
 const S_PROP_END := "))"
@@ -270,9 +275,8 @@ func _set_var_color(from: int, v: String, is_action := false, index := 0, action
 		else:
 			clr = clr.lightened(.22)
 		_c(from, clr)
-	
 
-func _h_action(from: int, to: int):
+func _h_action(from: int, to: int, is_case := false):
 	_c(from, C_SYMBOL)
 	var inner := text.substr(from, to-from)
 	
@@ -288,7 +292,10 @@ func _h_action(from: int, to: int):
 		color = C_STATE_ACTION
 	elif inner.begins_with(S_COMMAND):
 		color = C_COMMAND
-	elif inner.begins_with("*"):
+	elif inner.begins_with(S_EVAL):
+		_h_eval(from, to)
+		return
+	elif inner.begins_with(S_VAROUT) or is_case:
 		color = C_VAR_SHORTCUT
 		index += 2
 	else:
@@ -315,7 +322,7 @@ func _h_eval(from: int, to: int):
 #			_c(i, C_SYMBOL)
 #			_c(i+1, C_EVAL)
 
-func _h_conditional(from: int, to: int, begins_with: bool):
+func _h_conditional(from: int, to: int, is_case := false):
 	var inner := text.substr(from, to-from)
 	var off := from
 	
@@ -330,7 +337,7 @@ func _h_conditional(from: int, to: int, begins_with: bool):
 	for i in len(meta_actions):
 		var actions := UString.split_outside(meta_actions[i], " AND ")
 		for j in len(actions):
-			_h_action(from, from + len(actions[j]))
+			_h_action(from, from + len(actions[j]), is_case)
 			from += len(actions[j])
 			if j < len(actions)-1:
 				_c(from, C_SYMBOL)
@@ -344,12 +351,12 @@ func _h_bbcode(from: int, to: int, default: Color):
 	while i < to:
 		if text[i] == "#":
 			break
-		elif text[i] == "{":# and (i != 0 and text[i-1] != "#"):
-			var end := text.find("}", i+1)
+		elif text[i] == S_TEXT_LIST_START:
+			var end := text.find(S_TEXT_LIST_END, i+1)
 			if end != -1:
 				# colorize open and close tags
 				_c(i, C_SYMBOL)
-				_h_text_feature(i+1, end, default)
+				_h_text_list(i+1, end, default)
 				_c(end, C_SYMBOL)
 				# back to normal text color
 				_c(end+1, default)
@@ -368,11 +375,11 @@ func _h_bbcode(from: int, to: int, default: Color):
 					# colorize action tags
 					if tag.begins_with(S_EVAL):
 						_h_action(off, off+len(tag))
-#					elif tag.begins_with(S_ACTION_NODE):
-#						_h_action(off, off+len(tag), C_ACTION_NODE)
 					elif tag.begins_with(S_NODE_ACTION):
 						_h_action(off, off+len(tag))
 					elif tag.begins_with(S_STATE_ACTION):
+						_h_action(off, off+len(tag))
+					elif tag.begins_with(S_VAROUT):
 						_h_action(off, off+len(tag))
 					# colorize normal tags
 					else:
@@ -453,19 +460,37 @@ func _h_line(from: int, to: int):
 			_c(from, C_SYMBOL)
 #			_c(from+1, C_EVAL_TAG)
 			
-			var e := part.find(S_COND_END)
-			if e != -1:
-				to = from + e
+			var end := part.find(S_COND_END)
+			if end != -1:
+				to = from + end
 				# tail tag }}
 #				_c(to, C_EVAL_TAG)
 				_c(to, C_SYMBOL)
 				# condition
-				_h_conditional(from + len(S_COND_START), to, true)
-				from += e + len(S_COND_END) + 1
+				_h_conditional(from + len(S_COND_START), to)
+				from += end + len(S_COND_END) + 1
 				to = next_from-2
 				part = text.substr(from, to-from)
 			else:
 				part = ""
+		
+		elif part.begins_with(S_CASE_START):
+			var end := part.find(S_CASE_END)
+			_c(from, C_SYMBOL)
+			_c(from+1, Color.CYAN)
+			_c(from+2, Color.TOMATO)
+			if end != -1:
+				to = from + end
+				_c(to, Color.CYAN)
+				_c(to+1, C_SYMBOL)
+				_h_conditional(from + len(S_CASE_START), to, true)
+				from += end + len(S_CASE_END) + 1
+				to = next_from-2
+				part = text.substr(from, to-from)
+				
+			else:
+				part = ""
+		
 		# line ending with a condition.
 		elif part.ends_with(S_COND_END):
 			var s := part.rfind(S_COND_START, to)
@@ -610,7 +635,7 @@ func _h_line(from: int, to: int):
 		
 		from = next_from
 
-func _h_text_feature(from: int, to: int, text_color: Color):
+func _h_text_list(from: int, to: int, text_color: Color):
 	var inner := text.substr(from, to-from)
 	var parts := inner.split("|")
 	for i in len(parts):

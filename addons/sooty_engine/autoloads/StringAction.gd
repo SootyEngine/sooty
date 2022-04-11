@@ -53,36 +53,31 @@ func _test(t: String) -> bool:
 				return false
 	return true
 
-func do(command: String) -> Variant:
+func do(command: String, default: String = "~") -> Variant:
+	if not len(command):
+		return
+	
+	# MATCH case argument
 	if command == "_":
 		return "_"
 	
-	elif command.begins_with("*"):
-		return to_var(command)
-	
-	# $ state function
-	if command.begins_with("$"):
-		return do_state_action(command)
-	
-	# node path method
-	elif command.begins_with(">"):
-		return do_command(command)
-	
-	# group function
-	elif command.begins_with("@"):
-		return do_group_action(command)
-	
-	# evaluate
-	elif command.begins_with("~"):
-		return do_eval(command)
-	
+	if command[0] in ">*$@~":
+		return _do(command[0], command)
 	else:
-		return do_eval(command)
+		return _do(default, command)
+
+func _do(head: String, command: String):
+	match head:
+		"*": return to_var(command)
+		"$": return do_state_action(command)
+		">": return do_command(command)
+		"@": return do_group_action(command)
+		"~": return do_eval(command)
 
 func to_var(s: String) -> Variant:
 	if s.begins_with("*"):
 		s = s.substr(1)
-	var out := []
+	var out = []
 	for part in UString.split_outside(s, " "):
 		# dictionary key
 		if ":" in part:
@@ -96,7 +91,8 @@ func to_var(s: String) -> Variant:
 		# other
 		else:
 			out.append(UString.str_to_var(part))
-	return out[0] if len(out) == 1 else out
+	out = out[0] if len(out) == 1 else out
+	return out
 
 # ~actions
 func do_eval(eval: String) -> Variant:

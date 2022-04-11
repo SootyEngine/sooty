@@ -409,6 +409,7 @@ func _new_line_flat(parent: Dictionary, index: int, text := "") -> Dictionary:
 	return out
 
 func _new_line_child(parent: Dictionary, text := "") -> Dictionary:
+	print(parent)
 	return _new_line(text, parent.M.file, parent.M.line, parent.M.deep+1)
 
 func _new_line(text: String, file: StringName, line: int, deep: int) -> Dictionary:
@@ -515,11 +516,12 @@ func _process_line(line: Dictionary):
 	# <?>
 	if t.begins_with(Soot.LANG_GONE): return _line_as_lang(line, true)
 	# {{}}
+	_extract_condition(line) # all lines can have one
 	if t.begins_with("{{"): return _line_as_condition(line)
-	_extract_condition(line)
+	if t.begins_with("{("): return _line_as_condition(line, true)
 	# option
-	if t.begins_with("|>"): return _line_as_option(line)
-	if t.begins_with("+>"): return _line_as_option(line)
+	if t.begins_with(">>>"): return _line_as_option(line)
+	if t.begins_with("+>>"): return _line_as_option(line)
 	# list
 	if t.begins_with("{["): return _line_as_list(line)
 	# actions
@@ -528,6 +530,7 @@ func _process_line(line: Dictionary):
 	if t.begins_with("$"): return _line_as_action(line)
 	if t.begins_with("@"): return _line_as_action(line)
 	if t.begins_with("*"): return _line_as_action(line)
+#	if t.begins_with("."): return _line_as_action(line)
 	# flows
 	if t.begins_with(Soot.FLOW_GOTO): return _line_as_flow_action(line, "goto", Soot.FLOW_GOTO)
 	if t.begins_with(Soot.FLOW_CALL): return _line_as_flow_action(line, "call", Soot.FLOW_CALL)
@@ -541,10 +544,16 @@ func _process_line(line: Dictionary):
 	# otherwise it is text
 	return _line_as_text(line)
 
-func _line_as_condition(line: Dictionary):
+func _line_as_condition(line: Dictionary, is_case := false):
 	line.type = "cond"
 	line.cond_type = "if" # by default they are if, so no need for typing it out
-	_extract_condition(line)
+	
+	if is_case:
+		# extract case
+		var p = UString.extract(line.M.text, "{(", ")}")
+		if p.inside:
+			line.M.text = p.outside
+			line.cond = p.inside
 	
 	var cond: String = line.cond
 	
@@ -584,8 +593,6 @@ func _line_as_condition(line: Dictionary):
 		line.cond_lines = [line.M.tabbed]
 
 func _line_as_option(line: Dictionary):
-#	_extract_action(line)
-	
 	# extract flow lines
 	var lines := []
 	for li in line.M.tabbed:
@@ -602,13 +609,13 @@ func _line_as_option(line: Dictionary):
 		lines.append(fstep)
 	
 	line.type = "option"
-	line.text = line.M.text.substr(len("|>")).strip_edges()
+	line.text = line.M.text.trim_prefix(">>>").strip_edges()
 	
 	if lines:
 		line.then = lines
 
 func _line_as_list(line: Dictionary):
-	var list_type = UString.unwrap(line.M.text, "{[", "]}").strip_edges()
+	var list_type = UString.unwrap(line.M.text, "{<", ">}").strip_edges()
 	line.type = "list"
 	line.list_type = list_type
 	line.list = line.M.tabbed
@@ -617,7 +624,7 @@ func _line_as_flow_action(line: Dictionary, type: String, head: String):
 	line.type = type
 	line[type] = line.M.text.trim_prefix(head).strip_edges()
 	
-	# calls can be inline, for use with {[]} list pattern.
+	# calls can be inline, for use with {<>} list pattern.
 	if type == "call":
 		if line.M.tabbed:
 			line.then = line.M.tabbed
@@ -693,7 +700,7 @@ func _extract_properties(line: Dictionary):
 	var p := UString.extract(line.M.text, "((", "))")
 	line.M.text = p.outside
 	if p.inside:
-		for item in UString.split_outside(p.inside, " "):#UString.split_on_spaces(p.inside):
+		for item in UString.split_outside(p.inside, " "):
 			if ":" in item:
 				var kv = item.split(":", true, 1)
 				var k = kv[0].strip_edges()
@@ -710,23 +717,6 @@ func _extract_condition(line: Dictionary):
 	if p.inside:
 		line.M.text = p.outside
 		line.cond = p.inside
-
-#func _trailing_tokens(s: String, splitters: Array) -> Array:
-#	var f := UString.split_on_next(s, splitters)
-#	var token: String = f[0]
-#	var left_side: String = f[1]
-#	var left_over: String = f[2]
-#	if token == "":
-#		return [s, []]
-#	var tokens := [[token, left_over]]
-#	while true:
-#		f = UString.split_on_next(left_over, splitters)
-#		if f[0] == "":
-#			break
-#		tokens[-1][1] = f[1]
-#		left_over = f[2]
-#		tokens.append([f[0], left_over])
-#	return [left_side, tokens]
 
 func _get_uid(line_ids: Dictionary) -> String:
 	var uid := _get_id()

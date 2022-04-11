@@ -2,10 +2,10 @@
 extends RefCounted
 class_name UType
 
-static func is_same(a: Variant, b: Variant) -> bool:
+static func same_type(a: Variant, b: Variant) -> bool:
 	return typeof(a) == typeof(b)
 
-static func is_equal(a: Variant, b: Variant) -> bool:
+static func same_type_and_value(a: Variant, b: Variant) -> bool:
 	return typeof(a) == typeof(b) and a == b
 
 static func get_name(o: Variant) -> String:

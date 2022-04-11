@@ -33,19 +33,21 @@
 - [x] Custom `Bool` class for managing a single state bool.
 
 # *.soot Dialogue Files
+- [ ] `.` key for state parent object?
 - [ ] define step types in Soot
-- [ ] inserts for choices
-- [ ] inserts for actions?
+- [ ] Inserts for choices
+- [ ] Inserts for actions?
 - [x] Don't be file bound.
     - [x] Let multiple files contribute to the same dialogue.
     - [x] And let a single file contribute to multiple dialogues.
-- [x] `|>` as 'option' head
-- [x] `+>` as 'add options' head
+- [x] `>>>` as 'option' head
+- [x] `+>>` as 'add options' head
 - [x] `||` as 'underline' divider
-- [x] `((array_type))` array pattern
+- [ ] List type `flow` which pulls lines from a flow.
+- [x] `{<array_type>}` list pattern
     - [x] line array pattern
         ```
-        (())
+        {<>}
             line 1
             line 2
             line 3
@@ -55,7 +57,7 @@
         ```
     - [x] text array pattern (multiple may exist in one text.)
         ```
-        text line ((array_type | option1 | option2 | option 3)) other text. ((array_type|option 1|option2|option3)).
+        text line <array_type | option1 | option2 | option 3> other text. <array_type|option 1|option2|option3>.
         ```
     - [ ] text selector pattern nesting (DO LATER.)
 - [x] `==` same line pattern
@@ -93,6 +95,7 @@
 - [x] Generate `.sola` files, for writing translations.
 
 # *.soda Data Files
+- [ ] Outputed text arrays/dicts aren't colorized when on the same line.
 - [ ] Soda files in `lang/` with language prefix: `vars-en.soda` for replacing states without adding any.
 - [ ] Allow or `.` paths inside single key.
 - [ ] Translation loading when mods are loaded.
