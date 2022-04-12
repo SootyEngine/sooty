@@ -4,13 +4,6 @@ extends EditorSyntaxHighlighter
 func _get_name() -> String:
 	return "Soot"
 
-# operators
-#const OP_RELATIONS := ["==", "!=", "<", "<=", ">", ">="]
-#const OP_ASSIGNMENTS := ["=", "+=", "-="]
-#const OP_EVALS := ["if", "elif", "else", "match", "rand"]
-#const OP_KEYWORDS := ["and", "or", "not"]
-#const OP_ALL := OP_RELATIONS + OP_ASSIGNMENTS + OP_EVALS + OP_KEYWORDS
-
 const SYMBOL_ALPHA := .5
 
 # colors
@@ -19,6 +12,7 @@ const C_TEXT_INSERT := Color.PALE_GREEN
 const C_SPEAKER := Color(1, 1, 1, 0.5)
 const C_TAG := Color(1, 1, 1, .5)
 const C_SYMBOL := Color(1, 1, 1, 0.33)
+const C_SYMBOL_LIGHT := Color(1, 1, 1, 0.5)
 
 const C_FLAG := Color.SALMON
 const C_LANG := Color.YELLOW_GREEN
@@ -28,8 +22,10 @@ const C_COMMENT_LANG := Color(0.5, 1.0, 0.0, 0.5)
 
 const C_NODE_ACTION := Color.DEEP_SKY_BLUE
 const C_STATE_ACTION := Color.MEDIUM_PURPLE
-const C_CONTEXT_ACTION := Color.YELLOW_GREEN
+const C_CONTEXT_ACTION := Color.SPRING_GREEN
 const C_VAROUT := Color.ORANGE
+
+const C_OPERATOR := Color.WHITE
 
 const C_FLOW := Color.WHEAT
 const C_FLOW_GOTO := Color.TAN
@@ -94,10 +90,6 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 		_c(0, C_SYMBOL)
 		_c(len(Soot.LANG), Color.TOMATO)
 	
-	# new document
-	elif text.begins_with(Soot.SEPERATOR):
-		_c(0, Color.ORANGE)
-	
 	# normal lines
 	else:
 		var from := 0
@@ -118,9 +110,12 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 		_c(from, C_TEXT)
 		
 		# flow
-		if text.begins_with(Soot.FLOW):
-			_c(0, C_SYMBOL)
-			_c(len(Soot.FLOW), C_FLOW)
+		if stripped.begins_with(Soot.FLOW):
+			var i = text.find(Soot.FLOW)
+			_c(i, C_SYMBOL)
+			var clr := UClr.hue_shift(C_FLOW, .2 * i)
+			clr.v -= .2 * i
+			_c(i+len(Soot.FLOW), clr)
 		
 		else:
 			if text.strip_edges().begins_with(Soot.TEXT_INSERT):
@@ -188,7 +183,8 @@ func _h_var(from: int, v: String, index := 0, action_color := Color.WHITE):
 	# dict key
 	if ":" in v:
 		var p := v.split(":", true, 1)
-		_c(from, Color(action_color, .5))
+#		_c(from, Color(action_color, .5))
+		_c(from, C_SYMBOL)
 		_c(from+len(p[0]), C_SYMBOL)
 		_h_var(from+len(p[0])+1, p[1], 0, action_color)
 	
@@ -221,31 +217,36 @@ func _h_action_var(from: int, to: int):
 		_h_var(from, part, 0, C_VAROUT)
 		from += len(part)+1
 
-const A := "@"
-func _h_action(from: int, to: int, is_case := false):
-	var inner := text.substr(from, to-from)
-	if inner:
-		var color = C_CONTEXT_ACTION
-		var index := 0
-		var head = UString.get_leading_symbols(inner)
-		match head:
-			# *
-			Soot.DO_VAR: _h_action_var(from, to)
-			
-			# @) @
-			Soot.DO_NODE_FUNC: _h_action_shortcut(1, from, to, C_NODE_ACTION)
-			# @:
-			Soot.DO_NODE_EVAL: _h_action_eval(2, from, to, C_NODE_ACTION)
-			
-			# ~)
-			Soot.DO_SELF_FUNC: _h_action_shortcut(2, from, to, C_CONTEXT_ACTION)
-			# ~: ~
-			Soot.DO_SELF_EVAL: _h_action_eval(1, from, to, C_CONTEXT_ACTION)
-			
-			# $)
-			Soot.DO_STATE_FUNC: _h_action_shortcut(2, from, to, C_STATE_ACTION)
-			# $ $:
-			Soot.DO_STATE_EVAL: _h_action_eval(1, from, to, C_STATE_ACTION)
+#func _h_action(from: int, to: int, is_case := false):
+#	var inner := text.substr(from, to-from)
+#	if inner:
+#		var color = C_CONTEXT_ACTION
+#		var index := 0
+#		if inner.begins_with("@"):
+#			_h_action_shortcut(1, from, to, C_NODE_ACTION)
+#		elif inner.begins_with("~"):
+#			_h_action_eval(1, from, to, C_STATE_ACTION)
+#		else:
+#		_h_action_eval(from, to)
+#		var head = UString.get_leading_symbols(inner)
+#		match head:
+#			# *
+#			Soot.DO_VAR: _h_action_var(from, to)
+#
+#			# @) @
+#			Soot.DO_NODE_FUNC: _h_action_shortcut(1, from, to, C_NODE_ACTION)
+#			# @:
+#			Soot.DO_NODE_EVAL: _h_action_eval(2, from, to, C_NODE_ACTION)
+#
+#			# ~)
+#			Soot.DO_SELF_FUNC: _h_action_shortcut(2, from, to, C_CONTEXT_ACTION)
+#			# ~: ~
+#			Soot.DO_SELF_EVAL: _h_action_eval(1, from, to, C_CONTEXT_ACTION)
+#
+#			# $)
+#			Soot.DO_STATE_FUNC: _h_action_shortcut(2, from, to, C_STATE_ACTION)
+#			# $ $:
+#			Soot.DO_STATE_EVAL: _h_action_eval(1, from, to, C_STATE_ACTION)
 
 func _h_action_shortcut(head_len: int, from: int, to: int, color: Color):
 	_c(from, C_SYMBOL)
@@ -271,47 +272,93 @@ func _h_action_shortcut(head_len: int, from: int, to: int, color: Color):
 			index += 1
 		from += len(part) + 1
 
-func _h_action_eval(head_len: int, from: int, to: int, color: Color):
+func _h_case(from: int, to: int):
+	var parts := UString.split_outside(text.substr(from, to-from), " ")
+	var clr := Color.WHITE#C_VAROUT
+	var index := 0
+	for i in len(parts):
+		if parts[i]:
+			_h_var(from, parts[i], index, clr)
+			index += 1
+		from += len(parts[i]) + 1
+	
+func _h_node_action(from: int, to: int):
 	_c(from, C_SYMBOL)
-	from += head_len
-	var t_color = color
-	_c(from, t_color)
-	for i in range(from+1, to):
+	_c(from+1, C_NODE_ACTION)
+	from += 1
+	var parts := UString.split_outside(text.substr(from, to-from), " ")
+	var clr := C_NODE_ACTION
+	var index := 0
+	for i in len(parts):
+		if parts[i]:
+			clr = C_NODE_ACTION if i == 0 else Color.GRAY if index%2==0 else Color.WHITE
+			_h_var(from, parts[i], index, clr)
+#			if index == 0:
+#				clr = UClr.hue_shift(clr, .05)
+#
+#			else:
+#				if index % 2==0:
+#					clr = UClr.hue_shift(clr, -.01)
+#				else:
+#					clr = UClr.hue_shift(clr, .01)
+			index += 1
+				
+		from += len(parts[i]) + 1
+	
+func _h_eval(from: int, to: int):
+	_c(from, C_CONTEXT_ACTION)
+	var t_color = C_CONTEXT_ACTION
+	var m_color = C_CONTEXT_ACTION
+	
+	for i in range(from, to):
+		if text[i] == "$":
+			t_color = C_STATE_ACTION
+			m_color = C_STATE_ACTION
+			_c(i, Color(m_color, .5))
+			_c(i+1, t_color)
+		
+		elif text[i] == "@":
+			t_color = C_NODE_ACTION
+			m_color = C_NODE_ACTION
+			_c(i, Color(m_color, .5))
+			_c(i+1, t_color)
+		
 		if text[i] == ".":
-			t_color.s -= .1
-			t_color = UClr.hue_shift(t_color, -.075)
+			t_color = UClr.hue_shift(t_color, -.033)
+			_c(i, C_SYMBOL)
+			_c(i+1, t_color)
+		
+		elif text[i] in "0123456789":
+			_c(i, Color.WHITE)
+		
 		elif text[i] == "(":
-			t_color.s = .25
-			t_color = UClr.hue_shift(t_color, .5)
-		elif text[i] == ")":
-			t_color = color
-		if text[i] in ",.[](){}\"'`-+=<>":
+			_c(i, C_SYMBOL)
+			t_color = Color.GRAY
+			_c(i+1, t_color)
+		
+		elif text[i] in "`'\"":
+			_c(i, C_SYMBOL)
+			t_color = Color.GRAY
+			m_color = Color.GRAY
+			_c(i+1, t_color)
+		
+		elif text[i] in "!-=+<>)(),[]{}":
+			t_color = C_CONTEXT_ACTION
+			m_color = C_CONTEXT_ACTION
 			_c(i, C_SYMBOL)
 			_c(i+1, t_color)
 
-func _h_conditional(from: int, to: int, is_case := false):
+func _h_conditional(from: int, to: int):
 	var inner := text.substr(from, to-from)
 	var off := from
-	
-	for k in ["IF ", "ELIF ", "ELSE", "MATCH "]:
-		if inner.begins_with(k):
+	for part in UString.split_outside(inner, " "):
+		if part in ["in", "not"]:
 			_c(from, C_SYMBOL)
-			inner = inner.trim_prefix(k)
-			from += len(k)
-			break
-	
-	var meta_actions := UString.split_outside(inner, " OR ")
-	for i in len(meta_actions):
-		var actions := UString.split_outside(meta_actions[i], " AND ")
-		for j in len(actions):
-			_h_action(from, from + len(actions[j]), is_case)
-			from += len(actions[j])
-			if j < len(actions)-1:
-				_c(from, C_SYMBOL)
-				from += len(" AND ")
-		if i < len(meta_actions)-1:
+		elif part in ["if", "elif", "else", "match", "and", "or"]:
 			_c(from, C_SYMBOL)
-			from += len(" OR ")
+		else:
+			_h_eval(from, from+len(part))
+		from += len(part) + 1
 
 func _h_bbcode(from: int, to: int, default: Color):
 	var i := from
@@ -340,8 +387,8 @@ func _h_bbcode(from: int, to: int, default: Color):
 						_c(off, C_SYMBOL)
 						off += 1
 					# colorize action tags
-					if UString.begins_with_any(tag, Soot.ALL_DOINGS):
-						_h_action(off, off+len(tag))
+					if UString.begins_with_any(tag, ["~", "@"]):
+						_h_eval(off, off+len(tag))
 					else:
 						_c(off, C_TAG)
 					off += len(tag)
@@ -381,19 +428,21 @@ func _h_flow(from := 0):
 			var j := text.find(tag[0], i)
 			if j == -1:
 				break
-			var lit = tag[1]
+			var color: Color = tag[1]
 			_c(j, C_SYMBOL)
 			j += len(tag[0])
-			# path divider exists?
-			var d := text.find(Soot.FLOW_PATH_DIVIDER, j)
-			if d != -1:
-				# darken head of the path
-				_c(j, lit.darkened(.33))
-				j = d+1
+			_c(j, color)
 			# colorize path
-			_c(j, lit)
-			j += len(tag[0])
-			i = j
+			for i in range(j, len(text)):
+				if text[i] == ".":
+					_c(i, C_SYMBOL)
+					_c(i+1, color)
+				elif text[i] == "/":
+					color = UClr.hue_shift(color, .2)
+					color.v -= .1
+					_c(i, C_SYMBOL)
+					_c(i+1, color)
+			break
 
 func _h_properties(from: int, to: int):
 	for part in text.substr(from, to-from).split(" "):
@@ -428,9 +477,9 @@ func _h_line(from: int, to: int):
 				to = from + end
 				# tail tag }}
 #				_c(to, C_EVAL_TAG)
-				_c(to, C_SYMBOL)
 				# condition
 				_h_conditional(from + len(S_COND_START), to)
+				_c(to, C_SYMBOL)
 				from += end + len(S_COND_END) + 1
 				to = next_from-2
 				part = text.substr(from, to-from)
@@ -440,13 +489,12 @@ func _h_line(from: int, to: int):
 		elif part.begins_with(S_CASE_START):
 			var end := part.find(S_CASE_END)
 			_c(from, C_SYMBOL)
-			_c(from+1, Color.CYAN)
-			_c(from+2, Color.TOMATO)
+			_c(from+1, C_SYMBOL_LIGHT)
 			if end != -1:
 				to = from + end
-				_c(to, Color.CYAN)
+				_h_case(from + len(S_CASE_START), to)
+				_c(to, C_SYMBOL_LIGHT)
 				_c(to+1, C_SYMBOL)
-				_h_conditional(from + len(S_CASE_START), to, true)
 				from += end + len(S_CASE_END) + 1
 				to = next_from-2
 				part = text.substr(from, to-from)
@@ -459,7 +507,7 @@ func _h_line(from: int, to: int):
 			var s := part.rfind(S_COND_START, to)
 			if s != -1:
 				_c(from+s, C_SYMBOL)
-				_h_conditional(from+s + len(S_COND_START), to - len(S_COND_END), false)
+				_h_conditional(from+s + len(S_COND_START), to - len(S_COND_END))
 				_c(to-len(S_COND_END), C_SYMBOL) # }} symbol
 				to = from+s
 				part = text.substr(from, to-from)
@@ -516,25 +564,31 @@ func _h_line(from: int, to: int):
 				_c(from+end, Color(Color.LIGHT_SALMON, .5))
 				_c(from+end+1, C_SYMBOL)
 		
-		# $state actions
-		elif UString.begins_with_any(part, Soot.ALL_DOINGS):
-			_h_action(from, to)
+		# @node action
+		elif part.begins_with("@"):
+			_h_node_action(from, to)
+		
+		# ~ eval
+		elif part.begins_with("~"):
+			_c(from, C_SYMBOL)
+			from += 1
+			_h_eval(from, to)
 		
 		# options
-		elif part.begins_with(Soot.FLOW_CHOICE):
+		elif part.begins_with(Soot.CHOICE):
 			_c(from, Color(C_OPTION_TEXT, .5))
-			_c(from+len(Soot.FLOW_CHOICE), C_OPTION_TEXT)
-			_h_bbcode(from+len(Soot.FLOW_CHOICE), to, C_OPTION_TEXT)
+			_c(from+len(Soot.CHOICE), C_OPTION_TEXT)
+			_h_bbcode(from+len(Soot.CHOICE), to, C_OPTION_TEXT)
 			_h_flow()
 		
 		# options: add
-		elif part.begins_with(Soot.FLOW_CHOICE_ADD):
+		elif part.begins_with(Soot.CHOICE_ADD):
 			var c_option_add = C_OPTION_TEXT
 			c_option_add.h = wrapf(c_option_add.h - .22, 0.0, 1.0)
 			c_option_add.v = clampf(c_option_add.v - 0.25, 0.0, 1.0)
 			_c(from, C_SYMBOL)
-			_c(from+len(Soot.FLOW_CHOICE_ADD), c_option_add)
-			var s := text.find("*", from+len(Soot.FLOW_CHOICE_ADD))
+			_c(from+len(Soot.CHOICE_ADD), c_option_add)
+			var s := text.find("*", from+len(Soot.CHOICE_ADD))
 			if s != -1:
 				_c(s, C_SYMBOL)
 				_c(s+1, c_option_add)

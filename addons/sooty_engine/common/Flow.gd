@@ -15,16 +15,19 @@ signal flow_ended(id: String)
 signal on_step(step: Dictionary)
 signal selected(id: String) # used with select_option
 
+@export var _flows := {} # flow meta. flows themselves are in _lines.
 @export var _lines := {} # all lines from all files
 
 @export var last_end_message := ""
-@export var current_dialogue := ""
+@export var current_flow := ""
 @export var _started := false
 @export var _stack := [] # current stack of flows, so we can return to a position in a previous flow.
 @export var _last_tick_stack := [] # stack of the previous tick, used for saving and rollback.
 
 @export var states := {}
 @export var last_line := {}
+
+var context: Object = null
 
 func _init(lines := {}):
 	_lines = lines
@@ -44,6 +47,10 @@ func is_active() -> bool:
 
 func get_current() -> Dictionary:
 	return _stack[-1] if len(_stack) else {}
+
+func has_path(path: String) -> bool:
+	var flow := get_flow_path(path)
+	return flow in _lines
 
 func start(id: String):
 	if is_active():
@@ -88,23 +95,23 @@ func stack(id: String) -> bool:
 func goto(id: String) -> bool:
 	return _goto(id, S_GOTO)
 
-func _has_line(id: String) -> bool:
-	return id in _lines
+#func _has_line(id: String) -> bool:
+#	return id in _lines
 
 func _get_line(id: String) -> Dictionary:
 	return _lines[id]
 
 func _goto(id: String, step_type: int = S_GOTO) -> bool:
-	if _has_line(id):
+	if has_path(id):# _has_line(new_id):
+		var new_id := get_flow_path(id)
 		# if the stack is cleared, it means this was a "goto" not a "call"
 		if step_type == S_GOTO:
 			while len(_stack):
 				_pop()
-		
-		_push(step_type, id, _get_line(id).then)
+		_push(step_type, new_id, _get_line(new_id).then)
 		return true
 	else:
-		push_error("No step %s." % id)
+		push_error("No step '%s' from '%s'." % [id, current_flow])
 		return false
 
 func end(msg := ""):
@@ -134,7 +141,8 @@ func _push(type: int, id: String, list: Array):# key: String="then"):
 	
 	# a flow started
 	if type in [S_GOTO, S_CALL]:
-		current_dialogue = Soot.split_path(id)[0]
+		current_flow = id
+		print("Current flow is: ", current_flow)
 		_flow_started.call_deferred(id)
 
 func _flow_started(id: String):
@@ -158,7 +166,7 @@ func execute(id: String) -> Variant:
 		# try to get the value of a step
 		match out.line.get("type"):
 			"text": out.value = out.line.text
-			"do": out.value = StringAction.do(out.line.do)
+			"do": out.value = StringAction.do(out.line.do, context)
 	return out
 
 func _tick() -> Dictionary:
@@ -188,20 +196,14 @@ func _tick() -> Dictionary:
 			
 			match line.type:
 				"goto":
-					var goto = line.goto
-					if not Soot.is_path(goto):
-						goto = Soot.join_path([current_dialogue, goto])
-					_goto(goto, S_GOTO)
+					_goto(line.goto, S_GOTO)
 				
 				"call":
 					# does call have it's own lines? used by {[list]} pattern
 					if "then" in line:
 						_push(S_CALL_INLINE, line.M.id, line.then)
 					# use current_dialogue as parent, if none exists
-					var call = line.call
-					if not Soot.is_path(call):
-						call = Soot.join_path([current_dialogue, call])
-					_goto(call, S_CALL)
+					_goto(line.call, S_CALL)
 				
 				"do", "text":
 					pass
@@ -247,7 +249,7 @@ func _pop_stack_line() -> Dictionary:
 		# 'if' 'elif' 'else' chain
 		if line.type == "if":
 			for i in len(line.conds):
-				if StringAction.test(line.conds[i]):
+				if StringAction.test(line.conds[i], context):
 					_push(S_IF, line.M.id, line.cond_lines[i])
 					return {}
 		
@@ -256,7 +258,7 @@ func _pop_stack_line() -> Dictionary:
 			var match_result = Array(line.match.split(" AND "))
 			for i in len(match_result):
 				var m = match_result[i]
-				match_result[i] = StringAction.do(m)
+				match_result[i] = StringAction.eval(m, context)
 			# not an array?
 			if len(match_result) == 1:
 				match_result = match_result[0]
@@ -264,12 +266,12 @@ func _pop_stack_line() -> Dictionary:
 			
 #			print("MATCH: ", match_result)
 			for i in len(line.cases):
-				var case = line.cases[i].split(" OR ")
+				var case = line.cases[i].split(" or ")
 				for subcase in case:
-					subcase = Array(subcase.split(" AND "))
+					subcase = Array(subcase.split(" and "))
 					for i in len(subcase):
 						var sc = subcase[i]
-						subcase[i] = StringAction.do(sc, "*")
+						subcase[i] = StringAction.do("*" + sc, context)
 					var passes = _compare_list(match_result, subcase)
 #					print("\tCASE: %s == %s? %s!" % [subcase, match_result, passes])
 					if passes:
@@ -279,7 +281,7 @@ func _pop_stack_line() -> Dictionary:
 		
 		# has a condition
 		elif "cond" in line:
-			if StringAction._test(line.cond):
+			if StringAction.test(line.cond, context):
 				return line
 		
 		# special list function
@@ -385,13 +387,34 @@ func line_has_condition(line: Dictionary) -> bool:
 	return "cond" in line
 
 func line_passes_condition(line: Dictionary) -> bool:
-	return StringAction._test(line.cond)
+	return StringAction.test(line.cond, context)
 
 func line_get_options(line: Dictionary) -> Array:
 	var out_lines := []
 	if line_has_options(line):
 		_get_options(line.options, out_lines, 0)
 	return out_lines
+
+# works like a file path system
+# or the Godot NodePath system
+# `node` goes to child
+# `node/node2` goes to a grandchild
+# `.node` goes to a sibling
+# `..node` goes to a parent sibling
+# `/node` goes to a root flow
+func get_flow_path(next: String) -> String:
+	if next.begins_with("/"):
+		return next.substr(1)
+	
+	var path := current_flow
+	while next.begins_with("."):
+		next = next.substr(1)
+		if not "/" in path:
+			push_error("No flow parent for ", path)
+			return ""
+		path = path.get_base_dir()
+	
+	return path.plus_file(next)
 
 func _get_options(ids: Array, output: Array, depth: int):
 	if depth > 4:

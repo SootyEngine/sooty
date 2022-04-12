@@ -189,13 +189,11 @@ func set_weekday(wd: Variant):
 				goto_next_day()
 
 #func set_weekday_index(wd: int):
-#	prints(wd, get_weekday_index(), self)
 #	for i in 7:
 #		if get_weekday_index() != wd:
 #			goto_next_day()
 #		else:
 #			break
-#	prints(wd, get_weekday_index(), self)
 
 func get_weekday_index() -> int:
 	# zeller's congruence

@@ -6,6 +6,7 @@ const AUTO_INSTALL_USER_MODS := false
 
 signal pre_loaded()
 signal load_all(list: Array)
+signal _loaded()
 signal loaded()
 
 @export var mods := {}
@@ -46,10 +47,10 @@ func uninstall(dir: String):
 		mods[dir].installed = false
 		_load_mods()
 
-func load_mods(loud := false):
+func load_mods(loud := true):
 	_load_mods(loud)
 
-func _load_mods(loud := false):
+func _load_mods(loud := true):
 	pre_loaded.emit()
 	
 	var installed := get_installed()
@@ -87,6 +88,7 @@ func _load_mods(loud := false):
 	# wait a little for things to initialize.
 	await get_tree().process_frame
 	# alert everyone that mods were loaded.
+	_loaded.emit()
 	loaded.emit()
 
 func _print_file(path: String):

@@ -69,6 +69,8 @@ signal right_clicked(variant: Variant)
 @export var markdown_format_bold_italics := "[bi]%s[]"
 @export var markdown_format_strike_through := "[s]%s[]"
 
+var context: Object # used when request properties or calling pipe functions.
+
 var _stack := []
 var _state := {}
 var _meta := {}
@@ -235,7 +237,7 @@ func _parse_opening(tag: String):
 		if len(p) == 2:
 			_parse_tags(p[1])
 		
-		var got = StringAction.do(p[0])
+		var got = StringAction.do(p[0], context)
 		if got == null:
 			push_error("BBCode: Couldn't replace '%s'." % p[0])
 			push_bgcolor(Color.RED)
@@ -330,13 +332,13 @@ func _passes_condition(cond: String, raw: String) -> bool:
 	match cond:
 		"if":
 			var test := raw.split(" ", true, 1)[1]
-			_state.condition = State._test(test)
+			_state.condition = StringAction.test(test, context)
 			_stack_push(T_CONDITION)
 			
 		"elif":
 			if "condition" in _state and _state.condition == false:
 				var test := raw.split(" ", true, 1)[1]
-				_state.condition = State._test(test)
+				_state.condition = StringAction.test(test, context)
 		
 		"else":
 			if "condition" in _state:
@@ -418,11 +420,29 @@ func _parse_tag_unused(tag: String, _info: String, _raw: String) -> bool:
 	
 	return false
 
+func _preprocess_pipe(s: String) -> String:
+	var i := s.rfind("|")
+	if i != -1:
+		var input := s.substr(0, i)
+		var pipe = s.substr(i+1)
+		var args = UString.split_outside(pipe, " ")
+		var method = args.pop_front()
+		args = args.map(func(x: String): return var2str(UString.str_to_var(x)))
+		args.push_front(_preprocess_pipe(input))
+		return "%s(%s)" % [method, ", ".join(args)]
+	return s
+
 func _add_text(t: String):
 #	if _state.get("condition", true):
-	for pipe in _state.pipes:
-		var got = State._pipe(t, pipe)
-		t = str(got)
+	if len(_state.pipes):
+		var piped := t
+		for pipe in _state.pipes:
+			t += "|" + pipe
+		var eval := _preprocess_pipe(t)
+		StringAction.eval(eval, context)
+		
+#		var got = State._pipe(t, pipe)
+#		t = str(got)
 	add_text(t)
 
 func _push_meta(data: Variant):
@@ -695,3 +715,13 @@ func _install_effect(id:String) -> bool:
 
 static func sanitize(t: String) -> String:
 	return UString.replace_between(t, "[", "]", func(s): "").replace("*", "")
+
+#static func colorize_path(path: String, color: Color = Color.DEEP_SKY_BLUE) -> String:
+#	var out := "[%s]" % color
+#	if "//" in path:
+#		var head_tail := path.split("//", true, 1)
+#		out += head_tail[0]
+#		out += head_tail[1]
+#
+#	var tail_parts := head_tail[1].split("/")
+#	return out + "[]"

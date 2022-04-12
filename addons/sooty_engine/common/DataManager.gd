@@ -19,11 +19,11 @@ func _get_state():
 func _set_state(state: Dictionary):
 	UObject.set_state(_all, state)
 
-func _iter_init(arg):
+func _iter_init(arg) -> bool:
 	_iter_current = 0
 	return _iter_current < len(_all)
 
-func _iter_next(arg):
+func _iter_next(arg) -> bool:
 	_iter_current += 1
 	return _iter_current < len(_all)
 

@@ -56,7 +56,7 @@ func _patch_object(key: String, type: String) -> Object:
 
 func _connect_to_signals():
 	Mods.load_all.connect(_load_mods)
-	Mods.loaded.connect(_loaded_mods)
+	Mods._loaded.connect(_loaded_mods)
 
 func _load_mods(mods: Array):
 	# remove old shortcuts
@@ -65,7 +65,7 @@ func _load_mods(mods: Array):
 	UNode.remove_children(self)
 	
 	# create monkey patcher to add spare properites to
-	_monkey_patcher = preload("res://addons/sooty_engine/autoloads/patchable_state.gd").new()
+	_monkey_patcher = preload("res://addons/sooty_engine/autoloads/_monkey_patcher_.gd").new()
 	_monkey_patcher.name = "_monkey_patcher_"
 	
 	# init nodes from .gd scripts.

@@ -6,8 +6,6 @@ const CHECK_FILES_EVERY := 1 # seconds before checking if any script has changed
 signal reloaded()
 signal caption(text: String, line: Dictionary)
 
-@export var dialogues := {}
-
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("@Dialogue")
@@ -51,7 +49,7 @@ func _reloaded():
 	_stack = _last_tick_stack.duplicate(true)
 
 func _load_mods(mods: Array):
-	dialogues.clear()
+	_flows.clear()
 	_lines.clear()
 	
 	var memory_before = OS.get_static_memory_usage()
@@ -61,19 +59,19 @@ func _load_mods(mods: Array):
 	
 	# collect all files by name, so they can be merged if from mods.
 	for mod in mods:
-		mod.meta["dialogues"] = []
+		mod.meta["dialogue"] = []
 		var soot_files := UFile.get_files(mod.dir.plus_file("dialogue"), "." + Soot.EXT_DIALOGUE)
 		all_files.append_array(soot_files)
 		
 		for soot_path in soot_files:
-			mod.meta.dialogues.append(soot_path)
-			DialogueParser.new()._parse(soot_path, dialogues, _lines)
+			mod.meta.dialogue.append(soot_path)
+			DialogueParser.new()._parse(soot_path, _flows, _lines)
 		
-		mod.meta["langs"] = []
+		mod.meta["lang"] = []
 		var lang_files := UFile.get_files(mod.dir.plus_file("lang"), "-en." + Soot.EXT_LANG)
 		all_files += Array(lang_files)
 		for lang_path in lang_files:
-			mod.meta.langs.append(lang_path)
+			mod.meta.lang.append(lang_path)
 			var id := UFile.get_file_name(lang_path).rsplit("-", true, 1)[0]
 			UDict.append(lang_paths, id, lang_path)
 	
@@ -87,7 +85,7 @@ func _load_mods(mods: Array):
 	
 	# save states for debuging
 	if UFile.exists("res://dialogue_debug"):
-		UFile.save_text("res://dialogue_debug/_dialogues.soda", DataParser.dict_to_str(dialogues))
+		UFile.save_text("res://dialogue_debug/_all_flows.soda", DataParser.dict_to_str(_flows))
 		UFile.save_text("res://dialogue_debug/_all_lines.soda", DataParser.dict_to_str(_lines))
 	
 	# probably not accurate
@@ -100,12 +98,3 @@ func _load_mods(mods: Array):
 #	else:
 #		UString.push_error_similar("No dialogue %s." % id, id, cache.keys())
 #		return null
-
-func has_flow(id: String) -> bool:
-	return id in _lines
-
-func get_line(id: String) -> Dictionary:
-	return _lines.get(id, {})
-
-func get_dialogue(id: String) -> Dictionary:
-	return dialogues.get(id, {})

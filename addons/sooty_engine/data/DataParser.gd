@@ -162,7 +162,7 @@ static func _finalize_line(line: Dictionary):
 			if len(line.tabbed) == 1 and not "key" in line.tabbed[0]:
 				line.value = line.tabbed[0].value
 			else:
-				if UType.is_equal(line.value, ""):
+				if UType.same_type_and_value(line.value, ""):
 					line.value = {}
 				for item in line.tabbed:
 					if "key" in item:

@@ -198,12 +198,12 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 		# convert leading arguments
 		for i in len(new):
 			new[i] = UString.str_to_type(in_args[i], arg_info[i].type)
-			prints("%s -> %s == %s" % [in_args[i], arg_info[i].type, new[i]])
+#			prints("%s -> %s == %s" % [in_args[i], arg_info[i].type, new[i]])
 		# convert kwargs
 		if has_kwargs:
 			kwargs = UString.str_to_type(kwargs, TYPE_DICTIONARY, arg_info[-1].get("default", {}))
 	
-	print("OK ", in_args, new)
+#	prints("OK: %s NEW: %s" % [in_args, new])
 	
 	# add the initial values up front
 	for arg in arg_info:
@@ -237,9 +237,8 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 #	for i in len(out):
 #		print("\t* %s\t\t%s\t\t%s" % [old[i] if i < len(old) else "??", out[i], arg_info.values()[i]])
 	
-	
 	var got = obj.callv(method, out)# callablev(call, out) if call is Callable else obj.callv(method, out)
-	prints("CALLV:", method, out, got)
+#	prints("CALLV:", method, out, got)
 	return got
 
 # find second last dictionary/object in a nested structure

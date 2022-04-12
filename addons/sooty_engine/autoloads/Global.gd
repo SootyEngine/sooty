@@ -43,23 +43,19 @@ var scene_id: String:
 func notify(msg: Dictionary):
 	message.emit("notification", msg)
 
-func call_group(group: String, fname: String, args := []):
-	match len(args):
-		0: return get_tree().call_group(group, fname)
-		1: return get_tree().call_group(group, fname, args[0])
-		2: return get_tree().call_group(group, fname, args[0], args[1])
-		3: return get_tree().call_group(group, fname, args[0], args[1], args[2])
-		4: return get_tree().call_group(group, fname, args[0], args[1], args[2], args[3])
-		_: push_error("Not implemented.")
-		
-func call_group_flags(flags: int, group: String, fname: String, args := []):
-	match len(args):
-		0: return get_tree().call_group_flags(flags, group, fname)
-		1: return get_tree().call_group_flags(flags, group, fname, args[0])
-		2: return get_tree().call_group_flags(flags, group, fname, args[0], args[1])
-		3: return get_tree().call_group_flags(flags, group, fname, args[0], args[1], args[2])
-		4: return get_tree().call_group_flags(flags, group, fname, args[0], args[1], args[2], args[3])
-		_: push_error("Not implemented.")
+func call_group(group: String, method: String, args := [], as_string_args := false) -> Variant:
+	var out: Variant
+	var nodes := get_tree().get_nodes_in_group(group)
+	for node in nodes:
+		var got = UObject.call_w_kwargs([node, method], args, as_string_args)
+		if got != null:
+			out = got
+	if len(nodes) == 0:
+		push_warning("No nodes in group '%s' to call '%s' on with %s." % [group, method, args])
+	return out
+
+func get_group_property(group: String, property: String) -> Variant:
+	return get_tree().get_first_node_in_group(group)[property]
 
 func _ready() -> void:
 	get_tree().set_auto_accept_quit(false)
