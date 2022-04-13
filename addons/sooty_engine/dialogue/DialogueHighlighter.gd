@@ -51,6 +51,7 @@ const S_PROP_START := "(("
 const S_PROP_END := "))"
 
 var index := 0
+var deep := 0
 var state := {}
 var text := ""
 
@@ -58,6 +59,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 	text = get_text_edit().get_line(line)
 	state = {}
 	index = 0
+	deep = UString.count_leading(text, "\t")
 	var stripped = text.strip_edges()
 	var out = state
 	
@@ -114,9 +116,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 		if stripped.begins_with(Soot.FLOW):
 			var i = text.find(Soot.FLOW)
 			_c(i, C_SYMBOL)
-			var clr := UClr.hue_shift(C_FLOW, .2 * i)
-			clr.v -= .2 * i
-			_c(i+len(Soot.FLOW), clr)
+			_c(i+len(Soot.FLOW), get_flow_color(deep))
 		
 		else:
 			if text.strip_edges().begins_with(Soot.TEXT_INSERT):
@@ -510,29 +510,67 @@ func _h_bbcode(from: int, to: int, default: Color):
 				_c(i, color if md_tag1 else default)
 		i += 1
 
-func _h_flow(from := 0):
+func get_flow_color(deep: int) -> Color:
+	var color := UClr.hue_shift(C_FLOW, .3 * deep)
+	color.v -= .15 * deep
+	return color
+
+func _h_flow(from: int, to: int):
+	var inner := text.substr(from, to-from)
+	
+	_c(from, C_SYMBOL)
+	_c(from+2, get_flow_color(deep-1))
+	from += 2
+	
+	var started := false
+	var path_deep := deep-1
+	for i in range(from, to):
+		# nested path?
+		if text[i] == ".":
+			path_deep -= 1
+			_c(i, C_SYMBOL)
+			_c(i+1, get_flow_color(path_deep))
+		
+		# subpath?
+		elif text[i] == "/":
+			if not started:
+				path_deep = 0
+				started = true
+			else:
+				path_deep += 1
+			_c(i, C_SYMBOL)
+			_c(i+1, get_flow_color(path_deep))
+		
+		if not text[i] in " \t":
+			started = true
+		
+	
+#	var head := inner.substr(0, 2)
+#	var tail := inner.substr(2)
+#	prints(head, tail)
 	# => and ==
-	for tag in [[Soot.FLOW_GOTO, C_FLOW_GOTO], [Soot.FLOW_CALL, C_FLOW_CALL]]:
-		var i := from
-		while true:
-			var j := text.find(tag[0], i)
-			if j == -1:
-				break
-			var color: Color = tag[1]
-			_c(j, C_SYMBOL)
-			j += len(tag[0])
-			_c(j, color)
-			# colorize path
-			for i in range(j, len(text)):
-				if text[i] == ".":
-					_c(i, C_SYMBOL)
-					_c(i+1, color)
-				elif text[i] == "/":
-					color = UClr.hue_shift(color, .2)
-					color.v -= .1
-					_c(i, C_SYMBOL)
-					_c(i+1, color)
-			break
+#	for tag in [[Soot.FLOW_GOTO, C_FLOW_GOTO], [Soot.FLOW_CALL, C_FLOW_CALL]]:
+#		var i := from
+#		while true:
+#			var j := text.find(tag[0], i)
+#			if j == -1:
+#				break
+#			var color: Color = tag[1]
+#			_c(j, C_SYMBOL)
+#			j += len(tag[0])
+#			_c(j, color)
+#			# colorize path
+#			for i in range(j, len(text)):
+#				if text[i] == ".":
+#					_c(i, C_SYMBOL)
+#					_c(i+1, color)
+#				elif text[i] == "/":
+#					_c(i, C_SYMBOL)
+#					if not i == 0:
+#						color = UClr.hue_shift(color, .2)
+#						color.v -= .1
+#					_c(i+1, color)
+#			break
 
 func _h_properties(from: int, to: int):
 	for part in text.substr(from, to-from).split(" "):
@@ -673,7 +711,7 @@ func _h_line(from: int, to: int):
 			_c(from, Color(C_OPTION_TEXT, .5))
 			_c(from+len(Soot.CHOICE), C_OPTION_TEXT)
 			_h_bbcode(from+len(Soot.CHOICE), to, C_OPTION_TEXT)
-			_h_flow()
+#			_h_flow(from, to)
 		
 		# options: add
 		elif part.begins_with(Soot.CHOICE_ADD):
@@ -689,7 +727,7 @@ func _h_line(from: int, to: int):
 		
 		# flow actions == =>
 		elif part.begins_with(Soot.FLOW_GOTO) or part.begins_with(Soot.FLOW_CALL):
-			_h_flow()
+			_h_flow(from, to)
 		# flow ended ><
 		elif part.begins_with(Soot.FLOW_ENDD):
 			_c(from, C_FLOW_END)

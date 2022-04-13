@@ -63,20 +63,22 @@ func _editor_script_changed(s):
 			e.set_meta("_soot_hl", true)
 			
 			e = e as ScriptEditorBase
-			e.request_help.connect(_request_help)
-			e.go_to_help.connect(_request_help)
-			print("CONNECT")
 			
 			var c: CodeEdit = e.get_base_editor()
-			c.symbol_lookup.connect(_symbol_lookup.bind(c))
-			c.symbol_validate.connect(_symbol_validate.bind(c))
-			c.symbol_lookup_on_click = true
-			
 			var rpath: String = e.get_meta("_edit_res_path")
+			
+			# .soot dialogue files
 			if rpath.ends_with("." + Soot.EXT_DIALOGUE):
+				c.symbol_lookup.connect(_symbol_lookup.bind(c))
+				c.symbol_validate.connect(_symbol_validate.bind(c))
+				c.symbol_lookup_on_click = true
 				c.syntax_highlighter = soot_highlighter
+			
+			# .soda data files
 			elif rpath.ends_with("." + Soot.EXT_DATA):
 				c.syntax_highlighter = data_highlighter
+			
+			# .sola language files
 			elif rpath.ends_with("." + Soot.EXT_LANG):
 				c.syntax_highlighter = soot_highlighter
 
@@ -134,9 +136,6 @@ func _symbol_lookup(symbol: String, line: int, column: int, c: CodeEdit):
 				code_edit.set_line_as_center_visible.call_deferred(meta.line)
 		"===":
 			c.toggle_foldable_line(line)
-	
-func _request_help(what: String):
-	print("HELP ", what)
 
 func _exit_tree() -> void:
 #	if editor:
