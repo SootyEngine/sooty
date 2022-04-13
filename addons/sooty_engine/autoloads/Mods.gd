@@ -65,11 +65,11 @@ func _load_mods(loud := true):
 		for k in installed[0].meta.keys():
 			meta[k] = []
 		# print mod list
-		pri.nt("[Mods - %s]" % [len(installed)])
+		print("[Mods - %s]" % [len(installed)])
 		for i in len(installed):
 			var mod = installed[i]
 			# mod name
-			pri.nt("\t%s %s" % [i+1, mod.dir])
+			print("\t%s %s" % [i+1, mod.dir])
 			# collect it's files
 			for k in mod.meta:
 				meta[k].append_array(mod.meta[k])
@@ -80,11 +80,11 @@ func _load_mods(loud := true):
 			if total == 0:
 				none.append(k.capitalize())
 			else:
-				pri.nt("[%s - %s]" % [k.capitalize(), total])
+				print("[%s - %s]" % [k.capitalize(), total])
 			for i in len(meta[k]):
-				pri.nt("\t%s %s" % [i+1, meta[k][i].get_file()])
+				print("\t%s %s" % [i+1, meta[k][i].get_file()])
 		if none:
-			pri.nt("[No %s found]" % ", ".join(none))
+			print("[No %s found]" % ", ".join(none))
 	# wait a little for things to initialize.
 	await get_tree().process_frame
 	# alert everyone that mods were loaded.

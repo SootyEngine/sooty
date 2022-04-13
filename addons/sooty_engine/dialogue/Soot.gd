@@ -28,7 +28,7 @@ const FLOW_BACK := "<|"
 const FLOW_END_ALL := ">><<"
 
 const CHOICE := "---"
-const CHOICE_ADD := "---"
+const CHOICE_ADD := "-+-"
 
 const TAB_SAME_LINE := "||" # tabs whatever is after it below this line
 

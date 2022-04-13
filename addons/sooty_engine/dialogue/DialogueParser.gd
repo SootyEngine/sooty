@@ -390,7 +390,12 @@ func _clean(line: Dictionary) -> String:
 		line.M.id = _get_uid(_all_lines)
 	
 	if line.M.id in _all_lines:
-		push_error("Line id collision for %s." % line.M.id)
+		var other_meta = _all_lines[line.M.id].M
+		var ofile = str(other_meta.file)
+		var oline = other_meta.line
+		var nfile = str(line.M.file)
+		var nline = line.M.line
+		push_error("Same line id '%s': %s@%s and %s@%s" % [line.M.id, ofile, oline, nfile, nline])
 	
 	_all_lines[line.M.id] = line
 	

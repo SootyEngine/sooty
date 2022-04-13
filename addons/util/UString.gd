@@ -363,7 +363,7 @@ static func str_to_var(s: String) -> Variant:
 static func str_to_array(s: String, type: int = -1) -> Array:
 	return Array(s.split(",")).map(func(x): return str_to_type(x.strip_edges(), type))
 
-static func str_to_color(s: String) -> Color:
+static func str_to_color(s: String, default: Variant = Color.WHITE) -> Variant:
 	# from name?
 	var out := Color.WHITE
 	var i := out.find_named_color(s)
@@ -379,8 +379,8 @@ static func str_to_color(s: String) -> Color:
 			s = unwrap(s, "(", ")")
 		# floats?
 		return _set_type(Color.WHITE, str_to_array(s, TYPE_FLOAT))
-	push_error("Can't convert '%s' to color." % s)
-	return out
+#	push_error("Can't convert '%s' to color." % s)
+	return default
 
 static func str_to_dict(s: String) -> Dictionary:
 	if is_wrapped(s, "{", "}"):

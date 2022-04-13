@@ -1,0 +1,10 @@
+
+
+
+--- okay {{score > 20}} || john: Who cares1? oh wow || => east {{score == 20}}
+
+{<rand>}
+	==||The rat bites you.
+		A mouse looks at you.
+
+{{okay > 20}}

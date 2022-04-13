@@ -9,6 +9,7 @@ const SYMBOL_ALPHA := .5
 # colors
 const C_TEXT := Color.GAINSBORO
 const C_TEXT_INSERT := Color.PALE_GREEN
+const C_TEXT_PREDICATE := Color.PALE_TURQUOISE# Color(0.5, 0.7, 1.0, 1.0)
 const C_SPEAKER := Color(1, 1, 1, 0.5)
 const C_TAG := Color(1, 1, 1, .5)
 const C_SYMBOL := Color(1, 1, 1, 0.33)
@@ -121,7 +122,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 			if text.strip_edges().begins_with(Soot.TEXT_INSERT):
 				from = text.find(Soot.TEXT_INSERT, from)
 				_c(from, C_SYMBOL)
-				_c(from+1, Soot.TEXT_INSERT)
+				_c(from+1, C_TEXT_INSERT)
 				var e := text.find("=", from)
 				if e != -1:
 					_c(e, C_SYMBOL)
@@ -143,10 +144,10 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 				state.erase(k)
 	
 	# line id for lang
-	index = text.rfind(Soot.COMMENT_LANG)
-	if index != -1:
-		_c(index, C_SYMBOL)
-		_c(index+len(Soot.COMMENT_LANG), C_COMMENT_LANG)
+#	index = text.rfind(Soot.COMMENT_LANG)
+#	if index != -1:
+#		_c(index, C_SYMBOL)
+#		_c(index+len(Soot.COMMENT_LANG), C_COMMENT_LANG)
 	
 	return state
 
@@ -362,9 +363,14 @@ func _h_conditional(from: int, to: int):
 
 func _h_bbcode(from: int, to: int, default: Color):
 	var i := from
+	var in_predicate := false
+	var is_bold := false
+	var is_italic := false
+	var color = default
 	while i < to:
 		if text[i] == "#":
 			break
+		
 		elif text[i] == Soot.TEXT_LIST_START:
 			var end := text.find(Soot.TEXT_LIST_END, i+1)
 			if end != -1:
@@ -373,33 +379,72 @@ func _h_bbcode(from: int, to: int, default: Color):
 				_h_text_list(i+1, end, default)
 				_c(end, C_SYMBOL)
 				# back to normal text color
-				_c(end+1, default)
+				_c(end+1, color)
 				i = end
-			
+		
+		elif text[i] == "(":
+			in_predicate = true
+			color = C_TEXT_PREDICATE
+			if is_bold:
+				color = 4
+			_c(i, C_SYMBOL)
+			_c(i+1, color)
+		
+		elif text[i] == ")":
+			in_predicate = false
+			color = default
+			if is_bold:
+				color.a = 4
+			_c(i, C_SYMBOL)
+			_c(i+1, color)
+		
 		elif text[i] == "[":
 			var end := text.find("]", i+1)
 			if end != -1:
 				var inner := text.substr(i+1, end-i-1)
 				var off = i + 1
-				for tag in inner.split(";"):
+				var tags := inner.split(";")
+				for tag_index in len(tags):
+					var tag := tags[tag_index]
+					
 					if tag.begins_with("!"):
 						tag = tag.substr(1)
 						_c(off, C_SYMBOL)
 						off += 1
+					
+					elif tag == "":
+						is_bold = false
+						color = default
+					
+					# hacky way of getting bold
+					elif tag == "b":
+						is_bold = true
+						color.a = 4
+					
+					# color?
+					elif tag_index == len(tags)-1:
+						var tag_clr = UString.str_to_color(tag)
+						if tag_clr != null:
+							color = tag_clr
+							if is_bold:
+								color.a = 4
+					
 					# colorize action tags
-					if UString.begins_with_any(tag, ["~", "@"]):
+					if UString.begins_with_any(tag, ["~", "@", "$"]):
 						_h_eval(off, off+len(tag))
+					
 					else:
 						_c(off, C_TAG)
+					
 					off += len(tag)
-					# colorize ; seperator
-					_c(off, C_SYMBOL)
+					_c(off, C_SYMBOL) # colorize ; seperator
 					off += 1
+				
 				# colorize open and close tags
 				_c(i, C_SYMBOL)
 				_c(end, C_SYMBOL)
 				# back to normal text color
-				_c(end+1, default)
+				_c(end+1, color)
 				i = end
 		
 		elif text[i] == Soot.TEXT_INSERT:
@@ -411,12 +456,28 @@ func _h_bbcode(from: int, to: int, default: Color):
 			i += 1
 			while i < to and text[i] in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789":
 				i += 1
-			_c(i, default)
+			_c(i, color)
 		
 		# markdown: * ** ***
 		elif text[i] == "*":
 			_c(i, C_SYMBOL)
-			_c(i+1, default)
+			if i+1 < len(text) and text[i+1] == "*":
+				if i+2 < len(text) and text[i+2] == "*":
+					# bold italic
+					is_bold = not is_bold
+					color.a = 4 if is_bold else 1
+					i += 2
+				else:
+					# bold
+					is_bold = not is_bold
+					color.a = 4 if is_bold else 1
+					i += 1
+			else:
+				# italic
+				is_italic = not is_italic
+				color.a = 0.8 if is_italic else 1
+				
+			_c(i+1, color)
 	
 		i += 1
 
@@ -450,6 +511,10 @@ func _h_properties(from: int, to: int):
 		from += len(part) + 1
 
 func _h_line(from: int, to: int):
+	var comment := text.find("# ", from)
+	if comment != -1 and comment < to:
+		to = comment
+	
 	var t := text.substr(from, to-from)
 	var len_old = len(t)
 	t = t.strip_edges(true, false)
@@ -464,7 +529,7 @@ func _h_line(from: int, to: int):
 		to = from + len(part.strip_edges())
 		part = part.strip_edges()
 		_c(from, C_TEXT)
-		_c(to+1, C_SYMBOL) # ;; divider
+		_c(to+1, C_SYMBOL) # || divider
 		
 		# line begining with a condition.
 		if part.begins_with(S_COND_START):
@@ -501,6 +566,7 @@ func _h_line(from: int, to: int):
 				
 			else:
 				part = ""
+			print("START ", part)
 		
 		# line ending with a condition.
 		elif part.ends_with(S_COND_END):
@@ -511,6 +577,7 @@ func _h_line(from: int, to: int):
 				_c(to-len(S_COND_END), C_SYMBOL) # }} symbol
 				to = from+s
 				part = text.substr(from, to-from)
+			print("END ", part)
 		
 		# language tag
 		var start := part.find("#{")
@@ -624,16 +691,16 @@ func _h_line(from: int, to: int):
 			if i != -1:
 				_c(from, C_SPEAKER)
 				_c(from+i, C_SYMBOL)
+				var sub = text.substr(from, i-from)
+				# colorize in brackets
+				if "(" in sub:
+					var a := sub.find("(")
+					var b := sub.rfind(")")
+					_c(from+a, C_SYMBOL)
+					_c(from+a+1, C_NODE_ACTION)
+					_c(from+b, C_SYMBOL)
 				_c(from+i+1, C_TEXT)
 				from = i+1
-#				var sub = text.substr(from, i-from)
-#				# colorize in brackets
-#				if "(" in sub:
-#					var a := sub.find("(")
-#					var b := sub.rfind(")")
-#					_c(a, C_SYMBOL)
-#					_c(a+1, C_ACTION_GROUP)
-#					_c(b, C_SYMBOL)
 			
 			_h_bbcode(from, to, C_TEXT)
 		

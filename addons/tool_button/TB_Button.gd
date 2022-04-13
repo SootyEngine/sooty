@@ -121,23 +121,26 @@ func _get_info(d: Variant) -> Variant:
 			out.text = str(out.call)
 		
 	else:
-		print("Hmm 0?", d)
+		_print("Hmm 0? %s" % d)
 	
 	_process_info(out)
 	return out
 
+func _print(msg: String):
+	print("[TB] %s" % msg)
+
 func _process_info(out: Dictionary):
-	if not "call" in out:
-		var s = str(out)
-		out.call = func(): print("No call defined for %s." % s)
-	
 	# special tags of extra actions
-	var parts := Array(_get_label(out).split(";"))
-	if out.call is String:
-		out.call = parts[0]
-		out.text = parts.pop_front().capitalize()
-	else:
-		out.text = parts.pop_front()
+	out.text_args = Array(_get_label(out).split(";"))
+	
+	if not "call" in out:
+		out.call = out.text_args[0]
+	
+	out.text = out.text_args.pop_front()
+	
+#	if not "call" in out:
+#		var s = str(out)
+#		out.call = func(): _print("No call defined for %s." % s)
 	
 	# was just a string passed?
 	if out.call is String:
@@ -151,9 +154,9 @@ func _process_info(out: Dictionary):
 			if not "tint" in out:
 				out.tint = TINT_SIGNAL
 	
-	for i in len(parts):
-		if parts[i].begins_with("!"):
-			var tag: String = parts[i].substr(1)
+	for i in len(out.text_args):
+		if out.text_args[i].begins_with("!"):
+			var tag: String = out.text_args[i].substr(1)
 			var clr := Color()
 			var clr_index := clr.find_named_color(tag)
 			if clr_index != -1:
@@ -176,9 +179,11 @@ func _do_signal(sig_args: Array):
 
 func _get_label(x: Variant) -> String:
 	if x is String:
-		return x.capitalize()
+		return x
+	
 	elif x is Callable:
 		return str(x.get_method()).capitalize()
+	
 	elif x is Dictionary:
 		if "text" in x:
 			if x.text is String:
@@ -189,6 +194,7 @@ func _get_label(x: Variant) -> String:
 				return str(x.text)
 		else:
 			return _get_label(x.call)
+	
 	else:
 		return "???"
 
@@ -199,7 +205,7 @@ func _get_key_or_call(info: Dictionary, k: String, t: int, default):
 		elif info[k] is Callable:
 			return info[k].call()
 		else:
-			print("TB_BUTTON: Shouldn't happen.")
+			_print("Hmm 5?")
 	else:
 		return default
 
@@ -236,43 +242,51 @@ func _call(x: Variant) -> Variant:
 	elif x is String:
 		# special internal editor actions.
 		if x.begins_with("@"):
-			var p = x.substr(1).split(";")
-			match p[0]:
+			var args: Array = x.substr(1).split(";")
+			match args[0]:
 				"SCAN":
 					pluginref.get_editor_interface().get_resource_filesystem().scan()
 				
 				"CREATE_AND_EDIT":
+					var file_path = args[1]
+					var file_data = args[2]
 					var f := File.new()
-					f.open(p[1], File.WRITE)
-					f.store_string(p[2])
+					f.open(file_path, File.WRITE)
+					f.store_string(file_data)
 					f.close()
 					var rf: EditorFileSystem = pluginref.get_editor_interface().get_resource_filesystem()
-					rf.update_file(p[1])
+					rf.update_file(file_path)
 					rf.scan()
 					rf.scan_sources()
 					
-					pluginref.get_editor_interface().select_file(p[1])
-					pluginref.get_editor_interface().edit_resource.call_deferred(load(p[1]))
+					pluginref.get_editor_interface().select_file(file_path)
+					pluginref.get_editor_interface().edit_resource.call_deferred(load(file_path))
 					
 				"SELECT_AND_EDIT":
-					if File.new().file_exists(p[1]):
-						pluginref.get_editor_interface().select_file(p[1])
-						pluginref.get_editor_interface().edit_resource.call_deferred(load(p[1]))
+					var file_path = args[1]
+					if File.new().file_exists(file_path):
+						pluginref.get_editor_interface().select_file(file_path)
+						pluginref.get_editor_interface().edit_resource.call_deferred(load(file_path))
 					else:
-						push_error("Nothing to select and edit at %s." % p[1])
+						push_error("Nothing to select and edit at %s." % file_path)
 				
 				"SELECT_FILE":
-					if File.new().file_exists(p[1]):
-						pluginref.get_editor_interface().select_file(p[1])
+					var file_path = args[1]
+					if File.new().file_exists(file_path):
+						pluginref.get_editor_interface().select_file(file_path)
 					else:
-						push_error("No file to select at %s." % p[1])
+						push_error("No file to select at %s." % file_path)
 				
 				"EDIT_RESOURCE":
-					if File.new().file_exists(p[1]):
-						pluginref.get_editor_interface().edit_resource.call_deferred(load(p[1]))
+					var file_path = args[1]
+					if File.new().file_exists(file_path):
+						pluginref.get_editor_interface().edit_resource.call_deferred(load(file_path))
 					else:
-						push_error("No resource to edit at %s." % p[1])
-			
+						push_error("No resource to edit at %s." % file_path)
+				
+				var non_existing:
+					push_error("[TB] No editor button %s." % non_existing)
+				
 			return null
 		
 		else:
@@ -287,7 +301,7 @@ func _call(x: Variant) -> Variant:
 				return "%s: %s (signal)" % [err_name, x]
 			
 			else:
-				push_error("Hmm 1?")
+				push_error("Hmm 1? %s" % x)
 				return null
 	else:
 		push_error("Hmm 2?")
@@ -306,7 +320,7 @@ func _on_button_pressed(index: int):
 	else:
 		got = _call(all_info[index])
 	if got != null:
-		print("[tool_button]: ", got)
+		_print(got)
 
 static func get_error_name(error: int) -> String:
 	match error:

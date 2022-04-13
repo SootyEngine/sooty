@@ -52,15 +52,15 @@ IGNORE
 	=> goto_flow # Goto a flow.
 	== call_flow # Call a flow, then return back to this line.
 	
-	# ~: State evaluation
-	~score += 20
-	~time.day += 1
+	# ~ State assignments
+	~$score += 20
+	~$time.day += 1
 	
-	# $: State function shortcut.
-	$time.goto_next_day
-	$player.set_job baker tint:beige pay:12.50
+	# $ State function shortcut.
+	~ $time.goto_next_day()
+	~ $player.set_job("baker", {"tint": "beige", "pay": 12.50})
 	
-	# @: Node function shortcut.
+	# @ Node function shortcut.
 	@camera shake x time:3.0 wait:true x:y # nodes_in_group("sa:camera").camera("shake", x, { "wait": true, "x": y})
 	@camera.shake x time:3.0 wait:true x:y # nodes_in_group("sa:camera").shake(x, { "wait": true, "x": y })
 	
@@ -80,36 +80,36 @@ IGNORE
 	
 	# Conditions: match
 	{{match time.weekday}}
-		{{MONDAY}} @sfx sad_audio
-		{{TUESDAY}} john: Glad [b]mondays[] over.
-		{{WEDNESDAY}} It's the middle of the week.
-		{{THURSDAY}}
+		{(MONDAY)}
+			@sfx sad_audio
+		{(TUESDAY)}
+			john: Glad [b]mondays[] over.
+		{(WEDNESDAY)}
+			It's the middle of the week.
+		{(THURSDAY)}}
 			john: The whole vibe shifts on thursday!
-		{{FRIDAY}} @sfx happy_audio
+		{{FRIDAY}}
+			@sfx happy_audio
 			john: Aw yeah, friday!
-		{{_}} It's the weekend.
+		{{_}}
+			It's the weekend.
 	
 	# Options.
 	Text for an options menu.
-		- Option one. ((~choice = true)) => flow
+		--- Option one. ||~choice = true|| => flow
 			A line to show after option 1 is chosen.
-		- Option two. ((~score += 10;;== add_to_flow;;~score -= 20))
-		- Option three. {{score > 20}} # Only shown on condition score > 20.
-		+ add_options_from_a_flow
-		+ *_flow # Append options from all flows ending with '_flow'.
-		+ flow_* # Append options from all flows starting with 'flow_'
+		--- Option two. ||~score += 10 || == add_to_flow ||~score -= 20
+		--- Option three. {{score > 20}} # Only shown on condition score > 20.
+		-+- add_options_from_a_flow
+		-+- *_flow # Append options from all flows ending with '_flow'.
+		-+- flow_* # Append options from all flows starting with 'flow_'
 	
 	# Single line options.
 	# Don't do this though, as it's hard to read.
-	Where to? ((- West => west;;- East => east {{east.unlocked}};;- North => north))
+	Where to? || --- West => west || --- East => east {{east.unlocked}} || --- North => north
 	
 	# Extra properties.
-	This text should be offset.
-		|x:20 y:30
-		|tint:red
-	
-	# Or, on a single line.
-	This text should be offset. ((|x:20 y:30 tint:red))
+	This text should be offset. ((x:20 y:30 tint: red))
 
 # when loading a script, flags can be used to hide/show some lines.
 # found in Dialogues.flags = []

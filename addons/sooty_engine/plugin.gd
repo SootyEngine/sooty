@@ -41,12 +41,11 @@ func _enter_tree() -> void:
 	se.register_syntax_highlighter(data_highlighter)
 	# track scripts opened/closed to can add highliter.
 	se.editor_script_changed.connect(_editor_script_changed)
-	
-	editor = preload("res://addons/sooty_engine/ui/ui_map_gen.tscn").instantiate()
-	editor.is_plugin_hint = true
-	editor.plugin = self
-	add_control_to_dock(EditorPlugin.DOCK_SLOT_LEFT_BR, editor)
-#	add_control_to_bottom_panel(editor, "Dialogue")
+# 	
+# 	editor = preload("res://addons/sooty_engine/ui/ui_map_gen.tscn").instantiate()
+# 	editor.is_plugin_hint = true
+# 	editor.plugin = self
+# 	add_control_to_dock(EditorPlugin.DOCK_SLOT_LEFT_BR, editor)
 	
 
 # find a code editor for a given text file.
@@ -77,8 +76,8 @@ func _exit_tree() -> void:
 #	if editor:
 #		editor.queue_free()
 	
-	if editor:
-		remove_control_from_docks(editor)
+# 	if editor:
+# 		remove_control_from_docks(editor)
 	
 	# remove .soot highlighter.
 	get_editor_interface().get_script_editor().unregister_syntax_highlighter(soot_highlighter)
