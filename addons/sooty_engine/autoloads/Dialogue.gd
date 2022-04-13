@@ -42,7 +42,6 @@ func _process(_delta: float) -> void:
 func _on_step(step: Dictionary):
 	match step.type:
 		"text": caption.emit(step.text, step)
-		"action": StringAction.do(step.action)
 
 func _reloaded():
 	clear_waiting_list()

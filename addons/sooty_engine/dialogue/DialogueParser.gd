@@ -380,7 +380,7 @@ func _clean(line: Dictionary) -> String:
 				"if": _clean_nested_array(line.cond_lines)
 				"match": _clean_nested_array(line.case_lines)
 			line.type = line.cond_type
-		
+			line.erase("cond")
 		_: pass
 	
 	if line.M.id:
@@ -491,20 +491,20 @@ func _line_as_condition(line: Dictionary, is_case := false):
 	var cond: String = line.cond
 	
 	# if-elif-else condition
-	if cond.begins_with("IF "):
+	if cond.begins_with("if "):
 		line.cond_type = "if"
-		line.cond = cond.substr(len("IF ")).strip_edges()
-	elif cond.begins_with("ELIF "):
+		line.cond = cond.substr(len("if ")).strip_edges()
+	elif cond.begins_with("elif "):
 		line.cond_type = "elif"
-		line.cond = cond.substr(len("ELIF ")).strip_edges()
-	elif cond == "ELSE":
+		line.cond = cond.substr(len("elif ")).strip_edges()
+	elif cond == "else":
 		line.cond_type = "else"
 		line.cond = "true"
 	
 	# match condition
-	elif cond.begins_with("MATCH "):
+	elif cond.begins_with("match "):
 		line.cond_type = "match"
-		line.match = line.cond.trim_prefix("MATCH ").strip_edges()
+		line.match = line.cond.trim_prefix("match ").strip_edges()
 		line.cases = []
 		line.case_lines = []
 		for tabbed_line in line.M.tabbed:

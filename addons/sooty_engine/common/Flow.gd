@@ -26,11 +26,13 @@ signal selected(id: String) # used with select_option
 
 @export var states := {}
 @export var last_line := {}
+var last_value: Variant
 
 var context: Object = null
 
-func _init(lines := {}):
+func _init(lines := {}, flows := {}):
 	_lines = lines
+	_flows = flows
 
 func _get_state() -> Dictionary:
 	return {stack=_last_tick_stack, started=_started, last_end_message=last_end_message, states=states}
@@ -142,7 +144,6 @@ func _push(type: int, id: String, list: Array):# key: String="then"):
 	# a flow started
 	if type in [S_GOTO, S_CALL]:
 		current_flow = id
-		print("Current flow is: ", current_flow)
 		_flow_started.call_deferred(id)
 
 func _flow_started(id: String):
@@ -157,19 +158,14 @@ func _on_step(step: Dictionary):
 # run through the flow and return the last line
 # to_value will attempt to convert it from a line to something else
 func execute(id: String) -> Variant:
-	var out := { line={}, value=null }
 	if start(id):
 		var safety := 100
 		while safety > 0 and is_active():
-			out.line = _tick()
+			_tick()
 			safety -= 1
-		# try to get the value of a step
-		match out.line.get("type"):
-			"text": out.value = out.line.text
-			"do": out.value = StringAction.do(out.line.do, context)
-	return out
+	return {line=last_line, value=last_value}
 
-func _tick() -> Dictionary:
+func _tick():
 	if _started:
 		# has finished?
 		if not len(_stack):
@@ -190,6 +186,8 @@ func _tick() -> Dictionary:
 		var next_line := _pop_stack_line()
 		if next_line:
 			last_line = next_line
+			last_value = null
+			
 			var line := next_line
 			_on_step(line)
 			on_step.emit(line)
@@ -205,11 +203,15 @@ func _tick() -> Dictionary:
 					# use current_dialogue as parent, if none exists
 					_goto(line.call, S_CALL)
 				
-				"do", "text":
-					pass
+				"do":
+					last_value = StringAction.do(line.do, context)
+				
+				"text":
+					last_value = line.text
 				
 				"pass":
 					passed_w_msg.emit(line.msg)
+					last_value = line.msg
 					pass
 				
 				"end":
@@ -217,16 +219,16 @@ func _tick() -> Dictionary:
 				
 				"end_all":
 					end(line.end)
+					last_value = line.msg
 					break
 				
-				_: push_warning("Huh? %s %s" % [line.keys(), line])
+				_:
+					push_warning("Huh? %s %s" % [line.keys(), line])
 	
 	# emit start trigger
 	if not _started and len(_stack):
 		_started = true
 		started.emit()
-	
-	return last_line
 
 func _pop_stack_line() -> Dictionary:
 	# only show lines that pass their {{condition}}.
@@ -403,8 +405,13 @@ func line_get_options(line: Dictionary) -> Array:
 # `..node` goes to a parent sibling
 # `/node` goes to a root flow
 func get_flow_path(next: String) -> String:
+	# going to a root
 	if next.begins_with("/"):
 		return next.substr(1)
+	
+	# repeating current
+	if next == "." + current_flow:
+		return current_flow
 	
 	var path := current_flow
 	while next.begins_with("."):

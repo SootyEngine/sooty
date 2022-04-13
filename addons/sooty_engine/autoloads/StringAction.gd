@@ -51,12 +51,13 @@ func preprocess_eval(eval: String):
 			elif c == "(":
 				in_tag = false
 				tags[-1].is_func = true
+			elif c == " ":
+				in_tag = false
 	
 	var arg_names := ["_G_", "_S_"]
 	var arg_valus = [Global, State]
 	
 	for t in tags:
-#		print(t)
 		if t.type == "@":
 			if t.is_func:
 				if t.is_nested:
@@ -80,8 +81,8 @@ func preprocess_eval(eval: String):
 					eval = eval.replace(t.full, "_S_[\"%s\"]" % [t.tag])
 	return eval
 
-func test(eval: String, context: Object = null) -> bool:
-	return true if eval(eval, context) else false
+func test(e: String, context: Object = null) -> bool:
+	return true if eval(e, context) else false
 
 func do(command: String, context: Object = null) -> Variant:
 	if not len(command):
@@ -99,7 +100,7 @@ func do(command: String, context: Object = null) -> Variant:
 		return call_group(command, context)
 	
 	elif command.begins_with("~"):
-		return eval(command, context)
+		return eval(command.substr(1).strip_edges(), context)
 	
 	push_error("Do action '%s'." % command)
 	return null
@@ -270,13 +271,15 @@ func eval(eval: String, context: Variant = null, default = null) -> Variant:
 				
 			if _context_has(target, property):
 				var old_val = target[property]
-				var new_val = eval(p[1].strip_edges(), context)
+				var got_val = eval(p[1].strip_edges(), context)
+				var new_val = old_val
 				match op:
-					" = ": target[property] = new_val
-					" += ": target[property] = old_val + new_val
-					" -= ": target[property] = old_val - new_val
-					" *= ": target[property] = old_val * new_val
-					" /= ": target[property] = old_val / new_val
+					" = ": new_val = got_val
+					" += ": new_val += got_val
+					" -= ": new_val -= got_val
+					" *= ": new_val *= got_val
+					" /= ": new_val /= got_val
+				target[property] = new_val
 				return target[property]
 			else:
 				push_error("No property '%s' in %s." % [property, target])

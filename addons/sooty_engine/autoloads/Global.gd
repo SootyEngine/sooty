@@ -11,6 +11,7 @@ signal removed_from_group(node: Node, group: String)
 signal message(type: String, payload: Variant)
 
 var active_game := true
+var _printer: Callable
 
 func _init() -> void:
 	add_to_group("@.version")
