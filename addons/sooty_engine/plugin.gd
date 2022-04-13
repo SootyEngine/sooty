@@ -89,7 +89,7 @@ func _find_flow(next: String, line: int, c: CodeEdit) -> String:
 	out.resize(deep)
 	
 	# go backwards collecting parent flows
-	while line > 0:
+	while line >= 0:
 		var s := c.get_line(line)
 		var sdeep := UString.count_leading(s, "\t")
 		if sdeep <= deep:
@@ -102,7 +102,6 @@ func _find_flow(next: String, line: int, c: CodeEdit) -> String:
 	next = next.strip_edges()
 	var head := UString.get_leading_symbols(next)
 	next = next.trim_prefix(head).strip_edges()
-	# add self at end
 	
 	# create path
 	var path := Flow._get_flow_path("/".join(out), next)
@@ -124,8 +123,10 @@ func _symbol_lookup(symbol: String, line: int, column: int, c: CodeEdit):
 	match head:
 		"=>", "==":
 			var path := _find_flow(line_text, line, c)
-			if path in Dialogue._flows:
-				var meta: Dictionary = Dialogue._flows[path].M
+			var capped := path.substr(0, path.find(symbol)+len(symbol))
+			
+			if capped in Dialogue._flows:
+				var meta: Dictionary = Dialogue._flows[capped].M
 				# select file in FileSystem
 				get_editor_interface().select_file(meta.file)
 				# open in editor
@@ -134,6 +135,9 @@ func _symbol_lookup(symbol: String, line: int, column: int, c: CodeEdit):
 				var code_edit := get_code_edit(meta.file)
 				code_edit.set_caret_line.call_deferred(meta.line, true)
 				code_edit.set_line_as_center_visible.call_deferred(meta.line)
+			else:
+				push_warning("No path '%s' found." % capped)
+		
 		"===":
 			c.toggle_foldable_line(line)
 

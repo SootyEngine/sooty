@@ -29,8 +29,6 @@ const C_VAROUT := Color.ORANGE
 const C_OPERATOR := Color.WHITE
 
 const C_FLOW := Color.WHEAT
-const C_FLOW_GOTO := Color.TAN
-const C_FLOW_CALL := Color.TAN
 const C_FLOW_END := Color.TOMATO
 
 const C_OPTION_FLAG := Color(0.25, 0.88, 0.82, 0.5)
@@ -527,7 +525,11 @@ func _h_flow(from: int, to: int):
 	for i in range(from, to):
 		# nested path?
 		if text[i] == ".":
-			path_deep -= 1
+			if not started:
+				started = true
+				path_deep = deep-1
+			else:
+				path_deep -= 1
 			_c(i, C_SYMBOL)
 			_c(i+1, get_flow_color(path_deep))
 		
