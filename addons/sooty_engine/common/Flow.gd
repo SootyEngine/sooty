@@ -405,20 +405,23 @@ func line_get_options(line: Dictionary) -> Array:
 # `..node` goes to a parent sibling
 # `/node` goes to a root flow
 func get_flow_path(next: String) -> String:
+	return _get_flow_path(current_flow, next)
+
+static func _get_flow_path(from: String, next: String) -> String:
 	# going to a root
 	if next.begins_with("/"):
 		return next.substr(1)
 	
 	# repeating current
-	if next == "." + current_flow:
-		return current_flow
+	if next == "." + from:
+		return from
 	
-	var path := current_flow
+	var path := from
 	while next.begins_with("."):
 		next = next.substr(1)
 		if not "/" in path:
-			push_error("No flow parent for ", path)
-			return ""
+			push_warning("No flow parent for ", path)
+			return next# ""
 		path = path.get_base_dir()
 	
 	return path.plus_file(next)

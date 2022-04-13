@@ -363,6 +363,11 @@ func _h_conditional(from: int, to: int):
 
 func _h_bbcode(from: int, to: int, default: Color):
 	var i := from
+	
+	var md_tag1 := false # *	_
+	var md_tag2 := false # **	__
+	var md_tag3 := false # ***	___
+	
 	var in_predicate := false
 	var is_bold := false
 	var is_italic := false
@@ -414,6 +419,7 @@ func _h_bbcode(from: int, to: int, default: Color):
 					
 					elif tag == "":
 						is_bold = false
+						is_italic = false
 						color = default
 					
 					# hacky way of getting bold
@@ -441,8 +447,8 @@ func _h_bbcode(from: int, to: int, default: Color):
 					off += 1
 				
 				# colorize open and close tags
-				_c(i, C_SYMBOL)
-				_c(end, C_SYMBOL)
+				_c(i, C_SYMBOL) 	# [ open
+				_c(end, C_SYMBOL)	# ] close
 				# back to normal text color
 				_c(end+1, color)
 				i = end
@@ -461,24 +467,47 @@ func _h_bbcode(from: int, to: int, default: Color):
 		# markdown: * ** ***
 		elif text[i] == "*":
 			_c(i, C_SYMBOL)
-			if i+1 < len(text) and text[i+1] == "*":
-				if i+2 < len(text) and text[i+2] == "*":
+			i += 1
+			if i < len(text) and text[i] == "*":
+				i += 1
+				if i < len(text) and text[i] == "*":
+					i += 1
 					# bold italic
-					is_bold = not is_bold
-					color.a = 4 if is_bold else 1
-					i += 2
+					md_tag3 = not md_tag3
+					color.a = 4 if md_tag3 or md_tag2 else 1
+					_c(i, color if md_tag3 else default)
 				else:
 					# bold
-					is_bold = not is_bold
-					color.a = 4 if is_bold else 1
-					i += 1
+					md_tag2 = not md_tag2
+					color.a = 4 if md_tag3 or md_tag2 else 1
+					_c(i, color if md_tag2 else default)
 			else:
 				# italic
-				is_italic = not is_italic
-				color.a = 0.8 if is_italic else 1
-				
-			_c(i+1, color)
-	
+				md_tag1 = not md_tag1
+				color.a = 0.8 if md_tag1 else 1
+				_c(i, color if md_tag1 else default)
+		
+		elif text[i] == "_":
+			_c(i, C_SYMBOL)
+			i += 1
+			if i < len(text) and text[i] == "_":
+				i += 1
+				if i < len(text) and text[i] == "_":
+					i += 1
+					# bold italic
+					md_tag3 = not md_tag3
+					color.a = 4 if md_tag3 or md_tag2 else 1
+					_c(i, color if md_tag3 else default)
+				else:
+					# bold
+					md_tag2 = not md_tag2
+					color.a = 4 if md_tag3 or md_tag2 else 1
+					_c(i, color if md_tag2 else default)
+			else:
+				# italic
+				md_tag1 = not md_tag1
+				color.a = 0.8 if md_tag1 else 1
+				_c(i, color if md_tag1 else default)
 		i += 1
 
 func _h_flow(from := 0):
@@ -566,7 +595,6 @@ func _h_line(from: int, to: int):
 				
 			else:
 				part = ""
-			print("START ", part)
 		
 		# line ending with a condition.
 		elif part.ends_with(S_COND_END):
@@ -577,7 +605,6 @@ func _h_line(from: int, to: int):
 				_c(to-len(S_COND_END), C_SYMBOL) # }} symbol
 				to = from+s
 				part = text.substr(from, to-from)
-			print("END ", part)
 		
 		# language tag
 		var start := part.find("#{")

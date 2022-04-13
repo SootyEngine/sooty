@@ -129,11 +129,11 @@ var _flow_path := []
 #	else:
 #		print("Created lang file at: %s." % out_path)
 
-func _has_lines_with_same_id(id: StringName, lines: Dictionary) -> bool:
+func _has_lines_with_same_id(id: String, lines: Dictionary) -> bool:
 	return ("%s!0" % id) in lines
 
 # returns list with lines, and list with ids
-func _get_lines_with_same_id(id: StringName, lines: Dictionary) -> Array:
+func _get_lines_with_same_id(id: String, lines: Dictionary) -> Array:
 	var out := [[lines[id]], [id]]
 	var index := 0
 	var safety := 1000
@@ -155,7 +155,7 @@ func _clean_raw_line_for_lang(text: String) -> String:
 		text = text.split(Soot.COMMENT, true, 1)[0]
 	return text.strip_edges()
 
-func _parse(file_path: StringName, all_flows: Dictionary, all_lines: Dictionary):
+func _parse(file_path: String, all_flows: Dictionary, all_lines: Dictionary):
 	_all_flows = all_flows
 	_all_lines = all_lines
 	
@@ -341,7 +341,7 @@ func _new_line_flat(parent: Dictionary, index: int, text := "") -> Dictionary:
 func _new_line_child(parent: Dictionary, text := "") -> Dictionary:
 	return _new_line(text, parent.M.file, parent.M.line, parent.M.deep+1)
 
-func _new_line(text: String, file: StringName, line: int, deep: int) -> Dictionary:
+func _new_line(text: String, file: String, line: int, deep: int) -> Dictionary:
 	return {
 		"M"={ # meta data
 			"text"=text, # original text, stripped

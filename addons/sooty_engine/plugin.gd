@@ -63,7 +63,15 @@ func _editor_script_changed(s):
 			e.set_meta("_soot_hl", true)
 			
 			e = e as ScriptEditorBase
+			e.request_help.connect(_request_help)
+			e.go_to_help.connect(_request_help)
+			print("CONNECT")
+			
 			var c: CodeEdit = e.get_base_editor()
+			c.symbol_lookup.connect(_symbol_lookup.bind(c))
+			c.symbol_validate.connect(_symbol_validate.bind(c))
+			c.symbol_lookup_on_click = true
+			
 			var rpath: String = e.get_meta("_edit_res_path")
 			if rpath.ends_with("." + Soot.EXT_DIALOGUE):
 				c.syntax_highlighter = soot_highlighter
@@ -71,6 +79,64 @@ func _editor_script_changed(s):
 				c.syntax_highlighter = data_highlighter
 			elif rpath.ends_with("." + Soot.EXT_LANG):
 				c.syntax_highlighter = soot_highlighter
+
+# go backwards through the lines and try to find the flow/path/to/this/node.
+func _find_flow(next: String, line: int, c: CodeEdit) -> String:
+	var deep := UString.count_leading(next, "\t")
+	var out := []
+	out.resize(deep)
+	
+	# go backwards collecting parent flows
+	while line > 0:
+		var s := c.get_line(line)
+		var sdeep := UString.count_leading(s, "\t")
+		if sdeep <= deep:
+			var strip := s.strip_edges(true, false)
+			if strip.begins_with("==="):
+				out[sdeep] = strip.split("===", true, 1)[-1].strip_edges()
+		line -= 1
+	
+	# add self to the path
+	next = next.strip_edges()
+	var head := UString.get_leading_symbols(next)
+	next = next.trim_prefix(head).strip_edges()
+	# add self at end
+	
+	# create path
+	var path := Flow._get_flow_path("/".join(out), next)
+	return path
+	
+func _symbol_validate(symbol: String, c: CodeEdit):
+	var line_col := c.get_line_column_at_pos(c.get_local_mouse_pos())
+	var line_text := c.get_line(line_col.y).strip_edges(true, false)
+	var head := UString.get_leading_symbols(line_text)
+	if head in ["===", "=>", "=="]:
+		c.set_symbol_lookup_word_as_valid(true)
+	else:
+		c.set_symbol_lookup_word_as_valid(false)
+
+func _symbol_lookup(symbol: String, line: int, column: int, c: CodeEdit):
+	var line_col := c.get_line_column_at_pos(c.get_local_mouse_pos())
+	var line_text := c.get_line(line_col.y)
+	var head := UString.get_leading_symbols(line_text.strip_edges())
+	match head:
+		"=>", "==":
+			var path := _find_flow(line_text, line, c)
+			if path in Dialogue._flows:
+				var meta: Dictionary = Dialogue._flows[path].M
+				# select file in FileSystem
+				get_editor_interface().select_file(meta.file)
+				# open in editor
+				get_editor_interface().edit_resource(load(meta.file))
+				# move to the appropriate line
+				var code_edit := get_code_edit(meta.file)
+				code_edit.set_caret_line.call_deferred(meta.line, true)
+				code_edit.set_line_as_center_visible.call_deferred(meta.line)
+		"===":
+			c.toggle_foldable_line(line)
+	
+func _request_help(what: String):
+	print("HELP ", what)
 
 func _exit_tree() -> void:
 #	if editor:

@@ -310,9 +310,7 @@ static func begins_with_any(s: String, any: Array) -> bool:
 static func get_leading_symbols(s: String) -> String:
 	var out := ""
 	for c in s:
-		if c in " 	":
-			pass
-		elif c in "~!@#$%^&*?<>{}()[]:":
+		if c in "~!@#$%^&*?<>{}()[]=:":
 			out += c
 		else:
 			break
