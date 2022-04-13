@@ -8,7 +8,7 @@ signal caption(text: String, line: Dictionary)
 
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	add_to_group("@Dialogue")
+	add_to_group("@:Dialogue")
 	add_to_group("@.chose")
 	add_to_group("@.reset_choice")
 	add_to_group("@.reset_list")
@@ -83,9 +83,9 @@ func _load_mods(mods: Array):
 	file_scanner.set_files(all_files)
 	
 	# save states for debuging
-	if UFile.exists("res://dialogue_debug"):
-		UFile.save_text("res://dialogue_debug/_all_flows.soda", DataParser.dict_to_str(_flows))
-		UFile.save_text("res://dialogue_debug/_all_lines.soda", DataParser.dict_to_str(_lines))
+	if UFile.exists("res://debug_output/dialogue"):
+		UFile.save_text("res://debug_output/dialogue/_all_flows.soda", DataParser.dict_to_str(_flows))
+		UFile.save_text("res://debug_output/dialogue/_all_lines.soda", DataParser.dict_to_str(_lines))
 	
 	# probably not accurate
 	var memory_used = OS.get_static_memory_usage() - memory_before

@@ -216,61 +216,6 @@ func _h_action_var(from: int, to: int):
 		_h_var(from, part, 0, C_VAROUT)
 		from += len(part)+1
 
-#func _h_action(from: int, to: int, is_case := false):
-#	var inner := text.substr(from, to-from)
-#	if inner:
-#		var color = C_CONTEXT_ACTION
-#		var index := 0
-#		if inner.begins_with("@"):
-#			_h_action_shortcut(1, from, to, C_NODE_ACTION)
-#		elif inner.begins_with("~"):
-#			_h_action_eval(1, from, to, C_STATE_ACTION)
-#		else:
-#		_h_action_eval(from, to)
-#		var head = UString.get_leading_symbols(inner)
-#		match head:
-#			# *
-#			Soot.DO_VAR: _h_action_var(from, to)
-#
-#			# @) @
-#			Soot.DO_NODE_FUNC: _h_action_shortcut(1, from, to, C_NODE_ACTION)
-#			# @:
-#			Soot.DO_NODE_EVAL: _h_action_eval(2, from, to, C_NODE_ACTION)
-#
-#			# ~)
-#			Soot.DO_SELF_FUNC: _h_action_shortcut(2, from, to, C_CONTEXT_ACTION)
-#			# ~: ~
-#			Soot.DO_SELF_EVAL: _h_action_eval(1, from, to, C_CONTEXT_ACTION)
-#
-#			# $)
-#			Soot.DO_STATE_FUNC: _h_action_shortcut(2, from, to, C_STATE_ACTION)
-#			# $ $:
-#			Soot.DO_STATE_EVAL: _h_action_eval(1, from, to, C_STATE_ACTION)
-
-func _h_action_shortcut(head_len: int, from: int, to: int, color: Color):
-	_c(from, C_SYMBOL)
-	from += head_len
-	var inner := text.substr(from, to-from)
-	var parts = UString.split_outside(inner, " ")
-	var index := 0
-	for i in len(parts):
-		var part = parts[i]
-		if len(part):
-			if index == 0:
-				_c(from, color)
-				for j in len(part):
-					if part[j] == ".":
-						color.s -= .1
-						color = UClr.hue_shift(color, -.075)
-						_c(from+j, C_SYMBOL)
-						_c(from+j+1, color)
-				color.s = .25
-				color = UClr.hue_shift(color, .5)
-			else:
-				_h_var(from, part, index, color)
-			index += 1
-		from += len(part) + 1
-
 func _h_case(from: int, to: int):
 	var parts := UString.split_outside(text.substr(from, to-from), " ")
 	var clr := Color.WHITE#C_VAROUT
@@ -290,18 +235,24 @@ func _h_node_action(from: int, to: int):
 	var index := 0
 	for i in len(parts):
 		if parts[i]:
-			clr = C_NODE_ACTION if i == 0 else Color.GRAY if index%2==0 else Color.WHITE
-			_h_var(from, parts[i], index, clr)
-#			if index == 0:
-#				clr = UClr.hue_shift(clr, .05)
-#
-#			else:
-#				if index % 2==0:
-#					clr = UClr.hue_shift(clr, -.01)
-#				else:
-#					clr = UClr.hue_shift(clr, .01)
+			# function name
+			if index == 0:
+				clr = C_NODE_ACTION
+				_c(from, clr)
+				for j in range(from, from+len(parts[i])):
+					if text[j] == ".":
+						clr = UClr.hue_shift(clr, -.1)
+						clr.v += .2
+						_c(j, C_SYMBOL)
+						_c(j+1, clr)
+			
+			# arguments
+			else:
+				clr = Color.GRAY if index%2==0 else Color.WHITE
+				_h_var(from, parts[i], index, clr)
+
 			index += 1
-				
+		
 		from += len(parts[i]) + 1
 	
 func _h_eval(from: int, to: int):
@@ -517,11 +468,11 @@ func _h_flow(from: int, to: int):
 	var inner := text.substr(from, to-from)
 	
 	_c(from, C_SYMBOL)
-	_c(from+2, get_flow_color(deep-1))
+	_c(from+2, get_flow_color(deep))
 	from += 2
 	
 	var started := false
-	var path_deep := deep-1
+	var path_deep := deep
 	for i in range(from, to):
 		# nested path?
 		if text[i] == ".":

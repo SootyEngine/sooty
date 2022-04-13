@@ -2,6 +2,14 @@
 extends RefCounted
 class_name UNode
 
+static func get_all_groups(from: Node = Global.get_tree().root) -> Array:
+	var out := []
+	dig(from, func(x: Node):
+		for group in x.get_groups():
+			if not group in out:
+				out.append(group))
+	return out
+
 static func dig(node: Node, call: Callable):
 	call.call(node)
 	for child in node.get_children():

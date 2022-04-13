@@ -90,6 +90,22 @@ func _load_mods(loud := true):
 	# alert everyone that mods were loaded.
 	_loaded.emit()
 	loaded.emit()
+	
+	# Debug data for auto complete.
+	_save_group_data_to_file()
+
+func _save_group_data_to_file():
+	if UFile.exists("res://debug_output"):
+		var groups = UNode.get_all_groups()
+		var out := {}
+		for group in groups:
+			group = str(group)
+			if group.begins_with("@."):
+				out[group] = []
+			elif group.begins_with("@:"):
+				var node := get_tree().get_first_node_in_group(group)
+				out[group] = UObject.get_state_properties(node) + UObject.get_script_methods(node).keys()
+		UFile.save_to_resource("res://debug_output/all_groups.tres", out)
 
 func _print_file(path: String):
 	var f = UFile.get_file_name(path)

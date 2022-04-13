@@ -129,6 +129,10 @@ func _init_states():
 # get the default state
 func _loaded_mods():
 	_default = _get_state()
+	if UFile.exists("res://debug_output/states"):
+		var path = "res://debug_output/states/_%s.soda" % [_get_subdir()]
+		var text := DataParser.new().dict_to_str(_default, true, false, true)
+		UFile.save_text(path, text)
 
 func _reset():
 	UObject.set_state(self, _default)

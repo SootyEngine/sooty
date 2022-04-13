@@ -307,10 +307,25 @@ static func begins_with_any(s: String, any: Array) -> bool:
 			return true
 	return false
 
+const SYMBOLS := "~!@#$%^&*?<>{}()[]=:-+"
+
+static func get_symbol(text: String, i: int, symbols := SYMBOLS) -> String:
+	var out := ""
+	var started := false
+	while i >= 0:
+		if text[i] in symbols:
+			out = text[i] + out
+		elif text[i] in ".abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789":
+			out = text[i] + out
+		else:
+			break
+		i -= 1
+	return out
+
 static func get_leading_symbols(s: String) -> String:
 	var out := ""
 	for c in s:
-		if c in "~!@#$%^&*?<>{}()[]=:":
+		if c in SYMBOLS:
 			out += c
 		else:
 			break

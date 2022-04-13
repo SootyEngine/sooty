@@ -9,7 +9,7 @@ var _files := {}
 
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	add_to_group("@Music")
+	add_to_group("@:Music")
 
 func _ready():
 	Mods.load_all.connect(_load_mods)

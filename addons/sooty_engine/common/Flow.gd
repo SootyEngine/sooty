@@ -407,24 +407,25 @@ func line_get_options(line: Dictionary) -> Array:
 func get_flow_path(next: String) -> String:
 	return _get_flow_path(current_flow, next)
 
-static func _get_flow_path(from: String, next: String) -> String:
-	# going to a root
-	if next.begins_with("/"):
-		return next.substr(1)
-	
-	# repeating current
-	if next == "." + from:
+static func _get_flow_path(from: String, was: String) -> String:
+	var next := was
+	prints("[%s] [%s]" % [from, was])
+	if next:
+		# going to a root
+		if next.begins_with("/"):
+			return next.substr(1)
+		else:
+			var path := from
+			while next.begins_with("."):
+				next = next.substr(1)
+				path = path.rsplit("/", true, 1)[0]
+			
+			if next:
+				return "%s/%s" % [path, next]
+			else:
+				return path
+	else:
 		return from
-	
-	var path := from
-	while next.begins_with("."):
-		next = next.substr(1)
-		if not "/" in path:
-			push_warning("No flow parent for ", path)
-			return next# ""
-		path = path.get_base_dir()
-	
-	return path.plus_file(next)
 
 func _get_options(ids: Array, output: Array, depth: int):
 	if depth > 4:
@@ -453,3 +454,17 @@ func _get_options(ids: Array, output: Array, depth: int):
 #				continue
 #
 #			out.append(DialogueLine.new(_dialogue_id, opdata))
+
+func generate_tree() -> Dictionary:
+	var out := {}
+	for p in _flows:
+		UDict.set_at(out, p.split("/"), {})
+	return out
+
+func get_flow_children(path: String) -> Array:
+	var tree := generate_tree()
+	if path:
+		var got = UDict.get_at(tree, path.split("/"))
+		return got.keys() if got else []
+	else:
+		return tree.keys()

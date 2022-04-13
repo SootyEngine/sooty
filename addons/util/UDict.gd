@@ -106,15 +106,6 @@ static func merge(target: Dictionary, patch: Dictionary, deep: bool = false, lis
 					push_error("can't merge %s with %s. replacing %s instead." % [UType.type_name(target[k]), UType.type_name(patch[k]), k])
 					target[k] = patch[k]
 
-static func set_at(target: Dictionary, path: Array, value: Variant):
-	var t = target
-	for i in len(path)-1:
-		var part = path[i]
-		if not part in t:
-			t[part] = {}
-		t = t[part]
-	t[path[-1]] = value
-
 static func merge_at(target: Dictionary, path: Array, patch: Dictionary, deep: bool = false, lists: bool = false):
 	var t = target
 	for i in len(path):
@@ -216,6 +207,35 @@ static func sort_by_value(d: Dictionary, reversed: bool = false):
 	else:
 		a.sort_custom(func(x, y): return x[1] < y[1])
 	return _from_args(d, a)
+
+static func get_at(d: Dictionary, path: Array, default: Variant = null) -> Variant:
+	var out = d
+	for i in len(path):
+		if path[i] in out:
+			out = out[path[i]]
+		else:
+			return default
+	return out
+
+static func set_at(d: Dictionary, path: Array, value: Variant, create := true) -> bool:
+	var dict = get_penultimate(d, path, create)
+	if dict is Dictionary:
+		dict[path[-1]] = value
+		return true
+	push_error(dict)
+	return false
+
+static func get_penultimate(d: Dictionary, path: Array, create := false, default: Variant = null) -> Variant:
+	var out = d
+	for i in len(path)-1:
+		if not path[i] in out:
+			if create:
+				out[path[i]] = {}
+			else:
+				push_error("No %s." % path)
+				return default
+		out = out[path[i]]
+	return out
 
 # determine which keys are different or new
 static func get_different(default: Dictionary, current: Dictionary) -> Dictionary:

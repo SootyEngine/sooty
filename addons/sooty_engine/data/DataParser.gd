@@ -218,12 +218,12 @@ static func _is_list_item(s: String) -> bool:
 	return s.begins_with("- ") or s == "-"
 
 # attempt to display data as a .soda file
-static func dict_to_str(dict: Dictionary, with_type := false, strip := false) -> String:
+static func dict_to_str(dict: Dictionary, with_type := false, strip := false, allow_flat := false) -> String:
 	var out := []
 	dict = dict.duplicate(true)
 	if strip:
 		UDict.dig(dict, func(x): _strip(x))
-	_to_str(out, "", dict, with_type, 0, -1)
+	_to_str(out, "", dict, with_type, allow_flat, 0, -1)
 	out.pop_front() # TODO: find out why first element is empty
 	return "\n".join(out)
 
@@ -238,27 +238,27 @@ static func _strip(x):
 			TYPE_STRING:
 				x[k] = x[k].split("!", true, 2)[-1].c_escape()
 
-static func _to_str(out: Array, key: String, value: Variant, with_type: bool, deep: int, parent: int):
+static func _to_str(out: Array, key: String, value: Variant, with_type: bool, allow_flat: bool, deep: int, parent: int):
 	var head = "\t".repeat(max(0, deep-1))
 	var type := typeof(value)
 	match type:
 		TYPE_DICTIONARY:
 			var hline = _to_h_str(value, with_type)
-			if len(hline) <= deep * 40 or parent == TYPE_ARRAY:
+			if allow_flat and len(hline) <= deep * 40 or parent == TYPE_ARRAY:
 				out.append("%s%s%s" % [head, key, hline])
 			else:
 				out.append("%s%s" % [head, key])
 				for k in value:
-					_to_str(out, k+": ", value[k], with_type, deep+1, TYPE_DICTIONARY)
+					_to_str(out, k+": ", value[k], with_type, allow_flat, deep+1, TYPE_DICTIONARY)
 		
 		TYPE_ARRAY:
 			var hline = _to_h_str(value, with_type)
-			if len(hline) <= deep * 40 or UList.all_items_of_type(value, TYPE_STRING):
+			if allow_flat and len(hline) <= deep * 40 or UList.all_items_of_type(value, TYPE_STRING):
 				out.append("%s%s%s" % [head, key, hline])
 			else:
 				out.append("%s%s" % [head, key])
 				for item in value:
-					_to_str(out, "- ", item, with_type, deep+1, TYPE_ARRAY)
+					_to_str(out, "- ", item, with_type, allow_flat, deep+1, TYPE_ARRAY)
 		
 		_:
 			if type == TYPE_STRING and _has_special_char(value):

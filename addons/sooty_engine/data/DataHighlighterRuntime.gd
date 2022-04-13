@@ -91,6 +91,14 @@ func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 	_text = text
 	_deep = UString.count_leading(text, "\t")
 	
+	# debug
+	for item in ["(int)", "(String)", "(Color)", "(bool)"]:
+		var ii := _text.find(item)
+		if ii != -1:
+			_c(ii, C_SYMBOL)
+			_c(ii+1, Color.LIGHT_GREEN)
+			_c(ii+len(item)-1, C_SYMBOL)
+	
 	# meta fields
 	if text.begins_with("#."):
 		_c(0, C_SYMBOL)
