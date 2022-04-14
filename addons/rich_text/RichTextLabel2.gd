@@ -47,18 +47,32 @@ signal right_pressed(variant: Variant)
 		add_theme_font_size_override("mono_font_size", font_size)
 		add_theme_font_size_override("normal_font_size", font_size)
 
+@export var shadow: bool = false:
+	set(v):
+		shadow = v
+		if shadow:
+			add_theme_color_override("font_shadow_color", Color(0,0,0,.25))
+			add_theme_constant_override("shadow_offset_x", floor(font_size * .08))
+			add_theme_constant_override("shadow_offset_y", floor(font_size * .08))
+			add_theme_constant_override("shadow_outline_size", ceil(font_size * .1))
+			
+		else:
+			remove_theme_color_override("font_shadow_color")
+			remove_theme_constant_override("shadow_offset_x")
+			remove_theme_constant_override("shadow_offset_y")
+			remove_theme_constant_override("shadow_outline_size")
+
 @export var outline_mode: Outline = Outline.DARKEN:
 	set(o):
 		outline_mode = o
 		add_theme_color_override("font_outline_color", _get_outline_color(Color.WHITE))
 	
-@export var outline_colored := 0:
-	set(o):
-		outline_colored = o
-		add_theme_constant_override("outline_size", o)
-
-@export_range(0.0, 1.0) var outline_adjust := 0.33
+@export_range(0.0, 1.0) var outline_adjust := 0.5
 @export var outline_hue_adjust := 0.0125
+@export var outline_size := 0:
+	set(o):
+		outline_size = o
+		add_theme_constant_override("outline_size", o)
 
 @export var nicer_quotes_enabled := true
 @export var nicer_quotes_format := "“%s”"
@@ -394,7 +408,9 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		"fill": _push_paragraph(HORIZONTAL_ALIGNMENT_FILL)
 		
 		"dim": _push_color(_state.color.darkened(.33))
+		"dima": _push_color(Color(_state.color.darkened(.33), .5))
 		"lit": _push_color(_state.color.lightened(.33))
+		"lita": _push_color(Color(_state.color.lightened(.33), .5))
 		"hide": _push_color(Color.TRANSPARENT)
 		
 		"meta": _push_meta(info)
@@ -534,8 +550,8 @@ func _push_color(clr: Color):
 	push_outline_color(outline_color)
 	
 	# outline size
-	if outline_colored > 0:
-		push_outline_size(outline_colored)
+	if outline_size > 0:
+		push_outline_size(outline_size)
 
 func _get_outline_color(clr: Color) -> Color:
 	var out := clr
@@ -550,7 +566,7 @@ func _pop_color(data):
 	pop()
 	if outline_mode != Outline.OFF:
 		pop()
-	if outline_colored > 0:
+	if outline_size > 0:
 		pop()
 
 # remove the last tag or set of tags.

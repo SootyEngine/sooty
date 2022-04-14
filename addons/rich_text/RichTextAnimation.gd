@@ -39,8 +39,8 @@ enum {
 @export var fade_out_speed := 120.0
 
 @export_range(0.0, 1.0) var progress := 0.0: set = set_progress
-@export var effect_time := 0.0
 @export var visible_character := -1
+var effect_time := 0.0
 
 @export var _wait := 0.0
 @export var _pace := 1.0
@@ -197,7 +197,7 @@ func set_progress(p:float):
 			faded_in.emit()
 
 func _process(delta: float) -> void:
-	if play:
+	if not Engine.is_editor_hint() and play:
 		effect_time += delta
 	
 	if len(_alpha_real) != get_total_character_count():

@@ -617,7 +617,7 @@ func _line_as_lang(line: Dictionary, gone := false):
 func _line_as_meta(line: Dictionary):
 	var p = line.M.text.substr(len("#.")).split(":", true, 1)
 	var k: String = p[0].strip_edges()
-	var v: String = p[1].strip_edges()
+	var v = true if len(p) == 1 else p[1].strip_edges()
 	line.type = "meta"
 	line.key = k
 	line.val = v

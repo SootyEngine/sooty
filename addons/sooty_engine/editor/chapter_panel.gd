@@ -34,7 +34,7 @@ func _redraw():
 		var parts = flow.split("/")
 		var deep = len(parts)
 		var data = Dialogue._flows[flow]
-		var label := "%s%s" % ["\t".repeat(deep-1), parts[-1]]
+		var label := "%s%s" % ["\t\t".repeat(deep-1), parts[-1]]
 		var color := Color.WHITE.darkened(.2 * deep)
 		
 		var metas := []

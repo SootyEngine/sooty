@@ -275,16 +275,16 @@ static func get_arg_info(obj: Variant, meth: String) -> Array:
 
 # godot keeps dict key order, so we can return 
 static func get_method_info(obj: Variant, meth: String) -> Dictionary:
-	var methods = get_methods(obj) # TODO: Cache.
+	var methods = get_methods(obj, meth) # TODO: Cache.
 	return methods.get(meth, {})
 #	return null if methods == null or not meth in methods else methods[meth]
 
-static func get_methods(obj: Variant) -> Dictionary:
+static func get_methods(obj: Variant, method := "") -> Dictionary:
 	var script = obj.get_script()
 	var out := {}
 	if script:
 		for line in script.source_code.split("\n", false):
-			if line.begins_with("func "):
+			if method and line.begins_with("func " + method):
 				var p = line.substr(5).split("(")
 				var fname = p[0]
 				var end = p[1].rsplit(")")

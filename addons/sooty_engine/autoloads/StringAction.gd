@@ -157,9 +157,6 @@ func var_to_variant(svar: Variant) -> Variant:
 
 # @action
 func call_group(action: String, context: Object) -> Variant:
-	if action.begins_with("@"):
-		action = action.substr(1).strip_edges()
-	
 	var args := UString.split_outside(action, " ")
 	var group: String = args.pop_front()
 	return call_group_w_args(group, args, true)
@@ -168,13 +165,13 @@ func call_group(action: String, context: Object) -> Variant:
 # while it can call many members of a group, it returns the last non null value it gets
 func call_group_w_args(group: String, args: Array, as_string_args := false) -> Variant:
 	if group.begins_with("@"):
-		group = group.substr(1).strip_edges()
+		group = group.substr(1)
 	
 	# node call
 	var method: String = group
 	if "." in group:
 		var p = group.split(".", true, 1)
-		group = "@" + p[0]
+		group = "@:" + p[0]
 		method = p[1]
 	# function call
 	else:

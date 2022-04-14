@@ -2,12 +2,13 @@
 extends  RefCounted
 class_name DialogueTools
 
-const FORMAT_FROM := "[white;dim]｢[] %s [white;dim]｣[]"
 const FORMAT_ACTION := "[gray;i]*%s*[]"
 const FORMAT_PREDICATE := "[dim]%s[]"
 const FORMAT_QUOTE := "[q]%s[]"
 const FORMAT_INNER_QUOTE := "[i]%s[]"
 const QUOTE_DELAY := 0.25 # a delay between predicates and quotes.
+
+const LAST_SPEAKER := "LAST_SPEAKER"
 
 static func str_to_dialogue(s: String) -> Dictionary:
 	var speaker_split := _find_speaker_split(s, 0)
@@ -29,11 +30,9 @@ static func str_to_dialogue(s: String) -> Dictionary:
 			for part in a.inside.split(";"):
 				action.append("@%s.%s" % [from, part])
 			action = action
-		# remember last speaker
+		# signal that a speaker is desired but not given
 		if from.strip_edges() == "":
-			from = "LAST_SPEAKER"#_last_speaker
-#		else:
-#			_last_speaker = out.name
+			from = LAST_SPEAKER
 		text = text.replace("\\:", ":")
 	
 	return {from=from, text=text, action=action}
@@ -68,8 +67,6 @@ static func str_to_speaker(from: String) -> String:
 		# if a state, format it's text.
 		elif State._has(from):
 			from = UString.get_string(State._get(from), "speaker_name")
-		
-		from = FORMAT_FROM % from
 	
 	return from
 
@@ -78,7 +75,7 @@ static func str_to_caption(from: String, text: String) -> String:
 		return _str_to_caption(text,
 		"(", ")",
 		"[i;dim]", "[]",
-		UString.CHAR_QUOTE_OPENED, UString.CHAR_QUOTE_CLOSED)
+		"[dima]%s[]" % UString.CHAR_QUOTE_OPENED, "[dima]%s[]" % UString.CHAR_QUOTE_CLOSED)
 	else:
 		return _str_to_caption(UString.fix_quotes(text),
 		UString.CHAR_QUOTE_OPENED, UString.CHAR_QUOTE_CLOSED,
