@@ -1,8 +1,12 @@
-IGNORE
+#.IGNORE
 
-# Comments start with #.
+# Comments start with # .
 # Flows start with ===
 === flow_node
+	#.color: orange
+	#.progress: 100%
+	#.note: The one to win it
+	#.icon: ✔
 	
 	Text without a speaker. 
 	
@@ -88,10 +92,10 @@ IGNORE
 			It's the middle of the week.
 		{(THURSDAY)}}
 			john: The whole vibe shifts on thursday!
-		{{FRIDAY}}
+		{(FRIDAY)}
 			@sfx happy_audio
 			john: Aw yeah, friday!
-		{{_}}
+		{(_)}
 			It's the weekend.
 	
 	# Options.
@@ -115,6 +119,10 @@ IGNORE
 # found in Dialogues.flags = []
 # TODO
 === import_flags
+	#.icon: ★
+	#.note: Rewrite
+	#.color: light_green
+	
 	# special compiler flag test.
 	# must be on the first tab of a flow
 	#? lang:en

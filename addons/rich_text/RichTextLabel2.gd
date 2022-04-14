@@ -27,8 +27,8 @@ enum Align { NONE, LEFT, CENTER, RIGHT }
 enum Outline { OFF, DARKEN, LIGHTEN }
 enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
 
-signal clicked(variant: Variant)
-signal right_clicked(variant: Variant)
+signal pressed(variant: Variant)
+signal right_pressed(variant: Variant)
 
 @export_multiline var bbcode := "": set = set_bbcode
 
@@ -84,9 +84,13 @@ func _get_tool_buttons():
 
 func _init():
 	if not Engine.is_editor_hint():
+		_connect_meta()
+
+func _connect_meta():
 		meta_hover_started.connect(_meta_hover_started)
 		meta_hover_ended.connect(_meta_hover_ended)
-		gui_input.connect(_gui_input)
+#		meta_clicked.connect(_meta_clicked)
+#		gui_input.connect(_gui_input)
 
 func _meta_hover_started(meta: Variant):
 	_meta_hovered = meta
@@ -105,23 +109,23 @@ func _gui_input(event: InputEvent) -> void:
 					if _meta[_meta_hovered] is Callable:
 						_meta[_meta_hovered].call()
 					else:
-						clicked.emit(_meta[_meta_hovered])
-				
+						pressed.emit(_meta[_meta_hovered])
+			
 				# goto url
 				elif _meta_hovered.begins_with("https://"):
 					OS.shell_open(_meta_hovered)
-				
+		
 				else:
 					push_error("No meta url for '%s'. %s" % [_meta_hovered, _meta.keys()])
 				
 				get_viewport().set_input_as_handled()
-				
+
 			MOUSE_BUTTON_RIGHT:
 				if _meta_hovered in _meta:
 					if _meta[_meta_hovered] is Callable:
 						_meta[_meta_hovered].call()
 					else:
-						right_clicked.emit(_meta[_meta_hovered])
+						right_pressed.emit(_meta[_meta_hovered])
 				else:
 					push_error("No meta url for '%s'." % _meta_hovered)
 				get_viewport().set_input_as_handled()
@@ -148,7 +152,6 @@ func set_bbcode(btext: String):
 	bbcode = btext
 	clear()
 	uninstall_effects()
-	_meta.clear()
 	_stack.clear()
 	_state = {
 		color = color,
@@ -683,6 +686,22 @@ static func _str2var(s: String) -> Variant:
 #		if execute_expression(test[0]):
 #			return test[1]
 #	return ""
+
+func clear_meta():
+	_meta.clear()
+
+func gen_meta(label: String, data: Variant, hint := "", tags := "") -> String:
+	var h = "_%s" % hash(data)
+	_meta[h] = data
+	if hint:
+		if tags:
+			return "[meta %s^%s;%s]%s[]" % [h, hint, tags, label]
+		else:
+			return "[meta %s^%s]%s[]" % [h, hint, label]
+	elif tags:
+		return "[meta %s;%s]%s[]" % [h, tags, label]
+	else:
+		return "[meta %s]%s[]" % [h, label]
 
 func _has_effect(id:String) -> bool:
 	for e in custom_effects:

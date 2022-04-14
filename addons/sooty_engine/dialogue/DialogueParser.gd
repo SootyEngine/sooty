@@ -182,13 +182,13 @@ func _parse(file_path: String, all_flows: Dictionary, all_lines: Dictionary):
 		var line := i
 		
 		# meta lines
-		if current_line.begins_with("#."):
-			var meta_kv := current_line.trim_prefix("#.").split(":", true, 1)
-			var k := meta_kv[0].strip_edges()
-			var v = meta_kv[1].strip_edges() if len(meta) == 2 else true
-			meta[k] = v
-			i += 1
-			continue
+#		if current_line.begins_with("#."):
+#			var meta_kv := current_line.trim_prefix("#.").split(":", true, 1)
+#			var k := meta_kv[0].strip_edges()
+#			var v = meta_kv[1].strip_edges() if len(meta) == 2 else true
+#			meta[k] = v
+#			i += 1
+#			continue
 		
 		# TODO: move down to step level
 		# import time flags
@@ -401,8 +401,14 @@ func _clean(line: Dictionary) -> String:
 	
 	# erase non essential keys from Meta.
 	for k in line.M.keys():
-		if not k in ["file", "line", "id", "block"]:
+		if not k in ["file", "line", "id", "block", "meta"]:
 			line.M.erase(k)
+	# move explicit meta, to main meta thingy
+	# TODO: this better
+	if "meta" in line.M:
+		for k in line.M.meta:
+			line.M[k] = line.M.meta[k]
+		line.M.erase("meta")
 	
 	return line.M.id
 
@@ -431,6 +437,13 @@ func _collect_tabbed(dict_lines: Array, i: int) -> Array:
 	for j in len(line.M.tabbed):
 		var ln: Dictionary = line.M.tabbed[j]
 		match ln.type:
+			# grab meta values
+			"meta":
+				if not "meta" in line.M:
+					line.M.meta = {}
+				line.M.meta[ln.key] = ln.val
+			
+			# merge if/else
 			"cond":
 				match ln.cond_type:
 					"if", "match":
@@ -458,6 +471,8 @@ func _process_line(line: Dictionary):
 	if t.begins_with(Soot.LANG): return _line_as_lang(line)
 	# <?>
 	if t.begins_with(Soot.LANG_GONE): return _line_as_lang(line, true)
+	# #.meta: values
+	if t.begins_with("#."): return _line_as_meta(line)
 	# {{}}
 	_extract_condition(line) # all lines can have one
 	if t.begins_with("{{"): return _line_as_condition(line)
@@ -598,6 +613,14 @@ func _line_as_lang(line: Dictionary, gone := false):
 	line.type = "lang_gone" if gone else "lang"
 	line.M.id = line.M.text.substr(len(Soot.LANG)).strip_edges()
 	line.then = line.M.tabbed
+
+func _line_as_meta(line: Dictionary):
+	var p = line.M.text.substr(len("#.")).split(":", true, 1)
+	var k: String = p[0].strip_edges()
+	var v: String = p[1].strip_edges()
+	line.type = "meta"
+	line.key = k
+	line.val = v
 
 func _line_as_text_insert(line: Dictionary):
 	var text = line.M.text.trim_prefix(Soot.TEXT_INSERT).split("=")

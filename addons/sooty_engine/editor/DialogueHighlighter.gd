@@ -37,7 +37,6 @@ const C_OPTION_TEXT := Color.WHEAT
 # strings
 const S_FLAG := "\t#?"
 
-
 const S_LIST_START := "{<"
 const S_LIST_END := ">}"
 const S_COND_START := "{{"
@@ -52,9 +51,11 @@ var index := 0
 var deep := 0
 var state := {}
 var text := ""
+var current_line := 0
 
 func _get_line_syntax_highlighting(line: int) -> Dictionary:
 	text = get_text_edit().get_line(line)
+	current_line = line
 	state = {}
 	index = 0
 	deep = UString.count_leading(text, "\t")
@@ -62,10 +63,11 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 	var out = state
 	
 	# meta fields
-	if text.begins_with("#."):
-		_c(0, C_SYMBOL)
-		_c(2, Color.PALE_VIOLET_RED)
-		var i := text.find(":", 2)
+	var start := text.find("#.")
+	if start != -1:
+		_c(start, C_SYMBOL)
+		_c(start+2, Color.PALE_VIOLET_RED)
+		var i := text.find(":", start+2)
 		if i != -1:
 			_c(i, C_SYMBOL)
 			_c(i+1, Color.PINK)
@@ -149,28 +151,40 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 	
 	return state
 
-static func split_string(s: String) -> Array:
-	var out := [""]
-	var in_quotes := false
-	for c in s:
-		if c == '"':
-			if in_quotes:
-				in_quotes = false
-				out[-1] += '"'
-			else:
-				in_quotes = true
-				if out[-1] == "":
-					out[-1] += '"'
-				else:
-					out.append('"')
-		
-		elif c == " " and not in_quotes:
-			if out[-1] != "":
-				out.append("")
-		
-		else:
-			out[-1] += c
-	return out
+# go backwards through the lines and try to find the flow/path/to/this/node.
+func _find_true_depth() -> int:
+	var line := current_line
+	var t := get_text_edit()
+	while line >= 0:
+		var text := t.get_line(line)
+		var i := text.find("===")
+		if i != -1:
+			return i
+		line -= 1
+	return deep
+
+#static func split_string(s: String) -> Array:
+#	var out := [""]
+#	var in_quotes := false
+#	for c in s:
+#		if c == '"':
+#			if in_quotes:
+#				in_quotes = false
+#				out[-1] += '"'
+#			else:
+#				in_quotes = true
+#				if out[-1] == "":
+#					out[-1] += '"'
+#				else:
+#					out.append('"')
+#
+#		elif c == " " and not in_quotes:
+#			if out[-1] != "":
+#				out.append("")
+#
+#		else:
+#			out[-1] += c
+#	return out
 
 func _c(i: int, clr: Color):
 	state[i] = {color=clr}
@@ -467,18 +481,20 @@ func get_flow_color(deep: int) -> Color:
 func _h_flow(from: int, to: int):
 	var inner := text.substr(from, to-from)
 	
+	var true_deep = _find_true_depth()+1
+	
 	_c(from, C_SYMBOL)
-	_c(from+2, get_flow_color(deep))
+	_c(from+2, get_flow_color(true_deep))
 	from += 2
 	
 	var started := false
-	var path_deep := deep
+	var path_deep := true_deep
 	for i in range(from, to):
 		# nested path?
 		if text[i] == ".":
 			if not started:
 				started = true
-				path_deep = deep-1
+				path_deep = true_deep-1
 			else:
 				path_deep -= 1
 			_c(i, C_SYMBOL)

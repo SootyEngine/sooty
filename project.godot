@@ -59,46 +59,6 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/rich_text/Emoji.gd"
 }, {
-"base": "Node",
-"class": &"FE",
-"language": &"GDScript",
-"path": "res://addons/file_editor/comp/FE_Main.gd"
-}, {
-"base": "Node",
-"class": &"FE_BaseFile",
-"language": &"GDScript",
-"path": "res://addons/file_editor/data/FE_BaseFile.gd"
-}, {
-"base": "FE_BaseFile",
-"class": &"FE_Directory",
-"language": &"GDScript",
-"path": "res://addons/file_editor/data/FE_Directory.gd"
-}, {
-"base": "CodeEdit",
-"class": &"FE_Editor",
-"language": &"GDScript",
-"path": "res://addons/file_editor/ext_editor/FE_Editor.gd"
-}, {
-"base": "Container",
-"class": &"FE_Editors",
-"language": &"GDScript",
-"path": "res://addons/file_editor/comp/FE_Editors.gd"
-}, {
-"base": "FE_BaseFile",
-"class": &"FE_File",
-"language": &"GDScript",
-"path": "res://addons/file_editor/data/FE_File.gd"
-}, {
-"base": "Node",
-"class": &"FE_Files",
-"language": &"GDScript",
-"path": "res://addons/file_editor/comp/FE_Files.gd"
-}, {
-"base": "Resource",
-"class": &"FE_Util",
-"language": &"GDScript",
-"path": "res://addons/file_editor/FE_Util.gd"
-}, {
 "base": "Timer",
 "class": &"FileModifiedScanner",
 "language": &"GDScript",
@@ -250,14 +210,6 @@ _global_script_class_icons={
 "DialogueParser": "",
 "DialogueTools": "",
 "Emoji": "",
-"FE": "",
-"FE_BaseFile": "",
-"FE_Directory": "",
-"FE_Editor": "",
-"FE_Editors": "",
-"FE_File": "",
-"FE_Files": "",
-"FE_Util": "",
 "FileModifiedScanner": "",
 "Flow": "",
 "FontHelper": "",
@@ -315,7 +267,7 @@ gdscript/warnings/integer_division=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/sooty_engine/plugin.cfg", "res://addons/tool_button/plugin.cfg")
+enabled=PackedStringArray("res://addons/sooty_engine/plugin.cfg")
 
 [input]
 

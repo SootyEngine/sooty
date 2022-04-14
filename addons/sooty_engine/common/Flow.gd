@@ -409,7 +409,6 @@ func get_flow_path(next: String) -> String:
 
 static func _get_flow_path(from: String, was: String) -> String:
 	var next := was
-	prints("[%s] [%s]" % [from, was])
 	if next:
 		# going to a root
 		if next.begins_with("/"):

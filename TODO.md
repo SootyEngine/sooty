@@ -32,6 +32,11 @@
 - [ ] `Mods` add signal `collect_mods` which will request paths, instead of current system.
 - [x] Custom `Bool` class for managing a single state bool.
 
+# Inspector
+- [ ] Show an inspector with chapter overview
+- [ ] Use chapter meta data to contain color info for side panel
+- [ ] Show meta in side panel, if toggle is active
+
 # StringActions
 @node `shortcut`
 $flow or parent object of flow `eval`
@@ -47,6 +52,7 @@ remove `>` command and just use `@`
 - [ ] define step types in Soot
 - [ ] Inserts for choices
 - [ ] Inserts for actions?
+- [x] Seperate editors from plugin script.
 - [x] Don't be file bound.
     - [x] Let multiple files contribute to the same dialogue.
     - [x] And let a single file contribute to multiple dialogues.
@@ -132,6 +138,7 @@ remove `>` command and just use `@`
 - `.soot`
     - [ ] Highlight `IGNORE` yellow
     - [x] Markdown * ** ***
+- [ ] Move `type` to `M` meta.
 - [x] Match statements on same line aren't colored.
 - [x] `+` options isn't colored
 - [x] Colorize `/` in `=>` `==` paths.
@@ -182,6 +189,7 @@ remove `>` command and just use `@`
 - [x] Click an option to select.
 
 ## Sprites
+- [ ] Add resource for taking a snapshot of a position, scale, rotation, and color. Then call a function to lerp there.
 - [x] Add hide() function to immediately set modulate.a = 0.0.
 
 # Docs
