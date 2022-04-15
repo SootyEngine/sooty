@@ -34,10 +34,20 @@ signal right_pressed(variant: Variant)
 @export_multiline var bbcode := "": set = set_bbcode
 
 @export var effects_mode: EffectsMode = EffectsMode.OFF_IN_EDITOR
-@export var alignment: Align = Align.CENTER
-@export var color := Color.WHITE
+@export var alignment: Align = Align.CENTER:
+	set(x):
+		alignment = x
+		_redraw()
+
+@export var color := Color.WHITE:
+	set(x):
+		color = x
+		_redraw()
+		_update_color()
+
 @export var font := "":
 	set = set_font
+
 @export var font_size: int = 16:
 	set(x):
 		font_size = clampi(x, MIN_FONT_SIZE, MAX_FONT_SIZE)
@@ -46,6 +56,7 @@ signal right_pressed(variant: Variant)
 		add_theme_font_size_override("italics_font_size", font_size)
 		add_theme_font_size_override("mono_font_size", font_size)
 		add_theme_font_size_override("normal_font_size", font_size)
+		_redraw()
 
 @export var shadow: bool = false:
 	set(v):
@@ -65,14 +76,26 @@ signal right_pressed(variant: Variant)
 @export var outline_mode: Outline = Outline.DARKEN:
 	set(o):
 		outline_mode = o
-		add_theme_color_override("font_outline_color", _get_outline_color(Color.WHITE))
+		_redraw()
+		_update_color()
 	
-@export_range(0.0, 1.0) var outline_adjust := 0.5
-@export var outline_hue_adjust := 0.0125
+@export_range(0.0, 1.0) var outline_adjust := 0.5:
+	set(x):
+		outline_adjust = x
+		_redraw()
+		_update_color()
+	
+@export var outline_hue_adjust := 0.0125:
+	set(x):
+		outline_hue_adjust = x
+		_redraw()
+		_update_color()
+
 @export var outline_size := 0:
 	set(o):
 		outline_size = o
 		add_theme_constant_override("outline_size", o)
+		_redraw()
 
 @export var nicer_quotes_enabled := true
 @export var nicer_quotes_format := "“%s”"
@@ -158,10 +181,18 @@ func _reload_config():
 		for key in Global.config.get_section_keys("rich_text_shortcuts"):
 			_custom_colors[key] = Global.config.get_value("rich_text_shortcuts", key)
 
+func _update_color():
+	add_theme_color_override("font_outline_color", _get_outline_color(color))
+
+var _last_draw_at := get_tree().get_frame()
 func _redraw():
+#	if get_tree().get_frame() - _last_draw_at > 4:
 	set_bbcode(bbcode)
+#	else:
+#		print("skipping")
 
 func set_bbcode(btext: String):
+	_last_draw_at = get_tree().get_frame()
 	text = ""
 	bbcode = btext
 	clear()
@@ -339,7 +370,7 @@ func _parse_tag(tag: String):
 	# [tag key=val]
 	elif b != -1 and (a == -1 or b < a):
 		tag_name = tag.substr(0, b)
-		tag_info = tag.substr(b)
+		tag_info = tag.substr(b).strip_edges()
 	# [tag]
 	else:
 		tag_name = tag
@@ -391,10 +422,7 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 	
 	# font sizes
 	if len(tag) and tag[0].is_valid_int():
-		if "." in tag:
-			_push_font_size(int(_state.font_size * tag.to_float()))
-		else:
-			_push_font_size(int(_state.font_size + tag.to_int()))
+		_push_font_size(int(_state.font_size * _to_number(tag)))
 		return
 	
 	# emoji: old style
@@ -444,6 +472,9 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		"lita": _push_color(Color(_state.color.lightened(.33), .5))
 		"hide": _push_color(Color.TRANSPARENT)
 		
+		# shift the hue. default to 50%.
+		"hue": _push_color(UClr.hue_shift(_state.color, _to_number(info) if info else 0.5))
+		
 		"meta": _push_meta(info)
 		"hint": _push_hint(info)
 		
@@ -460,6 +491,15 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 			
 			elif not _parse_tag_unused(tag, info, raw):
 				append_text("[%s]" % raw)
+
+func _to_number(s: String) -> float:
+	if s.is_valid_int():
+		return s.to_int() / 100.0
+	elif s.is_valid_float():
+		return s.to_float()
+	else:
+		push_warning("Couldn't convert '%s' to number." % [s])
+		return 1.0
 
 func _parse_tag_unused(tag: String, _info: String, _raw: String) -> bool:
 	# check if it's a color.
@@ -598,8 +638,9 @@ func _get_outline_color(clr: Color) -> Color:
 	match outline_mode:
 		Outline.DARKEN: out = clr.darkened(outline_adjust)
 		Outline.LIGHTEN: out = clr.lightened(outline_adjust)
-	out.h = wrapf(out.h + outline_hue_adjust, 0.0, 1.0)
-	return out
+	return UClr.hue_shift(out, outline_hue_adjust)
+#	out.h = wrapf(out.h + outline_hue_adjust, 0.0, 1.0)
+#	return out
 
 func _pop_color(data):
 	_state.color = data

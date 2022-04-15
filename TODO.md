@@ -31,6 +31,10 @@
 - [x] Container Awards, Tasks, and other things in collections, rather than state.
 - [x] Move UI/console and fonts to `VisualNovel` addon.
 
+# RichTextLabel
+- [ ] Font tag should check if any bold/italic state is set, if it has an `_i.tres` `_b.tres` `_bi.tres` available.
+- [ ] Font image folder, for images that can be shown in fonts with a quick tag.
+
 # State
 - [ ] `Mods` add signal `collect_mods` which will request paths, instead of current system.
 - [x] Custom `Bool` class for managing a single state bool.
