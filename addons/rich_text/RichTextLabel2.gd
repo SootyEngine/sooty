@@ -366,7 +366,15 @@ func _passes_condition(cond: String, raw: String) -> bool:
 				return true
 	
 	return false
-	
+
+static func has_emoji_font() -> bool:
+	return File.new().file_exists("res://fonts/emoji_font.tres")
+
+static func get_emoji_font() -> Font:
+	if has_emoji_font():
+		return load("res://fonts/emoji_font.tres")
+	return null
+
 func _parse_tag_info(tag: String, info: String, raw: String):
 	if not _passes_condition(tag, raw):
 		return
@@ -386,13 +394,26 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 	
 	# emoji: old style
 	if tag in Emoji.OLDIE:
-		append_text(Emoji.OLDIE[tag])
+		var efont := get_emoji_font()
+		if efont != null:
+			push_font(efont)
+			append_text(Emoji.OLDIE[tag])
+			pop()
+		else:
+			append_text(Emoji.OLDIE[tag])
 		return
+	
 	# emoji: by name
 	if tag.begins_with(":") and tag.ends_with(":"):
-		var t := tag.trim_suffix(":").trim_prefix(":")
-		if t in Emoji.NAMES:
-			append_text(Emoji.NAMES[t])
+		var emoji_name := tag.trim_suffix(":").trim_prefix(":")
+		if emoji_name in Emoji.NAMES:
+			var efont := get_emoji_font()
+			if efont != null:
+				push_font(efont)
+				append_text(Emoji.NAMES[emoji_name])
+				pop()
+			else:
+				append_text(Emoji.NAMES[emoji_name])
 			return
 	
 	match tag:
