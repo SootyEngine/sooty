@@ -24,7 +24,7 @@ enum {
 	T_FLAG_CAP, T_FLAG_UPPER, T_FLAG_LOWER
 }
 
-enum Align { NONE, LEFT, CENTER, RIGHT }
+enum Align { NONE, LEFT, CENTER, RIGHT, FILL }
 enum Outline { OFF, DARKEN, LIGHTEN }
 enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
 
@@ -200,6 +200,7 @@ func _preparse(btext :String) -> String:
 		1: btext = "[left]%s[]" % btext
 		2: btext = "[center]%s[]" % btext
 		3: btext = "[right]%s[]" % btext
+		4: btext = "[fill]%s[]" % btext
 	
 	# escaped brackets
 	btext = btext.replace("\\[", "[lb]")
