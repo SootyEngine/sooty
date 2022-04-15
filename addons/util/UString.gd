@@ -133,7 +133,7 @@ static func split_outside(s: String, split_on: String) -> Array:
 			last = i
 		else:
 			i += 1
-	if last < len(s):
+	if last <= len(s):
 		out.append(s.substr(last, i-last))
 	return out
 

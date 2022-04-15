@@ -13,15 +13,24 @@
 	@Music.play "No Hope" volume:0.5
 	Text without a speaker. 
 	
+	[tomato]Tomato[b]Bold tomato[]tomto[;i]italic tomato[] toma [bi] bold italit[] comta.
+	[chocolate]When in rome[cornflower_blue]do whatever you want.
+	Whats [tomato]Not italic [bi]italic[] otaasd?[] okasd
+	[orange_red]The dark days of[b]tomorrow[] are nearly over.[]asdokasd asodkas[]
+	
 	# Speakers.
 	john: Text spoken by John.
 	: Text spoken by last speaker, John.
 	
 	# Markdown formatting.
 	Some *italic*, **bold** and ***bold italic*** text.
-	@Music.play ad o
+	@Music.testo("MON", "d1", true)
+	~ @Music.play("No Hope")
+	~ $ass.adsa(fd, d) ^ogre.reset(asad dsa, ds, true, "okay") + okay + @onasd(aosdk)
+	^okay.reset_all
 	
-
+	
+	[pale_violet_red]Okay now, which one of you thought.[b]And then[]we were out[] of the clear.
 	
 	# BBCode.
 	Some [b;tomato]bold red text[] and some [i;deep_sky_blue]italic blue text.[]

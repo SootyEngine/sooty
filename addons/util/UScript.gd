@@ -17,8 +17,10 @@ static func get_method_info(obj: Variant, meth: String) -> Dictionary:
 
 static func get_method_infos(obj: Variant) -> Dictionary:
 	var script: Script = obj.get_script()
-	if script.has_meta("method_info"):
-		return script.get_meta("method_info")
+#	if script.has_meta("cached_method_info"):
+#		print("got from cache")
+#		return script.get_meta("cached_method_info")
+	
 	var out := {}
 	if script:
 		for line in script.source_code.split("\n", false):
@@ -32,13 +34,21 @@ static func get_method_infos(obj: Variant) -> Dictionary:
 				# TODO: get return type
 				returns = UType.get_type_from_name(returns.trim_prefix("->").strip_edges())
 				out[fname] = {args=args, returns=returns}
-	script.set_meta("method_info", out)
+	
+	# look for explicitly defined data
+	if obj.has_method("_get_method_info"):
+		for method in out:
+			var extra_info = obj._get_method_info(method)
+			if extra_info:
+				UDict.merge(out[method], extra_info, true)
+	
+	script.set_meta("cached_method_info", out)
 	return out
 
 # convert a string of arguments to argument info
-static func _parse_method_arguments(s: String, obj: Variant = null) -> Array:
+static func _parse_method_arguments(s: String, obj: Variant = null) -> Dictionary:
 	if s.strip_edges() == "":
-		return []
+		return {}
 	
 	var args = [["", ""]]
 	var open := {}
@@ -62,7 +72,7 @@ static func _parse_method_arguments(s: String, obj: Variant = null) -> Array:
 			")": UDict.tick(open, "(", -1)
 		args[-1][0 if in_name else 1] += c
 	
-	var out := []
+	var out := {}
 	for i in len(args):
 		var name = args[i][0].strip_edges()
 		var value = args[i][1].split("=", true, 1)
@@ -76,11 +86,13 @@ static func _parse_method_arguments(s: String, obj: Variant = null) -> Array:
 		
 		if type_name:
 			arg_info.type = UType.get_type_from_name(type_name)
+			# null type, yet a name exists?
+			# so it's either a class_name or an Enum
 			if arg_info.type == TYPE_NIL:
 				arg_info.type = type_name
 		
 		elif "default" in arg_info:
 			arg_info.type = typeof(arg_info.default)
 		
-		out.append(arg_info)
+		out[name] = arg_info
 	return out

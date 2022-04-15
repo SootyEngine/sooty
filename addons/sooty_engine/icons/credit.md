@@ -17,3 +17,11 @@
 <a href="https://www.flaticon.com/free-icons/at" title="at icons">At icons created by Pixel perfect - Flaticon</a>
 
 <a href="https://www.flaticon.com/free-icons/music" title="music icons">Music icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/shine" title="shine icons">Shine icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/happy" title="happy icons">Happy icons created by Smashicons - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/slow-motion" title="slow motion icons">Slow motion icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/megaphone" title="megaphone icons">Megaphone icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/print" title="print icons">Print icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/align" title="align icons">Align icons created by Royyan Wijaya - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/expand" title="expand icons">Expand icons created by Freepik - Flaticon</a>

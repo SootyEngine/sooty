@@ -1,6 +1,55 @@
 @tool
 extends CodeEdit
 
+# richtextlabel tags
+var TAG_DESC := {
+	# font
+	"Bold": { "insert": "b", "icon": ICON_STR },
+	"Italics": { "insert": "i", "icon": ICON_STR },
+	"Bold italics": { "insert": "bi", "icon": ICON_STR },
+	"Underline": { "insert": "u", "icon": ICON_STR },
+	"Strike through": { "insert": "s", "icon": ICON_STR },
+	"Monospaced": { "insert": "code", "icon": ICON_STR },
+	
+	# size
+	"Resize 1.5x": { "insert": "1.5", "icon": ICON_RESIZE },
+	"Resize 2x": { "insert": "2.0", "icon": ICON_RESIZE },
+	"Resize .5x": { "insert": "0.5", "icon": ICON_RESIZE },
+	
+	# color
+	"Darken 33%": { "insert": "dim", "icon": ICON_COLOR },
+	"Lighten 33%": { "insert": "lit", "icon": ICON_COLOR },
+	
+	# emojis
+	"Emoji": {"insert": "::", "icon": ICON_PRINT },
+	
+	# brackets
+	"Left bracket": { "insert": "lb", "icon": ICON_PRINT },
+	"Right bracket": { "insert": "rb", "icon": ICON_PRINT },
+	
+	# inline state
+	"Input @node action": { "insert": "@", "icon": ICON_PRINT },
+	"Input $state action": { "insert": "$", "icon": ICON_PRINT },
+	"Input ^persistent state action": { "insert": "^", "icon": ICON_PRINT },
+	"Input ~evaluation": { "insert": "~", "icon": ICON_PRINT },
+	
+	# other
+	"Hint": { "insert": "hint \"Hello world!\"", "icon": ICON_PRINT },
+	"Link": { "insert": "meta \"www.google.com\"", "icon": ICON_PRINT },
+	"Link with hint": { "insert": "meta \"Link text\" \"Hint text\"", "icon": ICON_PRINT },
+	
+	# animations
+	"Delayed @node action": { "insert": "!@", "icon": ICON_CALL },
+	"Delayed $state action": { "insert": "!$", "icon": ICON_CALL },
+	"Delayed ^persistent state action": { "insert": "!^", "icon": ICON_CALL },
+	"Delayed ~evaluation": { "insert": "!~", "icon": ICON_CALL },
+	
+	"Align left": {"insert": "left", "icon": ICON_ALIGN },
+	"Alight right": {"insert": "right", "icon": ICON_ALIGN },
+	"Align center": {"insert": "center", "icon": ICON_ALIGN },
+	"Align fill": {"insert": "fill", "icon": ICON_ALIGN },
+}
+
 const SootHighlighter = preload("res://addons/sooty_engine/editor/DialogueHighlighter.gd")
 
 const ICON_ARRAY := preload("res://addons/sooty_engine/icons/var_array.png")
@@ -17,30 +66,78 @@ const ICON_SIGNAL := preload("res://addons/sooty_engine/icons/generic_signal.png
 const ICON_NODE_ACTION := preload("res://addons/sooty_engine/icons/node_action.png")
 const ICON_NODE_OBJECT := preload("res://addons/sooty_engine/icons/node_object.png")
 
+# rich text tags
+const ICON_EFFECT := preload("res://addons/sooty_engine/icons/effects.png")
+const ICON_EMOJI := preload("res://addons/sooty_engine/icons/emoji.png")
+const ICON_MOTION := preload("res://addons/sooty_engine/icons/motion.png")
+const ICON_CALL := preload("res://addons/sooty_engine/icons/call.png")
+const ICON_PRINT := preload("res://addons/sooty_engine/icons/print.png")
+const ICON_ALIGN := preload("res://addons/sooty_engine/icons/align.png")
+const ICON_RESIZE := preload("res://addons/sooty_engine/icons/resize.png")
+
 @export var plugin_instance_id: int
 
+var rte_info := {}
+func _get_rich_text_effect_info():
+	if not len(rte_info):
+		print("getting rte.")
+		for file in UFile.get_files("res://addons/rich_text/text_effects", ".gd"):
+			var rte = load(file).new()
+			if "bbcode" in rte:
+				if "info" in rte:
+					rte_info[rte.bbcode] = rte.info
+				else:
+					rte_info[rte.bbcode] = {}
+	return rte_info
+	
 func _init() -> void:
-	# custom highlighter
-	syntax_highlighter = SootHighlighter.new()
+	if not has_meta("initialized"):
+		set_meta("initialized", true)
+		# custom highlighter
+		syntax_highlighter = SootHighlighter.new()
+		
+		# allow selecting symbols
+		symbol_lookup.connect(_symbol_lookup)
+		symbol_validate.connect(_symbol_validate)
+		symbol_lookup_on_click = true
+		
+		# prevent tabs breaking when there is an `'`
+		delimiter_strings = []
+	#	add_comment_delimiter("#", "", true)
+		
+		# helpful auto completes
+		auto_brace_completion_pairs["`"] = "`"
+		auto_brace_completion_pairs["<"] = ">"
+		auto_brace_completion_pairs["**"] = "**"
+		
+		# code completion, to help remember node names
+		code_completion_enabled = true
+		code_completion_requested.connect(_code_completion_requested)
+		code_completion_prefixes = ["/", ".", "$", "@", "^", ",", " ", "(", "[", ";"]
+
+func _get_func_info(fname: String) -> Array:
+	var object: String = ""
+	var method: String = fname
 	
-	# allow selecting symbols
-	symbol_lookup.connect(_symbol_lookup)
-	symbol_validate.connect(_symbol_validate)
-	symbol_lookup_on_click = true
+	if "." in fname:
+		var p := fname.split(".", true, 1)
+		object = p[0]
+		method = p[1]
+		
+	if fname.begins_with("@"):
+		if "." in fname:
+			var p := fname.trim_prefix("@").split(".", true, 1)
+			object = p[0]
+			method = p[1]
+			var node := get_tree().get_first_node_in_group("@:" + object)
+			if node:
+				return [node, UScript.get_method_info(node, method)]
+		else:
+			var node := get_tree().get_first_node_in_group("@." + object)
+			if node:
+				return [node, UScript.get_method_info(node, method)]
 	
-	# prevent tabs breaking when there is an `'`
-	delimiter_strings = []
-	add_comment_delimiter("#", "", true)
-	
-	# helpful auto completes
-	auto_brace_completion_pairs["`"] = "`"
-	auto_brace_completion_pairs["<"] = ">"
-	auto_brace_completion_pairs["**"] = "**"
-	
-	# code completion, to help remember node names
-	code_completion_enabled = true
-	code_completion_requested.connect(_code_completion_requested)
-	code_completion_prefixes = ["/", ".", "$", "@"]
+	return []
 
 func _code_completion_requested():
 	var line := get_caret_line()
@@ -50,7 +147,48 @@ func _code_completion_requested():
 	var found_at_least_one := false
 	var after := line_text.substr(get_caret_column()).strip_edges()
 	
-	if head in ["=>", "=="]:
+	if head in ["===", "---", "=+=", "&", "#", "{{", "{(", "{<"]:
+		pass
+	
+	# bbcode tags
+	elif head in ["[", ";"]:
+		found_at_least_one = true
+		# main tags
+		for k in TAG_DESC:
+			var info = TAG_DESC[k]
+			var display = k
+			var insert = info.insert
+			add_code_completion_option(CodeEdit.KIND_FILE_PATH, display, insert, Color.WHITE, info.icon)
+		
+		# effects
+		var rte := _get_rich_text_effect_info()
+		for k in rte:
+			var info = rte[k]
+			var display = k[0].capitalize() + k.substr(1)
+			var insert = k
+			if "desc" in info:
+				display += ": " + info.desc
+			if "auto" in info:
+				insert = info.auto
+			add_code_completion_option(CodeEdit.KIND_VARIABLE, display, insert, Color.WHITE, ICON_EFFECT)
+		
+		# color names
+		var clr := Color.WHITE
+		for i in UClr.HUE_SORTED:
+			var c := clr.get_named_color(i)
+			var n := clr.get_named_color_name(i)
+			var display := "Color.%s %s" % [n, c]
+			var insert := n.to_lower()
+			add_code_completion_option(CodeEdit.KIND_VARIABLE, display, insert, c, ICON_COLOR)
+		
+		# emojis
+#		for emoji_name in Emoji.NAMES:
+#			var display = "Emoji %s" % [emoji_name.capitalize()]
+#			var insert = ":%s:" % emoji_name
+#			add_code_completion_option(CodeEdit.KIND_VARIABLE, display, insert, Color.WHITE, ICON_EMOJI)
+		
+		
+	elif head in ["=>", "=="]:
 		var path := _find_flow(line_text, line)
 		var base1 := after.get_base_dir()
 		var base2 := path.get_base_dir() + "/" if path.get_base_dir() else ""
@@ -64,26 +202,85 @@ func _code_completion_requested():
 			found_at_least_one = true
 			add_code_completion_option(CodeEdit.KIND_FILE_PATH, p, p)
 	
+	elif head == "~":
+		# figure out which argument we are trygin to write
+		var arg_info = _find_function(line_text, get_caret_column())
+		# get the functions argument info
+		var func_info = _get_func_info(arg_info.get("method", ""))
+	#	print(arg_info, func_info)
+		# find the info for this specific argument
+		if func_info:
+			var object: Object = func_info[0]
+			if arg_info.current_arg >= len(func_info[1].args):
+				push_warning("ARG OUT OF BOUNDS")
+			
+			else:
+				var aa = func_info[1].args.values()[arg_info.current_arg]
+				
+				# is there a function that returns auto complete options?
+				if "options" in aa:
+					for op in aa.options.call():
+						found_at_least_one = true
+						var x = var2str(UStringConvert.to_type(op, aa.type))
+						add_code_completion_option(CodeEdit.KIND_VARIABLE, op, x, Color.WHITE, null, 1)
+				else:
+					if aa.type is String:
+						# is class_name?
+						if UClass.exists(aa.type):
+							var manager: DataManager = DataManager.get_manager(aa.type)
+							if manager:
+								var options = UDict.map_list(manager.get_all_ids(), func(x): return '"%s"'%x, true)
+								print(options)
+								for o in options:
+									found_at_least_one = true
+									add_code_completion_option(CodeEdit.KIND_ENUM, o, options[o])
+						
+						# is enum?
+						else:
+							for k in object[aa.type]:
+								found_at_least_one = true
+								add_code_completion_option(CodeEdit.KIND_ENUM, aa.type+"."+k, '"%s"' % k)
+					# look for type options
+					else:
+						var icon: Texture = null
+						var options := {}
+						match aa.type:
+							TYPE_BOOL:
+								icon = ICON_BOOL
+								options = {"true":"true", "false":"false"}
+						for o in options:
+							found_at_least_one = true
+							add_code_completion_option(CodeEdit.KIND_ENUM, o, options[o], Color.WHITE, icon)
+	
 	# action shortcuts
 	elif head == "@":
-		var data = UFile.load_from_resource("res://debug_output/all_groups.tres", {})
-		var method = line_text.strip_edges().substr(1)
+		var method: String = line_text.strip_edges().substr(1)
+		var node_action_groups: Array = UGroup.get_all()\
+			.map(func(x): return str(x))\
+			.filter(func(x): return x.begins_with("@"))
+		
+		# . in action means it is a function call or property accesor
 		if "." in method:
 			var p = method.split(".", true, 1)
 			var group = p[0]
 			method = p[1]
 			var parts := UString.split_outside(method, " ")
+			var all_methods: Dictionary = {}
+			
+			var node: Node = get_tree().get_first_node_in_group("@:" + group)
+			if node:
+				all_methods = UScript.get_method_infos(node)
 			
 			# still writing the function name
+			# so show a list of all possible functions
 			if len(parts) == 0:
-				var all_methods = data.get("@:" + group, {}).funcs
 				for method in all_methods:
 					found_at_least_one = true
 					add_code_completion_option(CodeEdit.KIND_VARIABLE, method, method, Color.WHITE, ICON_NODE_ACTION)
 			
 			# at the point of writing arguments
 			else:
-				var meth_info = data.get("@:" + group, {}).funcs.get(parts[0], {})
+				var meth_info = all_methods.get(parts[0], {})# data.get("@:" + group, {}).funcs.get(parts[0], {})
 				var arg_index: int = len(parts)-2
 				if meth_info and arg_index < len(meth_info.args):
 #					print("@:" + method, meth_info.args[arg_index], len(parts), parts)
@@ -95,10 +292,18 @@ func _code_completion_requested():
 							found_at_least_one = true
 							var s2 = ('"%s"' % song) if " " in song else song
 							add_code_completion_option(CodeEdit.KIND_VARIABLE, song, s2, Color.WHITE, ICON_NODE_ACTION)
+		# no dot, means we may want to show all
+		# @: node_objects
+		# and
+		# @. node_functions
 		else:
-			for node_action in data:
+			for node_action in node_action_groups:
 				if node_action.begins_with("@."):
-					var p = _get_node_action_strings(node_action.substr(2), data[node_action])
+					var node: Node = get_tree().get_first_node_in_group("@." + node_action)
+					var method_info := {}
+					if node:
+						method_info = UScript.get_method_info(node, node_action.substr(2))
+					var p = _get_node_action_strings(node_action.substr(2), method_info)#data[node_action])
 					found_at_least_one = true
 					add_code_completion_option(CodeEdit.KIND_VARIABLE, p[0], p[1], Color.WHITE, ICON_NODE_ACTION)
 				elif node_action.begins_with("@:"):
@@ -117,39 +322,39 @@ func _code_completion_requested():
 			if "." in symbol:
 				var p := symbol.rsplit(".", true, 1)
 				target = State._get(p[0])
+			
+			if target:
 				keys = UObject.get_state_properties(target)
-			else:
-				keys = State._default.keys()
 			
-			for k in keys:
-				var icon: Texture = null
-				var display: String = k
-				if UObject.has_property(target, k):
-					var val = target[k]
-					display = "%s: %s" % [display, val]
-					match typeof(val):
-						TYPE_INT, TYPE_FLOAT: icon = ICON_INT
-						TYPE_ARRAY: icon = ICON_ARRAY
-						TYPE_DICTIONARY: icon = ICON_DICT
-						TYPE_BOOL: icon = ICON_BOOL
-						TYPE_STRING: icon = ICON_STR
-						TYPE_COLOR: icon = ICON_COLOR
-						TYPE_OBJECT: icon = UClass.get_icon(val.get_class(), ICON_OBJ)
+				for k in keys:
+					var icon: Texture = null
+					var display: String = k
+					if UObject.has_property(target, k):
+						var val = target[k]
+						display = "%s: %s" % [display, val]
+						match typeof(val):
+							TYPE_INT, TYPE_FLOAT: icon = ICON_INT
+							TYPE_ARRAY: icon = ICON_ARRAY
+							TYPE_DICTIONARY: icon = ICON_DICT
+							TYPE_BOOL: icon = ICON_BOOL
+							TYPE_STRING: icon = ICON_STR
+							TYPE_COLOR: icon = ICON_COLOR
+							TYPE_OBJECT: icon = UClass.get_icon(val.get_class(), ICON_OBJ)
+					
+					found_at_least_one = true
+					add_code_completion_option(CodeEdit.KIND_VARIABLE, display, k, Color.WHITE, icon)
 				
-				found_at_least_one = true
-				add_code_completion_option(CodeEdit.KIND_VARIABLE, display, k, Color.WHITE, icon)
-			
-			# signals
-			for k in UObject.get_script_signals(target):
-				found_at_least_one = true
-				add_code_completion_option(CodeEdit.KIND_SIGNAL, k, k + ".emit()", Color.LIGHT_GOLDENROD, ICON_SIGNAL)
-			
-			# methods
-			var methods := UObject.get_script_methods(target)
-			for method in methods:
-				var s := _method_to_strings(method, methods[method])
-				found_at_least_one = true
-				add_code_completion_option(CodeEdit.KIND_FUNCTION, s[0], s[1], Color.LIGHT_BLUE, ICON_METHOD)
+				# signals
+				for k in UObject.get_script_signals(target):
+					found_at_least_one = true
+					add_code_completion_option(CodeEdit.KIND_SIGNAL, k, k + ".emit()", Color.LIGHT_GOLDENROD, ICON_SIGNAL)
+				
+				# methods
+				var methods := UObject.get_script_methods(target)
+				for method in methods:
+					var s := _method_to_strings(method, methods[method])
+					found_at_least_one = true
+					add_code_completion_option(CodeEdit.KIND_FUNCTION, s[0], s[1], Color.LIGHT_BLUE, ICON_METHOD)
 		
 		elif head == "@":
 			var data = UFile.load_from_resource("res://debug_output/all_groups.tres", [])
@@ -172,8 +377,66 @@ func _code_completion_requested():
 					add_code_completion_option(CodeEdit.KIND_MEMBER, k, k, clr)
 	
 	if found_at_least_one:
-		update_code_completion_options(false)
+		update_code_completion_options(true)
 
+func _find_function(s: String, from: int):
+	if from > len(s):
+		from -= 1
+	
+	# look backwards till we find the start (
+	var start := from
+	var found_start := false
+	while start > 0:
+		if s[start] == "(":
+			found_start = true
+			break
+		start -= 1
+	if not found_start:
+		return {}
+	
+	# look forwards till we find end end )
+	var end := from
+	var found_end := false
+	while end < len(s):
+		if s[end] == ")":
+			found_end = true
+			end += 1
+			break
+		end += 1
+	if not found_end:
+		return {}
+	
+	# ignore if there is a space before the brackets
+	if start == 0 or s[start-1] == " ":
+		return {}
+	
+	# look backwards from start to find func name
+	var f_start := start
+	while f_start > 0 and not s[f_start] in " \t":
+		f_start -= 1
+	# extract function name
+	var found_func := start-f_start > 0
+	if not found_func:
+		return {}
+	
+	# divide the args
+	var inner := s.substr(start+1, end-start-2)
+	var args := UString.split_outside(inner, ",")
+	
+	# find the index of the current arg
+	var a := start+1
+	var arg_index := -1
+	for i in len(args):
+		a += len(args[i])
+		if a >= from:
+			arg_index = i
+		a += 1
+	
+	# strip method edges
+	var method := s.substr(f_start, start-f_start).strip_edges()
+	# strip argument edges
+	args = args.map(func(x): return x.strip_edges())
+	return {method=method, args=args, current_arg=arg_index}
 
 func _get_method_strings(target: Object, method: String) -> Array:
 	var info := UScript.get_method_info(target, method)

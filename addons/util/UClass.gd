@@ -16,7 +16,7 @@ static func exists(classname: String) -> bool:
 
 # create a custom built in object by class_name
 static func create(classname: String, args := []) -> Variant:
-	var obj = get_class_from_name(classname)
+	var obj = get_class_script(classname)
 	if obj == null:
 		UString.push_error_similar("No class_name '%s'." % classname, classname, get_all_class_names())
 	else:
@@ -34,7 +34,7 @@ static func get_all_class_names() -> Array[String]:
 	# should be faster than _global_script_classes
 	return ProjectSettings.get_setting("_global_script_class_icons").keys()
 
-static func get_class_from_name(classname: String) -> Variant:
+static func get_class_script(classname: String) -> Script:
 	# TODO: cache this?
 	for item in ProjectSettings.get_setting("_global_script_classes"):
 		if item["class"] == classname:

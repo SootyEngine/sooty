@@ -3,6 +3,11 @@ extends RichTextEffect
 
 # Syntax: [sin][]
 var bbcode = "sin"
+var info := {
+	"desc": "Animate as censored text",
+	"auto": "sin:1.0 freq:1.0 speed:10",
+	"args": { "sin": "", "freq": "", "speed": "" }
+}
 
 func _process_custom_fx(c: CharFXTransform):
 	var t: RichTextLabel2 = instance_from_id(get_meta("rt"))

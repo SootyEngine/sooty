@@ -60,6 +60,16 @@ static func count(d: Dictionary, k, v):
 	else:
 		d[k] += v
 
+static func map_list(array: Variant, call: Callable, as_properties := false) -> Dictionary:
+	var out := {}
+	if as_properties:
+		for item in array:
+			out[item] = call.call(item)
+	else:
+		for item in array:
+			out[call.call(item)] = item
+	return out
+
 static func map_keys(d: Dictionary, call: Callable) -> Dictionary:
 	var out := {}
 	for k in d:
@@ -106,7 +116,7 @@ static func merge(target: Dictionary, patch: Dictionary, deep: bool = false, lis
 				
 				# replace different type
 				else:
-					push_error("can't merge %s with %s. replacing %s instead." % [UType.get_type_name(target[k]), UType.get_type_name(patch[k]), k])
+					push_error("Can't merge %s with %s. replacing %s instead." % [UType.get_type_name(target[k]), UType.get_type_name(patch[k]), k])
 					target[k] = patch[k]
 
 static func merge_at(target: Dictionary, path: Array, patch: Dictionary, deep: bool = false, lists: bool = false):

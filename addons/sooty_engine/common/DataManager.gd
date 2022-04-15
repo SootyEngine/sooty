@@ -1,12 +1,22 @@
 @tool
 extends RefCounted
-class_name DataManager, "res://addons/visual_novel/icons/database.png"
-func get_class():
+class_name DataManager, "res://addons/soot_engine/icons/database.png"
+func _get_class():
 	return "DataManager"
 
-var _empty: Object = null
 var _all: Dictionary = {}
 var _iter_current := 0
+
+static func get_manager(item_or_manager_class: String) -> DataManager:
+	# use string name to find instance
+	if "data_managers" in Global.meta and item_or_manager_class in Global.meta.data_managers:
+		var m_instance_id: int = Global.meta.data_managers[item_or_manager_class]
+		return instance_from_id(m_instance_id)
+	push_error("Can't find manager for %s." % item_or_manager_class)
+	return null
+
+static func okay_then():
+	print("Hee haw")
 
 func _init(d := {}) -> void:
 	_post_init.call_deferred()
@@ -14,15 +24,13 @@ func _init(d := {}) -> void:
 	# since all objects share a script, they can access it's meta data
 	# which means they can access this manager, wherever it is
 	# so long as we have the _empt object, the script is in memory.
-	
-	prints("Manager: %s %s %s." % [_get_data_class(), UClass.get_class_name(self), get_instance_id()])
-	Global.meta[_get_data_class()] = get_instance_id()
-	Global.meta[UClass.get_class_name(self)] = get_instance_id()
-#	_empty.get_script().set_meta("manager", get_instance_id())
-#	var script: Script = UClass.get_from_name(_get_data_class())
-#	script.set_meta("manager", get_instance_id())
-#	# register self, for use with UString.str_to_type()
-#	Global.class_servers[get_class()] = get_instance_id()
+	var my_class_name := UClass.get_class_name(self)
+	var my_data_class := my_class_name.trim_suffix("Manager")
+	prints("Manager: %s %s." % [my_class_name, my_data_class])
+	if not "data_managers" in Global.meta:
+		Global.meta.data_managers = {}
+	Global.meta.data_managers[my_class_name] = get_instance_id()
+	Global.meta.data_managers[my_data_class] = get_instance_id()
 	
 	for k in d:
 		if d[k] is Dictionary:
@@ -64,7 +72,7 @@ func _iter_next(arg) -> bool:
 	return _iter_current < len(_all)
 
 func _iter_get(arg):
-	return _all.keys()[_iter_current]
+	return _all.values()[_iter_current]
 
 func _get(property: StringName):
 	if str(property) in _all:
@@ -72,8 +80,8 @@ func _get(property: StringName):
 
 # override this!
 func _get_data_class() -> String:
-	push_warning("You should override this instead.")
-	return get_class().trim_suffix("Manager")
+#	push_warning("You should override this instead.")
+	return UClass.get_class_name(self).trim_suffix("Manager")
 
 func has(id: String) -> bool:
 	return id in _all

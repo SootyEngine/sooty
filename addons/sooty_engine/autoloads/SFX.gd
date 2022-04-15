@@ -1,3 +1,4 @@
+@tool
 extends Node
 
 const BUS := "sfx"
@@ -14,9 +15,6 @@ func _ready():
 	Mods.load_all.connect(_load_mods)
 	Saver._get_state.connect(_save_state)
 	Saver._set_state.connect(_load_state)
-
-func sfx(id: String):
-	play(id)
 
 func _load_mods(mods: Array):
 	_files.clear()
@@ -41,6 +39,9 @@ func _process(delta: float) -> void:
 			_on_audio_finished(child)
 
 func play(id: String, kwargs := {}):
+	if Engine.is_editor_hint():
+		return
+	
 	if get_child_count() >= MAX_SOUNDS:
 		_queue.append(id)
 	else:

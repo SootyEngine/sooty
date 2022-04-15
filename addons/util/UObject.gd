@@ -94,20 +94,25 @@ static func get_state(target: Variant) -> Variant:
 		return out
 
 # set a serializable state.
-static func set_state(target: Variant, state: Variant):
+static func set_state(target: Variant, state: Variant, erase_keys := false, silent := false):
 	if target is Object and target.has_method("_set_state"):
 		target._set_state(state)
 	elif target is Array:
 		for i in len(state):
-			set_state(target[i], state[i])
+			set_state(target[i], state[i], erase_keys, silent)
 	elif state is Dictionary:
 		for k in state:
 			if k in target:
 				match typeof(target[k]):
-					TYPE_OBJECT, TYPE_DICTIONARY, TYPE_ARRAY: set_state(target[k], state[k])
-					_: target[k] = state[k]
+					TYPE_OBJECT, TYPE_DICTIONARY, TYPE_ARRAY:
+						set_state(target[k], state[k], erase_keys, silent)
+					_:
+						target[k] = state[k]
+						if erase_keys:
+							state.erase(k)
 			else:
-				push_error("No property '%s' in %s." % [k, target])
+				if not silent:
+					push_error("No property '%s' in %s." % [k, target])
 	else:
 		assert(false)
 

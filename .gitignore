@@ -20,6 +20,7 @@ data_*/
 /states/
 /persistent/
 /scenes/
+/fonts/
 
 /config.cfg
 /main.tscn

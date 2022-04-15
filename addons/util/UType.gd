@@ -40,9 +40,7 @@ static func get_type_from_name(name: String) -> int:
 		"StringName": return TYPE_STRING_NAME
 		"NodePath": return TYPE_NODE_PATH
 		"RID": return TYPE_RID
-		"Object":
-			# TODO: Use UClass to get actual class_name
-			return TYPE_OBJECT
+		"Object": return TYPE_OBJECT
 		"Callable": return TYPE_CALLABLE
 		"Signal": return TYPE_SIGNAL
 		"Dictionary": return TYPE_DICTIONARY

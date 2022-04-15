@@ -7,16 +7,30 @@ const S2T_BUILT_IN := -321_456
 const S2T_EXPRESSION = -654_321
 const S2T_STR_TO_VAR := -456_123
 
-static func to_type(s: String, type: Variant, default = null) -> Variant:
+static func to_type(s: String, type: Variant, object: Object = null, default = null) -> Variant:
 	# if string, it's a class_name
 	if type is String:
-#		var manager_name: String = type + "Manager"
+		# is class_name?
 		if UClass.exists(type):
-			var script: Script = UClass.get_from_name(type)
-			var manager := instance_from_id(script.get_meta("manager"))
-			return manager.find(s)
+			# find a manager to grab it from
+			var script: Script = UClass.get_class_script(type)
+			if script.has_method("_str_to_instance"):
+				return script._str_to_instance(s, type)
+			else:
+				push_error("Can't convert '%s' to '%s'. No static _str_to_instance() methods." % [s, type])
+				return null
+		
+		# is an Enum?
 		else:
-			push_error("No manager to convert '%s' to %s." % [s, type])
+			if object == null:
+				push_error("Can't convert '%' to Enum '%s' without reference to object." % [s, type])
+				return -1
+			
+			var the_enum = object[type]
+			return the_enum.values().find(s)
+		
+#		else:
+#			push_error("No manager to convert '%s' to %s." % [s, type])
 		return null
 	
 	elif type is int:

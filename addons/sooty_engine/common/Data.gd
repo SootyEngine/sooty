@@ -1,6 +1,13 @@
 @tool
 extends RefCounted
-class_name Data
+class_name Data, "res://addons/sooty_engine/icons/data.png"
+func _get_class():
+	return "Data"
+
+static func _str_to_instance(id: String, type: String):
+	var manager_class := type + "Manager"
+	var manager = UClass.get_class_script(manager_class)
+	return manager.get(id)
 
 func _init(d := {}):
 	UObject.set_state(self, d)
@@ -13,7 +20,7 @@ func _to_string() -> String:
 	return UClass._to_string2(self)
 
 func get_manager():
-	return _get_manager(get_script())
+	return DataManager.get_manager(_get_class())
 
 func get_id() -> String:
 	var manager = get_manager()
@@ -26,10 +33,3 @@ func duplicate() -> Object:
 	var output = UClass.create(classname)
 	UObject.set_state(output, UObject.get_state(self))
 	return output
-
-static func _get_manager(object: Object):
-	var classname := UClass.get_class_name(object)
-	if classname in Global.meta:
-		var instance_id: int = Global.meta[classname]
-		return instance_from_id(instance_id)
-	return null

@@ -4,7 +4,10 @@ extends RichTextEffect
 # v2: last letter in each word won't be symbolized.
 
 # Syntax: [cuss][]
-var bbcode = "cuss"
+const bbcode = "cuss"
+const info = {
+	"desc": "Animate as censored text"
+}
 
 const VOWELS := "aeiouAEIOU"
 const CHARS := "&$!@*#%"

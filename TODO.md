@@ -1,4 +1,7 @@
 
+- [ ] Use Godots built in filesystem to detect file changes for reloading mods.
+- [ ] Come up with seperate system for runteim, that manages all subfolders at once.
+
 # Bugs
 - [ ] .soot multiline strings `""""` have an issue with tabs.
 - [ ] Caption name showsup a second before hiding.

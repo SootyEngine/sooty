@@ -1,3 +1,4 @@
+@tool
 extends Data
 class_name PatchableData
 func get_class() -> String:
@@ -7,7 +8,7 @@ const DEFAULT_FORMAT := "[b]{name}[]"
 var _extra := {}
 
 func _init(d := {}):
-	UObject.set_state(self, d)
+	UObject.set_state(self, d, true, true)
 	for k in d:
 		if not k in self:
 			_extra[k] = d[k]

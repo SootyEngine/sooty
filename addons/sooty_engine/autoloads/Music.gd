@@ -77,6 +77,24 @@ func queue(id: String):
 		else:
 			play(id)
 
+# called by UScript, as a way of including more advanced arg info
+# for use with autocomplete
+func _get_method_info(method: String):
+	if method == "play":
+		return {
+			icon=preload("res://addons/sooty_engine/icons/music.png"),
+			args={
+				id={
+					options=func(): return _files.keys()
+				}
+			}
+		}
+
+enum Weekday { MON, TUE, WED, FRI }
+
+func testo(x: Weekday, data: Data, mybool: bool):
+	pass
+
 # kwarg (default value):
 # - pos (0.0): Position to play from.
 # - rand_offset: Random position to play from on start up.
