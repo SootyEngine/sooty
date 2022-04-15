@@ -16,6 +16,7 @@ enum {
 	T_CONDITION,
 	T_BOLD, T_ITALICS, T_BOLD_ITALICS, T_UNDERLINE, T_STRIKE_THROUGH, T_CODE,
 	T_META, T_HINT,
+	T_FONT,
 	T_FONT_SIZE,
 	T_TABBLE, T_CELL,
 	T_EFFECT,
@@ -35,7 +36,6 @@ signal right_pressed(variant: Variant)
 @export var effects_mode: EffectsMode = EffectsMode.OFF_IN_EDITOR
 @export var alignment: Align = Align.CENTER
 @export var color := Color.WHITE
-@export_dir var font_dir := "res://fonts"
 @export var font := "":
 	set = set_font
 @export var font_size: int = 16:
@@ -170,6 +170,7 @@ func set_bbcode(btext: String):
 	_state = {
 		color = color,
 		align = alignment,
+		font = font,
 		font_size = font_size,
 		opened = {},
 		pipes = []
@@ -187,7 +188,7 @@ func set_meta_data(key: String, data: Variant):
 
 func set_font(id: String):
 	font = id
-	FontHelper.new(font_dir).set_fonts(self, id)
+	FontHelper.new("res://fonts").set_fonts(self, id)
 
 func uninstall_effects():
 	while len(custom_effects):
@@ -367,6 +368,9 @@ func _passes_condition(cond: String, raw: String) -> bool:
 	
 	return false
 
+static func has_font(id: String) -> bool:
+	return File.new().file_exists("res://fonts/%s.tres" % id)
+
 static func has_emoji_font() -> bool:
 	return File.new().file_exists("res://fonts/emoji_font.tres")
 
@@ -415,6 +419,11 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 			else:
 				append_text(Emoji.NAMES[emoji_name])
 			return
+	
+	# is a custom font?
+	if has_font(tag):
+		_push_font(tag)
+		return
 	
 	match tag:
 		"b": _push_bold()
@@ -547,14 +556,23 @@ func _push_pipe(pipe: String):
 func _pop_pipe():
 	_state.pipes.pop_back()
 
+func _push_font(font: String):
+	_stack_push(T_FONT, _state.font)
+	_state.font = font
+	push_font(load("res://fonts/%s.tres" % font))
+
+func _pop_font(last_font):
+	_state.font = last_font
+	pop()
+
 func _push_font_size(s: int):
 	s = clampi(s, MIN_FONT_SIZE, MAX_FONT_SIZE)
 	_stack_push(T_FONT_SIZE, _state.font_size)
 	_state.font_size = s
 	push_font_size(s)
 
-func _pop_font_size(s):
-	_state.font_size = s
+func _pop_font_size(last_size):
+	_state.font_size = last_size
 	pop()
 
 func _push_color(clr: Color):
@@ -602,6 +620,7 @@ func _stack_pop():
 				T_COLOR: _pop_color(data)
 				T_PARAGRAPH: _pop_paragraph(data)
 				T_PIPE: _pop_pipe()
+				T_FONT: _pop_font(data)
 				T_FONT_SIZE: _pop_font_size(data)
 				T_CONDITION: _state.erase("condition")
 				T_NONE, _:
