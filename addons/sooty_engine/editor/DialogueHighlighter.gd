@@ -240,18 +240,18 @@ func _h_case(from: int, to: int):
 			index += 1
 		from += len(parts[i]) + 1
 	
-func _h_node_action(from: int, to: int):
+func _h_node_action(from: int, to: int, color: Color):
 	_c(from, C_SYMBOL)
-	_c(from+1, C_NODE_ACTION)
+	_c(from+1, color)
 	from += 1
 	var parts := UString.split_outside(text.substr(from, to-from), " ")
-	var clr := C_NODE_ACTION
+	var clr := color
 	var index := 0
 	for i in len(parts):
 		if parts[i]:
 			# function name
 			if index == 0:
-				clr = C_NODE_ACTION
+				clr = color
 				_c(from, clr)
 				for j in range(from, from+len(parts[i])):
 					if text[j] == ".":
@@ -306,7 +306,7 @@ func _h_eval(from: int, to: int):
 			m_color = Color.GRAY
 			_c(i+1, t_color)
 		
-		elif text[i] in "!-=+<>)(),[]{}":
+		elif text[i] in "-=+*/<>)(),[]{}":
 			t_color = C_CONTEXT_ACTION
 			m_color = C_CONTEXT_ACTION
 			_c(i, C_SYMBOL)
@@ -392,7 +392,7 @@ func _h_bbcode(from: int, to: int, default: Color):
 					
 					# color?
 					elif tag_index == len(tags)-1:
-						var tag_clr = UString.str_to_color(tag)
+						var tag_clr = UStringConvert.to_color(tag)
 						if tag_clr != null:
 							color = tag_clr
 							if is_bold:
@@ -667,7 +667,10 @@ func _h_line(from: int, to: int):
 		
 		# @node action
 		elif part.begins_with("@"):
-			_h_node_action(from, to)
+			_h_node_action(from, to, C_NODE_ACTION)
+		
+		elif part.begins_with("$"):
+			_h_node_action(from, to, C_STATE_ACTION)
 		
 		# ~ eval
 		elif part.begins_with("~"):

@@ -1,7 +1,0 @@
-[gd_resource type="Resource" format=3 uid="uid://by6l26k12v34s"]
-
-[resource]
-metadata/data = {
-"SOOT_OVERVIEW": Vector2(0, 0),
-"prefab": Vector2(0, 0)
-}

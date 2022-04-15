@@ -307,9 +307,9 @@ static func patch_to_var(patch: Variant, sources: Array, explicit_type := -1) ->
 			var line: String = info[1]
 			var data: String = info[2]
 			if explicit_type != -1:
-				return UString.str_to_type(data, explicit_type)
+				return UStringConvert.to_type(data, explicit_type)
 			else:
-				return UString.str_to_var(data)
+				return UStringConvert.to_var(data)
 		TYPE_DICTIONARY:
 			var out := {}
 			for k in patch:

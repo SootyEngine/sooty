@@ -57,9 +57,6 @@ const GLOBAL_SCOPE_METHODS := [
 	"wrapf", "wrapi"
 ]
 
-static func get_class_name(o: Object) -> String:
-	return o.get_script().resource_path.get_file().split(".", true, 1)[0]
-
 # find a child of type
 static func find_child_of_type(parent: Node, child_type: Variant) -> Node:
 	for i in parent.get_child_count():
@@ -67,12 +64,6 @@ static func find_child_of_type(parent: Node, child_type: Variant) -> Node:
 		if c is child_type:
 			return c
 	return null
-
-static func duplicate_object(input: Object) -> Object:
-	var classname := get_class_name(input)
-	var output = create(classname)
-	set_state(output, get_state(input))
-	return output
 
 # looks for an object of given type
 # call(player, HealthInfo) would look for "var health:HealthInfo" and return a reference to it.
@@ -133,12 +124,36 @@ static func get_state_properties(target: Variant) -> Array:
 		_:
 			return []
 
+static func has_property(target: Variant, property: String) -> bool:
+	if target is Object:
+		if target.has_method("_has"):
+			return target._has(property)
+		elif target.has_method("_get_state_properties"):
+			return property in target._get_state_properties()
+		else:
+			return property in target
+	elif target is Dictionary:
+		return property in target
+	else:
+		return false
+
 static func _get_state_properties(target: Object) -> Array:
 	return target.get_property_list()\
 		.filter(func(x): return x.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and x.name[0] != "_")\
 		.map(func(x): return x.name)
 
+static func get_script_signals(target: Object, only_argless := true) -> Dictionary:
+	var out := {}
+	for m in target.get_signal_list():
+		if only_argless and len(m.args):
+			continue
+		out[m.name] = m
+	return out
+
 static func get_script_methods(target: Object, skip_private := true, skip_get := true, skip_set := true) -> Dictionary:
+	if target.has_method("_get_script_methods"):
+		return target._get_script_methods()
+	
 	var out := {}
 	for m in target.get_method_list():
 		if m.flags & METHOD_FLAG_FROM_SCRIPT != 0 and not m.name[0] == "@":
@@ -162,7 +177,7 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 	var obj: Object = call.get_object() if call is Callable else call[0]
 	var method: String = call.get_method() if call is Callable else call[1]
 	if arg_info == null:
-		arg_info = get_arg_info(obj, method)
+		arg_info = UScript.get_arg_info(obj, method)
 	
 	# no args mean it was probably not a script function but a built in
 	if not len(arg_info):
@@ -197,11 +212,11 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 	if as_string_args:
 		# convert leading arguments
 		for i in len(new):
-			new[i] = UString.str_to_type(in_args[i], arg_info[i].type)
+			new[i] = UStringConvert.to_type(in_args[i], arg_info[i].type)
 #			prints("%s -> %s == %s" % [in_args[i], arg_info[i].type, new[i]])
 		# convert kwargs
 		if has_kwargs:
-			kwargs = UString.str_to_type(kwargs, TYPE_DICTIONARY, arg_info[-1].get("default", {}))
+			kwargs = UStringConvert.to_type(kwargs, TYPE_DICTIONARY, arg_info[-1].get("default", {}))
 	
 #	prints("OK: %s NEW: %s" % [in_args, new])
 	
@@ -270,110 +285,7 @@ static func try_get_at(d: Variant, path: Array, default = null) -> Variant:
 	else:
 		return default
 
-static func get_arg_info(obj: Variant, meth: String) -> Array:
-	return get_method_info(obj, meth).get("args", [])
 
-# godot keeps dict key order, so we can return 
-static func get_method_info(obj: Variant, meth: String) -> Dictionary:
-	var methods = get_methods(obj, meth) # TODO: Cache.
-	return methods.get(meth, {})
-#	return null if methods == null or not meth in methods else methods[meth]
-
-static func get_methods(obj: Variant, method := "") -> Dictionary:
-	var script = obj.get_script()
-	var out := {}
-	if script:
-		for line in script.source_code.split("\n", false):
-			if method and line.begins_with("func " + method):
-				var p = line.substr(5).split("(")
-				var fname = p[0]
-				var end = p[1].rsplit(")")
-				var sargs = end[0]
-				var returns = end[1].split(":", true, 1)[0].strip_edges()
-				var args = _parse_method_arguments(sargs, obj)
-				# TODO: get return type
-				returns = UType.get_type_from_name(returns.trim_prefix("->").strip_edges())
-				out[fname] = {args=args, returns=returns}
-	return out
-
-# convert a string of arguments to argument info
-static func _parse_method_arguments(s: String, obj: Variant = null) -> Array:
-	if s.strip_edges() == "":
-		return []
-	
-	var args = [["", ""]]
-	var open := {}
-	var in_name := true
-	
-	for c in s:
-		if not len(open):
-			if c == ":":
-				in_name = false
-				continue
-			elif c == ",":
-				args.append(["", ""])
-				in_name = true
-				continue
-		match c:
-			"{": UDict.tick(open, "{")
-			"}": UDict.tick(open, "{", -1)
-			"[": UDict.tick(open, "[")
-			"]": UDict.tick(open, "[", -1)
-			"(": UDict.tick(open, "(")
-			")": UDict.tick(open, "(", -1)
-		args[-1][0 if in_name else 1] += c
-	
-	var out := []
-	for i in len(args):
-		var name = args[i][0].strip_edges()
-		var value = args[i][1].split("=", true, 1)
-		var type: int = UString.S2T_STR_TO_VAR
-		var type_name: String = value[0].strip_edges()
-		# no explicit type given, but a value exists?
-		# let's assume
-		var arg_info: = { name=name, type=type }
-		if len(value) == 2:
-			arg_info.default = UString.express(value[1].strip_edges(), obj)
-		
-		if type_name:
-			arg_info.type = UType.get_type_from_name(type_name)
-		
-		elif "default" in arg_info:
-			arg_info.type = typeof(arg_info.default)
-		
-		out.append(arg_info)
-	return out
-
-static func get_all_class_names() -> Array[String]:
-	# should be faster than _global_script_classes
-	return ProjectSettings.get_setting("_global_script_class_icons").keys()
-	
-static func get_class_from_name(classname: String) -> Variant:
-	# TODO: cache this?
-	for item in ProjectSettings.get_setting("_global_script_classes"):
-		if item["class"] == classname:
-			return load(item.path)
-	return null
-
-# does a class_name exist?
-static func can_create(classname: String) -> bool:
-	return classname in get_all_class_names()
-
-# create a custom built in object by class_name
-static func create(classname: String, args := []) -> Variant:
-	var obj = get_class_from_name(classname)
-	if obj == null:
-		UString.push_error_similar("No class_name '%s'." % classname, classname, get_all_class_names())
-	else:
-		match len(args):
-			0: return obj.new()
-			1: return obj.new(args[0])
-			2: return obj.new(args[0], args[1])
-			3: return obj.new(args[0], args[1], args[2])
-			4: return obj.new(args[0], args[1], args[2], args[3])
-			5: return obj.new(args[0], args[1], args[2], args[3], args[4])
-			_: push_error("Not implemented.")
-	return null
 
 static func callablev(c: Callable, args: Array) -> Variant:
 	match len(args):
@@ -388,14 +300,4 @@ static func callablev(c: Callable, args: Array) -> Variant:
 			push_error("NOT IMPLEMENTED.")
 			return null
 
-# force grab the class_name from the source code.
-static func _to_string_nice(obj: Object) -> String:
-	var c := obj.get_class()
-	var s: Script = obj.get_script()
-	for line in s.source_code.split("\n", false, 2):
-		if line.begins_with("class_name"):
-			c = line.split("class_name", true, 1)[1].strip_edges()
-			break
-	var p = var2str(get_state(obj))
-	p = p.replace(": ", ":").replace("\n", " ").replace('"', '').replace("{ ", "(").replace(" }", ")")
-	return "%s%s" % [c, p]
+

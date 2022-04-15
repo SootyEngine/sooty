@@ -1,17 +1,53 @@
-extends Resource
-class_name DataManager
+@tool
+extends RefCounted
+class_name DataManager, "res://addons/visual_novel/icons/database.png"
+func get_class():
+	return "DataManager"
 
+var _empty: Object = null
 var _all: Dictionary = {}
 var _iter_current := 0
 
-func _init() -> void:
+func _init(d := {}) -> void:
 	_post_init.call_deferred()
+	
+	# since all objects share a script, they can access it's meta data
+	# which means they can access this manager, wherever it is
+	# so long as we have the _empt object, the script is in memory.
+	
+	prints("Manager: %s %s %s." % [_get_data_class(), UClass.get_class_name(self), get_instance_id()])
+	Global.meta[_get_data_class()] = get_instance_id()
+	Global.meta[UClass.get_class_name(self)] = get_instance_id()
+#	_empty.get_script().set_meta("manager", get_instance_id())
+#	var script: Script = UClass.get_from_name(_get_data_class())
+#	script.set_meta("manager", get_instance_id())
+#	# register self, for use with UString.str_to_type()
+#	Global.class_servers[get_class()] = get_instance_id()
+	
+	for k in d:
+		if d[k] is Dictionary:
+			_all[k] = UClass.create(_get_data_class(), [d[k]])
+		else:
+			_all[k] = d[k]
 
 func _post_init():
-	Mods.pre_loaded.connect(func(): _all.clear())
+	pass
+
+# look for this items id
+func _get_id(data: Variant) -> String:
+	for k in _all:
+		if _all[k] == data:
+			return k
+	return ""
+
+func get_all_ids() -> Array:
+	return _all.keys()
 
 func get_total() -> int:
 	return len(_all)
+
+func _get_state_properties() -> Array:
+	return _all.keys()
 
 func _get_state():
 	return UObject.get_state(_all)
@@ -36,13 +72,13 @@ func _get(property: StringName):
 
 # override this!
 func _get_data_class() -> String:
-	assert(false)
-	return ""
+	push_warning("You should override this instead.")
+	return get_class().trim_suffix("Manager")
 
 func has(id: String) -> bool:
 	return id in _all
 
-func find(id: String, error_action := "find") -> Variant:
+func find(id: String, error_action := "find"):
 	if len(_all) == 0:
 		push_error("Can't %s %s. No %s defined." % [error_action, id, _get_data_class()])
 		return null
@@ -54,8 +90,9 @@ func find(id: String, error_action := "find") -> Variant:
 		return null
 
 func _patch_object(key: String, type: String) -> Object:
-	_all[key] = UObject.create(type if type else _get_data_class())
+	prints("Add object: ", UClass.get_class_name(self), key, type)
+	_all[key] = UClass.create(type if type else _get_data_class())
 	return _all[key]
 
 func _to_string() -> String:
-	return UObject._to_string_nice(self)
+	return UClass._to_string2(self)

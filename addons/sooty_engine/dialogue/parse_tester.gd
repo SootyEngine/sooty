@@ -2,7 +2,29 @@
 extends EditorScript
 
 func _run():
-#
+#	Mods.load_mods()
+	pass
+#	var inv := Inventory.new()
+#	var coin := Data._get_manager(Item).find("coin")
+#	inv.gain(coin)
+#	Mods.load_mods()
+#	var inv := Inventory.new()
+#	print(inv.get_manager())
+#	print(UClass.get_class_name(inv))
+	
+#	print(StringAction.do("~$items.coin.get_class()"))
+	
+#	var inv := Inventory.new()
+#	var info := UObject.get_method_info(inv, "gain")
+#	print(info, UType.get_name_from_type(info.args[0].type))
+#	var manager_classname = info.args[0].classname + "Manager"
+#	if UClass.exists(manager_classname):
+#		var items = State.get_first(manager_classname)
+#		var ids = items.get_all_ids()
+#		print(ids)
+#	else:
+#		print("No manager ", manager_classname)
+	
 #	var exp := Expression.new()
 #	exp.parse("max(10, 20)")
 #	print(exp.execute())

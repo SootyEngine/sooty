@@ -8,13 +8,13 @@ static func same_type(a: Variant, b: Variant) -> bool:
 static func same_type_and_value(a: Variant, b: Variant) -> bool:
 	return typeof(a) == typeof(b) and a == b
 
-static func get_name(o: Variant) -> String:
+static func get_type_name(o: Variant) -> String:
 	return get_name_from_type(typeof(o))
 
 static func print_types(list: Array):
 	var out := []
 	for item in list:
-		out.append("%s (%s)" % [item, get_name(item)])
+		out.append("%s (%s)" % [item, get_type_name(item)])
 	print(", ".join(out))
 
 static func get_type_from_name(name: String) -> int:
@@ -40,7 +40,9 @@ static func get_type_from_name(name: String) -> int:
 		"StringName": return TYPE_STRING_NAME
 		"NodePath": return TYPE_NODE_PATH
 		"RID": return TYPE_RID
-		"Object": return TYPE_OBJECT
+		"Object":
+			# TODO: Use UClass to get actual class_name
+			return TYPE_OBJECT
 		"Callable": return TYPE_CALLABLE
 		"Signal": return TYPE_SIGNAL
 		"Dictionary": return TYPE_DICTIONARY
@@ -56,7 +58,10 @@ static func get_type_from_name(name: String) -> int:
 		"PackedColorArray": return TYPE_PACKED_COLOR_ARRAY
 		_: return TYPE_NIL
 
-static func get_name_from_type(type: int) -> String:
+static func get_name_from_type(type: Variant) -> String:
+	# class name?
+	if type is String:
+		return type
 	match type:
 		TYPE_NIL: return "null"
 		TYPE_BOOL: return "bool"
@@ -95,7 +100,10 @@ static func get_name_from_type(type: int) -> String:
 		TYPE_PACKED_COLOR_ARRAY: return "PackedColorArray"
 		_: return "???"
 
-static func get_default(type: int) -> Variant:
+static func get_default(type: Variant) -> Variant:
+	# class_name
+	if type is String:
+		return null
 	match type:
 		TYPE_NIL: return null
 		TYPE_BOOL: return false
@@ -132,4 +140,4 @@ static func get_default(type: int) -> Variant:
 		TYPE_PACKED_VECTOR2_ARRAY: return PackedVector2Array()
 		TYPE_PACKED_VECTOR3_ARRAY: return PackedVector3Array()
 		TYPE_PACKED_COLOR_ARRAY: return PackedColorArray()
-		_: return push_error("No default type for %s." % [get_name(type)])
+		_: return push_error("No default type for %s." % [get_type_name(type)])

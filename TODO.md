@@ -33,7 +33,10 @@
 - [x] Custom `Bool` class for managing a single state bool.
 
 # Inspector
-- [ ] Show an inspector with chapter overview
+- [x] Show an inspector with chapter overview
+- [ ] Add `sort` option for chapter overview
+    - [ ] progress
+    - [ ] words/length
 - [ ] Use chapter meta data to contain color info for side panel
 - [ ] Show meta in side panel, if toggle is active
 

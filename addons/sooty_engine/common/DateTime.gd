@@ -1,9 +1,10 @@
 @tool
 extends Data
-class_name DateTime
-
+class_name DateTime, "res://addons/sooty_engine/icons/datetime.png"
 func get_class() -> String:
 	return "DateTime"
+
+
 #
 # Godot's built in Time class starts Months and Weekdays at 1, while this starts at 0.
 # So be careful combining the two.
@@ -470,7 +471,7 @@ func get_until(other: Variant = null) -> String:
 # Time since this DateTime.
 func get_since(other: Variant = null) -> String:
 	if other == null:
-		other = DateTime.create_from_current()
+		other = create_from_current()
 	return other.get_until(self)
 
 # Array: [past or present or future, epoch type (day, month...), total epochs]

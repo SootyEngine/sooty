@@ -446,7 +446,7 @@ func _preprocess_pipe(s: String) -> String:
 		var pipe = s.substr(i+1)
 		var args = UString.split_outside(pipe, " ")
 		var method = args.pop_front()
-		args = args.map(func(x: String): return var2str(UString.str_to_var(x)))
+		args = args.map(func(x: String): return var2str(UStringConvert.to_var(x)))
 		args.push_front(_preprocess_pipe(input))
 		return "%s(%s)" % [method, ", ".join(args)]
 	return s

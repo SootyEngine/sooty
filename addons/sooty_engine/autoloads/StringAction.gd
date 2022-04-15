@@ -11,8 +11,8 @@ func add_command(call: Variant, desc := "", id := ""):
 	var obj: Object = call.get_object() if call is Callable else call[0]
 	var method: String = call.get_method() if call is Callable else call[1]
 	id = id if id else method
-	var args = UObject.get_arg_info(obj, method)
-	var arg_names := args.map(func(x): return "%s:%s" % [x.name, UType.get_name_from_type(x.type)])
+	var args = UClass.get_arg_info(obj, method)
+	var arg_names = args.map(func(x): return "%s:%s" % [x.name, UType.get_name_from_type(x.type)])
 	print("> '%s' [%s]: %s" % [id, " ".join(arg_names), desc])
 	_commands[id] = {
 		call=call,
@@ -23,9 +23,9 @@ func add_command(call: Variant, desc := "", id := ""):
 func _eval_replace_group_call(inside: String, group: String, nested: bool) -> String:
 	if nested:
 		var p := inside.split("(", true, 1)
-		return "_G_.call_group(\"@%s\", \"%s\", [%s])" % [group, p[0], p[1]]
+		return "_SA_._call_group(\"@%s\", \"%s\", [%s])" % [group, p[0], p[1]]
 	else:
-		return "_G_.call_group(\"@%s\", \"%s\", [%s])" % [group, group, inside]
+		return "_SA_._call_group(\"@%s\", \"%s\", [%s])" % [group, group, inside]
 
 # var action := '"%s %s %s %s %s" % [@test.name, @enemy.damage(score), @heal(333)]'
 # var action := '[@test.name, @enemy.damage(score), @heal(333)]'
@@ -54,9 +54,6 @@ func preprocess_eval(eval: String):
 			elif c == " ":
 				in_tag = false
 	
-	var arg_names := ["_G_", "_S_"]
-	var arg_valus = [Global, State]
-	
 	for t in tags:
 		if t.type == "@":
 			if t.is_func:
@@ -65,8 +62,7 @@ func preprocess_eval(eval: String):
 				else:
 					eval = UString.replace_between(eval, "@%s(" % [t.tag], ")", _eval_replace_group_call.bind(t.tag, false))
 			else:
-				eval = eval.replace(t.full, "_G_.get_group_property(\"@%s\", \"%s\")" % [t.tag, t.prop])
-#				eval = eval.replace(t.full, "_G_.call_group(\"@%s\", \"%s\")" % [t.tag, t.prop])
+				eval = eval.replace(t.full, "_SA_.get_group_property(\"@%s\", \"%s\")" % [t.tag, t.prop])
 		
 		elif t.type == "$":
 			if t.is_func:
@@ -177,7 +173,7 @@ func call_group_w_args(group: String, args: Array, as_string_args := false) -> V
 	else:
 		group = "@." + group
 	
-	return Global.call_group(group, method, args, as_string_args)
+	return _call_group(group, method, args, as_string_args)
 
 func _str_to_var(s: String) -> Variant:
 	# builting
@@ -228,6 +224,20 @@ func _str_to_var(s: String) -> Variant:
 	# must be a string?
 	return s
 
+
+func _call_group(group: String, method: String, args := [], as_string_args := false) -> Variant:
+	var out: Variant
+	var nodes := get_tree().get_nodes_in_group(group)
+	for node in nodes:
+		var got = UObject.call_w_kwargs([node, method], args, as_string_args)
+		if got != null:
+			out = got
+	if len(nodes) == 0:
+		push_warning("No nodes in group '%s' to call '%s' on with %s." % [group, method, args])
+	return out
+
+func get_group_property(group: String, property: String) -> Variant:
+	return get_tree().get_first_node_in_group(group)[property]
 #func _do_func(action: String, context: Object) -> Variant:
 #	var args := UString.split_outside(action, " ")
 #	var method: String = args.pop_front()
@@ -289,10 +299,10 @@ func eval(eval: String, context: Variant = null, default = null) -> Variant:
 	# state shortcut
 	eval = preprocess_eval(eval)
 	
-	if _expr.parse(eval, ["_T_", "_G_", "_S_"]) != OK:
+	if _expr.parse(eval, ["_T_", "_SA_", "_S_"]) != OK:
 		push_error("Failed _eval('%s'): %s." % [eval, _expr.get_error_text()])
 	else:
-		var result = _expr.execute([get_tree(), Global, State], context, false)
+		var result = _expr.execute([get_tree(), self, State], context, false)
 		if _expr.has_execute_failed():
 			push_error("Failed _eval('%s'): %s." % [eval, _expr.get_error_text()])
 		else:

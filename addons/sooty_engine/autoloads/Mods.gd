@@ -92,19 +92,30 @@ func _load_mods(loud := true):
 	loaded.emit()
 	
 	# Debug data for auto complete.
-	_save_group_data_to_file()
+	if not Engine.is_editor_hint():
+		_save_group_data_to_file()
 
 func _save_group_data_to_file():
 	if UFile.exists("res://debug_output"):
-		var groups = UNode.get_all_groups()
+		var groups = UGroup.get_all()
 		var out := {}
 		for group in groups:
 			group = str(group)
+			var node := get_tree().get_first_node_in_group(group)
+			# a single property
 			if group.begins_with("@."):
-				out[group] = []
+				out[group] = UScript.get_method_info(node, group.substr(2))
+			# the entire object
 			elif group.begins_with("@:"):
-				var node := get_tree().get_first_node_in_group(group)
-				out[group] = UObject.get_state_properties(node) + UObject.get_script_methods(node).keys()
+				var node_info := {funcs={}, props={}, signals={}}
+				# collect funcs
+				node_info.funcs = UScript.get_method_infos(node)
+				# collect properties
+				for prop in UObject.get_state_properties(node):
+					node_info.props[prop] = {property=prop, type=UClass.get_type_or_class(node[prop])}
+				# collect signals
+				node_info.signals = {}#UScript.get_signal_infos(node)
+				out[group] = node_info
 		UFile.save_to_resource("res://debug_output/all_groups.tres", out)
 
 func _print_file(path: String):

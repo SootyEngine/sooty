@@ -23,7 +23,7 @@ func _patch_property(property: String, value: Variant):
 
 # add an object from DataParser
 func _patch_object(property: String, type: String) -> Object:
-	_extra[property] = PatchableData.new() if type == "" else UObject.create(type)
+	_extra[property] = PatchableData.new() if type == "" else UClass.create(type)
 	return _extra[property]
 
 # add a list of properties from DataParser
@@ -32,7 +32,7 @@ func _patch_list_property(property: String, value: Variant):
 
 # add a list of objects from DataParser
 func _patch_list_object(property: String, type: String) -> Object:
-	var obj: Object = PatchableData.new() if type == "" else UObject.create(type)
+	var obj: Object = PatchableData.new() if type == "" else UClass.create(type)
 	UDict.append(_extra, property, obj)
 	return obj
 

@@ -16,6 +16,7 @@ signal changed_from_to(property: Array, from: Variant, to: Variant)
 @export var _default := {}
 # all the child nodes
 @export var _states := []
+@export var _state_properties := []
 # a child to add data to if it has no where else to go.
 var _monkey_patcher: Node
 # 
@@ -24,6 +25,23 @@ var _monkey_patcher: Node
 
 func get_method_names() -> Array:
 	return _calls.keys()
+
+func get_first(type: Variant) -> Variant:
+	# find the first object of a class_name
+	if type is String:
+		for state in _states:
+			var props := UObject.get_state_properties(state)
+			for property in props:
+				if state[property] is Object and state[property].get_class() == type:
+					return state[property]
+	# find the first object, using an actual class reference
+	else:
+		for state in _states:
+			var props := UObject.get_state_properties(state)
+			for property in props:
+				if state[property] is type:
+					return state[property]
+	return null
 
 # overriden in State, Persistent and Settings.
 func _get_subdir() -> String:
@@ -49,7 +67,7 @@ func _patch_property(key: String, patch: Variant):
 
 # called by DataParser if .soda sets something that doesn't exist.
 func _patch_object(key: String, type: String) -> Object:
-	var obj: Object = UObject.create(type) if type else PatchableData.new()
+	var obj: Object = UClass.create(type) if type else PatchableData.new()
 	if obj:
 		_monkey_patcher._data[key] = obj
 	return obj
@@ -68,6 +86,8 @@ func _load_mods(mods: Array):
 	_monkey_patcher = preload("res://addons/sooty_engine/autoloads/_monkey_patcher_.gd").new()
 	_monkey_patcher.name = "_monkey_patcher_"
 	
+	var all_files := []
+	
 	# init nodes from .gd scripts.
 	var subdir := _get_subdir()
 	for mod in mods:
@@ -75,6 +95,9 @@ func _load_mods(mods: Array):
 		
 		var head = mod.dir.plus_file(subdir)
 		var script_paths := UFile.get_files(head, ".gd")
+		
+		all_files.append_array(script_paths)
+		
 		for script_path in script_paths:
 			var script = load(script_path)
 			var state = script.new()
@@ -92,10 +115,15 @@ func _load_mods(mods: Array):
 	# collect all children in list.
 	_init_states()
 	
+
 	# install data (.soda) to children.
 	for mod in mods:
 		var head = mod.dir.plus_file(subdir)
-		for data_path in UFile.get_files(head, "." + Soot.EXT_DATA):
+		var data_files := UFile.get_files(head, "." + Soot.EXT_DATA)
+		
+		all_files.append_array(data_files)
+		
+		for data_path in data_files:
 			mod.meta[subdir].append(data_path) # tell Mods what file has been installed
 			var state = DataParser.parse(data_path)
 			
@@ -110,16 +138,27 @@ func _load_mods(mods: Array):
 					var new = state.shortcuts[k]
 					var old = _shortcuts[k]
 					push_error("Trying to use the same shortcut '%s' for %s and %s." % [k, old, new])
+	
+	var file_scanner := FileModifiedScanner.new()
+	file_scanner.set_name("FileScanner")
+	add_child(file_scanner)
+	file_scanner.modified.connect(_files_modified.bind(file_scanner))
+	file_scanner.set_files(all_files)
+
+func _files_modified(file_scanner: FileModifiedScanner):
+	file_scanner.update_times()
+	Mods._load_mods()
 
 func _init_states():
-	# 
 	_states = get_children()
+	_state_properties.clear()
 	
 	_calls.clear()
 	_call_names.clear()
 	
 	# collect methods in a way where they can all be called from the state
 	for state in _states:
+		_state_properties.append_array(UObject.get_state_properties(state))
 		var methods = UObject.get_script_methods(state)
 		for method in methods:
 			_call_names[method] = "_calls.%s.call(" % method
@@ -142,6 +181,13 @@ func _has_method(method: String) -> bool:
 
 func _get_method_parent(method: String) -> Node:
 	return _calls[method].get_object()
+
+func _get_script_methods() -> Dictionary:
+	var out := {}
+	for state in _states:
+		for method in UObject.get_script_methods(state):
+			out[method] = UScript.get_method_info(state, method)
+	return out
 
 # preprocess an eval, so it can call all methods of children
 func _preprocess_eval(eval: String) -> String:
@@ -200,9 +246,9 @@ func _has(pname: StringName) -> bool:
 
 func _get(pname: StringName):
 	var path := _get_property_path(pname)
-	var property = path[-1]
 	for state in _states:
 		var o = UObject.get_penultimate(state, path)
+		var property = path[-1]
 		if o != null:
 			if property in o:
 				return o[property]
@@ -215,7 +261,7 @@ func _set(pname: StringName, value) -> bool:
 		if o != null and property in o:
 			var old = o.get(property)
 			if typeof(value) != typeof(old):
-				push_error("Can't set %s (%s) to %s (%s)." % [property, UObject.get_name_from_type(typeof(old)), value, UObject.get_name_from_type(typeof(value))])
+				push_error("Can't set %s (%s) to %s (%s)." % [property, UType.get_name_from_type(typeof(old)), value, UType.get_name_from_type(typeof(value))])
 				return true
 			o.set(property, value)
 			var new = o.get(property)
@@ -228,22 +274,3 @@ func _set(pname: StringName, value) -> bool:
 			return true
 	push_error("No %s in %s. (Attempted '%s = %s')" % [pname, _get_state(), property, value])
 	return true
-
-func _get_all_of_type(type: Variant) -> Dictionary:
-	var out := {}
-	for k in _default:
-		var v = _get(k)
-		if v is type:
-			out[k] = v
-	return out
-
-func _get_all_of_class(classname: String) -> Dictionary:
-	var out := {}
-	for k in _default:
-		var v = _get(k)
-		if v is Object and v.get_class() == classname:
-			out[k] = v
-	return out
-
-func _has_of_type(id: String, type: Variant) -> bool:
-	return id in _default and self[id] is type

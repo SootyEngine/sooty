@@ -5,7 +5,7 @@ class_name Waiter
 signal waiting_list_changed()
 
 @export var _waiting_for := [] # objects that want the flow to _break
-	
+
 func is_waiting() -> bool:
 	return len(_waiting_for) > 0
 

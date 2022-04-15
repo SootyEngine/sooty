@@ -36,15 +36,12 @@ func _files_modified(file_scanner: FileModifiedScanner):
 	file_scanner.update_times()
 	Mods._load_mods()
 
-func _process(_delta: float) -> void:
-	_tick()
-
 func _on_step(step: Dictionary):
 	match step.type:
 		"text": caption.emit(step.text, step)
 
 func _reloaded():
-	clear_waiting_list()
+#	clear_waiting_list()
 	_stack = _last_tick_stack.duplicate(true)
 
 func _load_mods(mods: Array):

@@ -8,6 +8,9 @@
 	#.note: The one to win it
 	#.icon: ✔
 	
+	$okay.fuck it "all" over now
+	@Music.play
+	@Music.play "No Hope" volume:0.5
 	Text without a speaker. 
 	
 	# Speakers.
@@ -16,6 +19,9 @@
 	
 	# Markdown formatting.
 	Some *italic*, **bold** and ***bold italic*** text.
+	@Music.play ad o
+	
+
 	
 	# BBCode.
 	Some [b;tomato]bold red text[] and some [i;deep_sky_blue]italic blue text.[]

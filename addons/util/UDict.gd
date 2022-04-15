@@ -2,12 +2,15 @@
 extends RefCounted
 class_name UDict
 
+# debug pretty print
 static func log(d: Variant, msg: String = ""):
 	print(msg, JSON.new().stringify(d, "\t", false))
 
 static func first(d: Dictionary, default = null) -> Variant:
 	return default if not len(d) else d.values()[0]
 
+# copy content of one dict to another
+# why? target may be refrenced somewhere, and creating a new one would lose the reference.
 static func recycle(target: Dictionary, patch: Dictionary) -> Dictionary:
 	target.clear()
 	merge(target, patch)
@@ -103,7 +106,7 @@ static func merge(target: Dictionary, patch: Dictionary, deep: bool = false, lis
 				
 				# replace different type
 				else:
-					push_error("can't merge %s with %s. replacing %s instead." % [UType.type_name(target[k]), UType.type_name(patch[k]), k])
+					push_error("can't merge %s with %s. replacing %s instead." % [UType.get_type_name(target[k]), UType.get_type_name(patch[k]), k])
 					target[k] = patch[k]
 
 static func merge_at(target: Dictionary, path: Array, patch: Dictionary, deep: bool = false, lists: bool = false):
@@ -121,17 +124,15 @@ static func flip_keys_and_values(d:Dictionary) -> Dictionary:
 		out[d[k]] = k
 	return out
 
+# tickers keep count of things
 static func new_ticker(from: Dictionary, initial: int = 0) -> Dictionary:
-	var out := {}
-	for item in from:
-		out[item] = initial
-	return out
+	return map(from, func(x): return initial)
 
 static func tick(d: Dictionary, key, amount: int = 1, remove_if_empty: bool = true) -> int:
-	if not key in d:
-		d[key] = amount
-	else:
+	if key in d:
 		d[key] += amount
+	else:
+		d[key] = amount
 	if remove_if_empty and d[key] == 0:
 		d.erase(key)
 		return 0
@@ -145,38 +146,6 @@ static func total(d: Dictionary) -> Variant:
 	for i in range(1, len(v)):
 		out += v[i]
 	return out
-
-#class DSorter:
-#	var items:Array = []
-#	var dict:Dictionary
-#
-#	func _init(d:Dictionary):
-#		dict = d
-#
-#	func sort_by_key(reversed:bool=false):
-#		for k in dict:
-#			items.append([len(k) if k is String else k, k, dict[k]])
-#		return _out(reversed)
-#
-#	func sort_by_value_key(key, reversed:bool=false):
-#		for k in dict:
-#			items.append([dict[k].get(key, 0), k, dict[k]])
-#		return _out(reversed)
-#
-#	func _out(reversed:bool):
-#		if reversed:
-#			items.sort_custom(self, "_sort_dict")
-#		else:
-#			items.sort_custom(self, "_sort")
-#
-#		dict.clear()
-#		for item in items:
-#			dict[item[1]] = item[2]
-#
-#		return dict
-#
-#	func _sort(a, b): return a[0] < b[0]
-#	func _sort_reversed(a, b): return a[0] > b[0]
 
 # godot preserves dict order, so this can work
 static func _to_args(d: Dictionary) -> Array:
@@ -237,7 +206,7 @@ static func get_penultimate(d: Dictionary, path: Array, create := false, default
 		out = out[path[i]]
 	return out
 
-# determine which keys are different or new
+# return a copy that only contains values that are different
 static func get_different(default: Dictionary, current: Dictionary) -> Dictionary:
 	var out := {}
 	for k in current:
@@ -278,23 +247,24 @@ static func dig(d: Variant, call: Callable, reverse: bool = false):
 # returns an tree where all vlaues that were empty (str="" int=0 list=[] dict={}) were removed
 static func trim_empty(v: Variant):
 	var out = v.duplicate(true)
-	dig(out, func(x):
-		for k in x.keys():
-			if x[k]:
-				pass
-			else:
-				x.erase(k))
+	dig(out,
+		func(x):
+			for k in x.keys():
+				if x[k]:
+					pass
+				else:
+					x.erase(k))
 	return out
 
 static func map(d: Dictionary, call: Callable) -> Dictionary:
 	var out := {}
 	for k in d:
-		d[k] = call.call(k, d[k])
+		d[k] = call.call(d[k])
 	return out
 
 static func filter(d: Dictionary, call: Callable) -> Dictionary:
 	var out := {}
 	for k in d:
-		if call.call(k, d[k]):
+		if call.call(d[k]):
 			out[k] = d[k]
 	return out 

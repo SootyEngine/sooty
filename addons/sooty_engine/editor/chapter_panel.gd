@@ -45,7 +45,7 @@ func _redraw():
 		for k in data.M:
 			if not k in ["id", "file", "line"]:
 				if k == "color":
-					color = UString.str_to_color(data.M[k]).darkened(.2 * (deep-1))
+					color = UStringConvert.to_color(data.M[k]).darkened(.2 * (deep-1))
 					continue
 				elif k == "icon":
 					icon = data.M[k]

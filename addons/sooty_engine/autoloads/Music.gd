@@ -1,11 +1,12 @@
+@tool
 extends Node
 
 const BUS := "music"
 const DEFAULT_FADE_TIME := 2.0
 const MAX_MUSIC_PLAYERS := 3
 
-var _queue := []
-var _files := {}
+@export var _queue := []
+@export var _files := {}
 
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -81,6 +82,9 @@ func queue(id: String):
 # - rand_offset: Random position to play from on start up.
 # - fade_time (DEFAULT_FADE_TIME): Time to fade out over.
 func play(id: String, kwargs := {}):
+	if Engine.is_editor_hint():
+		return
+	
 	if id == get_current():
 		push_warning("Already playing '%s'." % id)
 		return
