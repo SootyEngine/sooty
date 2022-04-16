@@ -29,6 +29,8 @@
 	john: Text spoken by John.
 	: Text spoken by last speaker, John.
 	
+	Okay
+	
 	# Markdown formatting.
 	Some *italic*, **bold** and ***bold italic*** text.
 	@Music.testo("MON", "d1", true)
@@ -36,11 +38,19 @@
 	~ $ass.adsa(fd, d) ^ogre.reset(asad dsa, ds, true, "okay") + okay + @onasd(aosdk)
 	^okay.reset_all
 	
+	okay [what] aws dawd[dwa] awd [:canada:;b;red;b;:zombie_man:;$my_function true YES]
+	ad [@Music.play "No Hope"]
+	[~$my_function(true, 3) + ^reset(0) $my_function(true, 3) ]
+	~$my_function(true, 3)
+	$my_function true YES
+	
+	^achievement_get d1 true
+	$my_function true YES
 	
 	[pale_violet_red]Okay now, which one of you thought.[b]And then[]we were out[] of the clear.
 	
 	# BBCode.
-	Some [b;tomato]bold red text[] and some [i;deep_sky_blue]italic blue text.[]
+	Some [b;tomato]bold red text[] and some [deep_sky_blue]blue text [i]italic[] blue text.[]
 	
 	# Inserting state values to text.
 	The current score is [$score;b;cyan].
@@ -87,8 +97,8 @@
 	~ $player.set_job("baker", {"tint": "beige", "pay": 12.50})
 	
 	# @ Node function shortcut.
-	@camera shake x time:3.0 wait:true x:y # nodes_in_group("sa:camera").camera("shake", x, { "wait": true, "x": y})
-	@camera.shake x time:3.0 wait:true x:y # nodes_in_group("sa:camera").shake(x, { "wait": true, "x": y })
+	@camera shake x time:3.0 wait:true x:y # nodes_in_group("@.camera").camera("shake", x, { "wait": true, "x": y})
+	@camera.shake x time:3.0 wait:true x:y # nodes_in_group("@:camera").shake(x, { "wait": true, "x": y })
 	
 	# BBCode with actions.
 	Wait a minute, that means[!@camera.zoom 1;b;i;~score += 20] this was a...[!@camera.zoom] murder!

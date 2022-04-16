@@ -36,7 +36,7 @@ func _load_mods(mods: Array):
 		mod.meta["sfx"] = []
 		var head: String = mod.dir.plus_file("audio/sfx")
 		for file_path in UFile.get_files(head, UFile.EXT_AUDIO):
-			var id = UFile.trim_extension(file_path.trim_prefix(head + "/").replace("/", "_"))
+			var id = UFile.trim_extension(file_path.trim_prefix(head + "/"))#.replace("/", "-"))
 			_files[id] = file_path
 			mod.meta.sfx.append(id)#file_path)
 

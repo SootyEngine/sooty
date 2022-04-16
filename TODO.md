@@ -24,7 +24,7 @@
     - [ ] Agnosticize Choices system so it can be used for other types of user input, like popups.
     - [x] Change `text` lines to `keyval`.
     - [x] Handle DialogueLine in VisualNovel.
-
+- [ ] Swap how `@:` is for objects and `@.` for functions, the other way around.
 - [x] Remove `.` from `EXT_*` properties.
 - [x] Rename Achievement to Award.
 - [x] Data parser.

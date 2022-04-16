@@ -313,9 +313,12 @@ static func get_symbol(text: String, i: int, symbols := SYMBOLS) -> String:
 	var out := ""
 	var started := false
 	while i >= 0:
+		# part of symbol head
 		if text[i] in symbols:
+			started = true
 			out = text[i] + out
-		elif text[i] in ".abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789":
+		# part of symbol name
+		elif text[i] in "._abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789":
 			out = text[i] + out
 		else:
 			break
