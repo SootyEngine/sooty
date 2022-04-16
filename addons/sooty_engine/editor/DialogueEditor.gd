@@ -20,6 +20,8 @@ var TAG_DESC := {
 	"Darken 33%": { "insert": "dim", "icon": ICON_COLOR },
 	"Lighten 33%": { "insert": "lit", "icon": ICON_COLOR },
 	"Shift hue": { "insert": "hue", "icon": ICON_COLOR },
+	"Shift hue triune 1": { "insert": "hue -33", "icon": ICON_COLOR },
+	"Shift hue triune 2": { "insert": "hue 33", "icon": ICON_COLOR },
 	
 	# emojis
 	"Emoji": {"insert": "::", "icon": ICON_PRINT },
@@ -84,12 +86,10 @@ var rte_info := {}
 func _get_rich_text_effect_info():
 	if not len(rte_info):
 		for file in UFile.get_files("res://addons/rich_text/text_effects", ".gd"):
-			var rte = load(file).new()
-			if "bbcode" in rte:
-				if "info" in rte:
-					rte_info[rte.bbcode] = rte.info
-				else:
-					rte_info[rte.bbcode] = {}
+			var rte = load(file)
+			if "INFO" in rte:
+				var info: Dictionary = rte.INFO
+				rte_info[info.code] = info
 	return rte_info
 	
 func _init() -> void:
@@ -115,37 +115,37 @@ func _init() -> void:
 		# code completion, to help remember node names
 		code_completion_enabled = true
 		code_completion_requested.connect(_code_completion_requested)
-		code_completion_prefixes = ["/", ".", "$", "@", "^", ",", " ", "(", "[", ";"]
+		code_completion_prefixes = ["/", ".", "$", "@", "^", ",", " ", "(", "[", ";", ":"]
 
-func _get_func_info(fname: String) -> Array:
-	var object: String = ""
-	var method: String = fname
-	
-	if "." in fname:
-		var p := fname.split(".", true, 1)
-		object = p[0]
-		method = p[1]
-	
-	if fname.begins_with("@"):
-		if "." in fname:
-			var p := fname.trim_prefix("@").split(".", true, 1)
-			object = p[0]
-			method = p[1]
-			var node := get_tree().get_first_node_in_group("@:" + object)
-			if node:
-				return [node, UScript.get_method_info(node, method)]
-		else:
-			var node := get_tree().get_first_node_in_group("@." + object)
-			if node:
-				return [node, UScript.get_method_info(node, method)]
-	
-#	elif fname.begins_with("$"):
-#		var path := Array(method.split("."))
-#		object = UObject.get_penultimate(State, path)
-	
-	return []
+#func _get_func_info(fname: String) -> Array:
+#	var object: String = ""
+#	var method: String = fname
+#
+#	if "." in fname:
+#		var p := fname.split(".", true, 1)
+#		object = p[0]
+#		method = p[1]
+#
+#	if fname.begins_with("@"):
+#		if "." in fname:
+#			var p := fname.trim_prefix("@").split(".", true, 1)
+#			object = p[0]
+#			method = p[1]
+#			var node := get_tree().get_first_node_in_group("@:" + object)
+#			if node:
+#				return [node, UScript.get_method_info(node, method)]
+#		else:
+#			var node := get_tree().get_first_node_in_group("@." + object)
+#			if node:
+#				return [node, UScript.get_method_info(node, method)]
+#
+##	elif fname.begins_with("$"):
+##		var path := Array(method.split("."))
+##		object = UObject.get_penultimate(State, path)
+#
+#	return []
 
-func var_to_str(vari: Variant, is_action: bool) -> String:
+func _var_to_str(vari: Variant, is_action: bool) -> String:
 	if is_action:
 		var out = str(vari)
 		if " " in out:
@@ -167,7 +167,7 @@ func _show_arg(object: Object, arg_info: Dictionary, is_action := false) -> bool
 			found_at_least_one = true
 			var display: String = option# "%s: %s" % [arg_info.id.capitalize(), option]
 			var insert = UStringConvert.to_type(option, arg_info.type)
-			insert = var_to_str(insert, is_action)
+			insert = _var_to_str(insert, is_action)
 			add_code_completion_option(CodeEdit.KIND_VARIABLE, display, insert, Color.WHITE, icon, 1)
 	
 	else:
@@ -188,7 +188,7 @@ func _show_arg(object: Object, arg_info: Dictionary, is_action := false) -> bool
 				for enum_name in object[arg_info.type]:
 					var enum_index: int = object[arg_info.type][enum_name]
 					var display: String = "%s.%s" % [arg_info.type, enum_name]
-					var insert: String = "%s" % [enum_index] if not is_action else var_to_str(enum_name, is_action)
+					var insert: String = "%s" % [enum_index] if not is_action else _var_to_str(enum_name, is_action)
 					found_at_least_one = true
 					add_code_completion_option(CodeEdit.KIND_ENUM, display, insert, Color.WHITE, ICON_ENUM)
 		
@@ -217,46 +217,54 @@ func _code_completion_requested():
 	var found_at_least_one := false
 	var after := line_text.substr(get_caret_column()).strip_edges()
 	
+	print("HEAD ", head)
+	
 	if head in ["===", "---", "=+=", "&", "#", "{{", "{(", "{<"]:
 		pass
 	
 	# bbcode tags
-	elif head in ["[", ";"]:
-		found_at_least_one = true
-		# main tags
-		for k in TAG_DESC:
-			var info = TAG_DESC[k]
-			var display = k
-			var insert = info.insert
-			add_code_completion_option(CodeEdit.KIND_FILE_PATH, display, insert, Color.WHITE, info.icon)
-		
-		# effects
-		var rte := _get_rich_text_effect_info()
-		for k in rte:
-			var info = rte[k]
-			var display = k[0].capitalize() + k.substr(1)
-			var insert = k
-			if "desc" in info:
-				display += ": " + info.desc
-			if "auto" in info:
-				insert = info.auto
-			add_code_completion_option(CodeEdit.KIND_VARIABLE, display, insert, Color.WHITE, ICON_EFFECT)
-		
-		# color names
-		var clr := Color.WHITE
-		for i in UColor.HUE_SORTED:
-			var c := clr.get_named_color(i)
-			var n := clr.get_named_color_name(i)
-			var display := "Color.%s %s" % [n, c]
-			var insert := n.to_lower()
-			add_code_completion_option(CodeEdit.KIND_VARIABLE, display, insert, c, ICON_COLOR)
+	elif head in ["[", "[:", "[:]", ";"]:
+		print(line_text[get_caret_column()-1])
 		
 		# emojis
-#		for emoji_name in Emoji.NAMES:
-#			var display = "Emoji %s" % [emoji_name.capitalize()]
-#			var insert = ":%s:" % emoji_name
-#			add_code_completion_option(CodeEdit.KIND_VARIABLE, display, insert, Color.WHITE, ICON_EMOJI)
+		if line_text[get_caret_column()-1] == ":":
+			found_at_least_one = true
+			for emoji_name in Emoji.NAMES:
+				var display = "Emoji %s" % [emoji_name.capitalize()]
+				var insert = "%s:" % emoji_name
+				add_code_completion_option(CodeEdit.KIND_VARIABLE, display, insert, Color.WHITE, ICON_EMOJI)
 		
+		else:
+		
+			found_at_least_one = true
+			# main tags
+			for k in TAG_DESC:
+				var info = TAG_DESC[k]
+				var display = k
+				var insert = info.insert
+				add_code_completion_option(CodeEdit.KIND_FILE_PATH, display, insert, Color.WHITE, info.icon)
+			
+			# effects
+			var rte := _get_rich_text_effect_info()
+			for k in rte:
+				var info = rte[k]
+				var display = k[0].capitalize() + k.substr(1)
+				var insert = k
+				if "desc" in info:
+					display += ": " + info.desc
+				if "auto" in info:
+					insert = info.auto
+				add_code_completion_option(CodeEdit.KIND_VARIABLE, display, insert, Color.WHITE, ICON_EFFECT)
+			
+			# color names
+			var clr := Color.WHITE
+			for i in UColor.HUE_SORTED:
+				var c := clr.get_named_color(i)
+				var n := clr.get_named_color_name(i)
+				var display := "Color.%s %s" % [n, c]
+				var insert := n.to_lower()
+				add_code_completion_option(CodeEdit.KIND_VARIABLE, display, insert, c, ICON_COLOR)
+
 		
 	elif head in ["=>", "=="]:
 		var path := _find_flow(line_text, line)

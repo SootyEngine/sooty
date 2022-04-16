@@ -155,6 +155,8 @@ remove `>` command and just use `@`
         - [x] Enums
         - [x] Custom objects
     - [ ] Show available `kwarg` keys.
+        When at last element or further, check if its `kwargs`
+        Then look in function info for a `kwargs` dict, and display all
         - [ ] Check for already inputted kwargs.
         - [ ] Insert kwarg with it's default.
     - [ ] Evals
