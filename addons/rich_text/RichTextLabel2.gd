@@ -184,7 +184,7 @@ func _reload_config():
 func _update_color():
 	add_theme_color_override("font_outline_color", _get_outline_color(color))
 
-var _last_draw_at := get_tree().get_frame()
+var _last_draw_at := 0
 func _redraw():
 #	if get_tree().get_frame() - _last_draw_at > 4:
 	set_bbcode(bbcode)
@@ -192,7 +192,7 @@ func _redraw():
 #		print("skipping")
 
 func set_bbcode(btext: String):
-	_last_draw_at = get_tree().get_frame()
+#	_last_draw_at = get_tree().get_frame()
 	text = ""
 	bbcode = btext
 	clear()

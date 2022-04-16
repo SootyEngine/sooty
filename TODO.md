@@ -143,6 +143,7 @@
         - [x] Persistent state actions
         - [x] Enums
         - [x] Custom objects
+    - [50%] ctrl click on `===` `---` to toggle line hiding
     - [ ] Show available `kwarg` keys.
         When at last element or further, check if its `kwargs`
         Then look in function info for a `kwargs` dict, and display all

@@ -7,16 +7,17 @@ func _get_class():
 var _all: Dictionary = {}
 var _iter_current := 0
 
-static func get_manager(item_or_manager_class: String) -> DataManager:
+static func get_manager(item_or_manager_class: Variant) -> DataManager:
+	if item_or_manager_class is Script:
+		item_or_manager_class = UClass.get_class_name(item_or_manager_class)
+	
 	# use string name to find instance
 	if "data_managers" in Global.meta and item_or_manager_class in Global.meta.data_managers:
 		var m_instance_id: int = Global.meta.data_managers[item_or_manager_class]
 		return instance_from_id(m_instance_id)
+	
 	push_error("Can't find manager for %s." % item_or_manager_class)
 	return null
-
-static func okay_then():
-	print("Hee haw")
 
 func _init(d := {}) -> void:
 	_post_init.call_deferred()
@@ -26,7 +27,7 @@ func _init(d := {}) -> void:
 	# so long as we have the _empt object, the script is in memory.
 	var my_class_name := UClass.get_class_name(self)
 	var my_data_class := my_class_name.trim_suffix("Manager")
-	prints("Manager: %s %s." % [my_class_name, my_data_class])
+#	prints("Manager: %s %s." % [my_class_name, my_data_class])
 	if not "data_managers" in Global.meta:
 		Global.meta.data_managers = {}
 	Global.meta.data_managers[my_class_name] = get_instance_id()
@@ -50,6 +51,12 @@ func _get_id(data: Variant) -> String:
 
 func get_all_ids() -> Array:
 	return _all.keys()
+
+func get_all() -> Array:
+	return _all.values()
+
+func get_many(ids: Array) -> Array:
+	return ids.map(get)
 
 func get_total() -> int:
 	return len(_all)

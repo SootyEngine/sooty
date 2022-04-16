@@ -164,14 +164,14 @@ static func get_operator_value(v):
 	return v
 
 # Properly divides an array as arguments for a function. Like python.
-static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := false, arg_info = null) -> Variant:
+static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := false, arg_data = null) -> Variant:
 	var obj: Object = call.get_object() if call is Callable else call[0]
 	var method: String = call.get_method() if call is Callable else call[1]
-	if arg_info == null:
-		arg_info = UReflect.get_arg_info(obj, method)
+	if arg_data == null:
+		arg_data = UReflect.get_arg_info(obj, method)
 	
 	# no args mean it was probably not a script function but a built in
-	if not len(arg_info):
+	if not len(arg_data):
 		return obj.callv(method, in_args)
 	
 	var new := in_args.duplicate(true)
@@ -180,14 +180,14 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 	var has_kwargs := false
 	
 	# too many arguments?
-	if len(new) > len(arg_info):
+	if len(new) > len(arg_data):
 		var left_over := []
-		while len(new) > len(arg_info):
+		while len(new) > len(arg_data):
 			left_over.append(new.pop_back())
 		push_error("Passed too many arguments to %s. Trimming %s." % [method, left_over])
 	
 	# are kwargs wanted?
-	if len(new) and arg_info[-1].name == "kwargs":
+	if len(new) and arg_data.keys()[-1] == "kwargs":
 		# is last string a dict?
 		if as_string_args:
 			if new[-1] is String and ":" in new[-1]:
@@ -203,25 +203,27 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 	if as_string_args:
 		# convert leading arguments
 		for i in len(new):
-			new[i] = UStringConvert.to_type(in_args[i], arg_info[i].type)
+			new[i] = UStringConvert.to_type(in_args[i], arg_data.values()[i].type)
 #			prints("%s -> %s == %s" % [in_args[i], arg_info[i].type, new[i]])
 		# convert kwargs
 		if has_kwargs:
-			kwargs = UStringConvert.to_type(kwargs, TYPE_DICTIONARY, arg_info[-1].get("default", {}))
+			kwargs = UStringConvert.to_type(kwargs, TYPE_DICTIONARY, arg_data.values()[-1].get("default", {}))
 	
 #	prints("OK: %s NEW: %s" % [in_args, new])
 	
 	# add the initial values up front
-	for arg in arg_info:
-		if arg.name in ["args", "kwargs"]:
+	for arg_name in arg_data:
+		var arg_info: Dictionary = arg_data[arg_name]
+		
+		if arg_name in ["args", "kwargs"]:
 			break
 		
 		elif len(new):
 			out.append(new.pop_front())
 		
 		# pad the arguments with their defaults, so kwarg can always be at the end
-		elif "default" in arg:
-			out.append(arg.default)
+		elif "default" in arg_info:
+			out.append(arg_info.default)
 		
 		elif has_kwargs:
 			push_error("For kwargs to work, you need default values.")

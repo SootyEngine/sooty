@@ -14,6 +14,7 @@ func _init() -> void:
 	add_to_group("@.reset_list")
 	selected.connect(_choose)
 
+
 # check if a choise was made
 func chose(id: String) -> bool:
 	return states.get(id, 0) > 0
@@ -88,9 +89,3 @@ func _load_mods(mods: Array):
 	var memory_used = OS.get_static_memory_usage() - memory_before
 	prints("Dialogues:", String.humanize_size(memory_used))
 
-#func find(id: String) -> Dialogue:
-#	if id in cache:
-#		return cache[id]
-#	else:
-#		UString.push_error_similar("No dialogue %s." % id, id, cache.keys())
-#		return null

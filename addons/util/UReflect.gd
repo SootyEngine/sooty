@@ -6,8 +6,10 @@ func scan_scripts():
 	for file in UFile.get_files("res://", "gd"):
 		print(file)
 
-static func get_arg_info(object: Variant, meth: String) -> Array:
-	return get_method_info(object, meth).get("args", [])
+# returns an array where each key is an argument
+# godot preserves dictionary order, so this works
+static func get_arg_info(object: Variant, meth: String) -> Dictionary:
+	return get_method_info(object, meth).get("args", {})
 
 static func get_script_methods(object: Object, skip_private := true, skip_get := true, skip_set := true) -> Dictionary:
 	if object.has_method("_get_script_methods"):

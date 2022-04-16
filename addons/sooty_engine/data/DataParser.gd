@@ -218,7 +218,7 @@ static func _is_list_item(s: String) -> bool:
 	return s.begins_with("- ") or s == "-"
 
 # attempt to display data as a .soda file
-static func dict_to_str(dict: Dictionary, with_type := false, strip := false, allow_flat := false) -> String:
+static func dict_to_str(dict: Dictionary, with_type := false, strip := false, allow_flat := true) -> String:
 	var out := []
 	dict = dict.duplicate(true)
 	if strip:

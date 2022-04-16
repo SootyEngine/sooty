@@ -9,7 +9,7 @@ signal started() # Dialogue starts up.
 signal ended() # Dialogue has ended.
 signal ended_w_msg(msg: String) # Dialogue has ended, and includes ending msg.
 signal passed_w_msg(msg: String) # A 'pass' was called, and included a msg.
-signal ticked() # Step in a stack. May call multiple lines.
+signal step_started() # Step in a stack. May call multiple step.
 signal flow_started(id: String)
 signal flow_ended(id: String)
 signal stepped(step: Dictionary)
@@ -63,6 +63,7 @@ func start(id: String):
 	# start dialogue
 	last_line = {}
 	goto(id)
+	step.call_deferred()
 	return true
 
 func can_do(command: String) -> bool:
@@ -161,26 +162,22 @@ func execute(id: String) -> Variant:
 	if start(id):
 		var safety := 100
 		while safety > 0 and is_active():
-			tick()
+			step()
 			safety -= 1
 		return last_value
 	else:
 		return null
 
-func break_tick():
+func break_step(msg := ""):
 	_broke = true
 
-func tick():
+func step():
 	_broke = false
-	
 	if _started:
-#		if not len(_stack):
-#			end()
-		
 		# is start of tick?
 		if len(_stack):# and not _broke:
 			_last_tick_stack = _stack.duplicate(true)
-			ticked.emit()
+			step_started.emit()
 		# has finished?
 		else:
 			end()
@@ -391,10 +388,10 @@ func get_list_item(id: String, type: String, list: Array) -> String:
 	
 	return ""
 
-func line_has_options(line: Dictionary) -> bool:
+static func line_has_options(line: Dictionary) -> bool:
 	return "options" in line
 
-func line_has_condition(line: Dictionary) -> bool:
+static func line_has_condition(line: Dictionary) -> bool:
 	return "cond" in line
 
 func line_passes_condition(line: Dictionary) -> bool:

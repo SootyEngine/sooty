@@ -22,6 +22,7 @@ data_*/
 /scenes/
 /fonts/
 
+/action_tests.soot
 /config.cfg
 /main.tscn
 /icon.png

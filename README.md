@@ -7,7 +7,7 @@ See [docs](https://teebarjunk.github.io/sooty-docs/) for more info.
 ![](https://raw.githubusercontent.com/teebarjunk/sooty-visual_novel-example/main/README/preview.png)
 
 # Features
-- [Scripting language](#soot) with highlighter.
+- [Scripting language](#soot) with highlighter and autocomplete.
 - [`BBCode Evolved®`](#bbcode) with Markdown features.
 - Custom [data format](#soda), inspired by YAML.
 - Built with [modding](#mods) support in mind.
@@ -23,6 +23,15 @@ See [docs](https://teebarjunk.github.io/sooty-docs/) for more info.
 See [docs](https://teebarjunk.github.io/sooty-docs/dialogue/bbcode_evolved.html).
 
 ![](readme/bbcode.png)
+
+Don't worry about remember keywords, as Sooty has autocomplete for:
+
+- BBCode
+- Functions
+- States
+- Even resources, like music
+
+![](readme/autocomplete.png)
 
 # Actions
 ![](readme/actions.png)

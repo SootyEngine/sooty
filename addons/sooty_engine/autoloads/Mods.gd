@@ -4,6 +4,7 @@ extends Node
 const USER_DIR := "user://mods"
 const AUTO_INSTALL_USER_MODS := false
 
+signal request_mods(list: Array)
 signal pre_loaded()
 signal load_all(list: Array)
 signal _loaded()
@@ -47,10 +48,10 @@ func uninstall(dir: String):
 		mods[dir].installed = false
 		_load_mods()
 
-func load_mods(loud := true):
+func load_mods(loud := false):
 	_load_mods(loud)
 
-func _load_mods(loud := true):
+func _load_mods(loud := false):
 	pre_loaded.emit()
 	
 	var installed := get_installed()
