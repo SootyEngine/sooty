@@ -360,7 +360,7 @@ static func patch(target: Object, patch: Dictionary, sources: Array):
 							push_error("No _patch_list_object() in %s. Ignoring %s." % [target, patch_to_var(list_item_patch, sources)])
 					
 					elif list_item_patch is Array:
-						push_error("Not implemented.")
+						push_error("Array patching not implemented yet.")
 					
 					else:
 						if target.has_method("_patch_list_property"):

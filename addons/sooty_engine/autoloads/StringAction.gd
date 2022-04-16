@@ -33,7 +33,7 @@ func preprocess_eval(eval: String):
 	var tags := []
 	var in_tag := false
 	for c in eval:
-		if c in "@$":
+		if c in "@$^":
 			in_tag = true
 			tags.append({type=c, tag="", prop="", full=c, is_nested=false, is_func=false})
 		elif in_tag:
@@ -75,6 +75,19 @@ func preprocess_eval(eval: String):
 					eval = eval.replace(t.full, "_S_[\"%s.%s\"]" % [t.tag, t.prop])
 				else:
 					eval = eval.replace(t.full, "_S_[\"%s\"]" % [t.tag])
+		
+		elif t.type == "^":
+			if t.is_func:
+				if t.is_nested:
+					eval = eval.replace("^%s" % t.tag, "_P_.%s" % t.tag)
+				else:
+					eval = eval.replace(t.full + "(", "_P_._calls[\"%s\"].call(" % t.tag)
+			else:
+				if t.is_nested:
+					eval = eval.replace(t.full, "_P_[\"%s.%s\"]" % [t.tag, t.prop])
+				else:
+					eval = eval.replace(t.full, "_P_[\"%s\"]" % [t.tag])
+					
 	return eval
 
 func test(e: String, context: Object = null) -> bool:
@@ -93,7 +106,13 @@ func do(command: String, context: Object = null) -> Variant:
 		return to_var(command)
 	
 	elif command.begins_with("@"):
-		return call_group(command, context)
+		return do_group_action(command, context)
+	
+	elif command.begins_with("$"):
+		return do_state_action(command, context)
+	
+	elif command.begins_with("^"):
+		return do_state_action(command, context)
 	
 	elif command.begins_with("~"):
 		return eval(command.substr(1).strip_edges(), context)
@@ -103,6 +122,19 @@ func do(command: String, context: Object = null) -> Variant:
 
 func is_action(s: String) -> bool:
 	return UString.get_leading_symbols(s) in Soot.ALL_ACTION_HEADS
+
+func do_state_action(s: String, context: Object = null):
+	var state: Node = State
+	
+	if s.begins_with("$"):
+		s = s.substr(1)
+	elif s.begins_with("^"):
+		s = s.substr(1)
+		state = Persistent
+	
+	var args := UString.split_outside(s, " ")
+	var method = args.pop_front()
+	UObject.call_w_kwargs([state, method], args, true)
 
 # vars are kept as strings, so can be auto type converted
 func to_var(s: String) -> Variant:
@@ -152,7 +184,7 @@ func var_to_variant(svar: Variant) -> Variant:
 			return svar
 
 # @action
-func call_group(action: String, context: Object) -> Variant:
+func do_group_action(action: String, context: Object) -> Variant:
 	var args := UString.split_outside(action, " ")
 	var group: String = args.pop_front()
 	return call_group_w_args(group, args, true)
@@ -269,6 +301,10 @@ func eval(eval: String, context: Variant = null, default = null) -> Variant:
 				property = property.substr(1)
 				target = State
 			
+			elif property.begins_with("^"):
+				property = property.substr(1)
+				target = Persistent
+			
 			# assigning to a group object?
 			elif property.begins_with("@"):
 				property = property.substr(1)
@@ -299,10 +335,10 @@ func eval(eval: String, context: Variant = null, default = null) -> Variant:
 	# state shortcut
 	eval = preprocess_eval(eval)
 	
-	if _expr.parse(eval, ["_T_", "_SA_", "_S_"]) != OK:
+	if _expr.parse(eval, ["_T_", "_SA_", "_S_", "_P_"]) != OK:
 		push_error("Failed _eval('%s'): %s." % [eval, _expr.get_error_text()])
 	else:
-		var result = _expr.execute([get_tree(), self, State], context, false)
+		var result = _expr.execute([get_tree(), self, State, Persistent], context, false)
 		if _expr.has_execute_failed():
 			push_error("Failed _eval('%s'): %s." % [eval, _expr.get_error_text()])
 		else:
@@ -324,13 +360,13 @@ func _globalize_functions(t: String) -> String:
 			var k := j-1
 			var method_name := ""
 			# walk backwards
-			while k >= 0 and t[k] in ".abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789":
+			while k >= 0 and t[k] in UString.VAR_CHARS_NESTED:
 				method_name = t[k] + method_name
 				k -= 1
 			# if head isn't empty, it's a function not wrapping brackets.
 			if method_name != "":
 				out += UString.part(t, i, k+1)
-				# renpy inspired translations
+				# renpy inspired translation shortcut
 				if method_name == "_":
 					out += "tr("
 				# don't wrap property methods, since those will be globally accessible from _get

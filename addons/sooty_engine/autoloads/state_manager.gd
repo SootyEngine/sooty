@@ -159,7 +159,7 @@ func _init_states():
 	# collect methods in a way where they can all be called from the state
 	for state in _states:
 		_state_properties.append_array(UObject.get_state_properties(state))
-		var methods = UObject.get_script_methods(state)
+		var methods = UReflect.get_script_methods(state)
 		for method in methods:
 			_call_names[method] = "_calls.%s.call(" % method
 			_calls[method] = Callable(state, method)

@@ -88,9 +88,9 @@ static func get_state(target: Variant) -> Variant:
 	else:
 		var out := {}
 		for k in get_state_properties(target):
-			match typeof(target[k]):
-				TYPE_OBJECT, TYPE_DICTIONARY, TYPE_ARRAY: out[k] = get_state(target[k])
-				_: out[k] = target[k]
+			match typeof(target.get(k)):
+				TYPE_OBJECT, TYPE_DICTIONARY, TYPE_ARRAY: out[k] = get_state(target.get(k))
+				_: out[k] = target.get(k)
 		return out
 
 # set a serializable state.

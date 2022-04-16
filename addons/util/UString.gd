@@ -229,30 +229,6 @@ static func split_on_next(s: String, items: Array) -> Array:
 	var left_over: String = "" if len(p) == 1 else p[1].strip_edges(true, false)
 	return [token, token_str, left_over]
 
-# splits a string on spaces, respecting wrapped strings.
-#static func split_on_spaces(s: String) -> Array:
-#	var out := [""]
-#	var in_quotes := false
-#	for c in s:
-#		if c == '"':
-#			if in_quotes:
-#				in_quotes = false
-#				out[-1] += '"'
-#			else:
-#				in_quotes = true
-#				if out[-1] == "":
-#					out[-1] += '"'
-#				else:
-#					out.append('"')
-#
-#		elif c == " " and not in_quotes:
-#			if out[-1] != "":
-#				out.append("")
-#
-#		else:
-#			out[-1] += c
-#	return out
-
 static func is_capitalized(s: String) -> bool:
 	return s[0] == s[0].to_upper()
 
