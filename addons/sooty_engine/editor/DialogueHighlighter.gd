@@ -190,17 +190,16 @@ func _find_true_depth() -> int:
 func _c(i: int, clr: Color):
 	state[i] = {color=clr}
 
-func _h_var(from: int, v: String, index: int, action_color: Color):
+func _h_var(from: int, v: String, index: int):
 	if not len(v):
 		return
 	
 	# dict key
 	if ":" in v:
 		var p := v.split(":", true, 1)
-#		_c(from, Color(action_color, .5))
 		_c(from, C_SYMBOL)
 		_c(from+len(p[0]), C_SYMBOL)
-		_h_var(from+len(p[0])+1, p[1], 0, action_color)
+		_h_var(from+len(p[0])+1, p[1], 0)
 	
 	# array
 	elif "," in v:
@@ -208,7 +207,7 @@ func _h_var(from: int, v: String, index: int, action_color: Color):
 		var parts := v.split(",")
 		for i in len(parts):
 			var part := parts[i]
-			_h_var(off, part, index, action_color)
+			_h_var(off, part, index)
 			off += len(part)
 			_c(off, C_SYMBOL)
 			off += 1
@@ -219,16 +218,16 @@ func _h_var(from: int, v: String, index: int, action_color: Color):
 	
 	else:
 		if v[0] == "*":
-			_c(from, Color(action_color, SYMBOL_ALPHA))
+			_c(from, Color(Color.WHITE, SYMBOL_ALPHA))
 			from += 1
 		
-		_c(from, action_color)
+		_c(from, Color.DARK_GRAY if index % 2 != 0 else Color.WEB_GRAY)
 
 func _h_action_var(from: int, to: int):
 	var inner := text.substr(from, to-from)
 	var parts = UString.split_outside(inner, " ")
 	for part in parts:
-		_h_var(from, part, 0, C_VAROUT)
+		_h_var(from, part, 0)
 		from += len(part)+1
 
 func _h_case(from: int, to: int):
@@ -237,7 +236,7 @@ func _h_case(from: int, to: int):
 	var index := 0
 	for i in len(parts):
 		if parts[i]:
-			_h_var(from, parts[i], index, clr)
+			_h_var(from, parts[i], index)
 			index += 1
 		from += len(parts[i]) + 1
 	
@@ -263,15 +262,14 @@ func _h_node_action(from: int, to: int, color: Color):
 			
 			# arguments
 			else:
-				clr = UColor.hue_shift(Color(color,.8), -.05) if index%2==0 else UColor.hue_shift(Color(color,.8), .05)
-				_h_var(from, parts[i], index, clr)
+				_h_var(from, parts[i], index)
 			
 			index += 1
 		
 		from += len(parts[i]) + 1
 	
 func _h_eval(from: int, to: int):
-	_c(from, C_CONTEXT_ACTION)
+	_c(from, C_SYMBOL)# C_CONTEXT_ACTION)
 	var t_color = C_CONTEXT_ACTION
 	var m_color = C_CONTEXT_ACTION
 	
@@ -382,6 +380,7 @@ func _h_bbcode(from: int, to: int, default: Color):
 				var tags := inner.split(";")
 				for tag_index in len(tags):
 					var tag := tags[tag_index]
+					var tag_to := off + len(tag)
 					
 					if tag.begins_with("!"):
 						tag = tag.substr(1)
@@ -394,8 +393,18 @@ func _h_bbcode(from: int, to: int, default: Color):
 							clr_stack.pop_back()
 					
 					# colorize action tags
-					elif UString.begins_with_any(tag, ["~", "@", "$", "^"]):
-						_h_eval(off, off+len(tag))
+					# @node action
+					elif tag.begins_with("@"):
+						_h_node_action(off, tag_to, C_NODE_ACTION)
+					# $state action
+					elif tag.begins_with("$"):
+						_h_node_action(off, tag_to, C_STATE_ACTION)
+					# ^persistent state action
+					elif tag.begins_with("^"):
+						_h_node_action(off, tag_to, C_PERSISTENT_ACTION)
+					# ~ eval
+					elif tag.begins_with("~"):
+						_h_eval(off, tag_to)
 					
 					# hacky way of getting bold
 					elif tag == "b":
@@ -511,7 +520,6 @@ func get_flow_color(deep: int) -> Color:
 
 func _h_flow(from: int, to: int):
 	var inner := text.substr(from, to-from)
-	
 	var true_deep = _find_true_depth()+1
 	
 	_c(from, C_SYMBOL)
@@ -543,39 +551,11 @@ func _h_flow(from: int, to: int):
 		
 		if not text[i] in " \t":
 			started = true
-		
-	
-#	var head := inner.substr(0, 2)
-#	var tail := inner.substr(2)
-#	prints(head, tail)
-	# => and ==
-#	for tag in [[Soot.FLOW_GOTO, C_FLOW_GOTO], [Soot.FLOW_CALL, C_FLOW_CALL]]:
-#		var i := from
-#		while true:
-#			var j := text.find(tag[0], i)
-#			if j == -1:
-#				break
-#			var color: Color = tag[1]
-#			_c(j, C_SYMBOL)
-#			j += len(tag[0])
-#			_c(j, color)
-#			# colorize path
-#			for i in range(j, len(text)):
-#				if text[i] == ".":
-#					_c(i, C_SYMBOL)
-#					_c(i+1, color)
-#				elif text[i] == "/":
-#					_c(i, C_SYMBOL)
-#					if not i == 0:
-#						color = UClr.hue_shift(color, .2)
-#						color.v -= .1
-#					_c(i+1, color)
-#			break
 
 func _h_properties(from: int, to: int):
 	var parts := text.substr(from, to-from).split(" ")
 	for i in len(parts):
-		_h_var(from, parts[i], i, Color.WHITE)
+		_h_var(from, parts[i], i)
 		from += len(parts[i]) + 1
 
 func _h_line(from: int, to: int):
@@ -700,17 +680,14 @@ func _h_line(from: int, to: int):
 		# @node action
 		elif part.begins_with("@"):
 			_h_node_action(from, to, C_NODE_ACTION)
-		
+		# $state action
 		elif part.begins_with("$"):
 			_h_node_action(from, to, C_STATE_ACTION)
-		
+		# ^persistent state action
 		elif part.begins_with("^"):
 			_h_node_action(from, to, C_PERSISTENT_ACTION)
-		
 		# ~ eval
 		elif part.begins_with("~"):
-			_c(from, C_SYMBOL)
-			from += 1
 			_h_eval(from, to)
 		
 		# options

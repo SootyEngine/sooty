@@ -39,7 +39,7 @@
 	^okay.reset_all
 	
 	okay [what] aws dawd[dwa] awd [:canada:;b;red;b;:zombie_man:;$my_function true YES]
-	ad [@Music.play "No Hope"]
+	ad [@Music.play true 3]
 	[~$my_function(true, 3) + ^reset(0) $my_function(true, 3) ]
 	~$my_function(true, 3)
 	$my_function true YES
