@@ -1,26 +1,20 @@
 @tool
 extends RefCounted
-class_name UScript
+class_name UReflect
 
 func scan_scripts():
 	for file in UFile.get_files("res://", "gd"):
 		print(file)
 
-static func get_arg_info(obj: Variant, meth: String) -> Array:
-	return get_method_info(obj, meth).get("args", [])
+static func get_arg_info(object: Variant, meth: String) -> Array:
+	return get_method_info(object, meth).get("args", [])
 
-# godot keeps dict key order, so we can return 
-static func get_method_info(obj: Variant, meth: String, private := false) -> Dictionary:
-	var methods = get_method_infos(obj, private) # TODO: Cache.
-	return methods.get(meth, {})
-#	return null if methods == null or not meth in methods else methods[meth]
-
-static func get_script_methods(target: Object, skip_private := true, skip_get := true, skip_set := true) -> Dictionary:
-	if target.has_method("_get_script_methods"):
-		return target._get_script_methods()
+static func get_script_methods(object: Object, skip_private := true, skip_get := true, skip_set := true) -> Dictionary:
+	if object.has_method("_get_script_methods"):
+		return object._get_script_methods()
 	
 	var out := {}
-	for m in target.get_method_list():
+	for m in object.get_method_list():
 		if m.flags & METHOD_FLAG_FROM_SCRIPT != 0 and not m.name[0] == "@":
 			if skip_private and m.name[0] == "_":
 				continue
@@ -32,9 +26,17 @@ static func get_script_methods(target: Object, skip_private := true, skip_get :=
 	
 	return out
 
-static func get_method_infos(obj: Variant, private := false) -> Dictionary:
+# godot keeps dict key order, so we can return 
+static func get_method_info(object: Variant, meth: String, private := false) -> Dictionary:
+	var methods = get_methods(object, private) # TODO: Cache.
+	return methods.get(meth, {})
+
+static func get_methods(object: Variant, private := false) -> Dictionary:
+	if object.has_method("_get_methods"):
+		return object._get_methods()
+	
 	var out := {}
-	var script: Script = obj.get_script()
+	var script: Script = object.get_script()
 	var safety := 20
 	
 	# collect not only this scripts methods, but it's base_script, parents.
@@ -51,7 +53,7 @@ static func get_method_infos(obj: Variant, private := false) -> Dictionary:
 				var end = p[1].rsplit(")")
 				var sargs = end[0]
 				var returns = end[1].split(":", true, 1)[0].strip_edges()
-				var args = _parse_method_arguments(sargs, obj)
+				var args = _parse_method_arguments(sargs, object)
 				# TODO: get return type
 				returns = UType.get_type_from_name(returns.trim_prefix("->").strip_edges())
 				out[fname] = {args=args, returns=returns}
@@ -60,9 +62,9 @@ static func get_method_infos(obj: Variant, private := false) -> Dictionary:
 		safety -= 1
 	
 	# look for explicitly defined data
-	if obj.has_method("_get_method_info"):
+	if object.has_method("_get_method_info"):
 		for method in out:
-			var extra_info = obj._get_method_info(method)
+			var extra_info = object._get_method_info(method)
 			if extra_info:
 				UDict.merge(out[method], extra_info, true)
 	

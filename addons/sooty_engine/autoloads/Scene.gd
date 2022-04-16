@@ -8,13 +8,14 @@ var scenes := {}
 var _goto: Callable # an overridable goto function, so you can use your own transition system.
 
 var id: String:
-	get: return UFile.get_file_name(current.scene_file_path)
+	get: return UFile.get_file_name(get_tree().current_scene.scene_file_path)
 
 func _init() -> void:
 	add_to_group("@:Scene")
+	add_to_group("@.goto_scene")
 
 func _get_method_info(method: String):
-	if method == "goto":
+	if method == "goto" or method == "goto_scene":
 		return {
 			args={
 				id={
@@ -23,6 +24,10 @@ func _get_method_info(method: String):
 				}
 			}
 		}
+
+# testing
+func goto_scene(id: String, kwargs := {}):
+	goto(id, kwargs)
 
 func _ready() -> void:
 	await get_tree().process_frame

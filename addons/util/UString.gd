@@ -7,10 +7,12 @@ const CHAR_QUOTE_CLOSED := "”"
 const CHAR_INNER_QUOTE_OPENED := "‘"
 const CHAR_INNER_QUOTE_CLOSED := "’"
 
-const CHARS_ALPHA_LOWER := "abcdefghijklmnopqrstuvwxyz"
-const CHARS_ALPHA_UPPER := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const CHARS_ALPHA_ALL := CHARS_ALPHA_LOWER + CHARS_ALPHA_UPPER
-const CHARS_INTS := "0123456789"
+const LOWERCASE := "abcdefghijklmnopqrstuvwxyz"
+const UPPERCASE := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const ALL_LETTERS := LOWERCASE + UPPERCASE
+const INTEGERS := "0123456789"
+const VAR_CHARS := "_" + ALL_LETTERS + INTEGERS
+const VAR_CHARS_NESTED := "." + VAR_CHARS
 
 static func express(s: String, base_instance: Object = null, default = null) -> Variant:
 	var e := Expression.new()

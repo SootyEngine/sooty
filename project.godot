@@ -170,9 +170,9 @@ _global_script_classes=[{
 "path": "res://addons/util/URand.gd"
 }, {
 "base": "RefCounted",
-"class": &"UScript",
+"class": &"UReflect",
 "language": &"GDScript",
-"path": "res://addons/util/UScript.gd"
+"path": "res://addons/util/UReflect.gd"
 }, {
 "base": "RefCounted",
 "class": &"UString",
@@ -242,7 +242,7 @@ _global_script_class_icons={
 "UNode": "",
 "UObject": "",
 "URand": "",
-"UScript": "",
+"UReflect": "",
 "UString": "",
 "UStringConvert": "",
 "UTime": "",

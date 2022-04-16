@@ -65,7 +65,7 @@ func _run():
 #		print(script.resource_path)
 #		script = script.get_base_script()
 #		safety -= 1
-	UDict.log(UScript.get_method_infos(Dialogue))
+	UDict.log(UReflect.get_method_infos(Dialogue))
 	
 #	var out := {}
 #	for file in UFile.get_files("res://addons/rich_text/text_effects", ".gd"):

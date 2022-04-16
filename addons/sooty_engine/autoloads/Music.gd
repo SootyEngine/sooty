@@ -77,7 +77,7 @@ func queue(id: String):
 		else:
 			play(id)
 
-# called by UScript, as a way of including more advanced arg info
+# called by UReflect, as a way of including more advanced arg info
 # for use with autocomplete
 func _get_method_info(method: String):
 	if method == "play":

@@ -8,18 +8,11 @@
 	#.note: The one to win it
 	#.icon: ✔
 	
-	$okay.fuck it "all" over now
 	@Music.play Intro_Theme
 	@Music.play "No Hope" volume:0.5
 	Text without a speaker. 
 	
-	@Scene.goto another_scene 
-	$my_function false MAYBE
-	^achievement_get d1 false
-	^reset NICE_MODE
-	^reset ADVANCED
-	~okay() + $my_function(aa) dsada $my_function(true) ^achievement_get(d1, true)
-	
+	^achievement_get 
 	[tomato]Tomato[b]Bold tomato[]tomto[;i]italic tomato[] toma [bi] bold italit[] comta.
 	[chocolate]When in rome[cornflower_blue]do whatever you want.
 	Whats [tomato]Not italic [bi]italic[] otaasd?[] okasd
@@ -29,23 +22,8 @@
 	john: Text spoken by John.
 	: Text spoken by last speaker, John.
 	
-	Okay
-	
 	# Markdown formatting.
 	Some *italic*, **bold** and ***bold italic*** text.
-	@Music.testo("MON", "d1", true)
-	~ @Music.play("No Hope")
-	~ $ass.adsa(fd, d) ^ogre.reset(asad dsa, ds, true, "okay") + okay + @onasd(aosdk)
-	^okay.reset_all
-	
-	okay [what] aws dawd[dwa] awd [:canada:;b;red;b;:zombie_man:;$my_function true YES]
-	ad [@Music.play true 3]
-	[~$my_function(true, 3) + ^reset(0) $my_function(true, 3) ]
-	~$my_function(true, 3)
-	$my_function true YES
-	
-	^achievement_get d1 true
-	$my_function true YES
 	
 	[pale_violet_red]Okay now, which one of you thought.[b]And then[]we were out[] of the clear.
 	

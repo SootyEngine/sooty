@@ -171,6 +171,7 @@ remove `>` command and just use `@`
 - `.soot`
     - [ ] Highlight `IGNORE` yellow
     - [x] Tint text based on bbcode
+    - [ ] Don't highlight arguments after `/` if inside a string
     - [ ] Do bbcode tags:
         - [ ] `hue`
         - [ ] `dim` `dima` `lit` `lita`

@@ -182,13 +182,18 @@ func _has_method(method: String) -> bool:
 func _get_method_parent(method: String) -> Node:
 	return _calls[method].get_object()
 
+func _get_methods() -> Dictionary:
+	var out := {}
+	for state in _states:
+		UDict.merge(out, UReflect.get_methods(state))
+	return out
+	
 func _get_script_methods() -> Dictionary:
 	var out := {}
 	for state in _states:
-		for method in UScript.get_script_methods(state):
-			out[method] = UScript.get_method_info(state, method)
+		for method in UReflect.get_script_methods(state):
+			out[method] = UReflect.get_method_info(state, method)
 	return out
-
 
 # preprocess an eval, so it can call all methods of children
 func _preprocess_eval(eval: String) -> String:

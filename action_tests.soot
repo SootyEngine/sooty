@@ -1,0 +1,19 @@
+# @sub.function
+@Music.play "No Hope" {}
+
+# @function
+@sfx godette/bye true
+
+# $state_function
+$my_function true YES
+
+# ^persistent_state_function
+^achievement_get d1 true
+
+# ~eval
+~@Music.testo(0, d1, true) + @Music.play("No Hope", {}) + $my_function(true, 3)
+
+# BBCode tests
+In mid [@Music.testo MON d1 true]
+In mid [~@Music.play("No Hope", {});~@Music.testo();@SFX.sfx godette/bye true;:zombie_man:;!^achievement_get d1 true]
+[:1234:;goldenrod]This is golderon.[b;hue 0.4]and now it's bold.[] and now it's not.[] back to normal.

@@ -17,7 +17,7 @@ func _ready():
 	Saver._get_state.connect(_save_state)
 	Saver._set_state.connect(_load_state)
 
-# called by UScript, as a way of including more advanced arg info
+# called by UReflect, as a way of including more advanced arg info
 # for use with autocomplete
 func _get_method_info(method: String):
 	if method == "play" or method == "sfx":
@@ -55,8 +55,8 @@ func _process(delta: float) -> void:
 			_on_audio_finished(child)
 
 # used as an action shortcut
-func sfx(id: String, kwargs := {}):
-	play(id, kwargs)
+func sfx(id: String, fart: bool = false):# kwargs := {}):
+	play(id)#, kwargs)
 
 func play(id: String, kwargs := {}):
 	if Engine.is_editor_hint():

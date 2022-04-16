@@ -168,7 +168,7 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 	var obj: Object = call.get_object() if call is Callable else call[0]
 	var method: String = call.get_method() if call is Callable else call[1]
 	if arg_info == null:
-		arg_info = UScript.get_arg_info(obj, method)
+		arg_info = UReflect.get_arg_info(obj, method)
 	
 	# no args mean it was probably not a script function but a built in
 	if not len(arg_info):

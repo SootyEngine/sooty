@@ -422,7 +422,7 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 	
 	# font sizes
 	if len(tag) and tag[0].is_valid_int():
-		_push_font_size(int(_state.font_size * _to_number(tag)))
+		_push_font_size(int(_state.font_size * to_number(tag)))
 		return
 	
 	# emoji: old style
@@ -473,7 +473,7 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		"hide": _push_color(Color.TRANSPARENT)
 		
 		# shift the hue. default to 50%.
-		"hue": _push_color(UColor.hue_shift(_state.color, _to_number(info) if info else 0.5))
+		"hue": _push_color(UColor.hue_shift(_state.color, to_number(info) if info else 0.5))
 		
 		"meta": _push_meta(info)
 		"hint": _push_hint(info)
@@ -492,7 +492,7 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 			elif not _parse_tag_unused(tag, info, raw):
 				append_text("[%s]" % raw)
 
-func _to_number(s: String) -> float:
+static func to_number(s: String) -> float:
 	if s.is_valid_int():
 		return s.to_int() / 100.0
 	elif s.is_valid_float():

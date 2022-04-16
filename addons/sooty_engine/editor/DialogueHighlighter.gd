@@ -382,13 +382,15 @@ func _h_bbcode(from: int, to: int, default: Color):
 					var tag := tags[tag_index]
 					var tag_to := off + len(tag)
 					
+					# 
 					if tag.begins_with("!"):
 						tag = tag.substr(1)
-						_c(off, C_SYMBOL)
+						_c(off, Color.ORANGE_RED)
+						_c(off+1, clr_stack[-1])
 						off += 1
 					
 					# empty? pop last color tag
-					elif tag == "":
+					if tag == "":
 						if len(clr_stack) > 1:
 							clr_stack.pop_back()
 					
@@ -427,6 +429,32 @@ func _h_bbcode(from: int, to: int, default: Color):
 						clr_stack[-1].r = lerp(clr_stack[-1].r, 1.0, 0.33)
 						clr_stack[-1].g = lerp(clr_stack[-1].g, 1.0, 0.33)
 						clr_stack[-1].b = lerp(clr_stack[-1].b, 1.0, 0.33)
+					
+					# hue shift tag
+					elif tag.begins_with("hue"):
+						added_color = true
+						var amount := 0.5
+						if " " in tag:
+							var amt = tag.split(" ", true, 1)[1]
+							if amt:
+								amount = RichTextLabel2.to_number(amt)
+						var tag_clr := UColor.hue_shift(clr_stack[-1], amount)
+						clr_stack[-1].r = tag_clr.r
+						clr_stack[-1].g = tag_clr.g
+						clr_stack[-1].b = tag_clr.b
+					
+					# dim
+					elif tag.begins_with("dim") or tag.begins_with("lit"):
+						added_color = true
+						var amount := -0.33 if tag.begins_with("dim") else 0.33
+						if " " in tag:
+							var amt = tag.split(" ", true, 1)[1]
+							if amt:
+								amount = RichTextLabel2.to_number(amt)
+						var tag_clr := UColor.val_shift(clr_stack[-1], amount)
+						clr_stack[-1].r = tag_clr.r
+						clr_stack[-1].g = tag_clr.g
+						clr_stack[-1].b = tag_clr.b
 					
 					# color?
 					else:
