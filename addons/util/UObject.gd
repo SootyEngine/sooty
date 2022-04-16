@@ -155,21 +155,7 @@ static func get_script_signals(target: Object, only_argless := true) -> Dictiona
 		out[m.name] = m
 	return out
 
-static func get_script_methods(target: Object, skip_private := true, skip_get := true, skip_set := true) -> Dictionary:
-	if target.has_method("_get_script_methods"):
-		return target._get_script_methods()
-	
-	var out := {}
-	for m in target.get_method_list():
-		if m.flags & METHOD_FLAG_FROM_SCRIPT != 0 and not m.name[0] == "@":
-			if skip_private and m.name[0] == "_":
-				continue
-			if skip_get and m.name.begins_with("get_"):
-				continue
-			if skip_set and m.name.begins_with("set_"):
-				continue
-			out[m.name] = m
-	return out
+
 
 static func get_operator_value(v):
 	if v is Object:

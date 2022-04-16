@@ -12,6 +12,9 @@ static func part(a: Array, begin: int = 0, end=null) -> Array:
 #	if a is Array:
 	return a.slice(begin, end)
 
+static func getor(array: Array, index: int, default: Variant = null) -> Variant:
+	return default if index < 0 or index >= len(array) else array[index]
+
 static func get_unique(list: Array) -> Array:
 	var out := []
 	for item in list:
@@ -25,6 +28,14 @@ static func all_items_of_type(list: Array, type: int) -> bool:
 			return false
 	return true
 
+# convert a dict to an array
+static func map_dict(dict: Dictionary, call: Callable) -> Array:
+	var out := []
+	for k in dict:
+		out.append(call.call(k, dict[k]))
+	return out
+
+# if the input isn't a list, it will be outputed as one
 static func list(thing: Variant) -> Array:
 	match typeof(thing):
 		TYPE_NIL: return []

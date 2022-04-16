@@ -185,9 +185,10 @@ func _get_method_parent(method: String) -> Node:
 func _get_script_methods() -> Dictionary:
 	var out := {}
 	for state in _states:
-		for method in UObject.get_script_methods(state):
+		for method in UScript.get_script_methods(state):
 			out[method] = UScript.get_method_info(state, method)
 	return out
+
 
 # preprocess an eval, so it can call all methods of children
 func _preprocess_eval(eval: String) -> String:

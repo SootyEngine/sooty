@@ -34,6 +34,8 @@
 # RichTextLabel
 - [ ] Font tag should check if any bold/italic state is set, if it has an `_i.tres` `_b.tres` `_bi.tres` available.
 - [ ] Font image folder, for images that can be shown in fonts with a quick tag.
+- [ ] Effects based on mouse position
+- [ ] Hint effect that fades on mouse over
 
 # State
 - [ ] `Mods` add signal `collect_mods` which will request paths, instead of current system.
@@ -144,9 +146,29 @@ remove `>` command and just use `@`
 - [ ] `text/` folder to load from.
 - [ ] Highlighter.
 
+# Editors
+- `.soot`
+    - [ ] Actions
+        - [ ] Node actions
+        - [x] State actions
+        - [ ] Persistent state actions
+        - [x] Enums
+        - [x] Custom objects
+    - [ ] Evals
+    - [ ] Actions in bbcode
+    - [ ] Evals in bbcode
+    - [ ] Emojis when inside `::`
+    - [ ] Auto complete for `<list|pattern>`
+    - [ ] Only show autocomple in `~@^$` and bbcode.
+    - [x] Basic autocomplete
+
 # Highlighters
 - `.soot`
     - [ ] Highlight `IGNORE` yellow
+    - [x] Tint text based on bbcode
+    - [ ] Do bbcode tags:
+        - [ ] `hue`
+        - [ ] `dim` `dima` `lit` `lita`
     - [x] Markdown * ** ***
 - [ ] Move `type` to `M` meta.
 - [x] Match statements on same line aren't colored.

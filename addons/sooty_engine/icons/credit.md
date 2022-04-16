@@ -25,3 +25,4 @@
 <a href="https://www.flaticon.com/free-icons/print" title="print icons">Print icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/align" title="align icons">Align icons created by Royyan Wijaya - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/expand" title="expand icons">Expand icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/letter-e" title="letter e icons">Letter e icons created by Freepik - Flaticon</a>

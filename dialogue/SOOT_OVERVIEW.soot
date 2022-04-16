@@ -13,6 +13,10 @@
 	@Music.play "No Hope" volume:0.5
 	Text without a speaker. 
 	
+	$my_function false MAYBE
+	^achievement_get d1 false
+	^reset NICE_MODE
+	
 	[tomato]Tomato[b]Bold tomato[]tomto[;i]italic tomato[] toma [bi] bold italit[] comta.
 	[chocolate]When in rome[cornflower_blue]do whatever you want.
 	Whats [tomato]Not italic [bi]italic[] otaasd?[] okasd
