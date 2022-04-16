@@ -13,6 +13,17 @@ var id: String:
 func _init() -> void:
 	add_to_group("@:Scene")
 
+func _get_method_info(method: String):
+	if method == "goto":
+		return {
+			args={
+				id={
+					options=func(): return scenes.keys(),
+					icon=preload("res://addons/sooty_engine/icons/scene.png"),
+				}
+			}
+		}
+
 func _ready() -> void:
 	await get_tree().process_frame
 	

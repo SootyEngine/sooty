@@ -190,7 +190,7 @@ func _find_true_depth() -> int:
 func _c(i: int, clr: Color):
 	state[i] = {color=clr}
 
-func _h_var(from: int, v: String, index := 0, action_color := Color.WHITE):
+func _h_var(from: int, v: String, index: int, action_color: Color):
 	if not len(v):
 		return
 	
@@ -256,16 +256,16 @@ func _h_node_action(from: int, to: int, color: Color):
 				_c(from, clr)
 				for j in range(from, from+len(parts[i])):
 					if text[j] == ".":
-						clr = UClr.hue_shift(clr, -.1)
+						clr = UColor.hue_shift(clr, -.1)
 						clr.v += .2
 						_c(j, C_SYMBOL)
 						_c(j+1, clr)
 			
 			# arguments
 			else:
-				clr = Color.GRAY if index%2==0 else Color.WHITE
+				clr = UColor.hue_shift(Color(color,.8), -.05) if index%2==0 else UColor.hue_shift(Color(color,.8), .05)
 				_h_var(from, parts[i], index, clr)
-
+			
 			index += 1
 		
 		from += len(parts[i]) + 1
@@ -295,7 +295,7 @@ func _h_eval(from: int, to: int):
 			_c(i+1, t_color)
 		
 		if text[i] == ".":
-			t_color = UClr.hue_shift(t_color, -.033)
+			t_color = UColor.hue_shift(t_color, -.033)
 			_c(i, C_SYMBOL)
 			_c(i+1, t_color)
 		
@@ -505,7 +505,7 @@ func _h_bbcode(from: int, to: int, default: Color):
 		i += 1
 
 func get_flow_color(deep: int) -> Color:
-	var color := UClr.hue_shift(C_FLOW, .3 * deep)
+	var color := UColor.hue_shift(C_FLOW, .3 * deep)
 	color.v -= .15 * deep
 	return color
 
@@ -573,9 +573,10 @@ func _h_flow(from: int, to: int):
 #			break
 
 func _h_properties(from: int, to: int):
-	for part in text.substr(from, to-from).split(" "):
-		_h_var(from, part)
-		from += len(part) + 1
+	var parts := text.substr(from, to-from).split(" ")
+	for i in len(parts):
+		_h_var(from, parts[i], i, Color.WHITE)
+		from += len(parts[i]) + 1
 
 func _h_line(from: int, to: int):
 	var comment := text.find("# ", from)

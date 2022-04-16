@@ -83,7 +83,6 @@ const ICON_RESIZE := preload("res://addons/sooty_engine/icons/resize.png")
 var rte_info := {}
 func _get_rich_text_effect_info():
 	if not len(rte_info):
-		print("getting rte.")
 		for file in UFile.get_files("res://addons/rich_text/text_effects", ".gd"):
 			var rte = load(file).new()
 			if "bbcode" in rte:
@@ -126,7 +125,7 @@ func _get_func_info(fname: String) -> Array:
 		var p := fname.split(".", true, 1)
 		object = p[0]
 		method = p[1]
-		
+	
 	if fname.begins_with("@"):
 		if "." in fname:
 			var p := fname.trim_prefix("@").split(".", true, 1)
@@ -139,6 +138,10 @@ func _get_func_info(fname: String) -> Array:
 			var node := get_tree().get_first_node_in_group("@." + object)
 			if node:
 				return [node, UScript.get_method_info(node, method)]
+	
+#	elif fname.begins_with("$"):
+#		var path := Array(method.split("."))
+#		object = UObject.get_penultimate(State, path)
 	
 	return []
 
@@ -159,11 +162,14 @@ func _show_arg(object: Object, arg_info: Dictionary, is_action := false) -> bool
 	
 	# is there a function that returns auto complete options?
 	if "options" in arg_info:
-		for op in arg_info.options.call():
+		var icon: Texture = arg_info.get("icon", null)
+		for option in arg_info.options.call():
 			found_at_least_one = true
-			var insert = UStringConvert.to_type(op, arg_info.type)
+			var display: String = option# "%s: %s" % [arg_info.id.capitalize(), option]
+			var insert = UStringConvert.to_type(option, arg_info.type)
 			insert = var_to_str(insert, is_action)
-			add_code_completion_option(CodeEdit.KIND_VARIABLE, op, insert, Color.WHITE, null, 1)
+			add_code_completion_option(CodeEdit.KIND_VARIABLE, display, insert, Color.WHITE, icon, 1)
+	
 	else:
 		if arg_info.type is String:
 			
@@ -173,16 +179,17 @@ func _show_arg(object: Object, arg_info: Dictionary, is_action := false) -> bool
 				if manager:
 					for object_id in manager.get_all_ids():
 						found_at_least_one = true
-						var display: String = object_id
+						var display: String = "%s: %s" % [arg_info.name.capitalize(), object_id]
 						var insert: String = object_id
 						add_code_completion_option(CodeEdit.KIND_CLASS, display, insert, Color.WHITE, ICON_OBJECT)
 			
 			# is enum?
 			else:
 				for enum_name in object[arg_info.type]:
-					found_at_least_one = true
+					var enum_index: int = object[arg_info.type][enum_name]
 					var display: String = "%s.%s" % [arg_info.type, enum_name]
-					var insert: String = var_to_str(enum_name, is_action)
+					var insert: String = "%s" % [enum_index] if not is_action else var_to_str(enum_name, is_action)
+					found_at_least_one = true
 					add_code_completion_option(CodeEdit.KIND_ENUM, display, insert, Color.WHITE, ICON_ENUM)
 		
 		# for each type, see if there are options that can be returned
@@ -194,9 +201,11 @@ func _show_arg(object: Object, arg_info: Dictionary, is_action := false) -> bool
 					icon = ICON_BOOL
 					options = {"true":"true", "false":"false"}
 			
-			for o in options:
+			for display in options:
 				found_at_least_one = true
-				add_code_completion_option(CodeEdit.KIND_ENUM, o, options[o], Color.WHITE, icon)
+				var insert: String = options[display]
+				display = "%s: %s" % [arg_info.name.capitalize(), display]
+				add_code_completion_option(CodeEdit.KIND_ENUM, display, insert, Color.WHITE, icon)
 	
 	return found_at_least_one
 
@@ -235,7 +244,7 @@ func _code_completion_requested():
 		
 		# color names
 		var clr := Color.WHITE
-		for i in UClr.HUE_SORTED:
+		for i in UColor.HUE_SORTED:
 			var c := clr.get_named_color(i)
 			var n := clr.get_named_color_name(i)
 			var display := "Color.%s %s" % [n, c]
@@ -263,81 +272,108 @@ func _code_completion_requested():
 			found_at_least_one = true
 			add_code_completion_option(CodeEdit.KIND_FILE_PATH, p, p)
 	
-	elif head == "~":
+	# eval
+	elif line_stripped.begins_with("~"):
 		# figure out which argument we are trygin to write
-		var arg_data = _find_function(line_text, get_caret_column())
-		# get the functions argument info
-		var func_info = _get_func_info(arg_data.get("method", ""))
-		# find the info for this specific argument
-		if func_info:
-			var object: Object = func_info[0]
-			if arg_data.current_arg >= len(func_info[1].args):
-				push_warning("ARG OUT OF BOUNDS")
+		var func_data = _find_function(line_text, get_caret_column()-1)
+		if func_data:
+			var method: String = func_data.method
 			
-			else:
-				# information for current argument being typed
-				var arg_info = func_info[1].args.values()[arg_data.current_arg]
-				if _show_arg(object, arg_info):
+			# inside a function
+			if method.begins_with("@"):
+				pass
+			elif method.begins_with("$"):
+				if _show_state_args(State, method.substr(1), func_data.arg_index):
+					found_at_least_one = true
+			elif method.begins_with("^"):
+				if _show_state_args(Persistent, method.substr(1), func_data.arg_index):
+					found_at_least_one = true
+			
+		else:
+			# outside
+			var method := UString.get_symbol(line_text, get_caret_column()-1)
+			
+			if method.begins_with("@"):
+				pass
+			elif method.begins_with("$"):
+				if _show_state_options(State):
+					found_at_least_one = true
+			elif method.begins_with("^"):
+				if _show_state_options(Persistent):
 					found_at_least_one = true
 	
 	# action shortcuts
 	elif head == "@":
-		var method: String = line_text.strip_edges().substr(1)
+		var parts := UString.split_outside(line_text.strip_edges(true, false).substr(1), " ")
+		var method_name: String = parts.pop_front()
+#		prints(method_name, parts)
+		var writing_args := len(parts) > 1
+		
 		var node_action_groups: Array = UGroup.get_all()\
 			.map(func(x): return str(x))\
 			.filter(func(x): return x.begins_with("@"))
 		
-		# . in action means it is a function call or property accesor
-		if "." in method:
-			var p = method.split(".", true, 1)
-			var group = p[0]
-			method = p[1]
-			var parts := UString.split_outside(method, " ")
-			var all_methods: Dictionary = {}
-			
-			var node: Node = get_tree().get_first_node_in_group("@:" + group)
-			if node:
-				all_methods = UScript.get_method_infos(node)
-			
+		var object: Node
+		var object_name: String
+		# @. in action means it is a function call or property accesor
+		if "." in method_name:
+			var p = method_name.split(".", true, 1)
+			object_name = p[0]
+			method_name = p[1]
+			object = get_tree().get_first_node_in_group("@:" + object_name)
+		# @: otheriwse it is an object we can call any method on 
+		else:
+			object_name = method_name
+			object = get_tree().get_first_node_in_group("@." + object_name)
+		
+		var all_methods: Dictionary
+		# object exists? show it's methods
+		if object:
+			all_methods = UScript.get_method_infos(object)
+			# at the point of writing arguments
+			if method_name in all_methods:
+				var method_info = all_methods.get(method_name, {})
+				# get the current index
+				var arg_index: int = len(parts)-1
+				var arg_info = UList.getor(method_info.args.values(), arg_index)
+				if arg_info and _show_arg(object, arg_info, true):
+					found_at_least_one = true
 			# still writing the function name
 			# so show a list of all possible functions
-			if len(parts) == 0:
-				for method in all_methods:
-					found_at_least_one = true
-					add_code_completion_option(CodeEdit.KIND_VARIABLE, method, method, Color.WHITE, ICON_NODE_ACTION)
-			
-			# at the point of writing arguments
 			else:
-				var meth_info = all_methods.get(parts[0], {})# data.get("@:" + group, {}).funcs.get(parts[0], {})
-				var arg_index: int = len(parts)-2
-				if meth_info and arg_index < len(meth_info.args):
-#					print("@:" + method, meth_info.args[arg_index], len(parts), parts)
-					prints(group, parts[0], arg_index)
-					if group == "Music" and parts[0] == "play" and arg_index == 0:
-						var music = Music._files.keys()
-						print("MUSIC ", music)
-						for song in music:
-							found_at_least_one = true
-							var s2 = ('"%s"' % song) if " " in song else song
-							add_code_completion_option(CodeEdit.KIND_VARIABLE, song, s2, Color.WHITE, ICON_NODE_ACTION)
-		# no dot, means we may want to show all
-		# @: node_objects
-		# and
-		# @. node_functions
-		else:
-			for node_action in node_action_groups:
-				if node_action.begins_with("@."):
-					var node: Node = get_tree().get_first_node_in_group("@." + node_action)
-					var method_info := {}
-					if node:
-						method_info = UScript.get_method_info(node, node_action.substr(2))
-					var p = _get_node_action_strings(node_action.substr(2), method_info)#data[node_action])
+				for method_name in all_methods:
 					found_at_least_one = true
-					add_code_completion_option(CodeEdit.KIND_VARIABLE, p[0], p[1], Color.WHITE, ICON_NODE_ACTION)
+					add_code_completion_option(CodeEdit.KIND_VARIABLE, method_name, method_name, Color.WHITE, ICON_NODE_ACTION)
+		
+		else:
+			# show all actions
+			for node_action in node_action_groups:
+				# @. node functions
+				if node_action.begins_with("@."):
+					# find parent, so we can get it's argument info
+					# it won't be null
+					object = get_tree().get_first_node_in_group(node_action)
+					var method_info = UScript.get_method_info(object, node_action.substr(2))
+					if method_info:
+						# find an icon for the method
+						var icon: Texture = ICON_NODE_ACTION
+						if "icon" in method_info:
+							# if an int is returned, it's assumed to be a type
+							if method_info.icon is int:
+								icon = _get_type_icon(object, method_info.icon)
+						var action_name: String = node_action.substr(2)
+						var display: String = method_info.desc if "desc" in method_info else "%s %s" % [action_name.capitalize(), _get_arg_string(method_info)]
+						var insert: String = action_name
+						found_at_least_one = true
+						add_code_completion_option(CodeEdit.KIND_FUNCTION, display, insert, Color.WHITE, icon)
+					else:
+						push_error("No method %s() in %s." % [node_action.substr(2), object])
+				
+				# @: node objects
 				elif node_action.begins_with("@:"):
 					found_at_least_one = true
 					node_action = node_action.substr(2)
-					add_code_completion_option(CodeEdit.KIND_VARIABLE, node_action, node_action, Color.WHITE, ICON_NODE_OBJECT)
+					add_code_completion_option(CodeEdit.KIND_FUNCTION, node_action, node_action, Color.WHITE, ICON_NODE_OBJECT)
 
 	# state shortcuts
 	elif head == "$" or head == "^":
@@ -345,7 +381,6 @@ func _code_completion_requested():
 		var object: Object = State if head == "$" else Persistent
 		var inner: String = line_text.strip_edges(true, false).substr(1)
 		var parts := UString.split_outside(inner, " ")
-		UDebug.log(inner, parts)
 		var path: String = parts.pop_front()
 		
 		# a subpath to a deeper object?
@@ -359,63 +394,13 @@ func _code_completion_requested():
 			if parts and parts[-1] == "":
 				# subtract one, as it was the method name
 				var arg_index := len(parts)-1
-				
-				# we need to do this in a roundabout way
-				# because of State and Persistent being made up of subnodes.
-				var method_info = UScript.get_script_methods(object)
-				
-				# is it a method?
-				if path in method_info:
-					var arg_info = UList.getor(method_info[path].args.values(), arg_index)
-					if arg_info and _show_arg(object, arg_info, true):
-						found_at_least_one = true
-				
-				# is it a signal?
-				elif object.has_signal(path):
-					# TODO
-					pass
-				
-				# is it a property?
-				elif path in object:
-					push_warning("'%s' is a property in %s. It can't take arguments." % [path, object])
-					pass
+				var method = parts[0]
+				if _show_state_args(object, method, arg_index, true):
+					found_at_least_one = true
 			
 			else:
-				keys = UObject.get_state_properties(object)
-				
-				# display every property, with icon based on type
-				for insert in keys:
-					var icon: Texture = null
-					var display: String = insert
-					if UObject.has_property(object, insert):
-						var val = object[insert]
-						display = "%s: %s" % [display, val]
-						match typeof(val):
-							TYPE_INT, TYPE_FLOAT: icon = ICON_INT
-							TYPE_ARRAY: icon = ICON_ARRAY
-							TYPE_DICTIONARY: icon = ICON_DICT
-							TYPE_BOOL: icon = ICON_BOOL
-							TYPE_STRING: icon = ICON_STR
-							TYPE_COLOR: icon = ICON_COLOR
-							TYPE_OBJECT: icon = UClass.get_icon(val.get_class(), ICON_OBJ)
-				
+				if _show_state_options(object, true):
 					found_at_least_one = true
-					add_code_completion_option(CodeEdit.KIND_VARIABLE, display, insert, Color.WHITE, icon)
-				
-				# methods
-				var methods = UScript.get_script_methods(object)
-				for method in methods:
-					var method_info: Dictionary = methods[method]
-					var method_args := " ".join(UList.map_dict(method_info.args, func(k, v): return "%s:%s" % [k, UType.get_name_from_type(v.type)]))
-					var display: String = "%s %s" % [method, method_args]
-					var insert: String = method
-					found_at_least_one = true
-					add_code_completion_option(CodeEdit.KIND_FUNCTION, display, insert, Color.LIGHT_BLUE, ICON_METHOD)
-				
-				# signals
-				for k in UObject.get_script_signals(object):
-					found_at_least_one = true
-					add_code_completion_option(CodeEdit.KIND_SIGNAL, k, k + ".emit()", Color.LIGHT_GOLDENROD, ICON_SIGNAL)
 
 #	else:
 #		var symbol: String = UString.get_symbol(line_text, get_caret_column()-1, "$@")
@@ -448,10 +433,79 @@ func _code_completion_requested():
 	if found_at_least_one:
 		update_code_completion_options(true)
 
-func _find_function(s: String, from: int):
-	if from > len(s):
-		from -= 1
+func _show_state_args(object: Object, method: String, arg_index: int, is_action := false) -> bool:
+	var found_at_least_one := false
 	
+	# we need to get the method list in a roundabout way
+	# because of State and Persistent being made up of subnodes.
+	var method_info = UScript.get_script_methods(object)
+	
+	# is it a method?
+	if method in method_info:
+		var arg_info = UList.getor(method_info[method].args.values(), arg_index)
+		if arg_info and _show_arg(object, arg_info, is_action):
+			found_at_least_one = true
+	
+	# is it a signal?
+	elif object.has_signal(method):
+		# TODO
+		pass
+	
+	# is it a property?
+	elif method in object:
+		push_warning("'%s' is a property in %s. It can't take arguments." % [method, object])
+		pass
+	
+	return found_at_least_one
+
+func _show_state_options(object: Object, is_action := false) -> bool:
+	var keys = UObject.get_state_properties(object)
+	var found_at_least_one := false
+	
+	# display every property, with icon based on type
+	for insert in keys:
+		var icon: Texture = null
+		var display: String = insert
+		if UObject.has_property(object, insert):
+			var val = object[insert]
+			display = "%s: %s" % [display, val]
+			icon = _get_type_icon(object, typeof(val))
+	
+		found_at_least_one = true
+		add_code_completion_option(CodeEdit.KIND_VARIABLE, display, insert, Color.WHITE, icon)
+	
+	# methods
+	var methods = UScript.get_script_methods(object)
+	for method in methods:
+		var method_info: Dictionary = methods[method]
+		var method_args := _get_arg_string(method_info)
+		var display: String = "%s %s" % [method, method_args]
+		var insert: String = method if is_action else "%s()" % method
+		found_at_least_one = true
+		add_code_completion_option(CodeEdit.KIND_FUNCTION, display, insert, Color.LIGHT_BLUE, ICON_METHOD)
+	
+	# signals
+	if not is_action:
+		for signal_name in UObject.get_script_signals(object):
+			var display: String = signal_name
+			var insert: String = "%s.emit()" % signal_name
+			found_at_least_one = true
+			add_code_completion_option(CodeEdit.KIND_SIGNAL, display, insert, Color.LIGHT_GOLDENROD, ICON_SIGNAL)
+	
+	return found_at_least_one
+
+func _get_type_icon(object: Object, type: Variant) -> Texture:
+	match type:
+		TYPE_INT, TYPE_FLOAT: return ICON_INT
+		TYPE_ARRAY: return ICON_ARRAY
+		TYPE_DICTIONARY: return ICON_DICT
+		TYPE_BOOL: return ICON_BOOL
+		TYPE_STRING: return ICON_STR
+		TYPE_COLOR: return ICON_COLOR
+		TYPE_OBJECT: return UClass.get_icon(object.get_class(), ICON_OBJ)
+	return null
+
+func _find_function(s: String, from: int):
 	# look backwards till we find the start (
 	var start := from
 	var found_start := false
@@ -503,26 +557,18 @@ func _find_function(s: String, from: int):
 	
 	# strip method edges
 	var method := s.substr(f_start, start-f_start).strip_edges()
+	if method.begins_with("~"):
+		method = method.trim_prefix("~")
 	# strip argument edges
 	args = args.map(func(x): return x.strip_edges())
-	return {method=method, args=args, current_arg=arg_index}
+	return {method=method, args=args, arg_index=arg_index}
 
-#func _get_method_strings(target: Object, method: String) -> Array:
-#	var info := UScript.get_method_info(target, method)
-#	return _method_to_strings(method, info)
-
-func _get_node_action_strings(method: String, info: Dictionary) -> Array:
-	var arg_preview := [method]
-	var arg_output := [method]
-	if "args" in info:
-		for arg in info.args:
-			arg_preview.append("%s:%s" % [arg.name, UType.get_name_from_type(arg.type)])
-			if not "default" in arg:
-				arg_output.append("%s" % [var2str(UType.get_default(arg.type))])
-	return [
-		" ".join(arg_preview),
-		" ".join(arg_output)
-	]
+# convert args to a string (that:int, looks:String, like:bool, this:Array)
+func _get_arg_string(info: Dictionary) -> String:
+	var arg_preview := []
+	for id in info.args:
+		arg_preview.append("%s:%s" % [id, UType.get_name_from_type(info.args[id].type)])
+	return "(%s)" % ", ".join(arg_preview)
 
 func _method_to_strings(method: String, info: Dictionary) -> Array:
 	if info:

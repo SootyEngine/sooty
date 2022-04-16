@@ -10,19 +10,35 @@ var _queue := [] # sounds waiting to be played
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("@:SFX")
+	add_to_group("@.sfx")
 
 func _ready():
 	Mods.load_all.connect(_load_mods)
 	Saver._get_state.connect(_save_state)
 	Saver._set_state.connect(_load_state)
 
+# called by UScript, as a way of including more advanced arg info
+# for use with autocomplete
+func _get_method_info(method: String):
+	if method == "play" or method == "sfx":
+		return {
+			args={
+				id={
+					options=func(): return _files.keys(),
+					icon=preload("res://addons/sooty_engine/icons/sfx.png"),
+				}
+			}
+		}
+
 func _load_mods(mods: Array):
 	_files.clear()
 	for mod in mods:
 		mod.meta["sfx"] = []
-		for file_path in UFile.get_files(mod.dir.plus_file("audio/sfx"), UFile.EXT_AUDIO):
-			_files[UFile.get_file_name(file_path)] = file_path
-			mod.meta.sfx.append(file_path)
+		var head: String = mod.dir.plus_file("audio/sfx")
+		for file_path in UFile.get_files(head, UFile.EXT_AUDIO):
+			var id = UFile.trim_extension(file_path.trim_prefix(head + "/").replace("/", "_"))
+			_files[id] = file_path
+			mod.meta.sfx.append(id)#file_path)
 
 func _save_state(state: Dictionary):
 	state["SFX"] = { queue=_queue }
@@ -37,6 +53,10 @@ func _process(delta: float) -> void:
 	for child in get_children():
 		if child.get_playback_position() >= child.stream.get_length():
 			_on_audio_finished(child)
+
+# used as an action shortcut
+func sfx(id: String, kwargs := {}):
+	play(id, kwargs)
 
 func play(id: String, kwargs := {}):
 	if Engine.is_editor_hint():

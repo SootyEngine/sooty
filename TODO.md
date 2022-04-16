@@ -149,11 +149,14 @@ remove `>` command and just use `@`
 # Editors
 - `.soot`
     - [ ] Actions
-        - [ ] Node actions
+        - [x] Node actions
         - [x] State actions
         - [ ] Persistent state actions
         - [x] Enums
         - [x] Custom objects
+    - [ ] Show available `kwarg` keys.
+        - [ ] Check for already inputted kwargs.
+        - [ ] Insert kwarg with it's default.
     - [ ] Evals
     - [ ] Actions in bbcode
     - [ ] Evals in bbcode

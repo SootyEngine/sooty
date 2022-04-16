@@ -10,8 +10,8 @@ static func get_arg_info(obj: Variant, meth: String) -> Array:
 	return get_method_info(obj, meth).get("args", [])
 
 # godot keeps dict key order, so we can return 
-static func get_method_info(obj: Variant, meth: String) -> Dictionary:
-	var methods = get_method_infos(obj) # TODO: Cache.
+static func get_method_info(obj: Variant, meth: String, private := false) -> Dictionary:
+	var methods = get_method_infos(obj, private) # TODO: Cache.
 	return methods.get(meth, {})
 #	return null if methods == null or not meth in methods else methods[meth]
 
@@ -29,20 +29,25 @@ static func get_script_methods(target: Object, skip_private := true, skip_get :=
 			if skip_set and m.name.begins_with("set_"):
 				continue
 			out[m.name] = m
+	
 	return out
 
-static func get_method_infos(obj: Variant) -> Dictionary:
-	var script: Script = obj.get_script()
-#	if script.has_meta("cached_method_info"):
-#		print("got from cache")
-#		return script.get_meta("cached_method_info")
-	
+static func get_method_infos(obj: Variant, private := false) -> Dictionary:
 	var out := {}
-	if script:
+	var script: Script = obj.get_script()
+	var safety := 20
+	
+	# collect not only this scripts methods, but it's base_script, parents.
+	while script and safety > 0:
 		for line in script.source_code.split("\n", false):
 			if line.begins_with("func "):
 				var p = line.substr(5).split("(")
 				var fname = p[0]
+				
+				# skip private functions
+				if not private and fname.begins_with("_"):
+					continue
+				
 				var end = p[1].rsplit(")")
 				var sargs = end[0]
 				var returns = end[1].split(":", true, 1)[0].strip_edges()
@@ -50,6 +55,9 @@ static func get_method_infos(obj: Variant) -> Dictionary:
 				# TODO: get return type
 				returns = UType.get_type_from_name(returns.trim_prefix("->").strip_edges())
 				out[fname] = {args=args, returns=returns}
+		
+		script = script.get_base_script()
+		safety -= 1
 	
 	# look for explicitly defined data
 	if obj.has_method("_get_method_info"):
@@ -58,7 +66,7 @@ static func get_method_infos(obj: Variant) -> Dictionary:
 			if extra_info:
 				UDict.merge(out[method], extra_info, true)
 	
-	script.set_meta("cached_method_info", out)
+#	script.set_meta("cached_method_info", out)
 	return out
 
 # convert a string of arguments to argument info

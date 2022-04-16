@@ -82,10 +82,10 @@ func queue(id: String):
 func _get_method_info(method: String):
 	if method == "play":
 		return {
-			icon=preload("res://addons/sooty_engine/icons/music.png"),
 			args={
 				id={
-					options=func(): return _files.keys()
+					options=func(): return _files.keys(),
+					icon=preload("res://addons/sooty_engine/icons/music.png"),
 				}
 			}
 		}

@@ -18,6 +18,12 @@ func _init() -> void:
 	add_to_group("@.version")
 	add_to_group("@.msg")
 
+# called by UScript, as a way of including more advanced arg info
+# for use with autocomplete
+func _get_method_info(method: String):
+	if method == "version":
+		return { desc="Sooty Version", icon=TYPE_STRING }
+
 func version() -> String:
 	return VERSION
 

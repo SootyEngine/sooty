@@ -85,6 +85,10 @@ static func get_file_name(path: String) -> String:
 #	else:
 #		return path
 
+static func trim_extension(path: String) -> String:
+	var parts := path.rsplit(".", true, 1)
+	return parts[0]
+
 static func change_extension(path: String, ext: String) -> String:
 	var parts := path.rsplit("/", true, 1)
 	var fpath := parts[0]

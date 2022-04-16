@@ -473,7 +473,7 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		"hide": _push_color(Color.TRANSPARENT)
 		
 		# shift the hue. default to 50%.
-		"hue": _push_color(UClr.hue_shift(_state.color, _to_number(info) if info else 0.5))
+		"hue": _push_color(UColor.hue_shift(_state.color, _to_number(info) if info else 0.5))
 		
 		"meta": _push_meta(info)
 		"hint": _push_hint(info)
@@ -638,7 +638,7 @@ func _get_outline_color(clr: Color) -> Color:
 	match outline_mode:
 		Outline.DARKEN: out = clr.darkened(outline_adjust)
 		Outline.LIGHTEN: out = clr.lightened(outline_adjust)
-	return UClr.hue_shift(out, outline_hue_adjust)
+	return UColor.hue_shift(out, outline_hue_adjust)
 #	out.h = wrapf(out.h + outline_hue_adjust, 0.0, 1.0)
 #	return out
 

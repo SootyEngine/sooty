@@ -59,15 +59,23 @@ func find_function(s: String, from: int):
 enum MyEnum {x, y, z}
 
 func _run():
-	var out := {}
-	for file in UFile.get_files("res://addons/rich_text/text_effects", ".gd"):
-		var script = load(file).new()
-		print(script.get("bbcode"), script.get("info"))
+#	var safety := 100
+#	var script: Script = Dialogue.get_script()
+#	while script and safety > 0:
+#		print(script.resource_path)
+#		script = script.get_base_script()
+#		safety -= 1
+	UDict.log(UScript.get_method_infos(Dialogue))
+	
+#	var out := {}
+#	for file in UFile.get_files("res://addons/rich_text/text_effects", ".gd"):
+#		var script = load(file).new()
+#		print(script.get("bbcode"), script.get("info"))
 	
 #	var clr := Color.WHITE
 #	var clrs := []
 #	for i in clr.get_named_color_count():
-#		clrs.append([i, clr.get_named_color(i), UClr.hue_shift(clr.get_named_color(i), 0.0)])
+#		clrs.append([i, clr.get_named_color(i), UColor.hue_shift(clr.get_named_color(i), 0.0)])
 #	clrs.sort_custom(func(a, b): return a[1].h < b[1].h)
 #	var list1 = clrs.map(func(x): return x[0])
 #	clrs.sort_custom(func(a, b): return a[2].h < b[2].h)

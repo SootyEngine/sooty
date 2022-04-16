@@ -115,9 +115,9 @@ _global_script_classes=[{
 "path": "res://addons/util/UClass.gd"
 }, {
 "base": "RefCounted",
-"class": &"UClr",
+"class": &"UColor",
 "language": &"GDScript",
-"path": "res://addons/util/UClr.gd"
+"path": "res://addons/util/UColor.gd"
 }, {
 "base": "RefCounted",
 "class": &"UDebug",
@@ -231,7 +231,7 @@ _global_script_class_icons={
 "RichTextLabel2": "",
 "Soot": "",
 "UClass": "",
-"UClr": "",
+"UColor": "",
 "UDebug": "",
 "UDict": "",
 "UError": "",
