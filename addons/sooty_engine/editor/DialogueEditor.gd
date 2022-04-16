@@ -241,10 +241,26 @@ func _get_bbcode(s: String, at: int) -> Variant:
 			break
 		end += 1
 	
-	if found_end:
-		return s.substr(start, end-start+1)
-	else:
-		return s.substr(start)
+#	var inner: String
+#	if found_end:
+#		inner = s.substr(start, end-start+1)
+#	else:
+#		inner = s.substr(start)
+	
+	# second pass: finding the tag
+	var start_inner := at
+	while start_inner > start:
+		if s[start_inner] == ";":
+			break
+		start_inner -= 1
+	var end_inner := at
+	while end_inner < min(len(s), end):
+		if s[end_inner] == ";":
+			break
+		end_inner += 1
+	
+	var inner = s.substr(start_inner, end_inner-start_inner+1)
+	return inner
 
 func _get_node_and_method(input: String, is_action := false) -> Dictionary:
 	var head := input
@@ -290,7 +306,7 @@ func _code_completion_requested():
 	var bbcode_info = _get_bbcode(line_text, get_caret_column()-1)
 	if bbcode_info:
 		# only look at the last tag
-		bbcode_info = UString.unwrap(bbcode_info, "[", "]").rsplit(";", true, 1)[-1]
+		bbcode_info = UString.trim_amount(bbcode_info)#.rsplit(";", true, 1)[-1]
 		
 		# in line action
 		if bbcode_info.begins_with("!") and len(bbcode_info) >= 2 and bbcode_info[1] in "@$^~":

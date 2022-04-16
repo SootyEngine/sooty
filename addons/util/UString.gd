@@ -262,6 +262,9 @@ static func is_wrapped(s: String, head: String, tail=null) -> bool:
 static func unwrap(s: String, head: String, tail=null) -> String:
 	return s.trim_prefix(head).trim_suffix(tail if tail else head)
 
+static func trim_amount(s: String, amount := 1) -> String:
+	return s.substr(amount, len(s)-amount*2)
+
 # 1234567 => 1,234,567
 static func commas(number: Variant) -> String:
 	var string := str(number)

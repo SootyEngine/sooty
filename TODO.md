@@ -49,18 +49,7 @@
 - [ ] Use chapter meta data to contain color info for side panel
 - [ ] Show meta in side panel, if toggle is active
 
-# StringActions
-@node `shortcut`
-$flow or parent object of flow `eval`
-$@flow or parent object of flow `shortcut`
-~state `eval`
-~@state `shortcut`
-*var `shortcut`
-@~ node eval
-remove `>` command and just use `@`
-
 # *.soot Dialogue Files
-- [ ] `.` key for state parent object?
 - [ ] define step types in Soot
 - [ ] Inserts for choices
 - [ ] Inserts for actions?
@@ -96,7 +85,7 @@ remove `>` command and just use `@`
         line 2
     back outside
     ```
-- [ ] Match arrays pattern.
+- [x] Match arrays pattern.
 - [ ] Match dict pattern.
 - [ ] Make flags work on nested data.
 - [ ] ~~meta pattern should be processed as `soda`?~~
@@ -148,10 +137,10 @@ remove `>` command and just use `@`
 
 # Editors
 - `.soot`
-    - [ ] Actions
+    - [x] Actions
         - [x] Node actions
         - [x] State actions
-        - [ ] Persistent state actions
+        - [x] Persistent state actions
         - [x] Enums
         - [x] Custom objects
     - [ ] Show available `kwarg` keys.
@@ -159,12 +148,12 @@ remove `>` command and just use `@`
         Then look in function info for a `kwargs` dict, and display all
         - [ ] Check for already inputted kwargs.
         - [ ] Insert kwarg with it's default.
-    - [ ] Evals
-    - [ ] Actions in bbcode
-    - [ ] Evals in bbcode
-    - [ ] Emojis when inside `::`
     - [ ] Auto complete for `<list|pattern>`
-    - [ ] Only show autocomple in `~@^$` and bbcode.
+    - [x] Evals
+    - [x] Actions in bbcode
+    - [x] Evals in bbcode
+    - [x] Emojis when inside `::`
+    - [x] Only show autocomple in `~@^$` and bbcode.
     - [x] Basic autocomplete
 
 # Highlighters
@@ -173,8 +162,9 @@ remove `>` command and just use `@`
     - [x] Tint text based on bbcode
     - [ ] Don't highlight arguments after `/` if inside a string
     - [ ] Do bbcode tags:
-        - [ ] `hue`
-        - [ ] `dim` `dima` `lit` `lita`
+        - [x] `hue`
+        - [x] `dim` `lit`
+        - [ ] `dima`  `lita`
     - [x] Markdown * ** ***
 - [ ] Move `type` to `M` meta.
 - [x] Match statements on same line aren't colored.
