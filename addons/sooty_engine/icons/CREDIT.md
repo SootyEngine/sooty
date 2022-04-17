@@ -1,4 +1,6 @@
 <a href="https://www.flaticon.com/free-icons/dialogue-box" title="dialogue box icons">Dialogue box icons created by Good Ware - Flaticon</a> 
+<a href="https://www.flaticon.com/free-icons/dollar-symbol" title="dollar symbol icons">Dollar symbol icons created by Good Ware - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/caret" title="caret icons">Caret icons created by Iconpro86 - Flaticon</a>
 
 <a href="https://www.flaticon.com/free-icons/day-and-night" title="day and night icons">Day and night icons created by Freepik - Flaticon</a>
 

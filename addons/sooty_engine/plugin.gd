@@ -1,7 +1,19 @@
 @tool
 extends EditorPlugin
 
-const AUTOLOADS := ["Global", "Mods", "Settings", "Scene", "Saver", "Persistent", "State", "StringAction", "Music", "SFX", "Dialogue"]
+const AUTOLOADS := [
+	"Global",
+	"ModManager",
+	"Settings",
+	"SceneManager",
+	"SaveManager",
+	"Persistent",
+	"State",
+	"StringAction",
+	"MusicManager",
+	"SFXManager",
+	"Dialogue"
+]
 
 const EDITOR = preload("res://addons/sooty_engine/ui/ui_map_gen.tscn")
 var editor

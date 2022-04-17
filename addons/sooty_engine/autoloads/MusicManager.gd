@@ -10,12 +10,13 @@ const MAX_MUSIC_PLAYERS := 3
 
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	add_to_group("@:Music")
+	add_to_group("@:MusicManger")
+	add_to_group("@.play_music")
 
 func _ready():
-	Mods.load_all.connect(_load_mods)
-	Saver._get_state.connect(_save_state)
-	Saver._set_state.connect(_load_state)
+	ModManager.load_all.connect(_load_mods)
+	SaveManager._get_state.connect(_save_state)
+	SaveManager._set_state.connect(_load_state)
 
 func _load_mods(mods: Array):
 	for mod in mods:
@@ -80,20 +81,19 @@ func queue(id: String):
 # called by UReflect, as a way of including more advanced arg info
 # for use with autocomplete
 func _get_method_info(method: String):
-	if method == "play":
+	if method == "play" or method == "play_music":
 		return {
 			args={
 				id={
+					# auto complete list of music files
 					options=func(): return _files.keys(),
 					icon=preload("res://addons/sooty_engine/icons/music.png"),
 				}
 			}
 		}
 
-enum Weekday { MON, TUE, WED, FRI }
-
-func testo(x: Weekday, data: Data, mybool: bool):
-	pass
+func play_music(id: String, kwargs := {}):
+	play(id, kwargs)
 
 # kwarg (default value):
 # - pos (0.0): Position to play from.

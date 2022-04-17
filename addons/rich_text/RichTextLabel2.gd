@@ -282,19 +282,21 @@ func _parse(btext: String):
 		_add_text(btext)
 
 func _parse_opening(tag: String):
-	if len(tag) and tag[0] in "~@$#":
+	if len(tag) and tag[0] in "~$^@":
 		var p := tag.split(";", true, 1)
 		if len(p) == 2:
 			_parse_tags(p[1])
 		
 		var got = StringAction.do(p[0], context)
+		# no value was found
 		if got == null:
 			push_error("BBCode: Couldn't replace '%s'." % p[0])
 			push_bgcolor(Color.RED)
 			_add_text("[%s]" % tag)
 			pop()
 		else:
-			_parse(UString.as_string(got))
+			# objects may implement a get_string() method
+			_parse(UString.get_string(got, "bbcode"))
 		
 		if len(p) == 2:
 			_stack_pop()

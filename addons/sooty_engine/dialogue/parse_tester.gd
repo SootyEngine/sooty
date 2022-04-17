@@ -59,91 +59,9 @@ func find_function(s: String, from: int):
 enum MyEnum {x, y, z}
 
 func _run():
-#	var safety := 100
-#	var script: Script = Dialogue.get_script()
-#	while script and safety > 0:
-#		print(script.resource_path)
-#		script = script.get_base_script()
-#		safety -= 1
+
 	UDict.log(UReflect.get_method_infos(Dialogue))
 	
-#	var out := {}
-#	for file in UFile.get_files("res://addons/rich_text/text_effects", ".gd"):
-#		var script = load(file).new()
-#		print(script.get("bbcode"), script.get("info"))
-	
-#	var clr := Color.WHITE
-#	var clrs := []
-#	for i in clr.get_named_color_count():
-#		clrs.append([i, clr.get_named_color(i), UColor.hue_shift(clr.get_named_color(i), 0.0)])
-#	clrs.sort_custom(func(a, b): return a[1].h < b[1].h)
-#	var list1 = clrs.map(func(x): return x[0])
-#	clrs.sort_custom(func(a, b): return a[2].h < b[2].h)
-#	var list2 = clrs.map(func(x): return x[0])
-#	print(list1 == list2)
-#	print(list1)
-#	print(list2)
-	
-#	Global.meta.clear()
-##	var script: Script = UClass.get_class_from_name("DataManager")
-#	print("Data: ", Data.new()._get_class())
-#	print("DataManager: ", DataManager.new()._get_class())
-#	Mods.load_mods()
-#	for item in State.my_manager:
-#		print(item)
-#	UDict.log(Global.meta)
-	
-#	var e := Expression.new()
-#	e.parse("MyEnum.y")
-#	print(e.execute())
-#	for s in [
-#		"my_func(x, 'yes okay', but)",
-#		"(x, 'yes okay', but)",
-#		"my_func (x, 'yes okay', but)",
-#		"my_func(x, 'no') yes"]:
-#		var mid = s.find("yes")
-#		print(find_function(s, mid))
-	
-#	Mods.load_mods()
-#	print(Global.get_tree().get_first_node_in_group("@:Music").get_groups())
-#	var inv := Inventory.new()
-#	var coin := Data._get_manager(Item).find("coin")
-#	inv.gain(coin)
-#	Mods.load_mods()
-#	var inv := Inventory.new()
-#	print(inv.get_manager())
-#	print(UClass.get_class_name(inv))
-	
-#	print(StringAction.do("~$items.coin.get_class()"))
-	
-#	var inv := Inventory.new()
-#	var info := UObject.get_method_info(inv, "gain")
-#	print(info, UType.get_name_from_type(info.args[0].type))
-#	var manager_classname = info.args[0].classname + "Manager"
-#	if UClass.exists(manager_classname):
-#		var items = State.get_first(manager_classname)
-#		var ids = items.get_all_ids()
-#		print(ids)
-#	else:
-#		print("No manager ", manager_classname)
-	
-#	var exp := Expression.new()
-#	exp.parse("max(10, 20)")
-#	print(exp.execute())
-#
-#	return
-	
-#	Mods.load_mods(false)
-#	State.changed_from_to.connect(func(x, f, t): print("CHANGED %s FROM %s TO %s" % [x, f, t]))
-#	var f := Flow.new(Dialogue._lines, Dialogue._flows)
-#	prints(f.execute("East"), State.score)
-
-#	for p in get_children("/"):
-#		print("\t", p)
-	
-	
-#	var tree := generate_tree()
-#	print(get_children(tree, "the_beach"))
 	pass
 #	pri.nt("Okay")
 

@@ -9,18 +9,18 @@ var _queue := [] # sounds waiting to be played
 
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	add_to_group("@:SFX")
-	add_to_group("@.sfx")
+	add_to_group("@:SFXManager")
+	add_to_group("@.play_sfx")
 
 func _ready():
-	Mods.load_all.connect(_load_mods)
-	Saver._get_state.connect(_save_state)
-	Saver._set_state.connect(_load_state)
+	ModManager.load_all.connect(_load_mods)
+	SaveManager._get_state.connect(_save_state)
+	SaveManager._set_state.connect(_load_state)
 
 # called by UReflect, as a way of including more advanced arg info
 # for use with autocomplete
 func _get_method_info(method: String):
-	if method == "play" or method == "sfx":
+	if method == "play" or method == "play_sfx":
 		return {
 			args={
 				id={
@@ -55,7 +55,7 @@ func _process(delta: float) -> void:
 			_on_audio_finished(child)
 
 # used as an action shortcut
-func sfx(id: String, fart: bool = false):# kwargs := {}):
+func play_sfx(id: String, fart: bool = false):# kwargs := {}):
 	play(id)#, kwargs)
 
 func play(id: String, kwargs := {}):

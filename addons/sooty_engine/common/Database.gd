@@ -1,37 +1,37 @@
 @tool
 extends RefCounted
-class_name DataManager, "res://addons/soot_engine/icons/database.png"
+class_name Database, "res://addons/soot_engine/icons/database.png"
 func _get_class():
-	return "DataManager"
+	return "Database"
 
 var _all: Dictionary = {}
 var _iter_current := 0
 
-static func get_manager(item_or_manager_class: Variant) -> DataManager:
-	if item_or_manager_class is Script:
-		item_or_manager_class = UClass.get_class_name(item_or_manager_class)
+static func get_database(item_or_database: Variant) -> Database:
+	if item_or_database is Script:
+		item_or_database = UClass.get_class_name(item_or_database)
 	
 	# use string name to find instance
-	if "data_managers" in Global.meta and item_or_manager_class in Global.meta.data_managers:
-		var m_instance_id: int = Global.meta.data_managers[item_or_manager_class]
+	if "databases" in Global.meta and item_or_database in Global.meta.databases:
+		var m_instance_id: int = Global.meta.databases[item_or_database]
 		return instance_from_id(m_instance_id)
 	
-	push_error("Can't find manager for %s." % item_or_manager_class)
+	push_error("Can't find database for %s." % item_or_database)
 	return null
 
 func _init(d := {}) -> void:
 	_post_init.call_deferred()
 	
 	# since all objects share a script, they can access it's meta data
-	# which means they can access this manager, wherever it is
+	# which means they can access this database, wherever it is
 	# so long as we have the _empt object, the script is in memory.
 	var my_class_name := UClass.get_class_name(self)
-	var my_data_class := my_class_name.trim_suffix("Manager")
+	var my_data_class := my_class_name.trim_suffix("Database")
 #	prints("Manager: %s %s." % [my_class_name, my_data_class])
-	if not "data_managers" in Global.meta:
-		Global.meta.data_managers = {}
-	Global.meta.data_managers[my_class_name] = get_instance_id()
-	Global.meta.data_managers[my_data_class] = get_instance_id()
+	if not "databases" in Global.meta:
+		Global.meta.databases = {}
+	Global.meta.databases[my_class_name] = get_instance_id()
+	Global.meta.databases[my_data_class] = get_instance_id()
 	
 	for k in d:
 		if d[k] is Dictionary:
@@ -88,7 +88,7 @@ func _get(property: StringName):
 # override this!
 func _get_data_class() -> String:
 #	push_warning("You should override this instead.")
-	return UClass.get_class_name(self).trim_suffix("Manager")
+	return UClass.get_class_name(self).trim_suffix("Database")
 
 func has(id: String) -> bool:
 	return id in _all

@@ -134,7 +134,7 @@ func do_state_action(s: String, context: Object = null):
 	
 	var args := UString.split_outside(s, " ")
 	var method = args.pop_front()
-	UObject.call_w_kwargs([state, method], args, true)
+	return UObject.call_w_kwargs([state, method], args, true)
 
 # vars are kept as strings, so can be auto type converted
 func to_var(s: String) -> Variant:
@@ -207,55 +207,54 @@ func call_group_w_args(group: String, args: Array, as_string_args := false) -> V
 	
 	return _call_group(group, method, args, as_string_args)
 
-func _str_to_var(s: String) -> Variant:
-	# builting
-	match s:
-		"true": return true
-		"false": return false
-		"null": return null
-		"INF": return INF
-		"-INF": return -INF
-		"PI": return PI
-		"TAU": return TAU
-	
-	# state variable?
-	if s.begins_with("$"):
-		return _get(s.substr(1))
-	
-	# is a string with spaces?
-	if UString.is_wrapped(s, '"'):
-		return UString.unwrap(s, '"')
-	
-	# evaluate
-	if UString.is_wrapped(s, "<<", ">>"):
-		var e := UString.unwrap(s, "<<", ">>")
-		var got = State._eval(e)
-#		print("EVAL %s -> %s" % [e, got])
-		return got
-	
-	# array or dict?
-	if "," in s or ":" in s:
-		var args := s.split(",")
-		var is_dict := ":" in args[0]
-		var out = {} if is_dict else []
-		for arg in args:
-			if ":" in arg:
-				var kv := arg.split(":", true, 1)
-				var key := kv[0]
-				var val = _str_to_var(kv[1])
-				out[key] = val
-			else:
-				out.append(_str_to_var(arg))
-		return out
-	# float?
-	if s.is_valid_float():
-		return s.to_float()
-	# int?
-	if s.is_valid_int():
-		return s.to_int()
-	# must be a string?
-	return s
-
+#func _str_to_var(s: String) -> Variant:
+#	# builting
+#	match s:
+#		"true": return true
+#		"false": return false
+#		"null": return null
+#		"INF": return INF
+#		"-INF": return -INF
+#		"PI": return PI
+#		"TAU": return TAU
+#
+#	# state variable?
+#	if s.begins_with("$"):
+#		return _get(s.substr(1))
+#
+#	# is a string with spaces?
+#	if UString.is_wrapped(s, '"'):
+#		return UString.unwrap(s, '"')
+#
+#	# evaluate
+#	if UString.is_wrapped(s, "<<", ">>"):
+#		var e := UString.unwrap(s, "<<", ">>")
+#		var got = State._eval(e)
+##		print("EVAL %s -> %s" % [e, got])
+#		return got
+#
+#	# array or dict?
+#	if "," in s or ":" in s:
+#		var args := s.split(",")
+#		var is_dict := ":" in args[0]
+#		var out = {} if is_dict else []
+#		for arg in args:
+#			if ":" in arg:
+#				var kv := arg.split(":", true, 1)
+#				var key := kv[0]
+#				var val = _str_to_var(kv[1])
+#				out[key] = val
+#			else:
+#				out.append(_str_to_var(arg))
+#		return out
+#	# float?
+#	if s.is_valid_float():
+#		return s.to_float()
+#	# int?
+#	if s.is_valid_int():
+#		return s.to_int()
+#	# must be a string?
+#	return s
 
 func _call_group(group: String, method: String, args := [], as_string_args := false) -> Variant:
 	var out: Variant

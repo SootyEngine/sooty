@@ -36,7 +36,7 @@ func _init() -> void:
 
 func _ready() -> void:
 	await get_tree().process_frame
-	Mods.loaded.connect(_mods_loaded)
+	ModManager.loaded.connect(_mods_loaded)
 	
 	var d := Directory.new()
 	if not d.dir_exists(DIR):

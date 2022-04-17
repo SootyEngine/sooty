@@ -31,11 +31,11 @@ func _ready() -> void:
 	reloaded.connect(_reloaded)
 	
 	await get_tree().process_frame
-	Mods.load_all.connect(_load_mods)
+	ModManager.load_all.connect(_load_mods)
 
 func _files_modified(file_scanner: FileModifiedScanner):
 	file_scanner.update_times()
-	Mods._load_mods()
+	ModManager._load_mods()
 
 func _on_step(step: Dictionary):
 	match step.type:

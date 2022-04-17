@@ -174,10 +174,10 @@ func _show_arg(object: Object, arg_info: Dictionary, is_action := false) -> bool
 		if arg_info.type is String:
 			# is class_name?
 			if UClass.exists(arg_info.type):
-				var manager: DataManager = DataManager.get_manager(arg_info.type)
-				if manager:
+				var database: Database = Database.get_database(arg_info.type)
+				if database:
 					var classname: String = arg_info.name.capitalize()
-					for object_id in manager.get_all_ids():
+					for object_id in database.get_all_ids():
 						found_at_least_one = true
 						var display: String = "%s:%s" % [object_id, classname]
 						var insert: String = object_id

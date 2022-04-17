@@ -12,7 +12,7 @@ static func to_type(s: String, type: Variant, object: Object = null, default = n
 	if type is String:
 		# is class_name?
 		if UClass.exists(type):
-			# find a manager to grab it from
+			# find a database to grab it from
 			var script: Script = UClass.get_class_script(type)
 			if script.has_method("_str_to_instance"):
 				return script._str_to_instance(s, type)

@@ -51,7 +51,7 @@ func _redraw():
 					icon = data.M[k]
 					continue
 				elif k == "note":
-					end_metas.append(data.M[k])
+					end_metas.append("[dima;i]%s[]" % [data.M[k]])
 					continue
 				elif k == "progress":
 					progress = data.M[k].trim_suffix("%").to_float() / 100.0

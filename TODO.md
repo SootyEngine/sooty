@@ -1,6 +1,5 @@
-
-- [ ] Use Godots built in filesystem to detect file changes for reloading mods.
-- [ ] Come up with seperate system for runteim, that manages all subfolders at once.
+- [ ] Add autocomplete for path typing.
+- [ ] Toggle private/public flows visibiliy in chapter view.
 
 # Bugs
 - [ ] .soot multiline strings `""""` have an issue with tabs.
@@ -11,6 +10,9 @@
 - [x] Quitting doesn't hide captions.
 
 # Bad Design
+- [ ] Use Godots built in filesystem to detect file changes for reloading mods.
+- [ ] New `soot` file creation isn't detected.
+- [ ] Come up with seperate system for runteim, that manages all subfolders at once.
 - [ ] Optional obfuscation/encrypt for `soot` `soda` and save data?
 - [x] Persistent data loaded before mods loaded.
 

@@ -5,9 +5,9 @@ func _get_class():
 	return "Data"
 
 static func _str_to_instance(id: String, type: String):
-	var manager_class := type + "Manager"
-	var manager = UClass.get_class_script(manager_class)
-	return manager.get(id)
+	var database_class := type + "Database"
+	var database = UClass.get_class_script(database_class)
+	return database.get(id)
 
 func _init(d := {}):
 	UObject.set_state(self, d)
@@ -19,14 +19,14 @@ func _post_init():
 func _to_string() -> String:
 	return UClass._to_string2(self)
 
-func get_manager():
-	return DataManager.get_manager(_get_class())
+func get_database():
+	return Database.get_database(_get_class())
 
 func get_id() -> String:
-	var manager = get_manager()
-	if manager:
-		return manager._get_id(self)
-	return "NO_MANAGER"
+	var database = get_database()
+	if database:
+		return database._get_id(self)
+	return "NO_DATABASE"
 
 func duplicate() -> Object:
 	var classname := UClass.get_class_name(self)

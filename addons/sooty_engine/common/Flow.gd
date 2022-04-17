@@ -105,6 +105,9 @@ func goto(id: String) -> bool:
 func _get_line(id: String) -> Dictionary:
 	return _lines[id]
 
+func goto_and_return(id: String) -> bool:
+	return _goto(id, S_CALL)
+
 func _goto(id: String, step_type: int = S_GOTO) -> bool:
 	if has_path(id):# _has_line(new_id):
 		var new_id := get_flow_path(id)

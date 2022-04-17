@@ -245,7 +245,11 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 #	for i in len(out):
 #		print("\t* %s\t\t%s\t\t%s" % [old[i] if i < len(old) else "??", out[i], arg_info.values()[i]])
 	
-	var got = obj.callv(method, out)# callablev(call, out) if call is Callable else obj.callv(method, out)
+	var got: Variant
+	if obj.has_method("_call"):
+		got = obj._call(method, out)
+	else:
+		got = obj.callv(method, out)# callablev(call, out) if call is Callable else obj.callv(method, out)
 #	prints("CALLV:", method, out, got)
 	return got
 

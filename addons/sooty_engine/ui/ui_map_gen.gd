@@ -17,7 +17,7 @@ var goto_nodes := []
 func _ready() -> void:
 	await get_tree().process_frame
 	graph_edit.end_node_move.connect(save_graph_state)
-	Mods.loaded.connect(_update)
+	ModManager.loaded.connect(_update)
 	b_rebuild.pressed.connect(_update)
 
 func load_graph_state():

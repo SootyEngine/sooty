@@ -1,7 +1,8 @@
 @tool
 extends Node
-class_name BaseState
+class_name StateManagerBase
 
+signal _changed(property: String)
 signal changed(property: Array)
 signal changed_to(property: Array, to: Variant)
 signal changed_from_to(property: Array, from: Variant, to: Variant)
@@ -9,7 +10,7 @@ signal changed_from_to(property: Array, from: Variant, to: Variant)
 # won't emit signals when changing things.
 @export var _silent := false
 # state has changed.
-@export var _changed := false
+@export var _has_changed := false
 # shorter keys to nested data. (ie: p = characters:player)
 @export var _shortcuts := {}
 # the default state, after all mods were installed.
@@ -73,8 +74,8 @@ func _patch_object(key: String, type: String) -> Object:
 	return obj
 
 func _connect_to_signals():
-	Mods.load_all.connect(_load_mods)
-	Mods._loaded.connect(_loaded_mods)
+	ModManager.load_all.connect(_load_mods)
+	ModManager._loaded.connect(_loaded_mods)
 
 func _load_mods(mods: Array):
 	# remove old shortcuts
@@ -147,7 +148,7 @@ func _load_mods(mods: Array):
 
 func _files_modified(file_scanner: FileModifiedScanner):
 	file_scanner.update_times()
-	Mods._load_mods()
+	ModManager._load_mods()
 
 func _init_states():
 	_states = get_children()
@@ -211,8 +212,9 @@ func _call(method: String, args: Array = [], as_string_args := false, default = 
 			return default
 	
 	if method in _calls:
-		print("CALL ", method, args)
-		return UObject.call_w_kwargs(_calls[method], args, as_string_args)
+		var got = UObject.call_w_kwargs(_calls[method], args, as_string_args)
+		prints("CALL (%s) w (%s) and got (%s)" % [method, args, got])
+		return got
 	# call the first method we find
 #	for state in _children:
 #		if 
@@ -273,7 +275,8 @@ func _set(pname: StringName, value) -> bool:
 			var new = o.get(property)
 			if old != new:
 				if not _silent:
-					_changed = true
+					_has_changed = true
+					_changed.emit(pname)
 					changed.emit(path)
 					changed_to.emit(path, new)
 					changed_from_to.emit(path, old, new)
