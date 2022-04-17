@@ -9,10 +9,10 @@ var _goto: Callable # an overridable goto function, so you can use your own tran
 
 func _init() -> void:
 	add_to_group("@:SceneManager")
-	add_to_group("@.goto_scene")
+	add_to_group("@.scene")
 
 func _get_method_info(method: String):
-	if method == "goto" or method == "goto_scene":
+	if method == "scene":
 		return {
 			args={
 				id={
@@ -24,8 +24,12 @@ func _get_method_info(method: String):
 		}
 
 # testing
-func goto_scene(id: String, kwargs := {}):
-	goto(id, kwargs)
+enum Transition { FADE_OUT, INSTANT }
+func scene(id: String, transition: Transition = Transition.FADE_OUT, kwargs := {}):
+	if _goto:
+		_goto.call(id, kwargs)
+	else:
+		change(id)
 
 func _ready() -> void:
 	await get_tree().process_frame
@@ -83,12 +87,6 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("reload_scene"):
 		get_tree().reload_current_scene()
 		get_viewport().set_input_as_handled()
-
-func goto(id: String, kwargs := {}):
-	if _goto:
-		_goto.call(id, kwargs)
-	else:
-		change(id)
 
 # change scene with signals, and call start function
 func change(path: String, is_loading: bool = false):

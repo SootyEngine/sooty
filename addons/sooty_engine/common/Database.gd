@@ -1,7 +1,7 @@
 @tool
 extends RefCounted
 class_name Database, "res://addons/soot_engine/icons/database.png"
-func _get_class():
+func get_class():
 	return "Database"
 
 var _all: Dictionary = {}

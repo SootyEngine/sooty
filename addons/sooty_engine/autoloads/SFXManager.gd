@@ -10,7 +10,7 @@ var _queue := [] # sounds waiting to be played
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("@:SFXManager")
-	add_to_group("@.play_sfx")
+	add_to_group("@.sound")
 
 func _ready():
 	ModManager.load_all.connect(_load_mods)
@@ -20,7 +20,7 @@ func _ready():
 # called by UReflect, as a way of including more advanced arg info
 # for use with autocomplete
 func _get_method_info(method: String):
-	if method == "play" or method == "play_sfx":
+	if method == "sound":
 		return {
 			args={
 				id={
@@ -55,10 +55,7 @@ func _process(delta: float) -> void:
 			_on_audio_finished(child)
 
 # used as an action shortcut
-func play_sfx(id: String, fart: bool = false):# kwargs := {}):
-	play(id)#, kwargs)
-
-func play(id: String, kwargs := {}):
+func sound(id: String, kwargs := {}):
 	if Engine.is_editor_hint():
 		return
 	

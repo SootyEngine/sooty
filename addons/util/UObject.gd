@@ -172,7 +172,7 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 	
 	# no args mean it was probably not a script function but a built in
 	if not len(arg_data):
-		return obj.callv(method, in_args)
+		return _callv(obj, method, in_args)
 	
 	var new := in_args.duplicate(true)
 	var out := []
@@ -245,13 +245,16 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 #	for i in len(out):
 #		print("\t* %s\t\t%s\t\t%s" % [old[i] if i < len(old) else "??", out[i], arg_info.values()[i]])
 	
-	var got: Variant
-	if obj.has_method("_call"):
-		got = obj._call(method, out)
-	else:
-		got = obj.callv(method, out)# callablev(call, out) if call is Callable else obj.callv(method, out)
+	var got: Variant = _callv(obj, method, out)
 #	prints("CALLV:", method, out, got)
 	return got
+
+# some objects, like State/Persistent, have their own call function
+static func _callv(object: Object, method: String, arguments: Array) -> Variant:
+	if object.has_method("_call"):
+		return object._call(method, arguments)
+	else:
+		return object.callv(method, arguments)
 
 # find second last dictionary/object in a nested structure
 static func get_penultimate(d: Variant, path: Array) -> Variant:

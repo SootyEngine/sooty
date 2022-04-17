@@ -11,7 +11,7 @@ const MAX_MUSIC_PLAYERS := 3
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("@:MusicManger")
-	add_to_group("@.play_music")
+	add_to_group("@.music")
 
 func _ready():
 	ModManager.load_all.connect(_load_mods)
@@ -40,7 +40,7 @@ func _save_state(state: Dictionary):
 func _load_state(state: Dictionary):
 	var m = state.get("Music", {})
 	if "id" in m:
-		play(m, { pos=m.get("pos", 0.0) })
+		music(m, { pos=m.get("pos", 0.0) })
 
 func has(id: String) -> bool:
 	return id in _files
@@ -76,12 +76,12 @@ func queue(id: String):
 		if len(_queue):
 			_queue.append(id)
 		else:
-			play(id)
+			music(id)
 
 # called by UReflect, as a way of including more advanced arg info
 # for use with autocomplete
 func _get_method_info(method: String):
-	if method == "play" or method == "play_music":
+	if method == "music":
 		return {
 			args={
 				id={
@@ -92,14 +92,11 @@ func _get_method_info(method: String):
 			}
 		}
 
-func play_music(id: String, kwargs := {}):
-	play(id, kwargs)
-
 # kwarg (default value):
 # - pos (0.0): Position to play from.
 # - rand_offset: Random position to play from on start up.
 # - fade_time (DEFAULT_FADE_TIME): Time to fade out over.
-func play(id: String, kwargs := {}):
+func music(id: String, kwargs := {}):
 	if Engine.is_editor_hint():
 		return
 	

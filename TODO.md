@@ -1,5 +1,22 @@
 - [ ] Add autocomplete for path typing.
 - [ ] Toggle private/public flows visibiliy in chapter view.
+- [ ] `../` for going up a path, not `..`
+/   = Root directory
+.   = This location
+..  = Up a directory
+./  = Current directory
+../ = Parent of current directory
+../../ = Two directories backwards
+- `Goal` should get a `/states/_goals/` folder that can store `.soot` for more advanced goals
+- [x] `~` highlighting not working
+- [ ] chapter list `#.rank:` for sorting
+- [ ] chapter list `>` `v` for toggling subflow visibility
+- [ ] chapter list copy highlighter colors for tabs (yellow for top, then purple...)
+- [ ] chapter list tags, for filtering
+- [ ] `{{else}}` below options menu, for if they have no options to show
+- [ ] Highlighter in match case works weird
+- [ ] Richtext tab view
+
 
 # Bugs
 - [ ] .soot multiline strings `""""` have an issue with tabs.

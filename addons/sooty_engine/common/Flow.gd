@@ -318,7 +318,13 @@ func _compare_list(m, v) -> bool:
 func _compare(match_val: Variant, case_val: Variant) -> bool:
 	var match_type := typeof(match_val)
 	var case_type := typeof(case_val)
-	if match_type in [TYPE_DICTIONARY, TYPE_OBJECT] and case_type == TYPE_DICTIONARY:
+	
+	# is autopass?
+	if UType.same_type_and_value(case_val, "_"):
+		return true
+	
+	# all elements or dict/list are the same?
+	elif match_type in [TYPE_DICTIONARY, TYPE_OBJECT] and case_type == TYPE_DICTIONARY:
 		for property in case_val:
 			# default/ignore argument
 			if UType.same_type_and_value(case_val[property], "_"):
@@ -327,8 +333,11 @@ func _compare(match_val: Variant, case_val: Variant) -> bool:
 			if not property in match_val or not UType.same_type_and_value(case_val[property], match_val[property]):
 				return false
 		return true
+	
+	# both are same type?
 	elif match_type == case_type:
 		return match_val == case_val
+	
 	else:
 		return false
 

@@ -3,19 +3,19 @@
 [ext_resource type="Script" path="res://addons/sooty_engine/editor/chapter_panel.gd" id="1_8mieq"]
 [ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="2_s0u1e"]
 
-[node name="Chapters" type="ScrollContainer"]
+[node name="Chapters" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource( "1_8mieq" )
-_text = NodePath("Control/RichTextLabel")
+_text = NodePath("Control/ScrollContainer/RichTextLabel")
 _btn_refresh = NodePath("Control/HBoxContainer/refresh")
 plugin_instance_id = 0
 
 [node name="Control" type="VBoxContainer" parent="."]
-offset_right = 1024.0
-offset_bottom = 600.0
+anchor_right = 1.0
+anchor_bottom = 1.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
@@ -47,10 +47,16 @@ offset_right = 1024.0
 offset_bottom = 31.0
 text = "Show meta"
 
-[node name="RichTextLabel" type="RichTextLabel" parent="Control"]
+[node name="ScrollContainer" type="ScrollContainer" parent="Control"]
 offset_top = 35.0
 offset_right = 1024.0
 offset_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Control/ScrollContainer"]
+offset_right = 1024.0
+offset_bottom = 565.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_colors/font_outline_color = Color(0.67, 0.67, 0.67, 1)

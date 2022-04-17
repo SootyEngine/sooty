@@ -1,7 +1,7 @@
 @tool
 extends RefCounted
 class_name Data, "res://addons/sooty_engine/icons/data.png"
-func _get_class():
+func get_class():
 	return "Data"
 
 static func _str_to_instance(id: String, type: String):
@@ -20,7 +20,7 @@ func _to_string() -> String:
 	return UClass._to_string2(self)
 
 func get_database():
-	return Database.get_database(_get_class())
+	return Database.get_database(UClass.get_class_name(self))
 
 func get_id() -> String:
 	var database = get_database()

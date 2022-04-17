@@ -269,7 +269,8 @@ func _h_node_action(from: int, to: int, color: Color):
 		from += len(parts[i]) + 1
 	
 func _h_eval(from: int, to: int):
-	_c(from, C_SYMBOL)# C_CONTEXT_ACTION)
+	_c(from, C_SYMBOL)
+	_c(from+1, C_CONTEXT_ACTION)
 	var t_color = C_CONTEXT_ACTION
 	var m_color = C_CONTEXT_ACTION
 	

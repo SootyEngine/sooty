@@ -37,7 +37,7 @@ func preprocess_eval(eval: String):
 			in_tag = true
 			tags.append({type=c, tag="", prop="", full=c, is_nested=false, is_func=false})
 		elif in_tag:
-			if c in UString.CHARS_ALPHA_ALL + UString.CHARS_INTS + "_":
+			if c in UString.VAR_CHARS:
 				tags[-1].full += c
 				if not tags[-1].is_nested:
 					tags[-1].tag += c
