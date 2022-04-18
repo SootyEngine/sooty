@@ -483,7 +483,7 @@ func _process_line(line: Dictionary):
 	# list
 	if t.begins_with("{["): return _line_as_list(line)
 	# actions
-	if UString.begins_with_any(t, ["@", "~"]): return _line_as_doing(line)
+	if UString.begins_with_any(t, ["@", "$", "^", "~"]): return _line_as_doing(line)
 	# flows
 	if t.begins_with(Soot.FLOW_GOTO): return _line_as_flow_action(line, "goto", Soot.FLOW_GOTO)
 	if t.begins_with(Soot.FLOW_CALL): return _line_as_flow_action(line, "call", Soot.FLOW_CALL)

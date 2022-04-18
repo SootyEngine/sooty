@@ -227,8 +227,8 @@ func step():
 					_pop()
 				
 				"end_all":
-					end(line.end)
-					last_value = line.msg
+					end(line.end_all)
+					last_value = line.end_all
 					break
 				
 				_:
@@ -266,10 +266,10 @@ func _pop_stack_line() -> Dictionary:
 		
 		# match chain
 		elif line.type == "match":
-			var match_result = Array(line.match.split(" AND "))
+			var match_result = Array(line.match.split(" JOIN "))
 			for i in len(match_result):
 				var m = match_result[i]
-				match_result[i] = StringAction.eval(m, context)
+				match_result[i] = StringAction.do(m, context)
 			# not an array?
 			if len(match_result) == 1:
 				match_result = match_result[0]
@@ -277,12 +277,15 @@ func _pop_stack_line() -> Dictionary:
 			
 #			print("MATCH: ", match_result)
 			for i in len(line.cases):
-				var case = line.cases[i].split(" or ")
+				var case = line.cases[i].split(" OR ")
 				for subcase in case:
-					subcase = Array(subcase.split(" and "))
+					subcase = Array(subcase.split(" JOIN "))
 					for i in len(subcase):
 						var sc = subcase[i]
-						subcase[i] = StringAction.do("*" + sc, context)
+						# by default, treat it as an array of strings seperated by spaces
+						if not sc[0] in "~$@^":
+							sc = "*" + sc
+						subcase[i] = StringAction.do(sc, context)
 					var passes = _compare_list(match_result, subcase)
 #					print("\tCASE: %s == %s? %s!" % [subcase, match_result, passes])
 					if passes:

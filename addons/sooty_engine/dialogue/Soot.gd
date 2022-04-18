@@ -15,6 +15,8 @@ const EXT_LANG := "sola"
 # markdown file extension
 const EXT_TEXT := "soma" # for use with things like notes, creature databases...
 
+const ALL_EXTENSIONS := [EXT_DIALOGUE, EXT_LANG, EXT_TEXT, EXT_DATA]
+
 # flow control symbols
 const LANG := "<->"
 const LANG_GONE := "<?>" # translation that is currently missing. it's data will be kept around.

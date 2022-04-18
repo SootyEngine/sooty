@@ -31,18 +31,31 @@ func _enter_tree() -> void:
 	
 	# add .soot to the allowed textfile extensions.
 	var es: EditorSettings = get_editor_interface().get_editor_settings()
-	var fs = es.get_setting("docks/filesystem/textfile_extensions")
-	var added := false
-	for type in [",soot", ",soda", ",sola"]:
+	var fs: String = es.get_setting("docks/filesystem/textfile_extensions")
+	var changed := false
+	for type in [",soot", ",soda", ",sola", ",soma"]:
 		if not type in fs:
+			changed = true
 			fs += type
-			added = true
-	if added:
+	if changed:
 		es.set_setting("docks/filesystem/textfile_extensions", fs)
 	
+	# add extensions to the file search
+	var sof := "editor/script/search_in_file_extensions"
+	var extensions: PackedStringArray = ProjectSettings.get_setting(sof)
+	changed = false
+	for ext in Soot.ALL_EXTENSIONS:
+		if not ext in extensions:
+			changed = true
+			extensions.append(ext)
+	if changed:
+		ProjectSettings.set_setting(sof, extensions)
+	
+	# signal for auto adding highlighters based on file type
 	var se: ScriptEditor = get_editor_interface().get_script_editor()
 	se.editor_script_changed.connect(_editor_script_changed)
 	
+	# chapter overview side panel
 	chapter_panel = ChapterPanel.instantiate()
 	chapter_panel.plugin_instance_id = get_instance_id()
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_LEFT_UR, chapter_panel)
@@ -80,12 +93,17 @@ func _editor_script_changed(s):
 			var se: ScriptEditorBase = e
 			var c: CodeEdit = se.get_base_editor()
 			var rpath: String = se.get_meta("_edit_res_path")
-			match rpath.get_extension():
+			var extension: String = rpath.get_extension()
+			match extension:
 				# .soot dialogue files
 				# .sola language files
-				Soot.EXT_DIALOGUE, Soot.EXT_LANG:
+				Soot.EXT_DIALOGUE, Soot.EXT_LANG, Soot.EXT_TEXT:
 					c.set_script(load("res://addons/sooty_engine/editor/DialogueEditor.gd"))
 					c.set.call_deferred("plugin_instance_id", get_instance_id())
+					
+					# for markdown, add line wrapping
+					if extension == Soot.EXT_TEXT:
+						c.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 				
 				# .soda data files
 				Soot.EXT_DATA:

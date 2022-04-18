@@ -30,7 +30,7 @@ func version() -> String:
 func msg(type: String, payload: Variant = null):
 	message.emit(type, payload)
 
-@onready var config := Config.new("res://config.cfg") # the main config settings file. TODO: add reload option in settings
+var config := Config.new("res://config.cfg") # the main config settings file. TODO: add reload option in settings
 var _screenshot: Image # a copy of the screen, for use in menus, or save system.
 
 var window_width: int:

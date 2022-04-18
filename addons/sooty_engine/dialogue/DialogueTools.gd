@@ -35,6 +35,8 @@ static func str_to_dialogue(s: String) -> Dictionary:
 			from = LAST_SPEAKER
 		text = text.replace("\\:", ":")
 	
+	text = str_to_caption(from, text)
+	
 	return {from=from, text=text, action=action}
 
 static func _find_speaker_split(text: String, from: int) -> int:
@@ -48,27 +50,6 @@ static func _find_speaker_split(text: String, from: int) -> int:
 					return i
 	return -1
 
-static func str_to_speaker(from: String) -> String:
-	if from:
-		# if wrapped, use as is.
-		if UString.is_wrapped(from, '"'):
-			from = UString.unwrap(from, '"')
-		
-		# if multiple names, join them together.
-		elif " " in from:
-			var names = Array(from.split(" "))
-			for i in len(names):
-				if State._has(names[i]):
-					names[i] = UString.get_string(State._get(names[i]), "speaker_name")
-			from = names.pop_back()
-			if len(names):
-				from = ", ".join(names) + ", and " + from
-		
-		# if a state, format it's text.
-		elif State._has(from):
-			from = UString.get_string(State._get(from), "speaker_name")
-	
-	return from
 
 static func str_to_caption(from: String, text: String) -> String:
 	if from:

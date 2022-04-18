@@ -57,5 +57,4 @@ func get_string(id := "") -> String:
 						return fmt.format(UObject.get_state(self))
 				else:
 					return self.format.format(UObject.get_state(self))
-			return DEFAULT_FORMAT.format(UObject.get_state(self))
-	return ""
+	return DEFAULT_FORMAT.format(UObject.get_state(self))

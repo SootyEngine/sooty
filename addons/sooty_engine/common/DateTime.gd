@@ -4,7 +4,6 @@ class_name DateTime, "res://addons/sooty_engine/icons/datetime.png"
 func get_class() -> String:
 	return "DateTime"
 
-
 #
 # Godot's built in Time class starts Months and Weekdays at 1, while this starts at 0.
 # So be careful combining the two.
@@ -38,6 +37,9 @@ func reset():
 	hours = 0
 	minutes = 0
 	seconds = 0
+
+func get_string(type: String) -> String:
+	return "[b]%s[]" % str(get(type)).capitalize()
 
 #
 # SECONDS
@@ -128,7 +130,7 @@ func get_day_delta() -> float:
 	return get_seconds_into_day() / float(SECONDS_IN_DAY)
 
 func is_weekend() -> bool:
-	return get_weekday_index() in [WEEKDAY.SATURDAY, WEEKDAY.SUNDAY]
+	return get_weekday_index() in [Weekday.SATURDAY, Weekday.SUNDAY]
 
 func set_weekend(b):
 	for i in 12:
@@ -155,7 +157,7 @@ func get_days_until(other: Variant) -> int:
 func get_days_until_weekend() -> int:
 	var d := get_weekday_index()
 	for i in 7:
-		if wrapi(d+i, 0, 7) in [WEEKDAY.SATURDAY, WEEKDAY.SUNDAY]:
+		if wrapi(d+i, 0, 7) in [Weekday.SATURDAY, Weekday.SUNDAY]:
 			return i
 	return 7
 
@@ -173,10 +175,10 @@ func get_seconds_into_week() -> int:
 	return get_weekday_index() * SECONDS_IN_DAY
 
 func get_weekday_planet() -> String:
-	return PLANET.keys()[get_weekday_index()]
+	return Planet.keys()[get_weekday_index()]
 
 func get_weekday() -> String:
-	return WEEKDAY.keys()[get_weekday_index()]
+	return Weekday.keys()[get_weekday_index()]
 
 func set_weekday(wd: Variant):
 	if wd is int:
@@ -220,7 +222,7 @@ func get_weekday_index() -> int:
 func _get_month_from_str(s: String) -> int:
 	s = s.to_upper()
 	for i in 12:
-		if MONTH.keys()[i].begins_with(s):
+		if Month.keys()[i].begins_with(s):
 			return i
 	return -1
 
@@ -236,7 +238,7 @@ func set_day_of_month(d: int):
 	years = y
 
 func get_month() -> String:
-	return MONTH.keys()[get_month_index()]
+	return Month.keys()[get_month_index()]
 
 func get_month_capitalized() -> String:
 	return get_month().capitalize()
@@ -279,7 +281,7 @@ func goto_next_month():
 
 func get_seconds_until_next_month() -> int:
 	var m: int = get_month_index()
-	var days_until := DAYS_IN_YEAR if m == MONTH.DECEMBER else _days_until_month(years, m+1)
+	var days_until := DAYS_IN_YEAR if m == Month.DECEMBER else _days_until_month(years, m+1)
 	return (days_until - days) * SECONDS_IN_DAY
 
 func get_months_until(other: Variant) -> int:
@@ -336,20 +338,20 @@ func get_seconds_until_date(m: String, d := 1) -> int:
 
 func set_period(p: Variant):
 	if p is int:
-		for i in len(PERIOD):
+		for i in len(Period):
 			if get_period_index() != p:
 				goto_next_period()
 	elif p is String:
 		p = p.to_upper()
-		for i in len(PERIOD):
-			if not PERIOD[i].begins_with(p):
+		for i in len(Period):
+			if not Period[i].begins_with(p):
 				goto_next_period()
 
 func get_period() -> String:
-	return PERIOD.keys()[get_period_index()]
+	return Period.keys()[get_period_index()]
 
 func get_period_index() -> int:
-	return (wrapi(hours-1, 0, 24) * len(PERIOD)) / 24
+	return (wrapi(hours-1, 0, 24) * len(Period)) / 24
 
 func get_seconds_until_next_period() -> int:
 	var p := get_period_index()
@@ -377,17 +379,17 @@ func get_season_index() -> int:
 
 func set_season(s: Variant):
 	if s is int:
-		for i in len(SEASON):
+		for i in len(Season):
 			if get_season_index() != s:
 				goto_next_season()
 	elif s is String:
 		s = s.to_upper()
-		for i in len(SEASON):
-			if SEASON.keys()[i] != s:
+		for i in len(Season):
+			if Season.keys()[i] != s:
 				goto_next_season()
 
 func get_season() -> String:
-	return SEASON.keys()[get_season_index()]
+	return Season.keys()[get_season_index()]
 
 #
 # YEAR
@@ -536,10 +538,10 @@ static func _is_leap_year(y: int) -> bool:
 	return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)
 
 static func _days_until_month(y: int, m: int) -> int:
-	return DAYS_UNTIL_MONTH[m] + (1 if m == MONTH.FEBRUARY and _is_leap_year(y) else 0)
+	return DAYS_UNTIL_MONTH[m] + (1 if m == Month.FEBRUARY and _is_leap_year(y) else 0)
 
 static func _days_in_month(y: int, m: int) -> int:
-	return 29 if m == MONTH.FEBRUARY and _is_leap_year(y) else DAYS_IN_MONTH[m]
+	return 29 if m == Month.FEBRUARY and _is_leap_year(y) else DAYS_IN_MONTH[m]
 
 static func create_from_current() -> DateTime:
 	return create_from_datetime(Time.get_datetime_dict_from_system())
@@ -627,13 +629,13 @@ const EPOCH_SECONDS := {
 	EPOCH.SECOND: 1
 }
 
-enum WEEKDAY { SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY }
-enum MONTH { JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST, SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER }
-enum PERIOD { DAWN, MORNING, DAY, DUSK, EVENING, NIGHT }
-enum SEASON { SPRING, SUMMER, AUTUMN, WINTER }
-enum PLANET { SUN, MOON, MARS, MERCURY, JUPITER, VENUS, SATURN }
-enum HOROSCOPE { ARIES, TAURUS, GEMINI, CANCER, LEO, VIRGO, LIBRA, SCORPIUS, SAGITTARIUS, CAPRICORN, AQUARIUS, PISCES, OPHIUCHUS }
-enum ANIMAL { RAT, OX, TIGER, RABBIT, DRAGON, SNAKE, HORSE, GOAT, MONKEY, ROOSTER, DOG, PIG }
+enum Weekday { SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY }
+enum Month { JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST, SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER }
+enum Period { DAWN, MORNING, DAY, DUSK, EVENING, NIGHT }
+enum Season { SPRING, SUMMER, AUTUMN, WINTER }
+enum Planet { SUN, MOON, MARS, MERCURY, JUPITER, VENUS, SATURN }
+enum Horoscope { ARIES, TAURUS, GEMINI, CANCER, LEO, VIRGO, LIBRA, SCORPIUS, SAGITTARIUS, CAPRICORN, AQUARIUS, PISCES, OPHIUCHUS }
+enum Animal { RAT, OX, TIGER, RABBIT, DRAGON, SNAKE, HORSE, GOAT, MONKEY, ROOSTER, DOG, PIG }
 
 const UNICODE_ANIMALS := ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
 const UNICODE_HOROSCOPE := [0x2648, 0x2649, 0x264A, 0x264B, 0x264C, 0x264D, 0x264E, 0x264F, 0x2650, 0x2651, 0x2652, 0x2653, 0x26CE]
@@ -647,7 +649,7 @@ func get_horoscope_unicode() -> String:
 	return char(UNICODE_HOROSCOPE[get_horoscope_index()])
 
 func get_horoscope() -> String:
-	return HOROSCOPE.keys()[get_horoscope_index()]
+	return Horoscope.keys()[get_horoscope_index()]
 
 func get_horoscope_index() -> int:
 	var c := [[9, 19, 10], [10, 18, 11], [11, 20, 0], [0, 19, 1], [1, 20, 2], [2, 20, 3], [3, 22, 4], [4, 22, 5], [5, 22, 6], [6, 22, 7], [7, 21, 8], [8, 21, 9]]
@@ -659,7 +661,7 @@ func get_horoscope_index() -> int:
 #
 
 func get_zodiac() -> String:
-	return ANIMAL.keys()[get_zodiac_index()]
+	return Animal.keys()[get_zodiac_index()]
 
 func get_zodiac_unicode() -> String:
 	return UNICODE_ANIMALS[get_zodiac_index()]

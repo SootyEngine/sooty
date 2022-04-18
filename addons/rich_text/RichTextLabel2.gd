@@ -113,9 +113,6 @@ var _state := {}
 var _meta := {}
 var _meta_hovered: Variant = null
 
-var _shortcuts := {}
-var _custom_colors := {}
-
 func _get_tool_buttons():
 	return ["_redraw"]
 
@@ -167,19 +164,21 @@ func _gui_input(event: InputEvent) -> void:
 					push_error("No meta url for '%s'." % _meta_hovered)
 				get_viewport().set_input_as_handled()
 
-func _ready() -> void:
-	await get_tree().process_frame
-	_reload_config()
-	_redraw()
-
 func _reload_config():
-	if Global.config.has_section("rich_text_colors"):
-		for key in Global.config.get_section_keys("rich_text_colors"):
-			_shortcuts[key] = Global.config.get_color("rich_text_colors", key, Color.WHITE)
-	
-	if Global.config.has_section("rich_text_shortcuts"):
-		for key in Global.config.get_section_keys("rich_text_shortcuts"):
-			_custom_colors[key] = Global.config.get_value("rich_text_shortcuts", key)
+	if not "rtl_tags" in Global.meta:
+		var colors := {}
+		var tags := {}
+		
+		if Global.config.has_section("rich_text_colors"):
+			for key in Global.config.get_section_keys("rich_text_colors"):
+				colors[key] = Global.config.get_color("rich_text_colors", key, Color.WHITE)
+		
+		if Global.config.has_section("rich_text_shortcuts"):
+			for key in Global.config.get_section_keys("rich_text_shortcuts"):
+				tags[key] = Global.config.get_value("rich_text_shortcuts", key)
+		
+		Global.meta["rtl_colors"] = colors
+		Global.meta["rtl_tags"] = tags
 
 func _update_color():
 	add_theme_color_override("font_outline_color", _get_outline_color(color))
@@ -192,6 +191,7 @@ func _redraw():
 #		print("skipping")
 
 func set_bbcode(btext: String):
+	_reload_config()
 #	_last_draw_at = get_tree().get_frame()
 	text = ""
 	bbcode = btext
@@ -276,33 +276,34 @@ func _parse(btext: String):
 		btext = "" if len(p) == 1 else p[1]
 		
 		# go through all tags
-		_parse_opening(p[0])
+#		_parse_opening(p[0])
+		_parse_tags(p[0])
 	
 	if btext:
 		_add_text(btext)
 
-func _parse_opening(tag: String):
-	if len(tag) and tag[0] in "~$^@":
-		var p := tag.split(";", true, 1)
-		if len(p) == 2:
-			_parse_tags(p[1])
-		
-		var got = StringAction.do(p[0], context)
-		# no value was found
-		if got == null:
-			push_error("BBCode: Couldn't replace '%s'." % p[0])
-			push_bgcolor(Color.RED)
-			_add_text("[%s]" % tag)
-			pop()
-		else:
-			# objects may implement a get_string() method
-			_parse(UString.get_string(got, "bbcode"))
-		
-		if len(p) == 2:
-			_stack_pop()
-		
-	else:
-		_parse_tags(tag)
+#func _parse_opening(tag: String):
+#	if len(tag) and tag[0] in "~$^@":
+#		var p := tag.split(";", true, 1)
+#		if len(p) == 2:
+#			_parse_tags(p[1])
+#
+#		var got = StringAction.do(p[0], context)
+#		# no value was found
+#		if got == null:
+#			push_error("BBCode: Couldn't replace '%s'." % p[0])
+#			push_bgcolor(Color.RED)
+#			_add_text("[%s]" % tag)
+#			pop()
+#		else:
+#			# objects may implement a get_string() method
+#			_parse(UString.get_string(got, "bbcode"))
+#
+#		if len(p) == 2:
+#			_stack_pop()
+#
+#	else:
+#		_parse_tags(tag)
 
 func _parse_tags(tags_string: String):
 	# check for shortcuts
@@ -310,8 +311,8 @@ func _parse_tags(tags_string: String):
 	var tags := []
 	for i in len(p):
 		var tag = p[i]
-		if tag in _shortcuts:
-			tags.append_array(_shortcuts[tag].split(";"))
+		if tag in Global.meta.rtl_tags:
+			tags.append_array(Global.meta.rtl_tags[tag].split(";"))
 		else:
 			tags.append(tag)
 	
@@ -349,6 +350,21 @@ func _parse_tags(tags_string: String):
 		_stack.pop_back()
 
 func _parse_tag(tag: String):
+	# is a !$^@ StringAction?
+	if tag[0] in "~$^@":
+		var got = StringAction.do(tag, context)
+		prints("TAG GOT ", got, " FROM ", tag)
+		# no value was found
+		if got == null:
+			push_error("BBCode: Couldn't replace '%s'." % tag)
+			push_bgcolor(Color.RED)
+			_add_text("[%s]" % tag)
+			pop()
+		else:
+			# objects may implement a get_string() method
+			_parse(UString.get_string(got, "bbcode"))
+		return
+		
 	# COLOR. This allows doing: "[{color}]Text[]".format({color=Color.RED})
 	if UString.is_wrapped(tag, "(", ")"):
 		var rgba = UString.unwrap(tag, "(", ")").split_floats(",")
@@ -418,8 +434,8 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		return
 	
 	# color names
-	if tag in _custom_colors:
-		_push_color(_custom_colors[tag])
+	if tag in Global.meta.rtl_colors:
+		_push_color(Global.meta.rtl_colors[tag])
 		return
 	
 	# font sizes
