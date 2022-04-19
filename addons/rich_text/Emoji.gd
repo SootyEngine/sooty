@@ -1,5 +1,17 @@
 class_name Emoji
 
+# show a progress bar n characters long
+# expects values between 0.0 and 1.0
+static func progress(amount: float, chars := 4) -> String:
+	amount = clamp(amount, 0.0, 1.0)
+	var total := amount * chars
+	var filled = floor(total)
+	var r = (total-filled) * 8.0
+	if r:
+		return "█".repeat(filled) + "▏▎▍▌▋▊▉█"[r] + " ".repeat(chars-filled-1)
+	else:
+		return "█".repeat(filled) + " ".repeat(chars-filled)
+
 # https://github.com/ikatyang/emoji-cheat-sheet/blob/master/README.md
 const NAMES := {
 	"+1": "👍",

@@ -11,7 +11,7 @@ const MAX_FONT_SIZE := 64
 
 enum {
 	T_NONE,
-	T_COLOR, T_OUTLINE_COLOR,
+	T_COLOR, T_COLOR_OUTLINE, T_COLOR_BG, T_COLOR_FG,
 	T_PARAGRAPH,
 	T_CONDITION,
 	T_BOLD, T_ITALICS, T_BOLD_ITALICS, T_UNDERLINE, T_STRIKE_THROUGH, T_CODE,
@@ -28,6 +28,8 @@ enum Align { NONE, LEFT, CENTER, RIGHT, FILL }
 enum Outline { OFF, DARKEN, LIGHTEN }
 enum EffectsMode { OFF, OFF_IN_EDITOR, ON }
 
+signal internal_pressed(variant: Variant)
+signal internal_right_pressed(variant: Variant)
 signal pressed(variant: Variant)
 signal right_pressed(variant: Variant)
 
@@ -45,6 +47,8 @@ signal right_pressed(variant: Variant)
 		_redraw()
 		_update_color()
 
+@export var emoji_scale := 1.0
+@export var auto_font := true
 @export var font := "":
 	set = set_font
 
@@ -123,8 +127,6 @@ func _init():
 func _connect_meta():
 		meta_hover_started.connect(_meta_hover_started)
 		meta_hover_ended.connect(_meta_hover_ended)
-#		meta_clicked.connect(_meta_clicked)
-#		gui_input.connect(_gui_input)
 
 func _meta_hover_started(meta: Variant):
 	_meta_hovered = meta
@@ -142,6 +144,8 @@ func _gui_input(event: InputEvent) -> void:
 				if _meta_hovered in _meta:
 					if _meta[_meta_hovered] is Callable:
 						_meta[_meta_hovered].call()
+					elif _meta_hovered.begins_with("_"):
+						internal_pressed.emit(_meta[_meta_hovered])
 					else:
 						pressed.emit(_meta[_meta_hovered])
 			
@@ -158,6 +162,8 @@ func _gui_input(event: InputEvent) -> void:
 				if _meta_hovered in _meta:
 					if _meta[_meta_hovered] is Callable:
 						_meta[_meta_hovered].call()
+					elif _meta_hovered.begins_with("_"):
+						internal_right_pressed.emit(_meta[_meta_hovered])
 					else:
 						right_pressed.emit(_meta[_meta_hovered])
 				else:
@@ -165,7 +171,7 @@ func _gui_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 
 func _reload_config():
-	if not "rtl_tags" in Global.meta:
+	if Global and not "rtl_tags" in Global.meta:
 		var colors := {}
 		var tags := {}
 		
@@ -183,16 +189,18 @@ func _reload_config():
 func _update_color():
 	add_theme_color_override("font_outline_color", _get_outline_color(color))
 
-var _last_draw_at := 0
+var _last_drawn_at := 0
 func _redraw():
-#	if get_tree().get_frame() - _last_draw_at > 4:
+	if is_inside_tree():
+		var frame := get_tree().get_frame()
+		if frame == _last_drawn_at:
+			print("skip _redraw")
+			return
+		_last_drawn_at = frame
 	set_bbcode(bbcode)
-#	else:
-#		print("skipping")
 
 func set_bbcode(btext: String):
 	_reload_config()
-#	_last_draw_at = get_tree().get_frame()
 	text = ""
 	bbcode = btext
 	clear()
@@ -200,6 +208,8 @@ func set_bbcode(btext: String):
 	_stack.clear()
 	_state = {
 		color = color,
+		color_bg = null,
+		color_fg = null,
 		align = alignment,
 		font = font,
 		font_size = font_size,
@@ -219,7 +229,8 @@ func set_meta_data(key: String, data: Variant):
 
 func set_font(id: String):
 	font = id
-	FontHelper.new("res://fonts").set_fonts(self, id)
+	if auto_font:
+		FontHelper.new("res://fonts").set_fonts(self, id)
 
 func uninstall_effects():
 	while len(custom_effects):
@@ -276,34 +287,10 @@ func _parse(btext: String):
 		btext = "" if len(p) == 1 else p[1]
 		
 		# go through all tags
-#		_parse_opening(p[0])
 		_parse_tags(p[0])
 	
 	if btext:
 		_add_text(btext)
-
-#func _parse_opening(tag: String):
-#	if len(tag) and tag[0] in "~$^@":
-#		var p := tag.split(";", true, 1)
-#		if len(p) == 2:
-#			_parse_tags(p[1])
-#
-#		var got = StringAction.do(p[0], context)
-#		# no value was found
-#		if got == null:
-#			push_error("BBCode: Couldn't replace '%s'." % p[0])
-#			push_bgcolor(Color.RED)
-#			_add_text("[%s]" % tag)
-#			pop()
-#		else:
-#			# objects may implement a get_string() method
-#			_parse(UString.get_string(got, "bbcode"))
-#
-#		if len(p) == 2:
-#			_stack_pop()
-#
-#	else:
-#		_parse_tags(tag)
 
 func _parse_tags(tags_string: String):
 	# check for shortcuts
@@ -311,7 +298,7 @@ func _parse_tags(tags_string: String):
 	var tags := []
 	for i in len(p):
 		var tag = p[i]
-		if tag in Global.meta.rtl_tags:
+		if Global and tag in Global.meta.rtl_tags:
 			tags.append_array(Global.meta.rtl_tags[tag].split(";"))
 		else:
 			tags.append(tag)
@@ -434,7 +421,7 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		return
 	
 	# color names
-	if tag in Global.meta.rtl_colors:
+	if Global and tag in Global.meta.rtl_colors:
 		_push_color(Global.meta.rtl_colors[tag])
 		return
 	
@@ -448,7 +435,9 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		var efont := get_emoji_font()
 		if efont != null:
 			push_font(efont)
+			push_font_size(ceil(_state.font_size * emoji_scale))
 			append_text(Emoji.OLDIE[tag])
+			pop()
 			pop()
 		else:
 			append_text(Emoji.OLDIE[tag])
@@ -461,7 +450,9 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 			var efont := get_emoji_font()
 			if efont != null:
 				push_font(efont)
+				push_font_size(ceil(_state.font_size * emoji_scale))
 				append_text(Emoji.NAMES[emoji_name])
+				pop()
 				pop()
 			else:
 				append_text(Emoji.NAMES[emoji_name])
@@ -478,6 +469,9 @@ func _parse_tag_info(tag: String, info: String, raw: String):
 		"bi": _push_bold_italics()
 		"s": _push_strikethrough()
 		"u": _push_underline()
+		
+		"bg": _push_color_bg(UStringConvert.to_color(info))
+		"fg": _push_color_fg(UStringConvert.to_color(info))
 		
 		"left": _push_paragraph(HORIZONTAL_ALIGNMENT_LEFT)
 		"right": _push_paragraph(HORIZONTAL_ALIGNMENT_RIGHT)
@@ -634,6 +628,16 @@ func _pop_font_size(last_size):
 	_state.font_size = last_size
 	pop()
 
+func _push_color_bg(clr: Color):
+	_stack_push(T_COLOR_BG, _state.color_bg)
+	_state.color = clr
+	push_bgcolor(clr)
+
+func _push_color_fg(clr: Color):
+	_stack_push(T_COLOR_FG, _state.color_fg)
+	_state.color = clr
+	push_bgcolor(clr)
+
 func _push_color(clr: Color):
 	_stack_push(T_COLOR, _state.color)
 	_state.color = clr
@@ -668,6 +672,14 @@ func _pop_color(data):
 	if outline_size > 0:
 		pop()
 
+func _pop_color_bg(data):
+	_state.color_bg = data
+	pop()
+
+func _pop_color_fg(data):
+	_state.color_fg = data
+	pop()
+
 # remove the last tag or set of tags.
 func _stack_pop():
 	if len(_stack):
@@ -678,6 +690,8 @@ func _stack_pop():
 			var nopop = last[i][2]
 			match type:
 				T_COLOR: _pop_color(data)
+				T_COLOR_BG: _pop_color_bg(data)
+				T_COLOR_FG: _pop_color_fg(data)
 				T_PARAGRAPH: _pop_paragraph(data)
 				T_PIPE: _pop_pipe()
 				T_FONT: _pop_font(data)
@@ -806,8 +820,8 @@ static func _str2var(s: String) -> Variant:
 func clear_meta():
 	_meta.clear()
 
-func gen_meta(label: String, data: Variant, hint := "", tags := "") -> String:
-	var h = "_%s" % hash(data)
+func do_clickable(label: String, data: Variant, hint := "", tags := "", is_internal := false) -> String:
+	var h = ("_%s" if is_internal else "-%s") % hash(data)
 	_meta[h] = data
 	if hint:
 		if tags:

@@ -9,14 +9,18 @@
 ../../ = Two directories backwards
 - `Goal` should get a `/states/_goals/` folder that can store `.soot` for more advanced goals
 - [x] `~` highlighting not working
-- [ ] chapter list `#.rank:` for sorting
-- [ ] chapter list `>` `v` for toggling subflow visibility
-- [ ] chapter list copy highlighter colors for tabs (yellow for top, then purple...)
-- [ ] chapter list tags, for filtering
+- [ ] Chapter list `#.rank:` for sorting
+- [ ] Chapter list `>` `v` for toggling subflow visibility
+- [ ] Chapter list copy highlighter colors for tabs (yellow for top, then purple...)
+- [ ] Chapter list tags, for filtering
 - [ ] `{{else}}` below options menu, for if they have no options to show
 - [ ] Highlighter in match case works weird
 - [ ] Richtext tab view
+- [ ] Only load VisualNovelUI when `~` is pressed, to save on startup load time.
 
+# Shrinking database use
+- [ ] Only load flow paths at first? Then lazy load rest?
+- [ ] Store lines by speaker, and as arrays?
 
 # Bugs
 - [ ] .soot multiline strings `""""` have an issue with tabs.

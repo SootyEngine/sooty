@@ -323,15 +323,39 @@ static func count_leading(s: String, chr := " ") -> int:
 			break
 	return out
 
-#static func count_leading_tabs(s: String) -> int:
-#	var out := 0
-#	for c in s:
-#		match c:
-#			"\t": out += 1#4
-##			" ": out += 1
-#			_: break
-##	out /= 4
-#	return out
+# an array of nested arrays, where each has the form ["string text", [array of children]]
+static func get_tabbed_tree(input: String, allow_empty := false) -> Array:
+	var lines := input.split("\n", allow_empty)
+	var i := 0
+	var root := []
+	var state := {}
+	while i < len(lines):
+		var deep := UString.count_leading(lines[i], "\t")
+		var text := lines[i].substr(deep)
+		var line = [text, []]
+		state[deep] = line
+		if deep == 0:
+			root.append(line)
+		else:
+			state[deep-1][1].append(line)
+		i += 1
+	return root
+
+static func join_tabbed_tree(tree: Array,
+		head: Callable = func(deep:int, text: String): return "\t".repeat(deep) + text,
+		line: Callable = func(deep:int, text: String): return "\t".repeat(deep) + text) -> String:
+	var out := []
+	for branch in tree:
+		_join_tabbed_tree(branch, out, 0, head, line)
+	return "\n".join(out)
+
+static func _join_tabbed_tree(tree: Array, out: Array, deep: int, head: Callable, line: Callable):
+	if tree[1]:
+		out.append(head.call(deep, tree[0]))
+		for branch in tree[1]:
+			_join_tabbed_tree(branch, out, deep+1, head, line)
+	else:
+		out.append(line.call(deep, tree[1]))
 
 static func get_key_var(s: String, split_on := ":") -> Array:
 	var i := s.find(split_on)

@@ -45,3 +45,11 @@ const EVAL_STATE := "$"
 
 const NODE_ACTION := "@"
 const EVAL := "~"
+
+
+const C_FLOW := Color.WHEAT
+
+static func get_flow_color(deep: int) -> Color:
+	var color := UColor.hue_shift(C_FLOW, .3 * deep)
+	color.v -= .15 * deep
+	return color

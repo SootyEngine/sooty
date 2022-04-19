@@ -1,7 +1,24 @@
-[gd_scene load_steps=3 format=3 uid="uid://ckxnh203247fd"]
+[gd_scene load_steps=9 format=3 uid="uid://ckxnh203247fd"]
 
 [ext_resource type="Script" path="res://addons/sooty_engine/editor/chapter_panel.gd" id="1_8mieq"]
-[ext_resource type="Script" path="res://addons/rich_text/RichTextLabel2.gd" id="2_s0u1e"]
+[ext_resource type="Script" path="res://addons/rich_text/RichTextFoldable.gd" id="2_fh5rf"]
+[ext_resource type="FontData" uid="uid://dqx614s3tcalv" path="res://addons/sooty_engine/ui/FiraCode-Regular.ttf" id="2_nwq7p"]
+
+[sub_resource type="Font" id="Font_g84jw"]
+data/0 = ExtResource( "2_nwq7p" )
+
+[sub_resource type="Font" id="Font_xvh7e"]
+data/0 = ExtResource( "2_nwq7p" )
+
+[sub_resource type="Font" id="Font_j82t6"]
+data/0 = ExtResource( "2_nwq7p" )
+
+[sub_resource type="Font" id="Font_t8tlw"]
+data/0 = ExtResource( "2_nwq7p" )
+
+[sub_resource type="Font" id="Font_pks37"]
+data/0 = ExtResource( "2_nwq7p" )
+data/1 = ExtResource( "2_nwq7p" )
 
 [node name="Chapters" type="Control"]
 anchor_right = 1.0
@@ -11,6 +28,8 @@ size_flags_vertical = 3
 script = ExtResource( "1_8mieq" )
 _text = NodePath("Control/ScrollContainer/RichTextLabel")
 _btn_refresh = NodePath("Control/HBoxContainer/refresh")
+_filter = NodePath("Control/HBoxContainer/filter")
+_tog_private = NodePath("Control/HBoxContainer/private")
 plugin_instance_id = 0
 
 [node name="Control" type="VBoxContainer" parent="."]
@@ -33,7 +52,7 @@ text = "Refresh"
 
 [node name="filter" type="LineEdit" parent="Control/HBoxContainer"]
 offset_left = 72.0
-offset_right = 885.0
+offset_right = 917.0
 offset_bottom = 31.0
 size_flags_horizontal = 3
 placeholder_text = "Filter flows"
@@ -41,11 +60,12 @@ clear_button_enabled = true
 caret_blink = true
 caret_blink_speed = 0.5
 
-[node name="show_meta" type="CheckButton" parent="Control/HBoxContainer"]
-offset_left = 889.0
+[node name="private" type="CheckButton" parent="Control/HBoxContainer"]
+offset_left = 921.0
 offset_right = 1024.0
 offset_bottom = 31.0
-text = "Show meta"
+button_pressed = true
+text = "Private"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Control"]
 offset_top = 35.0
@@ -59,8 +79,13 @@ offset_right = 1024.0
 offset_bottom = 565.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_colors/font_outline_color = Color(0.67, 0.67, 0.67, 1)
+theme_override_colors/font_outline_color = Color(0.5, 0.5, 0.5, 1)
 theme_override_constants/outline_size = 0
+theme_override_fonts/mono_font = SubResource( "Font_g84jw" )
+theme_override_fonts/bold_italics_font = SubResource( "Font_xvh7e" )
+theme_override_fonts/italics_font = SubResource( "Font_j82t6" )
+theme_override_fonts/bold_font = SubResource( "Font_t8tlw" )
+theme_override_fonts/normal_font = SubResource( "Font_pks37" )
 theme_override_font_sizes/mono_font_size = 16
 theme_override_font_sizes/bold_italics_font_size = 16
 theme_override_font_sizes/italics_font_size = 16
@@ -71,6 +96,11 @@ fit_content_height = true
 meta_underlined = false
 hint_underlined = false
 autowrap_mode = 0
-script = ExtResource( "2_s0u1e" )
-alignment = 0
+script = ExtResource( "2_fh5rf" )
+alignment = 1
+emoji_scale = 1.5
 markdown_enabled = false
+tag_opened = "[lb]-[rb]"
+tag_closed = "[lb]+[rb]"
+tag_notab = "   "
+tab_children = false
