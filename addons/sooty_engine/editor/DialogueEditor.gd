@@ -39,14 +39,14 @@ var TAG_DESC := {
 	
 	# inline state
 	"Do @node action": { "insert": "@", "icon": ICON_PRINT },
-	"Do $state action": { "insert": "$", "icon": ICON_PRINT },
-	"Do ^persistent state action": { "insert": "^", "icon": ICON_PRINT },
+#	"Do $state action": { "insert": "$", "icon": ICON_PRINT },
+#	"Do ^persistent state action": { "insert": "^", "icon": ICON_PRINT },
 	"Do ~evaluation": { "insert": "~", "icon": ICON_PRINT },
 	
 	# animations
 	"Do delayed @node action": { "insert": "!@", "icon": ICON_CALL },
-	"Do delayed $state action": { "insert": "!$", "icon": ICON_CALL },
-	"Do delayed ^persistent state action": { "insert": "!^", "icon": ICON_CALL },
+#	"Do delayed $state action": { "insert": "!$", "icon": ICON_CALL },
+#	"Do delayed ^persistent state action": { "insert": "!^", "icon": ICON_CALL },
 	"Do delayed ~evaluation": { "insert": "!~", "icon": ICON_CALL },
 	
 	# align
@@ -132,7 +132,7 @@ func _init() -> void:
 			# actions
 			"$",
 			"@",
-			"^",
+#			"^",
 			# action arg divider
 			" ",
 			# eval
@@ -403,9 +403,9 @@ func _test_for_actions(s: String) -> bool:
 			found_at_least_one = true
 	
 	# ^ persistent state shortcut
-	elif s.begins_with("^"):
-		if _as_state_action(Persistent, s.substr(1), true):
-			found_at_least_one = true
+#	elif s.begins_with("^"):
+#		if _as_state_action(Persistent, s.substr(1), true):
+#			found_at_least_one = true
 	
 	return found_at_least_one
 
@@ -436,9 +436,10 @@ func _as_eval() -> bool:
 		elif method.begins_with("$"):
 			if _show_method_args(State, method.substr(1), func_data.arg_index):
 				found_at_least_one = true
-		elif method.begins_with("^"):
-			if _show_method_args(Persistent, method.substr(1), func_data.arg_index):
-				found_at_least_one = true
+		
+#		elif method.begins_with("^"):
+#			if _show_method_args(Persistent, method.substr(1), func_data.arg_index):
+#				found_at_least_one = true
 	
 	# we are outside, writing the functio name
 	else:
@@ -461,9 +462,10 @@ func _as_eval() -> bool:
 		elif method.begins_with("$"):
 			if _show_object_actions(State):
 				found_at_least_one = true
-		elif method.begins_with("^"):
-			if _show_object_actions(Persistent):
-				found_at_least_one = true
+		
+#		elif method.begins_with("^"):
+#			if _show_object_actions(Persistent):
+#				found_at_least_one = true
 	
 	return found_at_least_one
 

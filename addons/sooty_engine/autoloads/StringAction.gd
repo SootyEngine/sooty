@@ -27,7 +27,7 @@ func preprocess_eval(eval: String):
 	var tags := []
 	var in_tag := false
 	for c in eval:
-		if c in "@$^":
+		if c in "@$":
 			in_tag = true
 			tags.append({type=c, tag="", prop="", full=c, is_nested=false, is_func=false})
 		elif in_tag:
@@ -81,7 +81,7 @@ func preprocess_eval(eval: String):
 					eval = eval.replace(t.full, "_P_[\"%s.%s\"]" % [t.tag, t.prop])
 				else:
 					eval = eval.replace(t.full, "_P_[\"%s\"]" % [t.tag])
-					
+	
 	return eval
 
 func test(e: String, context: Object = null) -> bool:
@@ -298,9 +298,9 @@ func eval(eval: String, context: Variant = null, default = null) -> Variant:
 				property = property.substr(1)
 				target = State
 			
-			elif property.begins_with("^"):
-				property = property.substr(1)
-				target = Persistent
+#			elif property.begins_with("^"):
+#				property = property.substr(1)
+#				target = Persistent
 			
 			# assigning to a group object?
 			elif property.begins_with("@"):

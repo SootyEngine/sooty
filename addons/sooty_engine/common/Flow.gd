@@ -283,7 +283,7 @@ func _pop_stack_line() -> Dictionary:
 					for i in len(subcase):
 						var sc = subcase[i]
 						# by default, treat it as an array of strings seperated by spaces
-						if not sc[0] in "~$@^":
+						if not sc[0] in "~$@":
 							sc = "*" + sc
 						subcase[i] = StringAction.do(sc, context)
 					var passes = _compare_list(match_result, subcase)

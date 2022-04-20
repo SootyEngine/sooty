@@ -14,10 +14,6 @@ var active_game := true
 var _printer: Callable
 var meta := {}
 
-func _init() -> void:
-	add_to_group("@.version")
-	add_to_group("@.msg")
-
 # called by UReflect, as a way of including more advanced arg info
 # for use with autocomplete
 func _get_method_info(method: String):
@@ -52,9 +48,11 @@ func notify(msg: Dictionary):
 	message.emit("notification", msg)
 
 
-
 func _ready() -> void:
 	get_tree().set_auto_accept_quit(false)
+	
+	await get_tree().process_frame
+	StringAction.connect_methods(self, [version, msg])
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:

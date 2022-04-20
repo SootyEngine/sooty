@@ -287,11 +287,11 @@ func _h_eval(from: int, to: int):
 			_c(i, Color(m_color, .5))
 			_c(i+1, t_color)
 		
-		elif text[i] == "^":
-			t_color = C_PERSISTENT_ACTION
-			m_color = C_PERSISTENT_ACTION
-			_c(i, Color(m_color, .5))
-			_c(i+1, t_color)
+#		elif text[i] == "^":
+#			t_color = C_PERSISTENT_ACTION
+#			m_color = C_PERSISTENT_ACTION
+#			_c(i, Color(m_color, .5))
+#			_c(i+1, t_color)
 		
 		if text[i] == ".":
 			t_color = UColor.hue_shift(t_color, -.033)
