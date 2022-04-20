@@ -130,7 +130,7 @@ func get_day_delta() -> float:
 	return get_seconds_into_day() / float(SECONDS_IN_DAY)
 
 func is_weekend() -> bool:
-	return get_weekday_index() in [Weekday.SATURDAY, Weekday.SUNDAY]
+	return get_weekday_index() in [Weekday.Saturday, Weekday.Sunday]
 
 func set_weekend(b):
 	for i in 12:
@@ -543,6 +543,12 @@ func _get(property: StringName):
 		# is_period?
 		elif prop in Period:
 			return get_period() == prop
+		# is_horoscope?
+		elif prop in Horoscope:
+			return get_horoscope() == prop
+		# is_zodiac?
+		elif prop in Zodiac:
+			return get_zodiac() == prop
 
 func _set(property: StringName, value) -> bool:
 	var fname := "set_%s" % property
@@ -555,10 +561,10 @@ static func _is_leap_year(y: int) -> bool:
 	return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)
 
 static func _days_until_month(y: int, m: int) -> int:
-	return DAYS_UNTIL_MONTH[m] + (1 if m == Month.FEBRUARY and _is_leap_year(y) else 0)
+	return DAYS_UNTIL_MONTH[m] + (1 if m == Month.February and _is_leap_year(y) else 0)
 
 static func _days_in_month(y: int, m: int) -> int:
-	return 29 if m == Month.FEBRUARY and _is_leap_year(y) else DAYS_IN_MONTH[m]
+	return 29 if m == Month.February and _is_leap_year(y) else DAYS_IN_MONTH[m]
 
 static func create_from_current() -> DateTime:
 	return create_from_datetime(Time.get_datetime_dict_from_system())
@@ -652,7 +658,7 @@ enum Period { Dawn, Morning, Day, Dusk, Evening, Night }
 enum Season { Spring, Summer, Autumn, Winter }
 enum Planet { Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn }
 enum Horoscope { Aries, Taurus, Gemini, Cancer, Leo, Virgo, Libra, Scorpius, Sagitarius, Capricorn, Aquarius, Pisces, Ophiuchus }
-enum Animal { Rat, Ox, Tiger, Rabbit, Dragon, Snake, Horse, Goat, Monkey, Rooster, Dog, Pig }
+enum Zodiac { Rat, Ox, Tiger, Rabbit, Dragon, Snake, Horse, Goat, Monkey, Rooster, Dog, Pig }
 
 const UnicodeAnimal := ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
 const UnicodeHoroscope := [0x2648, 0x2649, 0x264A, 0x264B, 0x264C, 0x264D, 0x264E, 0x264F, 0x2650, 0x2651, 0x2652, 0x2653, 0x26CE]
@@ -678,7 +684,7 @@ func get_horoscope_index() -> int:
 #
 
 func get_zodiac() -> String:
-	return Animal.keys()[get_zodiac_index()]
+	return Zodiac.keys()[get_zodiac_index()]
 
 func get_zodiac_unicode() -> String:
 	return UnicodeAnimal[get_zodiac_index()]
