@@ -7,10 +7,6 @@ signal changed()
 var scenes := {}
 var _goto: Callable # an overridable goto function, so you can use your own transition system.
 
-func _init() -> void:
-	add_to_group("@:SceneManager")
-	add_to_group("@.scene")
-
 func _get_method_info(method: String):
 	if method == "scene":
 		return {
@@ -33,6 +29,9 @@ func scene(id: String, transition: Transition = Transition.FADE_OUT, kwargs := {
 
 func _ready() -> void:
 	await get_tree().process_frame
+	
+	StringAction.connect_as_node(self, "SceneManager")
+	StringAction.connect_methods(self, [scene])
 	
 	ModManager.load_all.connect(_load_mods)
 	if not Engine.is_editor_hint():

@@ -7,12 +7,11 @@ const MAX_SOUNDS := 8
 var _files := {} # all playable audio
 var _queue := [] # sounds waiting to be played
 
-func _init() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	add_to_group("@:SFXManager")
-	add_to_group("@.sound")
-
 func _ready():
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	StringAction.connect_as_node(self, "SFXManager")
+	StringAction.connect_methods(self, [sound])
+	
 	ModManager.load_all.connect(_load_mods)
 	SaveManager._get_state.connect(_save_state)
 	SaveManager._set_state.connect(_load_state)

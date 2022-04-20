@@ -8,10 +8,8 @@ signal caption(text: String, line: Dictionary)
 
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	add_to_group("@:Dialogue")
-	add_to_group("@.chose")
-	add_to_group("@.reset_choice")
-	add_to_group("@.reset_list")
+	StringAction.connect_as_node(self, "Dialogue")
+	StringAction.connect_methods(self, [chose, reset_choice, reset_list])
 	selected.connect(_choose)
 
 

@@ -8,12 +8,11 @@ const MAX_MUSIC_PLAYERS := 3
 @export var _queue := []
 @export var _files := {}
 
-func _init() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	add_to_group("@:MusicManger")
-	add_to_group("@.music")
-
 func _ready():
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	StringAction.connect_as_node(self, "MusicManager") 
+	StringAction.connect_methods(self, [music])
+	
 	ModManager.load_all.connect(_load_mods)
 	SaveManager._get_state.connect(_save_state)
 	SaveManager._set_state.connect(_load_state)

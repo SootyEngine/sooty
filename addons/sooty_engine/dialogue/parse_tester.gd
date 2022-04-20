@@ -12,10 +12,7 @@ extends EditorScript
 #		return "|%s%s|" % ["█".repeat(filled), " ".repeat(chars-filled)]
 
 func _run():
-	var dt := DateTime.create_from_current()
-	prints(dt)
-	prints(dt.get_weekday(), dt.is_wednesday, dt.weekday, dt.is_morning, dt.is_evening, dt.period)
-	prints(dt.zodiac, dt.horoscope, dt.is_sagitarius)
+	StringAction.do("get_flag")
 #	for i in 101:
 #		var t = i / 100.0
 #		print(progress(t, 2) + " " + str(t))

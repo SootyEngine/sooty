@@ -1,31 +1,25 @@
 @tool
 extends Node
 
-var _commands := {}
 var _expr := Expression.new()
-var symbol_calls := {
-	
-}
 
-func add_command(call: Variant, desc := "", id := ""):
-	var obj: Object = call.get_object() if call is Callable else call[0]
-	var method: String = call.get_method() if call is Callable else call[1]
-	id = id if id else method
-	var args = UClass.get_arg_info(obj, method)
-	var arg_names = args.map(func(x): return "%s:%s" % [x.name, UType.get_name_from_type(x.type)])
-	print("> '%s' [%s]: %s" % [id, " ".join(arg_names), desc])
-	_commands[id] = {
-		call=call,
-		desc=desc,
-		args=args
-	}
+# `@:` allow calling as @node_id
+static func connect_as_node(node: Node, id: String = ""):
+	if id == "":
+		id = node.name
+	node.add_to_group("@:%s" % id)
+
+# `@.` allow calling as @node.method_id
+static func connect_methods(node: Node, methods: Array):
+	for callable in methods:
+		node.add_to_group("@.%s" % callable.get_method())
 
 func _eval_replace_group_call(inside: String, group: String, nested: bool) -> String:
 	if nested:
 		var p := inside.split("(", true, 1)
-		return "_SA_._call_group(\"@%s\", \"%s\", [%s])" % [group, p[0], p[1]]
+		return "_SA_._call_group(\"@:%s\", \"%s\", [%s])" % [group, p[0], p[1]]
 	else:
-		return "_SA_._call_group(\"@%s\", \"%s\", [%s])" % [group, group, inside]
+		return "_SA_._call_group(\"@:%s\", \"%s\", [%s])" % [group, group, inside]
 
 # var action := '"%s %s %s %s %s" % [@test.name, @enemy.damage(score), @heal(333)]'
 # var action := '[@test.name, @enemy.damage(score), @heal(333)]'
@@ -62,7 +56,7 @@ func preprocess_eval(eval: String):
 				else:
 					eval = UString.replace_between(eval, "@%s(" % [t.tag], ")", _eval_replace_group_call.bind(t.tag, false))
 			else:
-				eval = eval.replace(t.full, "_SA_.get_group_property(\"@%s\", \"%s\")" % [t.tag, t.prop])
+				eval = eval.replace(t.full, "_SA_.get_group_property(\"@.%s\", \"%s\")" % [t.tag, t.prop])
 		
 		elif t.type == "$":
 			if t.is_func:
@@ -91,7 +85,12 @@ func preprocess_eval(eval: String):
 	return eval
 
 func test(e: String, context: Object = null) -> bool:
-	return true if eval(e, context) else false
+	if e == "true":
+		return true
+	elif e == "false":
+		return false
+	else:
+		return true if do(e, context) else false
 
 func do(command: String, context: Object = null) -> Variant:
 	if not len(command):
@@ -268,15 +267,14 @@ func _call_group(group: String, method: String, args := [], as_string_args := fa
 	return out
 
 func get_group_property(group: String, property: String) -> Variant:
-	return get_tree().get_first_node_in_group(group)[property]
-#func _do_func(action: String, context: Object) -> Variant:
-#	var args := UString.split_outside(action, " ")
-#	var method: String = args.pop_front()
-#	prints("FUNC", method, args)
-#	if context.has_method("_call"):
-#		return context._call(method, args, true)
-#	else:
-#		return UObject.call_w_kwargs([context, method], args, true)
+	var node: Node = get_tree().get_first_node_in_group(group)
+	if node:
+		var got = node.get(property)
+		print("Called %s.%s on %s, got %s." % [group, property, node, got])
+		return got
+	else:
+		push_error("No node for %s.%s." % [group, property])
+		return null
 
 func _context_has(context: Object, property: String) -> bool:
 	if context.has_method("_has"):
@@ -337,6 +335,7 @@ func eval(eval: String, context: Variant = null, default = null) -> Variant:
 	if _expr.parse(eval, ["_T_", "_SA_", "_S_", "_P_"]) != OK:
 		push_error("Failed _eval('%s'): %s." % [eval, _expr.get_error_text()])
 	else:
+		print("EVAL: %s" % eval)
 		var result = _expr.execute([get_tree(), self, State, Persistent], context, false)
 		if _expr.has_execute_failed():
 			push_error("Failed _eval('%s'): %s." % [eval, _expr.get_error_text()])
