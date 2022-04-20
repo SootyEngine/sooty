@@ -450,11 +450,11 @@ func get_relative(other: Variant = null) -> String:
 	var t1 := get_total_seconds()
 	var t2 := _to_datetime(other).get_total_seconds()
 	if t1 > t2:
-		return RELATION.keys()[RELATION.PAST]
+		return Relation.keys()[Relation.PAST]
 	elif t1 < t2:
-		return RELATION.keys()[RELATION.FUTURE]
+		return Relation.keys()[Relation.FUTURE]
 	else:
-		return RELATION.keys()[RELATION.PRESENT]
+		return Relation.keys()[Relation.PRESENT]
 
 # Time until this DateTime.
 func get_until(other: Variant = null) -> String:
@@ -484,13 +484,13 @@ func _get_until(other: Variant) -> Array:
 	
 	# now
 	if t1 == t2:
-		return [_en(RELATION, RELATION.PRESENT), _en(EPOCH, EPOCH.SECOND), 0]
+		return [_en(Relation, Relation.PRESENT), _en(Epoch, Epoch.SECOND), 0]
 	
-	var rel := _en(RELATION, RELATION.PAST if t2 < t1 else RELATION.FUTURE)
+	var rel := _en(Relation, Relation.PAST if t2 < t1 else Relation.FUTURE)
 	var dif := absi(t1 - t2)
 	for k in EPOCH_SECONDS:
 		if dif >= EPOCH_SECONDS[k]:
-			return [rel, _en(EPOCH, k), dif / EPOCH_SECONDS[k]]
+			return [rel, _en(Epoch, k), dif / EPOCH_SECONDS[k]]
 	
 	return ["?", "?", INF]
 
@@ -526,6 +526,23 @@ func _get(property: StringName):
 	fname = "is_%s" % property
 	if has_method(fname):
 		return call(fname)
+	
+	# is_(weekday, month, period, season)
+	var prop: String = str(property)
+	if prop.begins_with("is_"):
+		prop = prop.substr(3).capitalize()
+		# is_weekday?
+		if prop in Weekday:
+			return get_weekday() == prop
+		# is_month?
+		elif prop in Month:
+			return get_month() == prop
+		# is_season?
+		elif prop in Season:
+			return get_season() == prop
+		# is_period?
+		elif prop in Period:
+			return get_period() == prop
 
 func _set(property: StringName, value) -> bool:
 	var fname := "set_%s" % property
@@ -614,39 +631,39 @@ const SECONDS_IN_CENTURY := SECONDS_IN_YEAR * 100
 const DAYS_IN_MONTH := [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 const DAYS_UNTIL_MONTH := [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
 
-enum RELATION { PAST, PRESENT, FUTURE }
-enum EPOCH { SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR, DECADE, CENTURY }
+enum Relation { Past, Present, Future }
+enum Epoch { Second, Minute, Hour, Day, Week, Month, Year, Decade, Century }
 
 const EPOCH_SECONDS := {
-	EPOCH.CENTURY: SECONDS_IN_CENTURY,
-	EPOCH.DECADE: SECONDS_IN_DECADE,
-	EPOCH.YEAR: SECONDS_IN_YEAR,
-	EPOCH.MONTH: SECONDS_IN_MONTH,
-	EPOCH.WEEK: SECONDS_IN_WEEK,
-	EPOCH.DAY: SECONDS_IN_DAY,
-	EPOCH.HOUR: SECONDS_IN_HOUR,
-	EPOCH.MINUTE: SECONDS_IN_MINUTE,
-	EPOCH.SECOND: 1
+	Epoch.Century: SECONDS_IN_CENTURY,
+	Epoch.Decade: SECONDS_IN_DECADE,
+	Epoch.Year: SECONDS_IN_YEAR,
+	Epoch.Month: SECONDS_IN_MONTH,
+	Epoch.Week: SECONDS_IN_WEEK,
+	Epoch.Day: SECONDS_IN_DAY,
+	Epoch.Hour: SECONDS_IN_HOUR,
+	Epoch.Minute: SECONDS_IN_MINUTE,
+	Epoch.Second: 1
 }
 
-enum Weekday { SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY }
-enum Month { JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST, SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER }
-enum Period { DAWN, MORNING, DAY, DUSK, EVENING, NIGHT }
-enum Season { SPRING, SUMMER, AUTUMN, WINTER }
-enum Planet { SUN, MOON, MARS, MERCURY, JUPITER, VENUS, SATURN }
-enum Horoscope { ARIES, TAURUS, GEMINI, CANCER, LEO, VIRGO, LIBRA, SCORPIUS, SAGITTARIUS, CAPRICORN, AQUARIUS, PISCES, OPHIUCHUS }
-enum Animal { RAT, OX, TIGER, RABBIT, DRAGON, SNAKE, HORSE, GOAT, MONKEY, ROOSTER, DOG, PIG }
+enum Weekday { Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday }
+enum Month { January, February, March, April, May, June, July, August, September, October, November, December }
+enum Period { Dawn, Morning, Day, Dusk, Evening, Night }
+enum Season { Spring, Summer, Autumn, Winter }
+enum Planet { Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn }
+enum Horoscope { Aries, Taurus, Gemini, Cancer, Leo, Virgo, Libra, Scorpius, Sagitarius, Capricorn, Aquarius, Pisces, Ophiuchus }
+enum Animal { Rat, Ox, Tiger, Rabbit, Dragon, Snake, Horse, Goat, Monkey, Rooster, Dog, Pig }
 
-const UNICODE_ANIMALS := ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
-const UNICODE_HOROSCOPE := [0x2648, 0x2649, 0x264A, 0x264B, 0x264C, 0x264D, 0x264E, 0x264F, 0x2650, 0x2651, 0x2652, 0x2653, 0x26CE]
-const EMOJI_ANIMALS := ["🐀🐂🐅🐇🐉🐍🐎🐐🐒🐓🐕🐖"] # you wont be able to see these without an emoji font
+const UnicodeAnimal := ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
+const UnicodeHoroscope := [0x2648, 0x2649, 0x264A, 0x264B, 0x264C, 0x264D, 0x264E, 0x264F, 0x2650, 0x2651, 0x2652, 0x2653, 0x26CE]
+const EmojiAnimal := ["🐀🐂🐅🐇🐉🐍🐎🐐🐒🐓🐕🐖"] # you wont be able to see these without an emoji font
 
 #
 # HOROSCOPE
 #
 
 func get_horoscope_unicode() -> String:
-	return char(UNICODE_HOROSCOPE[get_horoscope_index()])
+	return char(UnicodeHoroscope[get_horoscope_index()])
 
 func get_horoscope() -> String:
 	return Horoscope.keys()[get_horoscope_index()]
@@ -664,10 +681,10 @@ func get_zodiac() -> String:
 	return Animal.keys()[get_zodiac_index()]
 
 func get_zodiac_unicode() -> String:
-	return UNICODE_ANIMALS[get_zodiac_index()]
+	return UnicodeAnimal[get_zodiac_index()]
 
 func get_zodiac_emoji() -> String:
-	return EMOJI_ANIMALS[get_zodiac_index()]
+	return EmojiAnimal[get_zodiac_index()]
 
 func get_zodiac_index() -> int:
 	return _z(years - 4)

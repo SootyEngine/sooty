@@ -38,6 +38,17 @@ func _pressed(flow: Dictionary):
 func _refresh():
 	_redraw()
 
+func _sort(a: Array, b: Array):
+	return a[2] < b[2]
+
+func sorted(d: Dictionary) -> Array:
+	var a := []
+	for k in d:
+		if k != "_F_" and k != "_P_":
+			a.append([k, d[k], d[k]._F_.M.get("rank", "0").to_int()])
+	a.sort_custom(_sort)
+	return a
+
 func _collect(id: String, d: Dictionary, out: Array, deep: int):
 	# skip private
 	if tog_private.button_pressed and id.begins_with("_"):
@@ -48,13 +59,14 @@ func _collect(id: String, d: Dictionary, out: Array, deep: int):
 	
 	var progress = info.M.get("progress", "0").to_float() / 100.0
 	var tabs := "  ".repeat(deep)
+	var note: String = info.M.get("note", "")
 	var tint: Color = Soot.get_flow_color(deep)
 	var prog := "[bg %s;%s;hint %.2d]%s[]" % [Color.WEB_GRAY, Color.TOMATO.lerp(Color.GREEN_YELLOW, progress), progress*100.0, Emoji.progress(progress, 2)]
-	var label := "%s%s%s" % [icon, tabs, "[%s]%s[]" % [tint, id]]
+	var label := "%s%s%s" % [icon, tabs, "[%s]%s[] [dim]%s[]" % [tint, id, note]]
 	out.append("\t".repeat(deep) + prog + text.do_clickable(label, info.M))
-	for k in d:
-		if k != "_F_" and k != "_P_":
-			_collect(k, d[k], out, deep + 1)
+	
+	for item in sorted(d):
+		_collect(item[0], item[1], out, deep + 1)
 	return out
 
 func _redraw(_x=null):
@@ -63,8 +75,8 @@ func _redraw(_x=null):
 		UDict.set_at(tree, flow.split("/"), {_P_=flow, _F_=Dialogue._flows[flow]})
 	
 	var out := []
-	for k in tree:
-		_collect(k, tree[k], out, 0)
+	for item in sorted(tree):
+		_collect(item[0], item[1], out, 0)
 	text.set_bbcode("\n".join(out))
 	
 #	var lines := []

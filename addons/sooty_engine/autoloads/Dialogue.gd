@@ -53,6 +53,7 @@ func _load_mods(mods: Array):
 	var soot_blocks := {}
 	var lang_paths := {}
 	var all_files := []
+	var total_bytes := 0
 	
 	# collect all files by name, so they can be merged if from mods.
 	for mod in mods:
@@ -61,6 +62,7 @@ func _load_mods(mods: Array):
 		all_files.append_array(soot_files)
 		
 		for soot_path in soot_files:
+			total_bytes += UFile.get_file_size(soot_path)
 			mod.meta.dialogue.append(soot_path)
 			DialogueParser.new()._parse(soot_path, _flows, _lines)
 		
@@ -87,5 +89,5 @@ func _load_mods(mods: Array):
 	
 	# probably not accurate
 	var memory_used = OS.get_static_memory_usage() - memory_before
-	prints("Dialogues:", String.humanize_size(memory_used))
+	prints("Dialogues: %s -> %s." % [String.humanize_size(total_bytes), String.humanize_size(memory_used)])
 

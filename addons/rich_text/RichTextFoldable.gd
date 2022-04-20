@@ -3,8 +3,8 @@ extends RichTextLabel2
 class_name RichTextFoldable
 
 var _fold_state := {}
-@export var tag_opened := "[:arrow_right:]"
-@export var tag_closed := "[:arrow_down:]"
+@export var tag_opened := "[:arrow_down:]"
+@export var tag_closed := "[:arrow_right:]"
 @export var tag_notab := "[:white_small_square:]"
 @export var toggle_by_icon := true
 @export var tab_children := true

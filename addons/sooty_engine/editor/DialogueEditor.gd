@@ -118,7 +118,7 @@ func _init() -> void:
 #			"(": ")",
 			"[": "]",
 			"{": "}",
-			"**": "**", # markdown bold
+#			"**": "**", # markdown bold
 			"<": ">"	# lists
 		}
 		

@@ -1,4 +1,3 @@
-- [ ] Add autocomplete for path typing.
 - [ ] Toggle private/public flows visibiliy in chapter view.
 - [ ] `../` for going up a path, not `..`
 /   = Root directory
@@ -14,9 +13,11 @@
 - [ ] Chapter list copy highlighter colors for tabs (yellow for top, then purple...)
 - [ ] Chapter list tags, for filtering
 - [ ] `{{else}}` below options menu, for if they have no options to show
-- [ ] Highlighter in match case works weird
-- [ ] Richtext tab view
-- [ ] Only load VisualNovelUI when `~` is pressed, to save on startup load time.
+- [x] Highlighter in match case works weird
+- [x] Richtext tab view
+- [x] Only load VisualNovelUI when `~` is pressed, to save on startup load time.
+- [ ] Auto load `config`
+- [ ] Signal that `config` can fire if it was reloaded.
 
 # Shrinking database use
 - [ ] Only load flow paths at first? Then lazy load rest?
@@ -24,7 +25,7 @@
 
 # Bugs
 - [ ] .soot multiline strings `""""` have an issue with tabs.
-- [ ] Caption name showsup a second before hiding.
+- [x] Caption name showsup a second before hiding.
 - [x] ~~temp_save tries to save on editor quit.~~
 - [x] Changing scenes ends the stack.
 - [x] Reloading dialogue stopped working.
@@ -47,7 +48,7 @@
     - [ ] Agnosticize Choices system so it can be used for other types of user input, like popups.
     - [x] Change `text` lines to `keyval`.
     - [x] Handle DialogueLine in VisualNovel.
-- [ ] Swap how `@:` is for objects and `@.` for functions, the other way around.
+- ~~[ ] Swap how `@:` is for objects and `@.` for functions, the other way around.~~
 - [x] Remove `.` from `EXT_*` properties.
 - [x] Rename Achievement to Award.
 - [x] Data parser.
@@ -73,7 +74,8 @@
 - [ ] Show meta in side panel, if toggle is active
 
 # *.soot Dialogue Files
-- [ ] define step types in Soot
+- [ ] Somehow show emojis in autocomplete?
+- [ ] Define step types in Soot
 - [ ] Inserts for choices
 - [ ] Inserts for actions?
 - [x] Seperate editors from plugin script.
@@ -154,9 +156,8 @@
 
 # *.soma Markdown File
 - [ ] Create file format based on Markdown for showing more complicated text like notebooks, item info, world story data...
-- [ ] `.soma` -> BBCode parser.
+- [x] ~~`.soma` -> BBCode parser.~~ Use/override `soot` highlighter.
 - [ ] `text/` folder to load from.
-- [ ] Highlighter.
 
 # Editors
 - `.soot`
@@ -208,7 +209,7 @@
 - [x] `get_file_in_dir(tail)`: Get a path to a possibly nested file ending in tail.
 
 # VisualNovel
-- [ ] Seperate UI from backend.
+- [x] Seperate UI from backend.
 - [ ] Use state objects to parse text/speaker. `_preparse_caption` `_preparse_caption_name`
 - [ ] ~~Create theme templates for captions + options.~~
 - [x] Character can control string wrappes `"` (For phones and such.)
@@ -225,8 +226,8 @@
 
 ## UI
 - Captions
-    - [ ] Seperate'indicator' into it's own agnostic scenes
-    - [ ] Seperate 'speaker' and 'caption' field into their own seperate scenes
+    - [ ] ~~Seperate'indicator' into it's own agnostic scenes~~ Draw indicator with a RichTextEffect somehow.
+    - [x] Seperate 'speaker' and 'caption' field into their own seperate scenes
 
 - Notifications
     - [ ] Task/Quest notification.
@@ -234,7 +235,8 @@
 - Save
     - [ ] Total time played.
 - [ ] Warn when starting a new game that progress will be lost.
-- [ ] Better HUD system for pause menu and such.
+- [ ] ~~Better HUD system for pause menu and such.~~
+- [ ] Create really simple dummy menus that can be "overriden" by simply having a replacement in a `/scene/` folder
 
 ### Captions
 - [x] Mouse over options to hover.
