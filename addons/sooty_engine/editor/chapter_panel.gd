@@ -51,7 +51,7 @@ func sorted(d: Dictionary) -> Array:
 
 func _collect(id: String, d: Dictionary, out: Array, deep: int):
 	# skip private
-	if tog_private.button_pressed and id.begins_with("_"):
+	if not tog_private.button_pressed and id.begins_with("_"):
 		return
 	
 	var info: Dictionary = d._F_

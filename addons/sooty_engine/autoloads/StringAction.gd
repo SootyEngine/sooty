@@ -85,7 +85,10 @@ func preprocess_eval(eval: String):
 	return eval
 
 func test(e: String, context: Object = null) -> bool:
-	if e == "true":
+	# allows @$^ to start with not
+	if e.begins_with("not "):
+		return not test(e.substr(4).strip_edges())
+	elif e == "true":
 		return true
 	elif e == "false":
 		return false
