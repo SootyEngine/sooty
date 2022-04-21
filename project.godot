@@ -9,11 +9,6 @@
 config_version=5
 
 _global_script_classes=[{
-"base": "Node",
-"class": &"BaseState",
-"language": &"GDScript",
-"path": "res://addons/sooty_engine/autoloads/state_manager.gd"
-}, {
 "base": "RefCounted",
 "class": &"Bool",
 "language": &"GDScript",
@@ -29,15 +24,15 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/common/Data.gd"
 }, {
-"base": "RefCounted",
-"class": &"DataManager",
-"language": &"GDScript",
-"path": "res://addons/sooty_engine/common/DataManager.gd"
-}, {
 "base": "Resource",
 "class": &"DataParser",
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/data/DataParser.gd"
+}, {
+"base": "RefCounted",
+"class": &"Database",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/common/Database.gd"
 }, {
 "base": "Data",
 "class": &"DateTime",
@@ -99,6 +94,11 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/rich_text/RichTextAnimation.gd"
 }, {
+"base": "RichTextLabel2",
+"class": &"RichTextFoldable",
+"language": &"GDScript",
+"path": "res://addons/rich_text/RichTextFoldable.gd"
+}, {
 "base": "RichTextLabel",
 "class": &"RichTextLabel2",
 "language": &"GDScript",
@@ -108,6 +108,11 @@ _global_script_classes=[{
 "class": &"Soot",
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/dialogue/Soot.gd"
+}, {
+"base": "Node",
+"class": &"StateManagerBase",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/autoloads/StateManagerBase.gd"
 }, {
 "base": "RefCounted",
 "class": &"UClass",
@@ -203,19 +208,13 @@ _global_script_classes=[{
 "class": &"UType",
 "language": &"GDScript",
 "path": "res://addons/util/UType.gd"
-}, {
-"base": "Node",
-"class": &"Waiter",
-"language": &"GDScript",
-"path": "res://addons/sooty_engine/common/Waiter.gd"
 }]
 _global_script_class_icons={
-"BaseState": "",
 "Bool": "",
 "Config": "",
 "Data": "res://addons/sooty_engine/icons/data.png",
-"DataManager": "res://addons/soot_engine/icons/database.png",
 "DataParser": "",
+"Database": "res://addons/soot_engine/icons/database.png",
 "DateTime": "res://addons/sooty_engine/icons/datetime.png",
 "DialogueParser": "",
 "DialogueTools": "",
@@ -228,8 +227,10 @@ _global_script_class_icons={
 "PatchableData": "",
 "PropList": "",
 "RichTextAnimation": "",
+"RichTextFoldable": "",
 "RichTextLabel2": "",
 "Soot": "",
+"StateManagerBase": "",
 "UClass": "",
 "UColor": "",
 "UDebug": "",
@@ -248,8 +249,7 @@ _global_script_class_icons={
 "UTime": "",
 "UTween": "",
 "UTween2D": "",
-"UType": "",
-"Waiter": ""
+"UType": ""
 }
 
 [application]
@@ -259,27 +259,13 @@ run/main_scene="res://main.tscn"
 config/icon="res://icon.png"
 config/features=PackedStringArray("4.0", "Vulkan Clustered")
 
-[autoload]
-
-Global="*res://addons/sooty_engine/autoloads/Global.gd"
-Mods="*res://addons/sooty_engine/autoloads/Mods.gd"
-Settings="*res://addons/sooty_engine/autoloads/Settings.gd"
-Scene="*res://addons/sooty_engine/autoloads/Scene.gd"
-Saver="*res://addons/sooty_engine/autoloads/Saver.gd"
-Persistent="*res://addons/sooty_engine/autoloads/Persistent.gd"
-State="*res://addons/sooty_engine/autoloads/State.gd"
-StringAction="*res://addons/sooty_engine/autoloads/StringAction.gd"
-Music="*res://addons/sooty_engine/autoloads/Music.gd"
-SFX="*res://addons/sooty_engine/autoloads/SFX.gd"
-Dialogue="*res://addons/sooty_engine/autoloads/Dialogue.gd"
-
 [debug]
 
 gdscript/warnings/integer_division=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/sooty_engine/plugin.cfg")
+enabled=PackedStringArray("res://addons/common_file_highlighters/plugin.cfg")
 
 [input]
 

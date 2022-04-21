@@ -1,4 +1,5 @@
 # Sooty `0.1` `Godot 4 alpha6` `unstable`
+## okay
 
 A dialogue engine for Godot. See [docs](https://sootyengine.github.io/docs/) for more info.
 
@@ -22,7 +23,6 @@ See [docs](https://sootyengine.github.io/docs/dialogue/bbcode_evolved.html).
 ![](readme/bbcode.png)
 
 # Autocomplete
-
 Don't worry about remember keywords, as Sooty has autocomplete for:
 
 - BBCode
