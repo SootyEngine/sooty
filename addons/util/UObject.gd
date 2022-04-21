@@ -191,7 +191,10 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 		# is last string a dict?
 		if as_string_args:
 			if new[-1] is String and ":" in new[-1]:
-				kwargs = new.pop_back()
+				kwargs = []
+				# collect ALL final keys with a ':'
+				while len(new) and ":" in new[-1]:
+					kwargs.append(new.pop_back())
 				has_kwargs = true
 		# is last item a dict?
 		else:
@@ -207,7 +210,14 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 #			prints("%s -> %s == %s" % [in_args[i], arg_info[i].type, new[i]])
 		# convert kwargs
 		if has_kwargs:
-			kwargs = UStringConvert.to_type(kwargs, TYPE_DICTIONARY, arg_data.values()[-1].get("default", {}))
+			var converted_kwargs := {}
+			for item in kwargs:
+				var kv = item.split(":", true, 1)
+				var k = kv[0]
+				var v = UStringConvert.to_var(kv[1])
+				converted_kwargs[k] = v
+			kwargs = converted_kwargs
+#			kwargs = UStringConvert.to_type(kwargs, TYPE_DICTIONARY, arg_data.values()[-1].get("default", {}))
 	
 #	prints("OK: %s NEW: %s" % [in_args, new])
 	
@@ -284,8 +294,6 @@ static func try_get_at(d: Variant, path: Array, default = null) -> Variant:
 		return o[path[-1]]
 	else:
 		return default
-
-
 
 static func callablev(c: Callable, args: Array) -> Variant:
 	match len(args):

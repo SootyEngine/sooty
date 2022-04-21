@@ -186,7 +186,7 @@ func set_weekday(wd: Variant):
 			if get_weekday_index() != wd:
 				goto_next_day()
 	elif wd is String:
-		wd = wd.to_upper()
+		wd = wd.capitalize()
 		for i in 7:
 			if not get_weekday().begins_with(wd):
 				goto_next_day()
@@ -220,7 +220,7 @@ func get_weekday_index() -> int:
 #
 
 func _get_month_from_str(s: String) -> int:
-	s = s.to_upper()
+	s = s.capitalize()
 	for i in 12:
 		if Month.keys()[i].begins_with(s):
 			return i
@@ -236,6 +236,13 @@ func set_day_of_month(d: int):
 	var y := years
 	days = _days_until_month(y, get_month_index()) + d - 1
 	years = y
+
+func get_months() -> int:
+	return years * 12 + get_month_index()
+
+func set_months(m: int):
+	set_month_index(wrapi(m, 0, 12))
+	years = m / 12
 
 func get_month() -> String:
 	return Month.keys()[get_month_index()]
@@ -264,7 +271,7 @@ func set_month_index(m: int):
 
 func set_month_name(m: String):
 	var d := get_day_of_month()
-	m = m.to_upper()
+	m = m.capitalize()
 	for i in 12:
 		if not get_month().begins_with(m):
 			goto_next_month()
@@ -281,7 +288,7 @@ func goto_next_month():
 
 func get_seconds_until_next_month() -> int:
 	var m: int = get_month_index()
-	var days_until := DAYS_IN_YEAR if m == Month.DECEMBER else _days_until_month(years, m+1)
+	var days_until := DAYS_IN_YEAR if m == Month.December else _days_until_month(years, m+1)
 	return (days_until - days) * SECONDS_IN_DAY
 
 func get_months_until(other: Variant) -> int:
@@ -342,7 +349,7 @@ func set_period(p: Variant):
 			if get_period_index() != p:
 				goto_next_period()
 	elif p is String:
-		p = p.to_upper()
+		p = p.capitalize()
 		for i in len(Period):
 			if not Period[i].begins_with(p):
 				goto_next_period()
@@ -383,7 +390,7 @@ func set_season(s: Variant):
 			if get_season_index() != s:
 				goto_next_season()
 	elif s is String:
-		s = s.to_upper()
+		s = s.capitalize()
 		for i in len(Season):
 			if Season.keys()[i] != s:
 				goto_next_season()
@@ -498,6 +505,16 @@ func _en(e: Variant, i: int) -> String:
 	return e.keys()[i]
 
 #
+#
+#
+
+# advance any number of properties by an amount
+func advance(kwargs := {}):
+	for property in kwargs:
+		var current = get(property)
+		set(property, current + kwargs[property])
+
+#
 # STATE
 #
 
@@ -556,6 +573,10 @@ func _set(property: StringName, value) -> bool:
 		call(fname, value)
 		return true
 	return false
+
+#
+# STATIC
+#
 
 static func _is_leap_year(y: int) -> bool:
 	return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)
