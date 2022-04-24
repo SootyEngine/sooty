@@ -312,10 +312,13 @@ func get_date() -> String:
 
 func set_date(s: String):
 	var p := s.split(" ", false)
+	# first part is month
 	if len(p) > 0:
 		set_month(_get_month_from_str(p[0]))
+	# second part is day
 	if len(p) > 1:
 		set_day_of_month(p[1].to_int())
+	# optional third part is year
 	if len(p) > 2:
 		years = p[2].to_int()
 

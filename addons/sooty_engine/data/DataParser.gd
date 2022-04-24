@@ -4,7 +4,7 @@ class_name DataParser
 
 const S_COMMENT := "#"
 
-static func parse(path: String) -> Dictionary:
+static func parse(path: String, auto_type := false) -> Dictionary:
 	var lines := UFile.load_text(path).split("\n")
 	var dict_lines := []
 	var shortcuts := {}
@@ -48,6 +48,7 @@ static func parse(path: String) -> Dictionary:
 			multiline_last = mi == 0
 			
 			stripped = stripped.substr(0, mi).strip_edges()
+			# first line isn't empty?
 			if stripped != "":
 				multiline_text.append(stripped)
 			
@@ -63,21 +64,23 @@ static func parse(path: String) -> Dictionary:
 					var last: Dictionary = dict_lines[-1]
 					multiline_text.push_front(last.text)
 					last.text = "\n".join(multiline_text)
+					multiline_text = []
 					continue
 				# create new line with full message.
 				else:
 					line_index = multiline_line_index
 					deep = multiline_deep
 					stripped = "\n".join(multiline_text)
-				
-				multiline_text.clear()
+					multiline_text = []
 		
 		# collect multiline
 		elif is_multiline:
 			# don't add an empty line if it was a comment.
 			if had_comment and not len(stripped):
 				continue
-			multiline_text.append(stripped)
+			# preserver tabs in multiline
+			var stripped_after := text.substr(multiline_deep).strip_edges(false, true)
+			multiline_text.append(stripped_after)
 			continue
 		
 		# skip empty lines.
@@ -100,6 +103,10 @@ static func parse(path: String) -> Dictionary:
 		var line: Dictionary = o[1]
 #		UDict.dig(line, _fix)
 		out_data[line.key] = line.value
+	
+	# auto convert data
+	if auto_type:
+		out_data = patch_to_var(out_data, [path])
 	
 #	UDict.log(out)
 	return {
@@ -337,8 +344,6 @@ static func patch(target: Object, patch: Dictionary, sources: Array):
 				if target.has_method("_patch_object"):
 					var new_obj: Object = target._patch_object(k, type)
 					if new_obj:
-						if new_obj.has_method("_added"):
-							new_obj._added(target)
 						patch(new_obj, v, sources)
 					else:
 						push_error("Couldn't create '%s' for %s." % [k, patch_to_var(v, sources)])
@@ -370,20 +375,27 @@ static func patch(target: Object, patch: Dictionary, sources: Array):
 			else:
 				if target.has_method("_patch_property"):
 					target._patch_property(k, patch_to_var(v, sources))
+				elif target.has_method("_patch_property_deferred"):
+					target._patch_property_deferred.call_deferred(k, patch_to_var(v, sources))
 				else:
 					push_error("No '%s' or _patch_property() in %s for %s." % [k, target, patch_to_var(v, sources)])
 		
+		elif target.has_method("_patch_manually"):
+			target._patch_manually(k, v, sources)
+		
+		elif target.has_method("_patch_manually_deferred"):
+			target._patch_manually_deferred.call_deferred(k, v, sources)
+		
 		else:
-			_patch(target, k, v, sources)
-
-static func _patch(target: Object, property: String, patch: Variant, sources: Array):
-	var target_type = typeof(target[property])
-	# recursively check sub objects.
-	if target_type == TYPE_OBJECT:
-		patch(target[property], patch, sources)
-	else:
-		var value = patch_to_var(patch, sources)
-		if typeof(value) == target_type:
-			target[property] = value
-		else:
-			push_error("Couldn't convert '%s' for property %s." % [patch, property])
+#			_patch(target, k, v, sources)
+#static func _patch(target: Object, property: String, patch: Variant, sources: Array):
+			var target_type = typeof(target[k])
+			# recursively check sub objects.
+			if target_type == TYPE_OBJECT:
+				patch(target[k], v, sources)
+			else:
+				var value = patch_to_var(v, sources)
+				if typeof(value) == target_type:
+					target[k] = value
+				else:
+					push_error("Couldn't convert '%s' for property %s." % [v, k])

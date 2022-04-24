@@ -174,7 +174,7 @@ func _show_arg(object: Object, arg_info: Dictionary, is_action := false) -> bool
 		if arg_info.type is String:
 			# is class_name?
 			if UClass.exists(arg_info.type):
-				var database: Database = Database.get_database(arg_info.type)
+				var database: Database = DataManager.get_database(arg_info.type)
 				if database:
 					var classname: String = arg_info.name.capitalize()
 					for object_id in database.get_all_ids():

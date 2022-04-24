@@ -100,6 +100,7 @@ signal right_pressed(variant: Variant)
 		outline_size = o
 		add_theme_constant_override("outline_size", o)
 		_redraw()
+		_update_color()
 
 @export var nicer_quotes_enabled := true
 @export var nicer_quotes_format := "“%s”"

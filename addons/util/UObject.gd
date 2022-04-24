@@ -96,7 +96,8 @@ static func get_state(target: Variant) -> Variant:
 # set a serializable state.
 static func set_state(target: Variant, state: Variant, erase_keys := false, silent := false):
 	if target is Object and target.has_method("_set_state"):
-		target._set_state(state)
+		if state:
+			target._set_state(state)
 	elif target is Array:
 		for i in len(state):
 			set_state(target[i], state[i], erase_keys, silent)
@@ -167,6 +168,15 @@ static func get_operator_value(v):
 static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := false, arg_data = null) -> Variant:
 	var obj: Object = call.get_object() if call is Callable else call[0]
 	var method: String = call.get_method() if call is Callable else call[1]
+	
+	# incase a path was given, go down the path.
+	if "." in method:
+		var p := method.rsplit(".", true, 1)
+		obj = UObject.get_penultimate(obj, p)
+		method = p[-1]
+	
+	# get methods argument info
+	# so we know how many arumgents it wants, and of what types
 	if arg_data == null:
 		arg_data = UReflect.get_arg_info(obj, method)
 	
@@ -206,8 +216,8 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 	if as_string_args:
 		# convert leading arguments
 		for i in len(new):
-			new[i] = UStringConvert.to_type(in_args[i], arg_data.values()[i].type)
-#			prints("%s -> %s == %s" % [in_args[i], arg_info[i].type, new[i]])
+			new[i] = UStringConvert.to_type(in_args[i], arg_data.values()[i].type, obj)
+#			prints("%s >>> %s == %s" % [in_args[i], arg_data.values()[i], new[i]])
 		# convert kwargs
 		if has_kwargs:
 			var converted_kwargs := {}

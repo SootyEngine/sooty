@@ -12,14 +12,10 @@ static func to_type(s: String, type: Variant, object: Object = null, default = n
 	if type is String:
 		# is class_name?
 		if UClass.exists(type):
-			# find a database to grab it from
-			var script: Script = UClass.get_class_script(type)
-			if script.has_method("_str_to_instance"):
-				return script._str_to_instance(s, type)
-			else:
-				push_error("Can't convert '%s' to '%s'. No static _str_to_instance() methods." % [s, type])
-				return null
-		
+			var got = DataManager.get_data(type, s)
+			print("converted %s %s to %s" % [type, s, got])
+			return got
+			
 		# is an Enum?
 		else:
 			if object == null:

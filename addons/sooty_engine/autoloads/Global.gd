@@ -47,7 +47,6 @@ var scene_id: String:
 func notify(msg: Dictionary):
 	message.emit("notification", msg)
 
-
 func _ready() -> void:
 	get_tree().set_auto_accept_quit(false)
 	

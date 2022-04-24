@@ -232,7 +232,7 @@ func call_group_w_args(group: String, args: Array, as_string_args := false) -> V
 #	if UString.is_wrapped(s, "<<", ">>"):
 #		var e := UString.unwrap(s, "<<", ">>")
 #		var got = State._eval(e)
-##		print("EVAL %s -> %s" % [e, got])
+##		print("EVAL %s >>> %s" % [e, got])
 #		return got
 #
 #	# array or dict?

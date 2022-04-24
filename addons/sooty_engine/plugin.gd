@@ -3,6 +3,7 @@ extends EditorPlugin
 
 const AUTOLOADS := [
 	"Global",
+	"DataManager",
 	"ModManager",
 	"Settings",
 	"SceneManager",
@@ -30,15 +31,15 @@ func _enter_tree() -> void:
 		add_autoload_singleton(id, "res://addons/sooty_engine/autoloads/%s.gd" % id)
 	
 	# add .soot to the allowed textfile extensions.
-	var es: EditorSettings = get_editor_interface().get_editor_settings()
-	var fs: String = es.get_setting("docks/filesystem/textfile_extensions")
+	var editor_settings: EditorSettings = get_editor_interface().get_editor_settings()
+	var fs: Array = editor_settings.get_setting("docks/filesystem/textfile_extensions").split(",")
 	var changed := false
-	for type in [",soot", ",soda", ",sola", ",soma"]:
+	for type in Soot.ALL_EXTENSIONS:
 		if not type in fs:
 			changed = true
-			fs += type
+			fs.append(type)
 	if changed:
-		es.set_setting("docks/filesystem/textfile_extensions", fs)
+		editor_settings.set_setting("docks/filesystem/textfile_extensions", ",".join(fs))
 	
 	# add extensions to the file search
 	var sof := "editor/script/search_in_file_extensions"
@@ -60,10 +61,10 @@ func _enter_tree() -> void:
 	chapter_panel.plugin_instance_id = get_instance_id()
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_LEFT_UR, chapter_panel)
 	
-# 	editor = preload("res://addons/sooty_engine/ui/ui_map_gen.tscn").instantiate()
-# 	editor.is_plugin_hint = true
-# 	editor.plugin = self
-# 	add_control_to_dock(EditorPlugin.DOCK_SLOT_LEFT_BR, editor)
+#	var rf: EditorFileSystem = get_editor_interface().get_resource_filesystem()
+#	rf.filesystem_changed.connect(func(): print("filesystem changed"))
+#	rf.resources_reload.connect(func(f): print("reloading: ", f))
+#	rf.resources_reimported.connect(func(f): print("reimporting: ", f))
 
 # find a code editor for a given text file.
 func get_code_edit(path: String) -> CodeEdit:

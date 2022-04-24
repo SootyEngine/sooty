@@ -289,43 +289,45 @@ static func _get_dirs(dir: Directory, out: Array, nested: bool):
 
 # Calls a function on every file in the given directories, with the given extensions.
 # paths can be a string or an array of strings.
-static func on_files(paths: Variant, call: Callable, extensions: Variant = [], nested := true, hidden := false, maximum := 1_000_000_000):
+static func on_files(paths: Variant, call: Callable, extensions: Variant = [], nested := true, hidden := false, max_files := 9999, max_depth := 9999):
 	var dir := Directory.new()
 	dir.include_hidden = hidden
 	var exts := UList.list(extensions)
 	for path in UList.list(paths):
 		if dir.dir_exists(path) and not UError.error(dir.open(path), "Can't open '%s'." % path):
-			maximum = _on_files(dir, call, exts, nested, hidden, maximum)
-			if maximum <= 0:
+			max_files = _on_files(0, dir, call, exts, nested, hidden, max_files, max_depth)
+			if max_files <= 0:
 				return
 
-static func _on_files(dir: Directory, call: Callable, extensions: Variant, nested: bool, hidden: bool, maximum: int) -> int:
+static func _on_files(depth: int, dir: Directory, call: Callable, extensions: Variant, nested: bool, hidden: bool, max_files: int, max_depth: int) -> int:
 	dir.list_dir_begin()
 	var fname = dir.get_next()
 	while fname != "":
 		var path = dir.get_current_dir().plus_file(fname)
 		if dir.current_is_dir():
-			# ignore .import and folders with a .gdignore file.
-			if nested and not fname == ".import" and not file_exists(path.plus_file(".gdignore")):
-				var sub_dir = Directory.new()
-				sub_dir.include_hidden = hidden
-				sub_dir.open(path)
-				maximum = _on_files(sub_dir, call, extensions, nested, hidden, maximum)
-		
+			# don't go below a certain depth
+			if depth < max_depth:
+				# ignore .import and folders with a .gdignore file.
+				if nested and not fname == ".import" and not file_exists(path.plus_file(".gdignore")):
+					var sub_dir = Directory.new()
+					sub_dir.include_hidden = hidden
+					sub_dir.open(path)
+					max_files = _on_files(depth + 1, sub_dir, call, extensions, nested, hidden, max_files, max_depth)
+			
 		elif not len(extensions) or _ends_with(fname, extensions):
 			call.call(path)
-			maximum -= 1
+			max_files -= 1
 		
-		if maximum <= 0:
+		if max_files <= 0:
 			break
 		
 		fname = dir.get_next()
 	dir.list_dir_end()
-	return maximum
+	return max_files
 
-static func get_files(paths: Variant, extensions: Variant = [], nested := true, hidden := false, maximum := 1_000_000_000) -> PackedStringArray:
+static func get_files(paths: Variant, extensions: Variant = [], nested := true, hidden := false, max_files := 9999, max_depth := 9999) -> PackedStringArray:
 	var out := []
-	on_files(paths, func(x): out.append(x), extensions, nested, hidden, maximum)
+	on_files(paths, func(x): out.append(x), extensions, nested, hidden, max_files, max_depth)
 	return PackedStringArray(out)
 
 #	var out := []

@@ -109,7 +109,8 @@ func load_slot(slot: String):
 	var slot_path := get_slot_directory(slot)
 	var state: Dictionary = UFile.load_from_resource(slot_path.plus_file(FNAME_STATE))
 	
-	await Scene.change_scene(state.current_scene, true)
+	# TODO: Move this to SceneManager class?
+	await SceneManager.change_scene(state.current_scene, true)
 	
 	pre_load.emit()
 	_set_state.emit(state)

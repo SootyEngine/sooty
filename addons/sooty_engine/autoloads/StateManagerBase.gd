@@ -106,6 +106,10 @@ func _load_mods(mods: Array):
 				mod.meta[subdir].append(script_path) # tell Mods what file has been installed
 				state.set_name(UFile.get_file_name(script_path))
 				add_child(state)
+				
+				# collect potential shortcuts
+				if "_shortcuts" in state:
+					UDict.merge(_shortcuts, state._shortcuts)
 			else:
 				# TODO: Allow resources.
 				push_error("States must be node. Can't load %s." % script_path)
@@ -116,7 +120,6 @@ func _load_mods(mods: Array):
 	# collect all children in list.
 	_init_states()
 	
-
 	# install data (.soda) to children.
 	for mod in mods:
 		var head = mod.dir.plus_file(subdir)
@@ -138,7 +141,7 @@ func _load_mods(mods: Array):
 				else:
 					var new = state.shortcuts[k]
 					var old = _shortcuts[k]
-					push_error("Trying to use the same shortcut '%s' for %s and %s." % [k, old, new])
+					push_error("Same shortcut '%s' for %s and %s." % [k, old, new])
 	
 	var file_scanner := FileModifiedScanner.new()
 	file_scanner.set_name("FileScanner")
@@ -169,6 +172,8 @@ func _init_states():
 # get the default state
 func _loaded_mods():
 	_default = _get_state()
+	
+	# output to debug file
 	if UFile.exists("res://debug_output/states"):
 		var path = "res://debug_output/states/_%s.soda" % [_get_subdir()]
 		var text := DataParser.new().dict_to_str(_default, true, false, true)

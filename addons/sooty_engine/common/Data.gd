@@ -4,14 +4,14 @@ class_name Data, "res://addons/sooty_engine/icons/data.png"
 func get_class():
 	return "Data"
 
-static func _str_to_instance(id: String, type: String):
-	var database_class := type + "Database"
-	var database = UClass.get_class_script(database_class)
-	return database.get(id)
+signal changed()
 
 func _init(d := {}):
 	UObject.set_state(self, d)
 	_post_init.call_deferred()
+
+func signal_changed():
+	DataManager.queue_solo_signal(changed)
 
 func _post_init():
 	pass
@@ -19,8 +19,8 @@ func _post_init():
 func _to_string() -> String:
 	return UClass._to_string2(self)
 
-func get_database():
-	return Database.get_database(UClass.get_class_name(self))
+func get_database() -> Database:
+	return DataManager.get_database(UClass.get_class_name(self))
 
 func get_id() -> String:
 	var database = get_database()

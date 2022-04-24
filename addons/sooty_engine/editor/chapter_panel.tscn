@@ -29,6 +29,7 @@ script = ExtResource( "1_8mieq" )
 _text = NodePath("Control/ScrollContainer/RichTextLabel")
 _btn_refresh = NodePath("Control/HBoxContainer/refresh")
 _filter = NodePath("Control/filter")
+_tags_panel = NodePath("Control/tag_selector")
 _tog_private = NodePath("Control/HBoxContainer/private")
 plugin_instance_id = 0
 
@@ -68,8 +69,13 @@ clear_button_enabled = true
 caret_blink = true
 caret_blink_speed = 0.5
 
-[node name="ScrollContainer" type="ScrollContainer" parent="Control"]
+[node name="tag_selector" type="HFlowContainer" parent="Control"]
 offset_top = 70.0
+offset_right = 1024.0
+offset_bottom = 70.0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Control"]
+offset_top = 74.0
 offset_right = 1024.0
 offset_bottom = 600.0
 size_flags_horizontal = 3
@@ -77,7 +83,7 @@ size_flags_vertical = 3
 
 [node name="RichTextLabel" type="RichTextLabel" parent="Control/ScrollContainer"]
 offset_right = 1024.0
-offset_bottom = 530.0
+offset_bottom = 526.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_colors/font_outline_color = Color(0.5, 0.5, 0.5, 1)

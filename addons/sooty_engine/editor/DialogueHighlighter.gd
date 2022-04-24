@@ -9,7 +9,7 @@ const SYMBOL_ALPHA := .5
 # colors
 const C_TEXT := Color.GAINSBORO
 const C_TEXT_INSERT := Color.PALE_GREEN
-const C_TEXT_PREDICATE := Color.PALE_TURQUOISE# Color(0.5, 0.7, 1.0, 1.0)
+const C_TEXT_PREDICATE := Color.PALE_TURQUOISE
 const C_SPEAKER := Color(1, 1, 1, 0.5)
 const C_TAG := Color(1, 1, 1, .4)
 const C_SYMBOL := Color(1, 1, 1, 0.3)
@@ -163,29 +163,6 @@ func _find_true_depth() -> int:
 			return i
 		line -= 1
 	return deep
-
-#static func split_string(s: String) -> Array:
-#	var out := [""]
-#	var in_quotes := false
-#	for c in s:
-#		if c == '"':
-#			if in_quotes:
-#				in_quotes = false
-#				out[-1] += '"'
-#			else:
-#				in_quotes = true
-#				if out[-1] == "":
-#					out[-1] += '"'
-#				else:
-#					out.append('"')
-#
-#		elif c == " " and not in_quotes:
-#			if out[-1] != "":
-#				out.append("")
-#
-#		else:
-#			out[-1] += c
-#	return out
 
 func _c(i: int, clr: Color):
 	state[i] = {color=clr}

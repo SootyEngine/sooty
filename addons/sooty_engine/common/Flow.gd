@@ -51,7 +51,7 @@ func is_active() -> bool:
 func get_current() -> Dictionary:
 	return _stack[-1] if len(_stack) else {}
 
-func has_path(path: String) -> bool:
+func exists(path: String) -> bool:
 	var flow := get_flow_path(path)
 	return flow in _lines
 
@@ -109,7 +109,7 @@ func goto_and_return(id: String) -> bool:
 	return _goto(id, S_CALL)
 
 func _goto(id: String, step_type: int = S_GOTO) -> bool:
-	if has_path(id):# _has_line(new_id):
+	if exists(id):# _has_line(new_id):
 		var new_id := get_flow_path(id)
 		# if the stack is cleared, it means this was a "goto" not a "call"
 		if step_type == S_GOTO:

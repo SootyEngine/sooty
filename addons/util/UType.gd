@@ -139,3 +139,57 @@ static func get_default(type: Variant) -> Variant:
 		TYPE_PACKED_VECTOR3_ARRAY: return PackedVector3Array()
 		TYPE_PACKED_COLOR_ARRAY: return PackedColorArray()
 		_: return push_error("No default type for %s." % [get_type_name(type)])
+
+# this could by highly innacurate
+# i really don't know what i'm doing
+static func get_size(thing: Variant) -> int:
+	match typeof(thing):
+		TYPE_NIL: return 0
+		TYPE_BOOL: return 1
+		TYPE_INT: return 64
+		TYPE_FLOAT: return 64
+		TYPE_STRING: return len(thing.to_utf8_buffer())
+		TYPE_VECTOR2: return 64*2
+		TYPE_VECTOR2I: return 64*2
+		TYPE_RECT2: return 64*6
+		TYPE_RECT2I: return 64*6
+		TYPE_VECTOR3: return 64*3
+		TYPE_VECTOR3I: return 64*3
+#		TYPE_TRANSFORM2D: return Transform2D()
+#		TYPE_PLANE: return Plane()
+#		TYPE_QUATERNION: return Quaternion()
+#		TYPE_AABB: return AABB()
+#		TYPE_BASIS: return Basis()
+#		TYPE_TRANSFORM3D: return Transform3D()
+		TYPE_COLOR: return 64*4
+#		TYPE_STRING_NAME: return "StringName"
+#		TYPE_NODE_PATH: return "NodePath"
+#		TYPE_RID: return "RID"
+#		TYPE_OBJECT: return "Object"
+#		TYPE_CALLABLE: return "Callable"
+#		TYPE_SIGNAL: return "Signal"
+		TYPE_DICTIONARY:
+			var out := 32 # number gotten through expierements
+			for k in thing:
+				out += get_size(k)
+				out += get_size(thing[k])
+			return out
+		
+		TYPE_ARRAY:
+			var out := 56 # number gotten through expierements
+			for item in thing:
+				out += get_size(item)
+			return out
+		
+		TYPE_PACKED_BYTE_ARRAY: return len(thing)
+		TYPE_PACKED_INT32_ARRAY: return len(thing)*32
+		TYPE_PACKED_INT64_ARRAY: return len(thing)*64
+		TYPE_PACKED_FLOAT32_ARRAY: return len(thing)*32
+		TYPE_PACKED_FLOAT64_ARRAY: return len(thing)*64
+		TYPE_PACKED_STRING_ARRAY: return len(thing.to_byte_array())
+		TYPE_PACKED_VECTOR2_ARRAY: return len(thing)*2*64
+		TYPE_PACKED_VECTOR3_ARRAY: return len(thing)*3*64
+		TYPE_PACKED_COLOR_ARRAY: return len(thing)*4*64
+		
+		_: push_error("Don't know how to measure %s." % thing)
+	return 0

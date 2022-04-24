@@ -48,10 +48,10 @@ func uninstall(dir: String):
 		mods[dir].installed = false
 		_load_mods()
 
-func load_mods(loud := false):
+func load_mods(loud := true):
 	_load_mods(loud)
 
-func _load_mods(loud := false):
+func _load_mods(loud := true):
 	pre_loaded.emit()
 	
 	var installed := get_installed()
@@ -87,7 +87,10 @@ func _load_mods(loud := false):
 		if none:
 			print("[No %s found]" % ", ".join(none))
 	# wait a little for things to initialize.
-	await get_tree().process_frame
+#	await get_tree().process_frame
+	_signal_loaded.call_deferred()
+
+func _signal_loaded():
 	# alert everyone that mods were loaded.
 	_loaded.emit()
 	loaded.emit()

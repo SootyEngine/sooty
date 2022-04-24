@@ -9,6 +9,10 @@ extends Node
 
 @export var _filter: NodePath
 @onready var filter: LineEdit = get_node(_filter)
+@export var _tags_panel: NodePath
+@onready var tags_panel: HFlowContainer = get_node(_tags_panel)
+var all_tags := []
+var enabled_tags := {}
 
 @export var _tog_private: NodePath
 @onready var tog_private: CheckButton = get_node(_tog_private)
@@ -55,67 +59,57 @@ func _collect(id: String, d: Dictionary, out: Array, deep: int):
 		return
 	
 	var info: Dictionary = d._F_
-	var icon: String = info.M.get("icon", "[:black_medium_square:]")
+	var tags: Array = info.M.get("tags", "").strip_edges().split(" ", false)
 	
-	var progress = info.M.get("progress", "0").to_float() / 100.0
-	var tabs := "  ".repeat(deep)
-	var note: String = info.M.get("note", "")
-	var tint: Color = Soot.get_flow_color(deep)
-	var prog := "[bg %s;%s;hint %.2d]%s[]" % [Color.WEB_GRAY, Color.TOMATO.lerp(Color.GREEN_YELLOW, progress), progress*100.0, Emoji.progress(progress, 2)]
-	var label := "%s%s%s" % [icon, tabs, "[%s]%s[] [dim]%s[]" % [tint, id, note]]
-	out.append("\t".repeat(deep) + prog + text.do_clickable(label, info.M))
+	# check if has all tags
+	if _has_tags(tags):
+		var icon: String = info.M.get("icon", "[:black_medium_square:]")
+		var progress = info.M.get("progress", "0").to_float() / 100.0
+		var tabs := "  ".repeat(deep)
+		var note: String = info.M.get("note", "")
+		var tint: Color = Soot.get_flow_color(deep)
+		var prog := "[bg %s;%s;hint %.2d]%s[]" % [Color.WEB_GRAY, Color.TOMATO.lerp(Color.GREEN_YELLOW, progress), progress*100.0, Emoji.progress(progress, 2)]
+		var label := "%s%s%s" % [icon, tabs, "[%s]%s[] [dim]%s[]" % [tint, id, note]]
+		out.append("\t".repeat(deep) + prog + text.do_clickable(label, info.M))
+		
+		# go through children
+		for item in sorted(d):
+			_collect(item[0], item[1], out, deep + 1)
 	
-	for item in sorted(d):
-		_collect(item[0], item[1], out, deep + 1)
 	return out
 
+func _toggle_tag(toggled: bool, tag: String):
+	enabled_tags[tag] = toggled
+	_redraw()
+
+func _has_tags(tags: Array) -> bool:
+	for tag in enabled_tags:
+		if enabled_tags[tag] and tag in all_tags:
+			if not tag in tags:
+				return false
+	return true
+
 func _redraw(_x=null):
+	all_tags.clear()
+	UNode.remove_children(tags_panel)
+	
 	var tree := {}
 	for flow in Dialogue._flows:
-		UDict.set_at(tree, flow.split("/"), {_P_=flow, _F_=Dialogue._flows[flow]})
+		var info: Dictionary = Dialogue._flows[flow]
+		var tags: Array = info.M.get("tags", "").strip_edges().split(" ", false)
+		
+		for tag in tags:
+			if not tag in all_tags:
+				all_tags.append(tag)
+				var btn := CheckBox.new()
+				btn.text = tag
+				btn.button_pressed = enabled_tags.get(tag, false)
+				btn.toggled.connect(_toggle_tag.bind(tag))
+				tags_panel.add_child(btn)
+		
+		UDict.set_at(tree, flow.split("/"), {_P_=flow, _F_=info})
 	
 	var out := []
 	for item in sorted(tree):
 		_collect(item[0], item[1], out, 0)
 	text.set_bbcode("\n".join(out))
-	
-#	var lines := []
-#	text.clear_meta()
-#
-#	var last_deep := 0
-#	for flow in Dialogue._flows:
-#		var parts = flow.split("/")
-#		var deep = len(parts)
-#		var data = Dialogue._flows[flow]
-#		var label := "%s%s" % ["\t\t".repeat(deep-1), parts[-1]]
-#		var color := Color.WHITE.darkened(.2 * deep)
-#
-#		var metas := []
-#		var end_metas := []
-#		var icon := ""
-#		var progress := 0.0
-#
-#		for k in data.M:
-#			if not k in ["id", "file", "line"]:
-#				if k == "color":
-#					color = UStringConvert.to_color(data.M[k]).darkened(.2 * (deep-1))
-#					continue
-#				elif k == "icon":
-#					icon = data.M[k]
-#					continue
-#				elif k == "note":
-#					end_metas.append("[dima;i]%s[]" % [data.M[k]])
-#					continue
-#				elif k == "progress":
-#					progress = data.M[k].trim_suffix("%").to_float() / 100.0
-#					continue
-#				end_metas.append("[dim]%s:[]%s" % [k, data.M[k]])
-#
-#		metas.append("[%s;hint %.2f] ■ []" % [Color.TOMATO.lerp(Color.YELLOW_GREEN, progress), progress*100.0])
-#		metas.append(icon)
-#		metas.append(text.gen_meta("[%s;b]%s[]" % [color, label], data, data.M.file))
-#
-#		lines.append(" ".join(metas + end_metas))
-#		last_deep = deep
-		
-#	text.set_bbcode("\n".join(lines))

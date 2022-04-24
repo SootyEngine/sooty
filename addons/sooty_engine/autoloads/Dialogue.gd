@@ -87,5 +87,5 @@ func _load_mods(mods: Array):
 	
 	# probably not accurate
 	var memory_used = OS.get_static_memory_usage() - memory_before
-	prints("Dialogues: %s -> %s." % [String.humanize_size(total_bytes), String.humanize_size(memory_used)])
+	prints("Dialogues: %s >>> %s." % [String.humanize_size(total_bytes), String.humanize_size(memory_used)])
 
