@@ -3,8 +3,11 @@ extends EditorScript
 
 
 func _run():
-	var dt := DateTime.create_from_current()
-	prints(dt, dt.month)
-	for i in 13:
-		dt.advance({months=1, days=15})
-		prints(dt, dt.month)
+	for i in 24:
+		var x = "12%s lb" % i
+		prints(x, Unit.mass(x, "g"))
+#		var x = "6'%s\"" % i
+#		print(x)
+#		var feet = Unit.length(x, "in")
+#		print("\t", feet)
+#		print("\t", Unit.length(feet, "ft in", "in"))

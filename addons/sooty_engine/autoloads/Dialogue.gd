@@ -1,18 +1,19 @@
 @tool
 extends Flow
 
-const CHECK_FILES_EVERY := 1 # seconds before checking if any script has changed.
+const CHECK_FILES_EVERY := 2.0 # seconds before checking if any script has changed.
 
 signal reloaded()
 signal caption(text: String, line: Dictionary)
 
-func _init() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	StringAction.connect_as_node(self, "Dialogue")
-	StringAction.connect_methods(self, [chose, reset_choice, reset_list])
+func _ready() -> void:
+	super._ready()
+	_sooty.actions.connect_as_node(self, "Dialogue")
+	_sooty.actions.connect_methods(self, [chose, reset_choice, reset_list])
+	_sooty.mods.load_all.connect(_load_mods)
 	selected.connect(_choose)
-
-
+	reloaded.connect(_reloaded)
+	
 # check if a choise was made
 func chose(id: String) -> bool:
 	return states.get(id, 0) > 0
@@ -25,15 +26,9 @@ func reset_choice(id: String):
 func _choose(id: String):
 	UDict.tick(states, id)
 
-func _ready() -> void:
-	reloaded.connect(_reloaded)
-	
-	await get_tree().process_frame
-	ModManager.load_all.connect(_load_mods)
-
 func _files_modified(file_scanner: FileModifiedScanner):
 	file_scanner.update_times()
-	ModManager._load_mods()
+	_sooty.mods.load_mods()
 
 func _on_step(step: Dictionary):
 	match step.type:
@@ -44,8 +39,8 @@ func _reloaded():
 	_stack = _last_tick_stack.duplicate(true)
 
 func _load_mods(mods: Array):
-	_flows.clear()
-	_lines.clear()
+	flows.clear()
+	lines.clear()
 	
 	var memory_before = OS.get_static_memory_usage()
 	var soot_blocks := {}
@@ -62,7 +57,7 @@ func _load_mods(mods: Array):
 		for soot_path in soot_files:
 			total_bytes += UFile.get_file_size(soot_path)
 			mod.meta.dialogue.append(soot_path)
-			DialogueParser.new()._parse(soot_path, _flows, _lines)
+			DialogueParser.new()._parse(soot_path, flows, lines)
 		
 		mod.meta["lang"] = []
 		var lang_files := UFile.get_files(mod.dir.plus_file("lang"), "-en." + Soot.EXT_LANG)
@@ -73,17 +68,17 @@ func _load_mods(mods: Array):
 			UDict.append(lang_paths, id, lang_path)
 	
 	# timer checks if any files were modified.
-	UNode.remove_children(self)
-	var file_scanner := FileModifiedScanner.new()
-	file_scanner.set_name("FileScanner")
-	add_child(file_scanner)
-	file_scanner.modified.connect(_files_modified.bind(file_scanner))
-	file_scanner.set_files(all_files)
+#	UNode.remove_children(self)
+#	var file_scanner := FileModifiedScanner.new()
+#	file_scanner.set_name("FileScanner")
+#	add_child(file_scanner)
+#	file_scanner.modified.connect(_files_modified.bind(file_scanner))
+#	file_scanner.set_files(all_files)
 	
 	# save states for debuging
 	if UFile.exists("res://debug_output/dialogue"):
-		UFile.save_text("res://debug_output/dialogue/_all_flows.soda", DataParser.dict_to_str(_flows))
-		UFile.save_text("res://debug_output/dialogue/_all_lines.soda", DataParser.dict_to_str(_lines))
+		UFile.save_text("res://debug_output/dialogue/_all_flows.soda", DataParser.dict_to_str(flows))
+		UFile.save_text("res://debug_output/dialogue/_all_lines.soda", DataParser.dict_to_str(lines))
 	
 	# probably not accurate
 	var memory_used = OS.get_static_memory_usage() - memory_before

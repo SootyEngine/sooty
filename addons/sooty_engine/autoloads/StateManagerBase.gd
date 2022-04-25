@@ -1,6 +1,5 @@
 @tool
-extends Node
-class_name StateManagerBase
+extends RefCounted
 
 signal _changed(property: String)
 signal changed(property: Array)
@@ -19,10 +18,16 @@ signal changed_from_to(property: Array, from: Variant, to: Variant)
 @export var _states := []
 @export var _state_properties := []
 # a child to add data to if it has no where else to go.
-var _monkey_patcher: Node
+var _monkey_patcher: RefCounted
+var _sooty: Node
 # 
 @export var _calls := {}
 @export var _call_names := {}
+
+func _ready() -> void:
+	_sooty = Global.get_node("/root/Sooty")
+	_sooty.mods.load_all.connect(_load_mods)
+	_sooty.mods._loaded.connect(_loaded_mods)
 
 func get_method_names() -> Array:
 	return _calls.keys()
@@ -58,9 +63,6 @@ func _load_state(data: Dictionary):
 	UObject.set_state(self, data.get(_get_subdir(), {}))
 	_silent = false
 
-func _ready() -> void:
-	await get_tree().process_frame
-	_connect_to_signals()
 
 # called by DataParser if .soda sets something that doesn't exist.
 func _patch_property(key: String, patch: Variant):
@@ -73,23 +75,22 @@ func _patch_object(key: String, type: String) -> Object:
 		_monkey_patcher._data[key] = obj
 	return obj
 
-func _connect_to_signals():
-	ModManager.load_all.connect(_load_mods)
-	ModManager._loaded.connect(_loaded_mods)
-
 func _load_mods(mods: Array):
-	# remove old shortcuts
+	# remove old state data
 	_shortcuts.clear()
+	_state_properties.clear()
+	_calls.clear()
+	_call_names.clear()
+	
 	# remove old states
-	UNode.remove_children(self)
+	UGroup.remove_all(_get_node_group())
 	
 	# create monkey patcher to add spare properites to
 	_monkey_patcher = preload("res://addons/sooty_engine/autoloads/_monkey_patcher_.gd").new()
-	_monkey_patcher.name = "_monkey_patcher_"
-	
-	var all_files := []
+	_states = [_monkey_patcher]
 	
 	# init nodes from .gd scripts.
+	var all_files := []
 	var subdir := _get_subdir()
 	for mod in mods:
 		mod.meta[subdir] = []
@@ -100,27 +101,38 @@ func _load_mods(mods: Array):
 		all_files.append_array(script_paths)
 		
 		for script_path in script_paths:
+			mod.meta[subdir].append(script_path) # tell Mods what file has been installed
+			
+			# collect state
 			var script = load(script_path)
 			var state = script.new()
+			_states.append(state)
+			
+			# collect potential shortcuts
+			if "_shortcuts" in state:
+				UDict.merge(_shortcuts, state._shortcuts)
+			
+			# add to tree if it's a node
 			if state is Node:
-				mod.meta[subdir].append(script_path) # tell Mods what file has been installed
 				state.set_name(UFile.get_file_name(script_path))
-				add_child(state)
-				
-				# collect potential shortcuts
-				if "_shortcuts" in state:
-					UDict.merge(_shortcuts, state._shortcuts)
+				Sooty.add_child(state)
+				state.add_to_group(_get_node_group())
+			
+			elif state is Resource or state is RefCounted:
+				pass
+			
 			else:
 				# TODO: Allow resources.
-				push_error("States must be node. Can't load %s." % script_path)
+				push_error("States must be Node or Resource/RefCounted. Can't load %s." % script_path)
 	
-	# add monkey patcher for missing properties.
-	add_child(_monkey_patcher)
+	# collect methods in a way where they can all be called from the state
+	for state in _states:
+		_state_properties.append_array(UObject.get_state_properties(state))
+		for method in UReflect.get_script_methods(state):
+			_call_names[method] = "_calls.%s.call(" % method
+			_calls[method] = Callable(state, method)
 	
-	# collect all children in list.
-	_init_states()
-	
-	# install data (.soda) to children.
+	# patch data (.soda) to state.
 	for mod in mods:
 		var head = mod.dir.plus_file(subdir)
 		var data_files := UFile.get_files(head, "." + Soot.EXT_DATA)
@@ -143,31 +155,18 @@ func _load_mods(mods: Array):
 					var old = _shortcuts[k]
 					push_error("Same shortcut '%s' for %s and %s." % [k, old, new])
 	
-	var file_scanner := FileModifiedScanner.new()
-	file_scanner.set_name("FileScanner")
-	add_child(file_scanner)
-	file_scanner.modified.connect(_files_modified.bind(file_scanner))
-	file_scanner.set_files(all_files)
+	# var file_scanner := FileModifiedScanner.new()
+	# file_scanner.set_name("FileScanner")
+	# add_child(file_scanner)
+	# file_scanner.modified.connect(_files_modified.bind(file_scanner))
+	# file_scanner.set_files(all_files)
+
+func _get_node_group() -> String:
+	return "_s_%s_" % [_get_subdir()]
 
 func _files_modified(file_scanner: FileModifiedScanner):
 	file_scanner.update_times()
-	ModManager._load_mods()
-
-func _init_states():
-	_states = get_children()
-	_state_properties.clear()
-	
-	_calls.clear()
-	_call_names.clear()
-	
-	# collect methods in a way where they can all be called from the state
-	for state in _states:
-		_state_properties.append_array(UObject.get_state_properties(state))
-		var methods = UReflect.get_script_methods(state)
-		for method in methods:
-			_call_names[method] = "_calls.%s.call(" % method
-			_calls[method] = Callable(state, method)
-#			print("%s contributed method '%s'." % [child.name, method])
+	_sooty.mods.load_mods()
 
 # get the default state
 func _loaded_mods():

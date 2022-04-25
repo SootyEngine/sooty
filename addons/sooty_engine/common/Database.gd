@@ -10,7 +10,7 @@ var _data_class_name: String = "Data"
 
 func _init(type: Script, d := {}) -> void:
 	_data_class_name = UClass.get_class_name(type)
-	DataManager.register(_data_class_name, self)
+	Sooty.databases.register(_data_class_name, self)
 	_post_init.call_deferred()
 	
 	for k in d:

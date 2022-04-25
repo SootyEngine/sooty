@@ -38,8 +38,8 @@ func reset():
 	minutes = 0
 	seconds = 0
 
-func get_string(type: String) -> String:
-	return "[b]%s[]" % str(get(type)).capitalize()
+#func get_string(type: String) -> String:
+#	return "[b]%s[]" % str(get(type)).capitalize()
 
 #
 # SECONDS

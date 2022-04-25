@@ -87,19 +87,27 @@ static func merge_missing(target: Dictionary, patch: Dictionary):
 		if not k in target:
 			target[k] = patch[k]
 
-static func merge(target: Dictionary, patch: Dictionary, deep: bool = false, lists:bool = false, append: bool = false):
+static func merge(target: Dictionary, patch: Dictionary, deep: bool = false, kwargs := {}):
+	
 	if not deep:
 		for k in patch:
 			target[k] = patch[k]
 	
 	else:
+		# merge arrays?
+		var lists: bool = kwargs.get("lists", false)
+		# convert to array if item exists?
+		var append: bool = kwargs.get("append", false)
+		# replace existing keys?
+		var replace: bool = kwargs.get("replace", false)
+		
 		for k in patch:
 			if not k in target:
 				target[k] = patch[k]
 			
 			else:
 				if target[k] is Dictionary:
-					merge(target[k], patch[k], deep, lists)
+					merge(target[k], patch[k], deep, kwargs)
 				
 				elif target[k] is Array and lists:
 					if patch[k] is Array:
@@ -111,22 +119,27 @@ static func merge(target: Dictionary, patch: Dictionary, deep: bool = false, lis
 				elif typeof(target[k]) == typeof(patch[k]):
 					if append and target[k] != patch[k]:
 						target[k] = [target[k], patch[k]]
-					else:
+					elif replace:
 						target[k] = patch[k]
+					else:
+						push_error("Can't replace %s." % [target[k]])
 				
 				# replace different type
-				else:
-					push_error("Can't merge %s with %s. replacing %s instead." % [UType.get_type_name(target[k]), UType.get_type_name(patch[k]), k])
+				elif replace:
+#					push_error("Can't merge %s with %s. replacing %s instead." % [UType.get_type_name(target[k]), UType.get_type_name(patch[k]), k])
 					target[k] = patch[k]
+				
+				else:
+					push_error("Can't replace %s." % [target[k]])
 
-static func merge_at(target: Dictionary, path: Array, patch: Dictionary, deep: bool = false, lists: bool = false):
+static func merge_at(target: Dictionary, path: Array, patch: Dictionary, deep: bool = false, kwargs := {}):
 	var t = target
 	for i in len(path):
 		var part = path[i]
 		if not part in t:
 			t[part] = {}
 		t = t[part]
-	merge(t, patch, deep, lists)
+	merge(t, patch, deep, kwargs)
 
 static func flip_keys_and_values(d:Dictionary) -> Dictionary:
 	var out := {}

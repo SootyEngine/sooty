@@ -174,7 +174,7 @@ func _show_arg(object: Object, arg_info: Dictionary, is_action := false) -> bool
 		if arg_info.type is String:
 			# is class_name?
 			if UClass.exists(arg_info.type):
-				var database: Database = DataManager.get_database(arg_info.type)
+				var database: Database = Sooty.databases.get_database(arg_info.type)
 				if database:
 					var classname: String = arg_info.name.capitalize()
 					for object_id in database.get_all_ids():
@@ -364,7 +364,7 @@ func _code_completion_requested():
 		var base1 := after.get_base_dir()
 		var base2 := path.get_base_dir() + "/" if path.get_base_dir() else ""
 		
-		var paths := Dialogue._flows.keys()\
+		var paths = Sooty.dialogue.get_all_flow_ids()\
 			.filter(func(x): return x.begins_with(base2))\
 			.map(func(x): return x.trim_prefix(base2))\
 			.map(func(x): return base1.plus_file(x))
@@ -399,7 +399,7 @@ func _test_for_actions(s: String) -> bool:
 	
 	# $state shortcuts
 	elif s.begins_with("$"):
-		if _as_state_action(State, s.substr(1), true):
+		if _as_state_action(Sooty.state, s.substr(1), true):
 			found_at_least_one = true
 	
 	# ^ persistent state shortcut
@@ -434,7 +434,7 @@ func _as_eval() -> bool:
 					found_at_least_one = true
 			
 		elif method.begins_with("$"):
-			if _show_method_args(State, method.substr(1), func_data.arg_index):
+			if _show_method_args(Sooty.state, method.substr(1), func_data.arg_index):
 				found_at_least_one = true
 		
 #		elif method.begins_with("^"):
@@ -460,7 +460,7 @@ func _as_eval() -> bool:
 					found_at_least_one = true
 		
 		elif method.begins_with("$"):
-			if _show_object_actions(State):
+			if _show_object_actions(Sooty.state):
 				found_at_least_one = true
 		
 #		elif method.begins_with("^"):
@@ -471,7 +471,7 @@ func _as_eval() -> bool:
 
 func _show_all_node_actions(is_action := false) -> bool:
 	var found_at_least_one := false
-	var node_action_groups: Array = UGroup.get_all()\
+	var node_action_groups: Array = UGroup.get_all_from()\
 		.map(func(x): return str(x))\
 		.filter(func(x): return x.begins_with("@"))
 	
@@ -739,8 +739,8 @@ func _symbol_lookup(symbol: String, line: int, column: int):
 			var path := _find_flow(line_text, line)
 			var capped := path.substr(0, path.find(symbol)+len(symbol))
 			
-			if capped in Dialogue._flows:
-				var meta: Dictionary = Dialogue._flows[capped].M
+			if capped in Sooty.dialogue.flows:
+				var meta: Dictionary = Sooty.dialogue.flows[capped].M
 				# select file in FileSystem
 				instance_from_id(plugin_instance_id).edit_text_file(meta.file, meta.line)
 				

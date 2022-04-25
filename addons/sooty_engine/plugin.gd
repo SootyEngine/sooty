@@ -1,21 +1,6 @@
 @tool
 extends EditorPlugin
 
-const AUTOLOADS := [
-	"Global",
-	"DataManager",
-	"ModManager",
-	"Settings",
-	"SceneManager",
-	"SaveManager",
-	"Persistent",
-	"State",
-	"StringAction",
-	"MusicManager",
-	"SFXManager",
-	"Dialogue"
-]
-
 const EDITOR = preload("res://addons/sooty_engine/ui/ui_map_gen.tscn")
 var editor
 
@@ -26,9 +11,8 @@ func _get_plugin_name() -> String:
 	return "Sooty"
 
 func _enter_tree() -> void:
-	# load all autoloads in order.
-	for id in AUTOLOADS:
-		add_autoload_singleton(id, "res://addons/sooty_engine/autoloads/%s.gd" % id)
+	add_autoload_singleton("Global", "res://addons/sooty_engine/autoloads/Global.gd")
+	add_autoload_singleton("Sooty", "res://addons/sooty_engine/autoloads/Sooty.gd")
 	
 	# add .soot to the allowed textfile extensions.
 	var editor_settings: EditorSettings = get_editor_interface().get_editor_settings()
@@ -110,16 +94,13 @@ func _editor_script_changed(s):
 				Soot.EXT_DATA:
 					c.set_script(load("res://addons/sooty_engine/editor/DataEditor.gd"))
 					c.set.call_deferred("plugin_instance_id", get_instance_id())
+					
+					# get rid of delimiters, as they break tab folding when an apostrophe is used.
+					c.delimiter_strings = []
 
 func _exit_tree() -> void:
-#	if editor:
-#		editor.queue_free()
-	
-# 	if editor:
-# 		remove_control_from_docks(editor)
-	
 	if chapter_panel:
 		chapter_panel.queue_free()
 	
-	for i in range(len(AUTOLOADS)-1, -1, -1):
-		remove_autoload_singleton(AUTOLOADS[i])
+	remove_autoload_singleton("Global")
+	remove_autoload_singleton("Sooty")

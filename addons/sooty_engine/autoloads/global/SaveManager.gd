@@ -1,5 +1,5 @@
 @tool
-extends Node
+extends RefCounted
 
 const DIR := "user://saves"
 const PATH_PERSISTENT := "user://persistent.res"
@@ -27,25 +27,19 @@ signal pre_load_persistent()
 signal _set_persistent(data: Dictionary)
 signal loaded_persistent()
 
-var _wait_timer := 0.0
 var _last_save_slot := ""
-var _timer := Timer.new()
+var _sooty: Node
 
-func _init() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-
-func _ready() -> void:
-	await get_tree().process_frame
-	ModManager.loaded.connect(_mods_loaded)
+func _ready():
+	_sooty = Global.get_node("/root/Sooty")
+	_sooty.mods.loaded.connect(_mods_loaded)
 	
 	var d := Directory.new()
 	if not d.dir_exists(DIR):
 		d.make_dir(DIR)
 	
-	if not Engine.is_editor_hint():
-		add_child(_timer)
-		_timer.wait_time = 2.0
-		_timer.timeout.connect(_save_persistent)
+#	if not Engine.is_editor_hint():
+#		_global.get_tree().create_timer(2.0).timeout.connect(_save_persistent)
 
 func has_last_save() -> bool:
 	return _last_save_slot != "" and has_slot(_last_save_slot)
@@ -54,19 +48,18 @@ func load_last_save():
 	load_slot(_last_save_slot)
 
 func _mods_loaded():
-	await get_tree().process_frame
+#	await get_tree().process_frame
 	pre_load_persistent.emit()
 	var data: Dictionary = UFile.load_from_resource(PATH_PERSISTENT, {})
 	_last_save_slot = data.get("last_save_slot", _last_save_slot)
 	_set_persistent.emit(data)
 	loaded_persistent.emit()
-	print("Loaded Persistent from user://persistent.tres.")
+	print("Loaded Persistent: user://persistent.tres.")
 
-func save_persistent():
-	_timer.start()
+#func save_persistent():
+#	_timer.start()
 
 func _save_persistent():
-	_timer.stop()
 	pre_save_persistent.emit()
 	var data := {}
 	data["last_save_slot"] = _last_save_slot
@@ -75,7 +68,7 @@ func _save_persistent():
 	# DEBUG
 	UFile.save_to_resource("user://persistent.tres", data)
 	saved_persistent.emit()
-	print("Saved Persistent to user://persistent.tres.")
+	print("Saved Persistent: user://persistent.tres.")
 
 func get_all_saved_slots() -> PackedStringArray:
 	return UFile.get_dirs(DIR)
@@ -110,7 +103,7 @@ func load_slot(slot: String):
 	var state: Dictionary = UFile.load_from_resource(slot_path.plus_file(FNAME_STATE))
 	
 	# TODO: Move this to SceneManager class?
-	await SceneManager.change_scene(state.current_scene, true)
+	await _sooty.scenes.change_scene(state.current_scene, true)
 	
 	pre_load.emit()
 	_set_state.emit(state)
@@ -141,8 +134,8 @@ func save_slot(slot: String):
 	# state data
 	var state := {}
 	state.current_scene = slot_path.plus_file("scene.tscn")#get_tree().current_scene.scene_file_path
-	UFile.save_node(slot_path.plus_file(FNAME_SCENE), get_tree().current_scene)
-	UFile.save_node(slot_path.plus_file("scene.tscn"), get_tree().current_scene) # debug
+	UFile.save_node(slot_path.plus_file(FNAME_SCENE), Global.get_tree().current_scene)
+	UFile.save_node(slot_path.plus_file("scene.tscn"), Global.get_tree().current_scene) # debug
 	
 	_get_state.emit(state)
 	UFile.save_to_resource(slot_path.plus_file(FNAME_STATE), state)
@@ -152,24 +145,24 @@ func save_slot(slot: String):
 	# save slot info
 	var state_info := { time=Time.get_datetime_dict_from_system() }
 	
-	if State._has("save_caption"):
-		state_info.save_caption = State._get("save_caption")
+	if _sooty.state._has("save_caption"):
+		state_info.save_caption = _sooty.state._get("save_caption")
 	
-	if State._has("progress"):
-		state_info.progress = State._get("progress")
+	if _sooty.state._has("progress"):
+		state_info.progress = _sooty.state._get("progress")
 	
 	_get_state_info.emit(state_info)
 	UFile.save_json(slot_path.plus_file(FNAME_INFO), state_info)
 	
 	# preview image
-	if not Global._screenshot:
+	if not Global.screenshot:
 		Global.snap_screenshot()
-	var img: Image = Global._screenshot.duplicate()
+	var img: Image = Global.screenshot.duplicate()
 	var siz := img.get_size() / PREVIEW_SIZE_DIV_AMOUNT
 	img.resize(ceil(siz.x), ceil(siz.y), Image.INTERPOLATE_LANCZOS)
 	img.save_png(slot_path.plus_file(FNAME_PREVIEW))
 	
 	saved.emit()
 	_last_save_slot = slot
-	save_persistent()
+#	save_persistent()
 	print("Saved Slot %s." % slot)

@@ -1,7 +1,14 @@
 @tool
-extends Node
+extends RefCounted
 
 var _expr := Expression.new()
+var _state: Object
+var _persistent: Object
+
+func _ready():
+	var sooty := Global.get_node("/root/Sooty")
+	_state = sooty.state
+	_persistent = sooty.persistent
 
 # `@:` allow calling as @node_id
 static func connect_as_node(node: Node, id: String = ""):
@@ -126,13 +133,13 @@ func is_action(s: String) -> bool:
 	return UString.get_leading_symbols(s) in Soot.ALL_ACTION_HEADS
 
 func do_state_action(s: String, context: Object = null):
-	var state: Node = State
+	var state: Node = _state
 	
 	if s.begins_with("$"):
 		s = s.substr(1)
 	elif s.begins_with("^"):
 		s = s.substr(1)
-		state = Persistent
+		state = _persistent
 	
 	var args := UString.split_outside(s, " ")
 	var method = args.pop_front()
@@ -209,58 +216,9 @@ func call_group_w_args(group: String, args: Array, as_string_args := false) -> V
 	
 	return _call_group(group, method, args, as_string_args)
 
-#func _str_to_var(s: String) -> Variant:
-#	# builting
-#	match s:
-#		"true": return true
-#		"false": return false
-#		"null": return null
-#		"INF": return INF
-#		"-INF": return -INF
-#		"PI": return PI
-#		"TAU": return TAU
-#
-#	# state variable?
-#	if s.begins_with("$"):
-#		return _get(s.substr(1))
-#
-#	# is a string with spaces?
-#	if UString.is_wrapped(s, '"'):
-#		return UString.unwrap(s, '"')
-#
-#	# evaluate
-#	if UString.is_wrapped(s, "<<", ">>"):
-#		var e := UString.unwrap(s, "<<", ">>")
-#		var got = State._eval(e)
-##		print("EVAL %s >>> %s" % [e, got])
-#		return got
-#
-#	# array or dict?
-#	if "," in s or ":" in s:
-#		var args := s.split(",")
-#		var is_dict := ":" in args[0]
-#		var out = {} if is_dict else []
-#		for arg in args:
-#			if ":" in arg:
-#				var kv := arg.split(":", true, 1)
-#				var key := kv[0]
-#				var val = _str_to_var(kv[1])
-#				out[key] = val
-#			else:
-#				out.append(_str_to_var(arg))
-#		return out
-#	# float?
-#	if s.is_valid_float():
-#		return s.to_float()
-#	# int?
-#	if s.is_valid_int():
-#		return s.to_int()
-#	# must be a string?
-#	return s
-
 func _call_group(group: String, method: String, args := [], as_string_args := false) -> Variant:
 	var out: Variant
-	var nodes := get_tree().get_nodes_in_group(group)
+	var nodes := UGroup.get_all(group)
 	for node in nodes:
 		var got = UObject.call_w_kwargs([node, method], args, as_string_args)
 		if got != null:
@@ -270,7 +228,7 @@ func _call_group(group: String, method: String, args := [], as_string_args := fa
 	return out
 
 func get_group_property(group: String, property: String) -> Variant:
-	var node: Node = get_tree().get_first_node_in_group(group)
+	var node: Node = UGroup.first(group)
 	if node:
 		var got = node.get(property)
 		print("Called %s.%s on %s, got %s." % [group, property, node, got])
@@ -287,7 +245,7 @@ func _context_has(context: Object, property: String) -> bool:
 
 func eval(eval: String, context: Variant = null, default = null) -> Variant:
 	if context == null:
-		context = State
+		context = _state
 	
 	# assignments?
 	for op in [" = ", " += ", " -= ", " *= ", " /= "]:
@@ -299,7 +257,7 @@ func eval(eval: String, context: Variant = null, default = null) -> Variant:
 			# assigning to a state variable?
 			if property.begins_with("$"):
 				property = property.substr(1)
-				target = State
+				target = _state
 			
 #			elif property.begins_with("^"):
 #				property = property.substr(1)
@@ -308,7 +266,7 @@ func eval(eval: String, context: Variant = null, default = null) -> Variant:
 			# assigning to a group object?
 			elif property.begins_with("@"):
 				property = property.substr(1)
-				target = get_tree().get_first_node_in_group(property)
+				target = UGroup.first(property)
 				push_error("Assigning to @nodes isn't implemented.")
 				return
 				
@@ -339,7 +297,7 @@ func eval(eval: String, context: Variant = null, default = null) -> Variant:
 		push_error("Failed _eval('%s'): %s." % [eval, _expr.get_error_text()])
 	else:
 		print("EVAL: %s" % eval)
-		var result = _expr.execute([get_tree(), self, State, Persistent], context, false)
+		var result = _expr.execute([Global.get_tree(), self, _state, _persistent], context, false)
 		if _expr.has_execute_failed():
 			push_error("Failed _eval('%s'): %s." % [eval, _expr.get_error_text()])
 		else:
@@ -375,7 +333,7 @@ func _globalize_functions(t: String) -> String:
 				elif "." in method_name or method_name in UObject.GLOBAL_SCOPE_METHODS:
 					out += "%s(" % method_name
 				else:
-					var parent = State._get_method_parent(method_name)
+					var parent = _state._get_method_parent(method_name)
 					out += "get_node(\"%s\").%s(" % [parent, method_name]
 				out += UString.part(t, k+1+len(method_name), j)
 				i = j + 1

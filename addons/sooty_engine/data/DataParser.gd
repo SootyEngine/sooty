@@ -387,8 +387,6 @@ static func patch(target: Object, patch: Dictionary, sources: Array):
 			target._patch_manually_deferred.call_deferred(k, v, sources)
 		
 		else:
-#			_patch(target, k, v, sources)
-#static func _patch(target: Object, property: String, patch: Variant, sources: Array):
 			var target_type = typeof(target[k])
 			# recursively check sub objects.
 			if target_type == TYPE_OBJECT:

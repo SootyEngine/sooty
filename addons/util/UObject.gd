@@ -156,8 +156,6 @@ static func get_script_signals(target: Object, only_argless := true) -> Dictiona
 		out[m.name] = m
 	return out
 
-
-
 static func get_operator_value(v):
 	if v is Object:
 		if v.has_method("_operator_get"):

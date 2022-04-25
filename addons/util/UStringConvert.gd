@@ -12,7 +12,7 @@ static func to_type(s: String, type: Variant, object: Object = null, default = n
 	if type is String:
 		# is class_name?
 		if UClass.exists(type):
-			var got = DataManager.get_data(type, s)
+			var got = Sooty.databases.get_data(type, s)
 			print("converted %s %s to %s" % [type, s, got])
 			return got
 			

@@ -15,8 +15,8 @@ signal flow_ended(id: String)
 signal stepped(step: Dictionary)
 signal selected(id: String) # used with select_option
 
-@export var _flows := {} # flow meta. flows themselves are in _lines.
-@export var _lines := {} # all lines from all files
+@export var flows := {} # flow meta. flows themselves are in _lines.
+@export var lines := {} # all lines from all files
 
 @export var last_end_message := ""
 @export var current_flow := ""
@@ -24,6 +24,7 @@ signal selected(id: String) # used with select_option
 @export var _started := false
 @export var _stack := [] # current stack of flows, so we can return to a position in a previous flow.
 @export var _last_tick_stack := [] # stack of the previous tick, used for saving and rollback.
+var _sooty: Node
 
 @export var states := {}
 @export var last_line := {}
@@ -31,9 +32,12 @@ var last_value: Variant
 
 var context: Object = null
 
-func _init(lines := {}, flows := {}):
-	_lines = lines
-	_flows = flows
+func _init(l := {}, f := {}):
+	lines = l
+	flows = f
+
+func _ready():
+	_sooty = get_node("/root/Sooty")
 
 func _get_state() -> Dictionary:
 	return {stack=_last_tick_stack, started=_started, last_end_message=last_end_message, states=states}
@@ -51,10 +55,22 @@ func is_active() -> bool:
 func get_current() -> Dictionary:
 	return _stack[-1] if len(_stack) else {}
 
-func exists(path: String) -> bool:
-	var flow := get_flow_path(path)
-	return flow in _lines
+func get_all_flow_ids() -> Array:
+	return flows.keys()
 
+func has(path: String) -> bool:
+	return path in flows
+
+func has_from_current(path: String) -> bool:
+	var flow := get_flow_path(path)
+	return flow in lines
+
+func try_start(path: String) -> bool:
+	if has(path) and not is_active():
+		return start(path)
+	else:
+		return false
+	
 func start(id: String):
 	if is_active():
 		push_warning("Already started.")
@@ -62,7 +78,7 @@ func start(id: String):
 	
 	# start dialogue
 	last_line = {}
-	goto(id)
+	_goto(id)
 	step.call_deferred()
 	return true
 
@@ -76,10 +92,10 @@ func can_do(command: String) -> bool:
 func do(command: String):
 	# => goto
 	if command.begins_with(Soot.FLOW_GOTO):
-		_goto(command.trim_prefix(Soot.FLOW_GOTO).strip_edges(), S_GOTO)
+		_goto(command.trim_prefix(Soot.FLOW_GOTO).strip_edges())
 	# == call
 	elif command.begins_with(Soot.FLOW_CALL):
-		_goto(command.trim_prefix(Soot.FLOW_CALL).strip_edges(), S_CALL)
+		_add_to_stack(command.trim_prefix(Soot.FLOW_CALL).strip_edges())
 	# __ pass
 	elif command.begins_with(Soot.FLOW_PASS):
 		# do nothing
@@ -93,29 +109,22 @@ func do(command: String):
 	else:
 		push_error("Don't know what to do with '%s'." % command)
 
-func stack(id: String) -> bool:
-	return _goto(id, S_CALL)
-
-func goto(id: String) -> bool:
-	return _goto(id, S_GOTO)
-
-#func _has_line(id: String) -> bool:
-#	return id in _lines
-
 func _get_line(id: String) -> Dictionary:
-	return _lines[id]
+	return lines[id]
 
-func goto_and_return(id: String) -> bool:
-	return _goto(id, S_CALL)
+func _goto(id: String) -> bool:
+	return _add_to_stack(id, true)
 
-func _goto(id: String, step_type: int = S_GOTO) -> bool:
-	if exists(id):# _has_line(new_id):
+func _add_to_stack(id: String, clear_stack := false) -> bool:
+	if has_from_current(id):# _has_line(new_id):
 		var new_id := get_flow_path(id)
 		# if the stack is cleared, it means this was a "goto" not a "call"
-		if step_type == S_GOTO:
+		if clear_stack:
 			while len(_stack):
 				_pop()
-		_push(step_type, new_id, _get_line(new_id).then)
+		var step_type := S_GOTO if clear_stack else S_CALL
+		var steps = _get_line(new_id).then
+		_push(step_type, new_id, steps)
 		return true
 	else:
 		push_error("No step '%s' from '%s'." % [id, current_flow])
@@ -171,6 +180,12 @@ func execute(id: String) -> Variant:
 	else:
 		return null
 
+func try_execute(path: String) -> Variant:
+	if has(path):
+		return execute(path)
+	else:
+		return null
+
 func break_step(msg := ""):
 	_broke = true
 
@@ -203,17 +218,17 @@ func step():
 			
 			match line.type:
 				"goto":
-					_goto(line.goto, S_GOTO)
+					_goto(line.goto)
 				
 				"call":
 					# does call have it's own lines? used by {[list]} pattern
 					if "then" in line:
 						_push(S_CALL_INLINE, line.M.id, line.then)
 					# use current_dialogue as parent, if none exists
-					_goto(line.call, S_CALL)
+					_add_to_stack(line.call)
 				
 				"do":
-					last_value = StringAction.do(line.do, context)
+					last_value = _sooty.actions.do(line.do, context)
 				
 				"text":
 					last_value = line.text
@@ -260,7 +275,7 @@ func _pop_stack_line() -> Dictionary:
 		# 'if' 'elif' 'else' chain
 		if line.type == "if":
 			for i in len(line.conds):
-				if StringAction.test(line.conds[i], context):
+				if _sooty.actions.test(line.conds[i], context):
 					_push(S_IF, line.M.id, line.cond_lines[i])
 					return {}
 		
@@ -269,7 +284,7 @@ func _pop_stack_line() -> Dictionary:
 			var match_result = Array(line.match.split(" JOIN "))
 			for i in len(match_result):
 				var m = match_result[i]
-				match_result[i] = StringAction.do(m, context)
+				match_result[i] = _sooty.actions.do(m, context)
 			# not an array?
 			if len(match_result) == 1:
 				match_result = match_result[0]
@@ -285,7 +300,7 @@ func _pop_stack_line() -> Dictionary:
 						# by default, treat it as an array of strings seperated by spaces
 						if not sc[0] in "~$@":
 							sc = "*" + sc
-						subcase[i] = StringAction.do(sc, context)
+						subcase[i] = _sooty.actions.do(sc, context)
 					var passes = _compare_list(match_result, subcase)
 #					print("\tCASE: %s == %s? %s!" % [subcase, match_result, passes])
 					if passes:
@@ -295,7 +310,7 @@ func _pop_stack_line() -> Dictionary:
 		
 		# has a condition
 		elif "cond" in line:
-			if StringAction.test(line.cond, context):
+			if _sooty.actions.test(line.cond, context):
 				return line
 		
 		# special list function
@@ -410,7 +425,7 @@ static func line_has_condition(line: Dictionary) -> bool:
 	return "cond" in line
 
 func line_passes_condition(line: Dictionary) -> bool:
-	return StringAction.test(line.cond, context)
+	return _sooty.actions.test(line.cond, context)
 
 func line_get_options(line: Dictionary) -> Array:
 	var out_lines := []
@@ -477,7 +492,7 @@ func _get_options(ids: Array, output: Array, depth: int):
 
 func generate_tree() -> Dictionary:
 	var out := {}
-	for p in _flows:
+	for p in flows:
 		UDict.set_at(out, p.split("/"), {})
 	return out
 

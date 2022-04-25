@@ -94,8 +94,8 @@ func _redraw(_x=null):
 	UNode.remove_children(tags_panel)
 	
 	var tree := {}
-	for flow in Dialogue._flows:
-		var info: Dictionary = Dialogue._flows[flow]
+	for flow in Sooty.dialogue.flows:
+		var info: Dictionary = Sooty.dialogue.flows[flow]
 		var tags: Array = info.M.get("tags", "").strip_edges().split(" ", false)
 		
 		for tag in tags:

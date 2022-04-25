@@ -1,5 +1,5 @@
 @tool
-extends Node
+extends RefCounted
 
 const USER_DIR := "user://mods"
 const AUTO_INSTALL_USER_MODS := false
@@ -20,11 +20,6 @@ func _init():
 		for mod in get_user_mod_dirs():
 			_add_mod(mod, AUTO_INSTALL_USER_MODS)
 
-func _ready() -> void:
-	await get_tree().process_frame
-	await get_tree().process_frame
-	_load_mods()
-
 func get_user_mod_dirs() -> PackedStringArray:
 	return UFile.get_dirs("user://mods")
 
@@ -41,17 +36,14 @@ func get_uninstalled() -> Array:
 func install(dir: String):
 	if not mods[dir].installed:
 		mods[dir].installed = true
-		_load_mods()
+		load_mods()
 
 func uninstall(dir: String):
 	if mods[dir].installed:
 		mods[dir].installed = false
-		_load_mods()
+		load_mods()
 
-func load_mods(loud := true):
-	_load_mods(loud)
-
-func _load_mods(loud := true):
+func load_mods():
 	pre_loaded.emit()
 	
 	var installed := get_installed()
@@ -61,7 +53,7 @@ func _load_mods(loud := true):
 	load_all.emit(installed)
 	
 	# Display lists of what was added by the mods.
-	if loud:
+	if Sooty.config.getor("sooty.print_mods_loaded", false):
 		var meta := {}
 		for k in installed[0].meta.keys():
 			meta[k] = []
@@ -87,7 +79,6 @@ func _load_mods(loud := true):
 		if none:
 			print("[No %s found]" % ", ".join(none))
 	# wait a little for things to initialize.
-#	await get_tree().process_frame
 	_signal_loaded.call_deferred()
 
 func _signal_loaded():

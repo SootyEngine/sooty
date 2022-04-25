@@ -44,8 +44,7 @@ func _hl_dict(from: int) -> int:
 			for part in inner.split(","):
 				var i := part.find(":")
 				if i != -1:
-					var c := C_PROPERTY.darkened((_deep+1) * .05)
-					c.h = wrapf(c.h - .2 * (_deep+1), 0.0, 1.0)
+					var c := _shift(C_PROPERTY, _deep)
 					_c(off, c)
 					_c(off+i, C_SYMBOL)
 					_c(off+i+1, C_FIELD)
@@ -70,8 +69,7 @@ func _hl_list(from: int) -> int:
 			for part in inner.split(","):
 				var i := part.find(":")
 				if i != -1:
-					var c := C_PROPERTY.darkened((_deep+1) * .05)
-					c.h = wrapf(c.h - .2 * (_deep+1), 0.0, 1.0)
+					var c := _shift(C_PROPERTY, _deep)
 					_c(off, c)
 					_c(off+i, C_SYMBOL)
 					_c(off+i+1, C_FIELD)
@@ -85,6 +83,11 @@ func _hl_list(from: int) -> int:
 
 func _get_line_syntax_highlighting(line: int) -> Dictionary:
 	return _get_line_syntax_highlighting2(get_text_edit().get_line(line))
+
+func _shift(color: Color, depth: int) -> Color:
+	var clr := UColor.hue_shift(color, depth * .2)
+	clr.v -= depth * .05
+	return clr
 
 func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 	_out = {}
@@ -120,15 +123,13 @@ func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 				_c(i, C_SYMBOL)
 				_c(i+1, clr)
 				deep += 1
-				clr = C_PROPERTY.darkened(deep * .05)
-				clr.h = wrapf(clr.h - .2 * deep, 0.0, 1.0)
+				clr = _shift(C_PROPERTY, deep)
 				
 			elif _text[i] == ".":
 				_c(i, C_SYMBOL)
 				_c(i+1, clr)
 				deep += 1
-				clr = C_PROPERTY.darkened(deep * .05)
-				clr.h = wrapf(clr.h - .2 * deep, 0.0, 1.0)
+				clr = _shift(C_PROPERTY, deep)
 			
 		return _out
 	
@@ -148,9 +149,8 @@ func _get_line_syntax_highlighting2(text: String) -> Dictionary:
 	# property name `:`
 	var a := _find_property_split(_text, i)
 	if a != -1:
-		var c := C_PROPERTY.darkened(_deep * .05)
-		c.h = wrapf(c.h - .2 * _deep, 0.0, 1.0)
-		_c(i, c)#C_PROPERTY.darkened(_deep * .2))
+		var c := _shift(C_PROPERTY, _deep)
+		_c(i, c)
 		_c(a, C_SYMBOL)
 		_c(a+1, C_FIELD)
 		

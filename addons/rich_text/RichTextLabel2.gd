@@ -171,22 +171,6 @@ func _gui_input(event: InputEvent) -> void:
 					push_error("No meta url for '%s'." % _meta_hovered)
 				get_viewport().set_input_as_handled()
 
-func _reload_config():
-	if Global and not "rtl_tags" in Global.meta:
-		var colors := {}
-		var tags := {}
-		
-		if Global.config.has_section("rich_text_colors"):
-			for key in Global.config.get_section_keys("rich_text_colors"):
-				colors[key] = Global.config.get_color("rich_text_colors", key, Color.WHITE)
-		
-		if Global.config.has_section("rich_text_shortcuts"):
-			for key in Global.config.get_section_keys("rich_text_shortcuts"):
-				tags[key] = Global.config.get_value("rich_text_shortcuts", key)
-		
-		Global.meta["rtl_colors"] = colors
-		Global.meta["rtl_tags"] = tags
-
 func _update_color():
 	add_theme_color_override("font_outline_color", _get_outline_color(color))
 
@@ -201,7 +185,6 @@ func _redraw():
 	set_bbcode(bbcode)
 
 func set_bbcode(btext: String):
-	_reload_config()
 	text = ""
 	bbcode = btext
 	clear()
@@ -299,8 +282,8 @@ func _parse_tags(tags_string: String):
 	var tags := []
 	for i in len(p):
 		var tag = p[i]
-		if Global and tag in Global.meta.rtl_tags:
-			tags.append_array(Global.meta.rtl_tags[tag].split(";"))
+		if Sooty and tag in Sooty.config.rich_text_tags:
+			tags.append_array(Sooty.config.rich_text_tags[tag].split(";"))
 		else:
 			tags.append(tag)
 	
@@ -340,7 +323,7 @@ func _parse_tags(tags_string: String):
 func _parse_tag(tag: String):
 	# is a !$^@ StringAction?
 	if tag[0] in "~$^@":
-		var got = StringAction.do(tag, context)
+		var got = Sooty.actions.do(tag, context)
 		prints("TAG GOT ", got, " FROM ", tag)
 		# no value was found
 		if got == null:
@@ -388,13 +371,13 @@ func _passes_condition(cond: String, raw: String) -> bool:
 	match cond:
 		"if":
 			var test := raw.split(" ", true, 1)[1]
-			_state.condition = StringAction.test(test, context)
+			_state.condition = Sooty.actions.test(test, context)
 			_stack_push(T_CONDITION)
 			
 		"elif":
 			if "condition" in _state and _state.condition == false:
 				var test := raw.split(" ", true, 1)[1]
-				_state.condition = StringAction.test(test, context)
+				_state.condition = Sooty.actions.test(test, context)
 		
 		"else":
 			if "condition" in _state:
@@ -419,11 +402,6 @@ static func get_emoji_font() -> Font:
 
 func _parse_tag_info(tag: String, info: String, raw: String):
 	if not _passes_condition(tag, raw):
-		return
-	
-	# color names
-	if Global and tag in Global.meta.rtl_colors:
-		_push_color(Global.meta.rtl_colors[tag])
 		return
 	
 	# font sizes
@@ -542,7 +520,7 @@ func _add_text(t: String):
 		for pipe in _state.pipes:
 			t += "|" + pipe
 		var eval := _preprocess_pipe(t)
-		StringAction.eval(eval, context)
+		Sooty.actions.eval(eval, context)
 		
 #		var got = State._pipe(t, pipe)
 #		t = str(got)

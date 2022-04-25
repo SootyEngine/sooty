@@ -1,4 +1,5 @@
-extends Node
+@tool
+extends RefCounted
 # a state for holding data that's added at runtime through base_state and .soda files.
 
 var _data := {}

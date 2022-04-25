@@ -9,36 +9,39 @@ var scenes_ui := {}
 var active_ui := {}
 var _goto: Callable # an overridable goto function, so you can use your own transition system.
 
+func _ready() -> void:
+	var _sooty := get_node("/root/Sooty")
+	_sooty.actions.connect_as_node(self, "SceneManager")
+	_sooty.actions.connect_methods(self, [goto_scene, scene_id, show_ui, toggle_ui])
+	_sooty.mods.load_all.connect(_load_mods)
+	if not Engine.is_editor_hint():
+		# call the start function when testing from editor
+		_sooty.mods.loaded.connect(_signal_changed.bind(false), CONNECT_ONESHOT)
+
 func _get_method_info(method: String):
-	if method == "scene":
-		return {
-			args={
-				id={
-					# auto complete list of scenes
-					options=func(): return scenes.keys(),
-					icon=preload("res://addons/sooty_engine/icons/scene.png"),
+	match method:
+		"goto_scene":
+			return {
+				args={
+					id={
+						# auto complete list of scenes
+						options=func(): return scenes.keys(),
+						icon=preload("res://addons/sooty_engine/icons/scene.png"),
+					}
 				}
 			}
-		}
 
 # testing
 enum Transition { FADE_OUT, INSTANT }
-func scene(id: String, transition: Transition = Transition.FADE_OUT, kwargs := {}):
+func goto_scene(id: String, transition: Transition = Transition.FADE_OUT, kwargs := {}):
 	if _goto:
 		_goto.call(id, kwargs)
 	else:
 		change(id)
-
-func _ready() -> void:
-	await get_tree().process_frame
 	
-	StringAction.connect_as_node(self, "SceneManager")
-	StringAction.connect_methods(self, [scene, show_ui, toggle_ui])
-	
-	ModManager.load_all.connect(_load_mods)
-	if not Engine.is_editor_hint():
-		# call the start function when testing from editor
-		ModManager.loaded.connect(_signal_changed.bind(false), CONNECT_ONESHOT)
+# the current scen name
+func scene_id() -> String:
+	return UFile.get_file_name(Global.get_tree().current_scene.scene_file_path)
 
 func _signal_changed(is_loading: bool):
 	if not is_loading:
@@ -71,27 +74,22 @@ func toggle_ui(id: String):
 
 func hide_ui(id: String):
 	if id in active_ui and active_ui[id].is_inside_tree():
-		remove_child(active_ui[id])
-#	if is_showing_ui(id):
-#		remove_child(active_ui[id])
-#		active_ui[id].queue_free()
+		Global.remove_child(active_ui[id])
 
 func show_ui(id: String) -> Node:
 	if id in scenes_ui:
 		# has valid instance?
 		if id in active_ui and is_instance_valid(active_ui[id]):
 			if not active_ui[id].is_inside_tree():
-				add_child(active_ui[id])
+				Global.add_child(active_ui[id])
 			return active_ui[id]
 		else:
 			print("Creating ", id)
 			var out: Node = load(scenes_ui[id]).instantiate()
 			out.name = id
 			active_ui[id] = out
-			add_child(out)
+			Global.add_child(out)
 			return out
-#		else:
-#			push_warning("UI '%s' already visible." % [id])
 	else:
 		push_warning("No ui '%s'. %s" % [id, scenes_ui.keys()])
 		return null
@@ -104,18 +102,9 @@ func create(id: String, parent: Node = null) -> Node:
 		return out
 	return null
 
-func _input(event: InputEvent) -> void:
-	if Engine.is_editor_hint():
-		set_process_input(false)
-		return
-	
-	if event.is_action_pressed("reload_scene"):
-		get_tree().reload_current_scene()
-		get_viewport().set_input_as_handled()
-
 # change scene with signals, and call start function
 func change(path: String, is_loading: bool = false):
-	var tree := get_tree()
+	var tree := Global.get_tree()
 	
 	if not path.begins_with("res://") and not path.begins_with("user://"):
 		if path in scenes:
@@ -129,7 +118,7 @@ func change(path: String, is_loading: bool = false):
 	
 	if not is_loading:
 		pre_changed.emit()
-#	await tree.process_frame
+	
 	_signal_changed.call_deferred(is_loading)
 
 func _load_mods(mods: Array):

@@ -19,19 +19,19 @@ var resolution := Vector2i(1080, 720):
 var music_volume := 1.0:
 	set(v):
 		music_volume = clampf(v, 0.0, 1.0)
-		AudioServer.set_bus_volume_db(AudioServer.get_bus_index(MusicManager.BUS), linear2db(music_volume))
+		AudioServer.set_bus_volume_db(AudioServer.get_bus_index(Sooty.music.BUS), linear2db(music_volume))
 
 var music_mute := false:
 	set(v):
 		music_mute = v
-		AudioServer.set_bus_mute(AudioServer.get_bus_index(MusicManager.BUS), music_mute)
+		AudioServer.set_bus_mute(AudioServer.get_bus_index(Sooty.music.BUS), music_mute)
 
 var sfx_volume := 1.0:
 	set(v):
 		sfx_volume = clampf(v, 0.0, 1.0)
-		AudioServer.set_bus_volume_db(AudioServer.get_bus_index(SFXManager.BUS), linear2db(sfx_volume))
+		AudioServer.set_bus_volume_db(AudioServer.get_bus_index(Sooty.sound.BUS), linear2db(sfx_volume))
 
 var sfx_mute := false:
 	set(v):
 		sfx_mute = v
-		AudioServer.set_bus_mute(AudioServer.get_bus_index(SFXManager.BUS), sfx_mute)
+		AudioServer.set_bus_mute(AudioServer.get_bus_index(Sooty.sound.BUS), sfx_mute)
