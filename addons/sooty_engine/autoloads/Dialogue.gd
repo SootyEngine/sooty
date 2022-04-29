@@ -9,7 +9,7 @@ signal caption(text: String, line: Dictionary)
 func _ready() -> void:
 	super._ready()
 	_sooty.actions.connect_as_node(self, "Dialogue")
-	_sooty.actions.connect_methods(self, [chose, reset_choice, reset_list])
+	_sooty.actions.connect_methods([chose, reset_choice, reset_list])
 	_sooty.mods.load_all.connect(_load_mods)
 	selected.connect(_choose)
 	reloaded.connect(_reloaded)
@@ -68,12 +68,13 @@ func _load_mods(mods: Array):
 			UDict.append(lang_paths, id, lang_path)
 	
 	# timer checks if any files were modified.
-#	UNode.remove_children(self)
-#	var file_scanner := FileModifiedScanner.new()
-#	file_scanner.set_name("FileScanner")
-#	add_child(file_scanner)
-#	file_scanner.modified.connect(_files_modified.bind(file_scanner))
-#	file_scanner.set_files(all_files)
+	UGroup.remove("_dialogue_timer_")
+	var file_scanner := FileModifiedScanner.new()
+	Global.add_child(file_scanner)
+	file_scanner.add_to_group("_dialogue_timer_")
+	file_scanner.set_name("FileScanner")
+	file_scanner.modified.connect(_files_modified.bind(file_scanner))
+	file_scanner.set_files(all_files)
 	
 	# save states for debuging
 	if UFile.exists("res://debug_output/dialogue"):

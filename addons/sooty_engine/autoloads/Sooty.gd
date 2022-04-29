@@ -31,15 +31,16 @@ const VERSION := "0.1_alpha"
 #var dialogue: Dialogue = Dialogue.new()
 
 var config = load("res://addons/sooty_engine/autoloads/Config.gd").new()
-var databases = load("res://addons/sooty_engine/autoloads/global/Databases.gd").new()
-var actions = load("res://addons/sooty_engine/autoloads/global/StringAction.gd").new()
-var saver = load("res://addons/sooty_engine/autoloads/global/SaveManager.gd").new()
-var mods = load("res://addons/sooty_engine/autoloads/global/Mods.gd").new()
-var music = load("res://addons/sooty_engine/autoloads/global/Music.gd").new()
-var sound = load("res://addons/sooty_engine/autoloads/global/Sound.gd").new()
+var databases = load("res://addons/sooty_engine/autoloads/Databases.gd").new()
+var actions = load("res://addons/sooty_engine/autoloads/StringAction.gd").new()
+var saver = load("res://addons/sooty_engine/autoloads/Saver.gd").new()
+var mods = load("res://addons/sooty_engine/autoloads/Mods.gd").new()
+var music = load("res://addons/sooty_engine/autoloads/Music.gd").new()
+var sound = load("res://addons/sooty_engine/autoloads/Sound.gd").new()
 var state = load("res://addons/sooty_engine/autoloads/State.gd").new()
 var persistent = load("res://addons/sooty_engine/autoloads/Persistent.gd").new()
-var scenes = load("res://addons/sooty_engine/autoloads/SceneManager.gd").new()
+var scenes = load("res://addons/sooty_engine/autoloads/Scenes.gd").new()
+var ui = load("res://addons/sooty_engine/autoloads/UIs.gd").new()
 var settings = load("res://addons/sooty_engine/autoloads/Settings.gd").new()
 var dialogue = load("res://addons/sooty_engine/autoloads/Dialogue.gd").new()
 
@@ -59,7 +60,7 @@ func _ready():
 		elif o.has_method("_ready"):
 			o._ready()
 	
-	actions.connect_methods(self, [version, msg])
+	actions.connect_methods([version, msg])
 
 func start():
 	game_active = true

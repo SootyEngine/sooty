@@ -332,68 +332,55 @@ static func patch_to_var(patch: Variant, sources: Array, explicit_type := -1) ->
 	return null
 
 static func patch(target: Object, patch: Dictionary, sources: Array):
-	for k in patch:
-		var v = patch[k]
-		var p = UString.get_key_var(k, "=")
-		k = p[0]
+	if target == null:
+		push_error("Huh?")
+		return
+	
+	var target_properties := UObject.get_state_properties(target)
+#	prints(UClass._to_string2(target), target_properties, patch.keys())
+	
+	for property in patch:
+		var value = patch[property]
+		var p = UString.get_key_var(property, "=")
+		property = p[0]
 		var type = p[1]
 		
-		# create if it didn't exist
-		if not k in target:
-			if v is Dictionary:
-				if target.has_method("_patch_object"):
-					var new_obj: Object = target._patch_object(k, type)
-					if new_obj:
-						patch(new_obj, v, sources)
-					else:
-						push_error("Couldn't create '%s' for %s." % [k, patch_to_var(v, sources)])
-				else:
-					push_error("No _patch_object() in %s. Ignoring %s." % [target, patch_to_var(v, sources)])
-			
-			elif v is Array:
-				for list_item_patch in v:
-					if list_item_patch is Dictionary:
-						if target.has_method("_patch_list_object"):
-							var new_obj: Object = target._patch_list_object(k, type)
-							if new_obj:
-								if new_obj.has_method("_added"):
-									new_obj._added(target)
-								patch(new_obj, list_item_patch, sources)
-							else:
-								push_error("Couldn't create '%s' for %s." % [k, patch_to_var(list_item_patch, sources)])
-						else:
-							push_error("No _patch_list_object() in %s. Ignoring %s." % [target, patch_to_var(list_item_patch, sources)])
-					
-					elif list_item_patch is Array:
-						push_error("Array patching not implemented yet.")
-					
-					else:
-						if target.has_method("_patch_list_property"):
-							target._patch_list_property(k, patch_to_var(list_item_patch, sources))
-						else:
-							push_error("No _patch_list_property() in %s for %s." % [target, patch_to_var(list_item_patch, sources)])
-			else:
-				if target.has_method("_patch_property"):
-					target._patch_property(k, patch_to_var(v, sources))
-				elif target.has_method("_patch_property_deferred"):
-					target._patch_property_deferred.call_deferred(k, patch_to_var(v, sources))
-				else:
-					push_error("No '%s' or _patch_property() in %s for %s." % [k, target, patch_to_var(v, sources)])
-		
-		elif target.has_method("_patch_manually"):
-			target._patch_manually(k, v, sources)
-		
-		elif target.has_method("_patch_manually_deferred"):
-			target._patch_manually_deferred.call_deferred(k, v, sources)
-		
-		else:
-			var target_type = typeof(target[k])
+		if property in target_properties:
+			var target_type = typeof(target[property])
 			# recursively check sub objects.
 			if target_type == TYPE_OBJECT:
-				patch(target[k], v, sources)
-			else:
-				var value = patch_to_var(v, sources)
-				if typeof(value) == target_type:
-					target[k] = value
+				patch(target[property], value, sources)
+			
+			elif target_type == TYPE_DICTIONARY or target_type == TYPE_ARRAY:
+				if target.has_method("_patch_property_deferred"):
+					target._patch_property_deferred.call_deferred(property, patch_to_var(value, sources))
+				
+				elif target.has_method("_patch_property"):
+					target._patch_property(property, patch_to_var(value, sources))
+				
 				else:
-					push_error("Couldn't convert '%s' for property %s." % [v, k])
+					_patch_property(target, target_type, property, value, sources)
+			
+			else:
+				_patch_property(target, target_type, property, value, sources)
+		
+		elif target.has_method("_patch_property_object"):
+			var obj = target._patch_property_object(property, type)
+			patch(obj, value, sources)
+		
+		elif target.has_method("_patch_property_deferred"):
+			target._patch_property_deferred.call_deferred(property, patch_to_var(value, sources))
+		
+		elif target.has_method("_patch_property"):
+			target._patch_property(property, patch_to_var(value, sources))
+		
+		else:
+			push_error("No '%s' or patch method in %s for %s." % [property, target, patch_to_var(value, sources)])
+
+static func _patch_property(target: Variant, target_type: int, property: String, value: Variant, sources: Array):
+	# auto set property
+	var value_converted = patch_to_var(value, sources, target_type)
+	if typeof(value_converted) == target_type:
+		target[property] = value_converted
+	else:
+		push_error("Couldn't convert '%s' for property %s." % [value, property])

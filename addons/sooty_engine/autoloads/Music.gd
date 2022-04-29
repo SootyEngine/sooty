@@ -1,18 +1,16 @@
 @tool
-extends Node
+extends "res://addons/sooty_engine/autoloads/ResManager.gd"
 
 const BUS := "music"
 const DEFAULT_FADE_TIME := 2.0
 const MAX_MUSIC_PLAYERS := 3
 
 @export var _queue := []
-@export var _files := {}
 
 func _ready():
-	Sooty.actions.connect_as_node(self, "Music")
-	Sooty.actions.connect_methods(self, [play_music])
-	
-	Sooty.mods.load_all.connect(_load_mods)
+	super._ready()
+	Sooty.actions.connect_as_node(self)
+	Sooty.actions.connect_methods([play_music])
 	Sooty.saver._get_state.connect(_save_state)
 	Sooty.saver._set_state.connect(_load_state)
 
@@ -23,21 +21,17 @@ func _get_method_info(method: String):
 				args={
 					id={
 						# auto complete list of music files
-						options=func(): return _files.keys(),
+						options=get_all_ids,
 						icon=preload("res://addons/sooty_engine/icons/music.png"),
 					}
 				}
 			}
 
-func _load_mods(mods: Array):
-	for mod in mods:
-		mod.meta["music"] = []
-		var dir = mod.dir.plus_file("audio/music")
-		var got = UFile.get_files(dir, UFile.EXT_AUDIO)
-		for file_path in got:
-			var id := UFile.get_file_name(file_path)
-			_files[id] = file_path
-			mod.meta.music.append(file_path)
+func _get_res_dir():
+	return "audio/music"
+
+func _get_res_extensions():
+	return UFile.EXT_AUDIO
 
 func _save_state(state: Dictionary):
 	var player := get_current_player()
@@ -52,9 +46,6 @@ func _load_state(state: Dictionary):
 	var m = state.get("Music", {})
 	if "id" in m:
 		play_music(m, { pos=m.get("pos", 0.0) })
-
-func has(id: String) -> bool:
-	return id in _files
 
 func get_current() -> String:
 	var c := get_current_player()
@@ -85,7 +76,8 @@ func fade_out(fade_time := DEFAULT_FADE_TIME):
 		tween.tween_callback(player.queue_free)
 
 func queue(id: String):
-	if id in _files:
+	var path := find(id)
+	if path:
 		if len(_queue):
 			_queue.append(id)
 		else:
@@ -119,7 +111,7 @@ func play_music(id: String, kwargs := {}):
 	player.add_to_group("_music_")
 	player.set_meta("id", id)
 	player.set_meta("state", "playing")
-	player.stream = load(_files[id])
+	player.stream = load(find(id))
 	player.finished.connect(_on_music_finished.bind(player))
 	player.bus = BUS
 	

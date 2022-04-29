@@ -434,7 +434,9 @@ func _collect_tabbed(dict_lines: Array, i: int) -> Array:
 	
 	# combine if-elif-else
 	var new_tabbed := []
-	for j in len(line.M.tabbed):
+	var j := 0
+#	for j in len(line.M.tabbed):
+	while j < len(line.M.tabbed):
 		var ln: Dictionary = line.M.tabbed[j]
 		match ln.type:
 			# grab meta values
@@ -442,6 +444,14 @@ func _collect_tabbed(dict_lines: Array, i: int) -> Array:
 				if not "meta" in line.M:
 					line.M.meta = {}
 				line.M.meta[ln.key] = ln.val
+			
+			# text with options can have an {{else}}
+			# for when there are no options
+#			"text":
+#				if "options" in ln:
+#					if j+1 < len(line.M.tabbed) and line.M.tabbed[j+1].type == "cond" and line.M.tabbed[j+1].cond_type == "else":
+#						ln.else_lines = line.M.tabbed[j+1]
+#						j += 1
 			
 			# merge if/else
 			"cond":
@@ -458,6 +468,8 @@ func _collect_tabbed(dict_lines: Array, i: int) -> Array:
 							push_error("'%s' must follow an 'if'." % [ln.cond_type])
 			_:
 				new_tabbed.append(ln)
+		j += 1
+	
 	line.M.tabbed = new_tabbed
 	
 	_process_line(line)

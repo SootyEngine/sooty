@@ -62,8 +62,10 @@ func _iter_get(arg):
 	return _all.values()[_iter_current]
 
 func _get(property: StringName):
-	if str(property) in _all:
-		return _all[str(property)]
+	var id := str(property)
+	if id in _all:
+		return _all[id]
+	UString.push_error_similar("No %s '%s'." % [_data_class_name, id], id, _all.keys())
 
 func has(id: String) -> bool:
 	return id in _all
@@ -79,8 +81,11 @@ func find(id: String, error_action := "find") -> Variant:
 		UString.push_error_similar("Can't %s %s named %s." % [error_action, _data_class_name, id], id, _all.keys())
 		return null
 
-func _patch_object(key: String, type: String) -> Object:
-	_all[key] = UClass.create(type if type else _data_class_name)
+# DataParser
+func _patch_property_object(key: String, type: String) -> Object:
+	type = type if type else _data_class_name
+	_all[key] = UClass.create(type)
+#	print("DB:%s++ %s:%s" % [_data_class_name, key, type])
 	return _all[key]
 
 func _to_string() -> String:

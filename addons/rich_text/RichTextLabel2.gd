@@ -282,7 +282,7 @@ func _parse_tags(tags_string: String):
 	var tags := []
 	for i in len(p):
 		var tag = p[i]
-		if Sooty and tag in Sooty.config.rich_text_tags:
+		if Sooty != null and tag in Sooty.config.rich_text_tags:
 			tags.append_array(Sooty.config.rich_text_tags[tag].split(";"))
 		else:
 			tags.append(tag)
@@ -324,7 +324,6 @@ func _parse_tag(tag: String):
 	# is a !$^@ StringAction?
 	if tag[0] in "~$^@":
 		var got = Sooty.actions.do(tag, context)
-		prints("TAG GOT ", got, " FROM ", tag)
 		# no value was found
 		if got == null:
 			push_error("BBCode: Couldn't replace '%s'." % tag)
@@ -333,7 +332,7 @@ func _parse_tag(tag: String):
 			pop()
 		else:
 			# objects may implement a get_string() method
-			_parse(UString.get_string(got, "bbcode"))
+			_parse(str(got))
 		return
 		
 	# COLOR. This allows doing: "[{color}]Text[]".format({color=Color.RED})

@@ -20,9 +20,9 @@ static func get_all(group: String) -> Array[Node]:
 	return Global.get_tree().get_nodes_in_group(group)
 
 # remove all nodes in a group
-static func remove_all(group: String):
+static func remove(group: String):
 	for node in Global.get_tree().get_nodes_in_group(group):
-		print("Remove %s %s" % [group, node])
+		node.get_parent().remove_child(node)
 		node.queue_free()
 
 # find all groups

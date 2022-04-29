@@ -24,12 +24,6 @@ static func express(s: String, base_instance: Object = null, default = null) -> 
 			push_error(e.get_error_text())
 	return default
 
-static func get_string(v: Variant, id: String = "") -> String:
-	if v is Object and v.has_method("get_string"):
-		return v.get_string(id)
-	print(v, " HAD NO METHOD get_string()")
-	return str(v)
-
 # Replace "quotes" with “quotes”.
 static func fix_quotes(input: String) -> String:
 	var out := ""

@@ -3,6 +3,8 @@ extends RefCounted
 class_name Data, "res://addons/sooty_engine/icons/data.png"
 func get_class():
 	return "Data"
+func _get_database_id():
+	return "Data"
 
 signal changed()
 
@@ -20,13 +22,15 @@ func _to_string() -> String:
 	return UClass._to_string2(self)
 
 func get_database() -> Database:
-	return Sooty.databases.get_database(UClass.get_class_name(self))
+	return Sooty.databases.get_database(_get_database_id())# UClass.get_class_name(self))
 
 func get_id() -> String:
 	var database = get_database()
 	if database:
 		return database._get_id(self)
-	return "NO_DATABASE"
+	else:
+		push_error()
+		return "NO_DATABASE"
 
 func duplicate() -> Object:
 	var classname := UClass.get_class_name(self)
@@ -49,5 +53,5 @@ func get_icon() -> Texture:
 
 # for use with the dialogue system
 # you may want a stylized form, or a form based on language
-func get_string(value: Variant, for_what := "") -> String:
-	return "<<%s:%s:%s>>" % [get_id(), value, for_what]
+func get_string(property: String, for_what := "") -> String:
+	return get(property)

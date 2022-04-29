@@ -46,7 +46,6 @@ const EVAL_STATE := "$"
 const NODE_ACTION := "@"
 const EVAL := "~"
 
-
 const C_FLOW := Color.WHEAT
 
 static func get_flow_color(deep: int) -> Color:

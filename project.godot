@@ -14,11 +14,6 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/common/Bool.gd"
 }, {
-"base": "ConfigFile",
-"class": &"Config",
-"language": &"GDScript",
-"path": "res://addons/util/Config.gd"
-}, {
 "base": "RefCounted",
 "class": &"Data",
 "language": &"GDScript",
@@ -79,22 +74,12 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/data/ModInfo.gd"
 }, {
-"base": "Node",
-"class": &"OSApp",
-"language": &"GDScript",
-"path": "res://addons/sim_os/apps/App.gd"
-}, {
-"base": "Control",
-"class": &"OSAppWindow",
-"language": &"GDScript",
-"path": "res://addons/sim_os/OSAppWindow.gd"
-}, {
 "base": "Data",
 "class": &"PatchableData",
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/common/PatchableData.gd"
 }, {
-"base": "Resource",
+"base": "RefCounted",
 "class": &"PropList",
 "language": &"GDScript",
 "path": "res://addons/util/PropList.gd"
@@ -119,10 +104,10 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://addons/sooty_engine/dialogue/Soot.gd"
 }, {
-"base": "Node",
-"class": &"StateManagerBase",
+"base": "RefCounted",
+"class": &"Soot2",
 "language": &"GDScript",
-"path": "res://addons/sooty_engine/autoloads/StateManagerBase.gd"
+"path": "res://addons/sooty_engine/dialogue/SootParser2.gd"
 }, {
 "base": "RefCounted",
 "class": &"UClass",
@@ -163,6 +148,11 @@ _global_script_classes=[{
 "class": &"UGroup",
 "language": &"GDScript",
 "path": "res://addons/util/UGroup.gd"
+}, {
+"base": "Node",
+"class": &"UIManager",
+"language": &"GDScript",
+"path": "res://addons/sooty_engine/autoloads/UIs.gd"
 }, {
 "base": "RefCounted",
 "class": &"UList",
@@ -221,7 +211,6 @@ _global_script_classes=[{
 }]
 _global_script_class_icons={
 "Bool": "",
-"Config": "",
 "Data": "res://addons/sooty_engine/icons/data.png",
 "DataParser": "",
 "Database": "res://addons/soot_engine/icons/database.png",
@@ -234,15 +223,13 @@ _global_script_class_icons={
 "FontHelper": "",
 "Markdown": "",
 "ModInfo": "",
-"OSApp": "",
-"OSAppWindow": "",
 "PatchableData": "",
 "PropList": "",
 "RichTextAnimation": "",
 "RichTextFoldable": "",
 "RichTextLabel2": "",
 "Soot": "",
-"StateManagerBase": "",
+"Soot2": "",
 "UClass": "",
 "UColor": "",
 "UDebug": "",
@@ -251,6 +238,7 @@ _global_script_class_icons={
 "UFile": "",
 "UFlag": "",
 "UGroup": "",
+"UIManager": "",
 "UList": "",
 "UNode": "",
 "UObject": "",
@@ -274,16 +262,7 @@ config/features=PackedStringArray("4.0", "Vulkan Clustered")
 [autoload]
 
 Global="*res://addons/sooty_engine/autoloads/Global.gd"
-ModManager="*res://addons/sooty_engine/autoloads/ModManager.gd"
-Settings="*res://addons/sooty_engine/autoloads/Settings.gd"
-SceneManager="*res://addons/sooty_engine/autoloads/SceneManager.gd"
-SaveManager="*res://addons/sooty_engine/autoloads/SaveManager.gd"
-Persistent="*res://addons/sooty_engine/autoloads/Persistent.gd"
-State="*res://addons/sooty_engine/autoloads/State.gd"
-StringAction="*res://addons/sooty_engine/autoloads/StringAction.gd"
-MusicManager="*res://addons/sooty_engine/autoloads/MusicManager.gd"
-SFXManager="*res://addons/sooty_engine/autoloads/SFXManager.gd"
-Dialogue="*res://addons/sooty_engine/autoloads/Dialogue.gd"
+Sooty="*res://addons/sooty_engine/autoloads/Sooty.gd"
 
 [debug]
 

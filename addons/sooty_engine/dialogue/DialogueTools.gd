@@ -8,8 +8,6 @@ const FORMAT_QUOTE := "[q]%s[]"
 const FORMAT_INNER_QUOTE := "[i]%s[]"
 const QUOTE_DELAY := 0.25 # a delay between predicates and quotes.
 
-const LAST_SPEAKER := "LAST_SPEAKER"
-
 static func str_to_dialogue(s: String) -> Dictionary:
 	var speaker_split := _find_speaker_split(s, 0)
 	var from := ""
@@ -30,9 +28,6 @@ static func str_to_dialogue(s: String) -> Dictionary:
 			for part in a.inside.split(";"):
 				action.append("@%s.%s" % [from, part])
 			action = action
-		# signal that a speaker is desired but not given
-		if from.strip_edges() == "":
-			from = LAST_SPEAKER
 		text = text.replace("\\:", ":")
 	
 	text = str_to_caption(from, text)

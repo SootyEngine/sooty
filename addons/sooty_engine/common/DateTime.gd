@@ -3,11 +3,15 @@ extends Data
 class_name DateTime, "res://addons/sooty_engine/icons/datetime.png"
 func get_class() -> String:
 	return "DateTime"
-
+func _get_database_id():
+	return "Data"
 #
 # Godot's built in Time class starts Months and Weekdays at 1, while this starts at 0.
 # So be careful combining the two.
 #
+
+func _patch_property(property: String, value: Variant):
+	_set(property, value)
 
 var years := 0
 
@@ -521,13 +525,13 @@ func advance(kwargs := {}):
 # STATE
 #
 
-func get_state() -> Dictionary:
-	return { years=years, days=days, hours=hours, minutes=minutes, seconds=seconds }
-
-func set_state(state: Dictionary):
-	for k in state:
-		if k in self:
-			self[k] = state[k]
+#func _get_state() -> Dictionary:
+#	return { years=years, days=days, hours=hours, minutes=minutes, seconds=seconds }
+#
+#func _set_state(state: Dictionary):
+#	for k in state:
+#		if k in self:
+#			self[k] = state[k]
 
 #
 # INTERNAL

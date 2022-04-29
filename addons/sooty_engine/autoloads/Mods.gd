@@ -16,6 +16,12 @@ func _init():
 	_add_mod("res://", true)
 	_add_mod("res://addons/sooty_engine", true)
 	
+	# add any "res://addons" that has an "mod.soda" file.
+	for dir in UFile.get_dirs("res://addons", false):
+		var mod_info_path := dir.plus_file("mod.soda")
+		if UFile.exists(mod_info_path):
+			_add_mod(dir, true)
+	
 	if UFile.dir_exists(USER_DIR):
 		for mod in get_user_mod_dirs():
 			_add_mod(mod, AUTO_INSTALL_USER_MODS)

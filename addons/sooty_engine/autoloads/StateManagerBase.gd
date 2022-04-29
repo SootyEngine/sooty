@@ -19,15 +19,14 @@ signal changed_from_to(property: Array, from: Variant, to: Variant)
 @export var _state_properties := []
 # a child to add data to if it has no where else to go.
 var _monkey_patcher: RefCounted
-var _sooty: Node
+
 # 
 @export var _calls := {}
 @export var _call_names := {}
 
 func _ready() -> void:
-	_sooty = Global.get_node("/root/Sooty")
-	_sooty.mods.load_all.connect(_load_mods)
-	_sooty.mods._loaded.connect(_loaded_mods)
+	Sooty.mods.load_all.connect(_load_mods)
+	Sooty.mods._loaded.connect(_loaded_mods)
 
 func get_method_names() -> Array:
 	return _calls.keys()
@@ -63,14 +62,14 @@ func _load_state(data: Dictionary):
 	UObject.set_state(self, data.get(_get_subdir(), {}))
 	_silent = false
 
-
 # called by DataParser if .soda sets something that doesn't exist.
 func _patch_property(key: String, patch: Variant):
 	_monkey_patcher._data[key] = patch
 
 # called by DataParser if .soda sets something that doesn't exist.
-func _patch_object(key: String, type: String) -> Object:
+func _patch_property_object(key: String, type: String) -> Object:
 	var obj: Object = UClass.create(type) if type else PatchableData.new()
+#	print("%s:%s++ %s:%s" % [_get_subdir(), type, key, UClass.get_class_name(obj)])
 	if obj:
 		_monkey_patcher._data[key] = obj
 	return obj
@@ -83,7 +82,7 @@ func _load_mods(mods: Array):
 	_call_names.clear()
 	
 	# remove old states
-	UGroup.remove_all(_get_node_group())
+	UGroup.remove(_get_node_group())
 	
 	# create monkey patcher to add spare properites to
 	_monkey_patcher = preload("res://addons/sooty_engine/autoloads/_monkey_patcher_.gd").new()
@@ -155,18 +154,20 @@ func _load_mods(mods: Array):
 					var old = _shortcuts[k]
 					push_error("Same shortcut '%s' for %s and %s." % [k, old, new])
 	
-	# var file_scanner := FileModifiedScanner.new()
-	# file_scanner.set_name("FileScanner")
-	# add_child(file_scanner)
-	# file_scanner.modified.connect(_files_modified.bind(file_scanner))
-	# file_scanner.set_files(all_files)
+	# create a file scanner to keep track of modified files
+	var file_scanner := FileModifiedScanner.new()
+	Global.add_child(file_scanner)
+	file_scanner.set_name("FileScanner")
+	file_scanner.add_to_group(_get_node_group())
+	file_scanner.modified.connect(_files_modified.bind(file_scanner))
+	file_scanner.set_files(all_files)
 
 func _get_node_group() -> String:
 	return "_s_%s_" % [_get_subdir()]
 
 func _files_modified(file_scanner: FileModifiedScanner):
 	file_scanner.update_times()
-	_sooty.mods.load_mods()
+	Sooty.mods.load_mods()
 
 # get the default state
 func _loaded_mods():
@@ -224,8 +225,7 @@ func _call(method: String, args: Array = [], as_string_args := false, default = 
 #		if 
 #		if state.has_method(method):
 #			return UObject.call_w_kwargs([state, method], args, as_string_args)
-	
-	push_error("No function '%s' in %s. %s" % [method, _get_subdir(), get_method_names()])
+	UString.push_error_similar("No method '%s' in %s." % [method, _get_subdir()], method, get_method_names())
 	return default
 
 func _reset_state():
@@ -239,6 +239,12 @@ func _get_state() -> Dictionary:
 	var out := {}
 	for state in _states:
 		UDict.merge(out, UObject.get_state(state), true)
+	return out
+
+func _get_state_properties() -> Array:
+	var out := []
+	for state in _states:
+		out.append_array(UObject.get_state_properties(state))
 	return out
 
 func _get_property_path(property: StringName) -> Array:

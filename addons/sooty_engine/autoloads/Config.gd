@@ -7,6 +7,8 @@ var modified_at := 0
 
 func _init():
 	_reload()
+
+func _ready():
 	_timer.call_deferred()
 
 func _reload():
@@ -21,7 +23,7 @@ func _timer():
 	Global.get_tree().create_timer(1.0).timeout.connect(_timer)
 
 func _get(property: StringName) -> Variant:
-	return UDict.get_at(data, str(property).split("."))
+	return UDict.get_at(data, str(property).split("."), false)
 
 func getor(property: String, default: Variant) -> Variant:
 	var got = _get(property)

@@ -1,10 +1,7 @@
 @tool
 extends Node
 
-
-var meta: = {}
 var screenshot: Image # a copy of the screen, for use in menus, or save system.
-var _printer: Callable
 var _queued_solo_signals := {}
 
 var window_width: int:

@@ -1,37 +1,18 @@
-#.IGNORE
-
 # Comments start with # .
 # Flows start with ===
 === flow_node
-	#.color: orange
-	#.progress: 100%
-	#.note: The one to win it
-	#.icon: ✔
-	
-	@Music.play Intro_Theme
-	@Music.play "No Hope" volume:0.5
-	Text without a speaker. 
-	
-	^achievement_get 
-	[tomato]Tomato[b]Bold tomato[]tomto[;i]italic tomato[] toma [bi] bold italit[] comta.
-	[chocolate]When in rome[cornflower_blue]do whatever you want.
-	Whats [tomato]Not italic [bi]italic[] otaasd?[] okasd
-	[orange_red]The dark days of[b]tomorrow[] are nearly over.[]asdokasd asodkas[]
-	
 	# Speakers.
 	john: Text spoken by John.
-	: Text spoken by last speaker, John.
+	mary:  I don't agree.
 	
 	# Markdown formatting.
 	Some *italic*, **bold** and ***bold italic*** text.
 	
-	[pale_violet_red]Okay now, which one of you thought.[b]And then[]we were out[] of the clear.
-	
 	# BBCode.
-	Some [b;tomato]bold red text[] and some [deep_sky_blue]blue text [i]italic[] blue text.[]
+	Some [b;tomato]bold red text[] and some [deep_sky_blue]blue text[].
 	
 	# Inserting state values to text.
-	The current score is [$score;b;cyan].
+	The current score is [~score;b;cyan].
 	
 	# Effecting the animation.
 	We can pause[wait] the text.
@@ -66,13 +47,13 @@
 	=> goto_flow # Goto a flow.
 	== call_flow # Call a flow, then return back to this line.
 	
-	# ~ State assignments
-	~$score += 20
-	~$time.day += 1
+	# State assignments
+	~score += 20
+	~time.day += 1
 	
-	# $ State function shortcut.
-	~ $time.goto_next_day()
-	~ $player.set_job("baker", {"tint": "beige", "pay": 12.50})
+	# State function shortcut.
+	~time.goto_next_day()
+	~player.set_job("baker", {"tint": "beige", "pay": 12.50})
 	
 	# @ Node function shortcut.
 	@camera shake x time:3.0 wait:true x:y # nodes_in_group("@.camera").camera("shake", x, { "wait": true, "x": y})
@@ -118,20 +99,54 @@
 		-+- *_flow # Append options from all flows ending with '_flow'.
 		-+- flow_* # Append options from all flows starting with 'flow_'
 	
-	# Single line options.
-	# Don't do this though, as it's hard to read.
-	Where to? || --- West => west || --- East => east {{east.unlocked}} || --- North => north
-	
 	# Extra properties.
 	This text should be offset. ((x:20 y:30 tint: red))
 
+=== lists
+	You see a ...
+	{<rand>}
+		Dog
+		Cat
+		Mouse
+	
+	Or on a line <rand|Dog|Cat|Mouse>.
+
+=== inserts
+	# Inserts are for making lots of text more readable.
+	Sometimes you have &a to write. &b.
+		&a=a lot of text you want
+		&b=You can use inserts.
+	
+	# They can self reference.
+	You see a &rand walking along.
+		&rand=<rand|&a|&b|&c|&d|&e>
+		&a=[cyan]Dog[]
+		&b=[orange]Cat[]
+		&c=[gray]Mouse[]
+		&d=[light_green]Chameleon[]
+		&e=[light_coral]Piglet[]
+
+=== meta_properties
+	# an icon to make it easier to identify
+	#.icon: ★[:1234:]
+	# a personal note for the flow
+	#.note: Rewrite
+	# how far do you think this flow is to being done?
+	#.progress: 25%
+	# how to order this flow in the list
+	#.rank: 0
+	# used in filtering
+	#.tags: tut fl
+	
+	Flows can have meta properties.
+	Ideally, define these right below the flow.
+	
+	They are currently used in the 'Chapters' panel.
+	
 # when loading a script, flags can be used to hide/show some lines.
 # found in Dialogues.flags = []
 # TODO
 === import_flags
-	#.icon: ★
-	#.note: Rewrite
-	#.color: light_green
 	
 	# special compiler flag test.
 	# must be on the first tab of a flow

@@ -4,7 +4,6 @@ extends RefCounted
 var databases := {}
 
 func register(data_class_name: String, database: Object):
-	prints("DB: %s." % [data_class_name])
 	databases[data_class_name] = database.get_instance_id()
 
 func get_all(data_type: Variant) -> Array:
@@ -14,7 +13,7 @@ func get_data(data_type: Variant, data_id: String) -> Variant:
 	var database = get_database(data_type)
 	var data = database.get(data_id)
 	# show error message
-	if not data:
+	if data == null:
 		var data_type_name = data_type
 		if data_type is Script:
 			data_type_name = UClass.get_class_name(data_type)

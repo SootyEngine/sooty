@@ -72,7 +72,7 @@ static func get_first_property_of_object_type(target: Object, object_type: Varia
 		if target[k] is object_type:
 			return target[k]
 	return null
-
+	
 # get a serializable state. (can be Color and Vector2, but not Objects.)
 static func get_state(target: Variant) -> Variant:
 	if target is Object and target.has_method("_get_state"):
@@ -96,6 +96,8 @@ static func get_state(target: Variant) -> Variant:
 # set a serializable state.
 static func set_state(target: Variant, state: Variant, erase_keys := false, silent := false):
 	if target is Object and target.has_method("_set_state"):
+		# sometimes the state may be empty
+		# in which case, just skip it
 		if state:
 			target._set_state(state)
 	elif target is Array:
@@ -156,7 +158,7 @@ static func get_script_signals(target: Object, only_argless := true) -> Dictiona
 		out[m.name] = m
 	return out
 
-static func get_operator_value(v):
+static func get_operator_value(v: Variant):
 	if v is Object:
 		if v.has_method("_operator_get"):
 			return v._operator_get()
@@ -171,6 +173,9 @@ static func call_w_kwargs(call: Variant, in_args: Array = [], as_string_args := 
 	if "." in method:
 		var p := method.rsplit(".", true, 1)
 		obj = UObject.get_penultimate(obj, p)
+		if obj == null:
+			push_warning("No object at '%s'." % [method])
+			return null
 		method = p[-1]
 	
 	# get methods argument info

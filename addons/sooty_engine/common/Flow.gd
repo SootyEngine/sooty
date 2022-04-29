@@ -62,7 +62,7 @@ func has(path: String) -> bool:
 	return path in flows
 
 func has_from_current(path: String) -> bool:
-	var flow := get_flow_path(path)
+	var flow := evaluate_path(path)
 	return flow in lines
 
 func try_start(path: String) -> bool:
@@ -77,6 +77,7 @@ func start(id: String):
 		return false
 	
 	# start dialogue
+	current_flow = ""
 	last_line = {}
 	_goto(id)
 	step.call_deferred()
@@ -116,8 +117,8 @@ func _goto(id: String) -> bool:
 	return _add_to_stack(id, true)
 
 func _add_to_stack(id: String, clear_stack := false) -> bool:
-	if has_from_current(id):# _has_line(new_id):
-		var new_id := get_flow_path(id)
+	var new_id := evaluate_path(id)
+	if has(new_id):
 		# if the stack is cleared, it means this was a "goto" not a "call"
 		if clear_stack:
 			while len(_stack):
@@ -127,7 +128,7 @@ func _add_to_stack(id: String, clear_stack := false) -> bool:
 		_push(step_type, new_id, steps)
 		return true
 	else:
-		push_error("No step '%s' from '%s'." % [id, current_flow])
+		UString.push_error_similar("No flow '%s' from '%s'." % [new_id, current_flow], id, flows.keys())
 		return false
 
 func end(msg := ""):
@@ -359,7 +360,7 @@ func _compare(match_val: Variant, case_val: Variant) -> bool:
 	else:
 		return false
 
-func _replace_text_lists(text: String, id: String) -> String:
+func _replace_list_text(text: String, id: String) -> String:
 	var parts := Array(text.split("|")).map(func(x: String): return x.strip_edges())
 	var type = parts.pop_front()
 	return get_list_item(id, type, parts)
@@ -367,10 +368,17 @@ func _replace_text_lists(text: String, id: String) -> String:
 # for strings with "{list_type|item|item|item}" pattern
 # this selects an item based on the list_type
 func replace_list_text(id: String, text: String) -> String:
-	return UString.replace_between(text, "{", "}", _replace_text_lists.bind(id))
+	return UString.replace_between(text, "<", ">", _replace_list_text.bind(id))
 
 func reset_list(id: String):
 	states.erase(id)
+
+const LIST_TYPES := {
+	"": "Default: Go through steps, then loop around.",
+	"rand": "Random: Pick a random step.",
+	"stop": "Stop: Go through steps, then stop at last one.",
+	"hide": "Hide: Go through steps, then hide."
+}
 
 # return an item from a list, and changes the lists state for next time
 func get_list_item(id: String, type: String, list: Array) -> String:
@@ -440,10 +448,10 @@ func line_get_options(line: Dictionary) -> Array:
 # `.node` goes to a sibling
 # `..node` goes to a parent sibling
 # `/node` goes to a root flow
-func get_flow_path(next: String) -> String:
-	return _get_flow_path(current_flow, next)
+func evaluate_path(next: String) -> String:
+	return _evaluate_path(current_flow, next)
 
-static func _get_flow_path(from: String, was: String) -> String:
+static func _evaluate_path(from: String, was: String) -> String:
 	var next := was
 	if next:
 		# going to a root
@@ -453,10 +461,16 @@ static func _get_flow_path(from: String, was: String) -> String:
 			var path := from
 			while next.begins_with("."):
 				next = next.substr(1)
-				path = path.rsplit("/", true, 1)[0]
+				if "/" in path:
+					path = path.rsplit("/", true, 1)[0]
+				else:
+					path = ""
 			
 			if next:
-				return "%s/%s" % [path, next]
+				if path:
+					return path.plus_file(next)
+				else:
+					return next
 			else:
 				return path
 	else:
@@ -503,3 +517,9 @@ func get_flow_children(path: String) -> Array:
 		return got.keys() if got else []
 	else:
 		return tree.keys()
+
+# flow path based on scene name
+# so passing "_init" while in "res://my_scene.tres" gets "my_scene/_init" 
+static func get_scene_path(path: String) -> String:
+	var scene_id := UFile.get_file_name(Global.get_tree().current_scene.scene_file_path)
+	return scene_id.plus_file(path)

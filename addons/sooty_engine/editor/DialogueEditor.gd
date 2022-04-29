@@ -714,7 +714,7 @@ func _find_flow(next: String, line: int) -> String:
 	next = next.trim_prefix(head).strip_edges()
 	
 	# create path
-	var path := Flow._get_flow_path("/".join(out), next)
+	var path := Flow._evaluate_path("/".join(out), next)
 	return path
 	
 func _symbol_validate(symbol: String):

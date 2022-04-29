@@ -1,5 +1,5 @@
 - [ ] Toggle private/public flows visibiliy in chapter view.
-- [ ] `../` for going up a path, not `..`
+- [ ] ~~`../` for going up a path, not `..`~~
 /   = Root directory
 .   = This location
 ..  = Up a directory
@@ -16,8 +16,11 @@
 - [x] Highlighter in match case works weird
 - [x] Richtext tab view
 - [x] Only load VisualNovelUI when `~` is pressed, to save on startup load time.
-- [ ] Auto load `config`
+- [x] Fix `.flow` in dialogues.
+- [x] Auto load `config`
 - [ ] Signal that `config` can fire if it was reloaded.
+- [ ] Use `^` for `self`
+- [ ] Conditions are evals and assume `$` unless `@` or `^` is used.
 
 # Shrinking database use
 - [ ] Only load flow paths at first? Then lazy load rest?

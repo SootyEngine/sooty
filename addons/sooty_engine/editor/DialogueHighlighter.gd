@@ -10,10 +10,11 @@ const SYMBOL_ALPHA := .5
 const C_TEXT := Color.GAINSBORO
 const C_TEXT_INSERT := Color.PALE_GREEN
 const C_TEXT_PREDICATE := Color.PALE_TURQUOISE
-const C_SPEAKER := Color(1, 1, 1, 0.5)
+const C_SPEAKER := Color(.5, .5, .5, 3.0)
 const C_TAG := Color(1, 1, 1, .4)
 const C_SYMBOL := Color(1, 1, 1, 0.3)
-const C_SYMBOL_LIGHT := Color(1, 1, 1, 0.5)
+const C_SYMBOL_BOLD := Color(.25, .25, .25, 4.0)
+const C_CASE := Color.LIGHT_CORAL
 
 const C_FLAG := Color.SALMON
 const C_LANG := Color.YELLOW_GREEN
@@ -50,18 +51,23 @@ const S_PROP_END := "))"
 
 var index := 0
 var deep := 0
-var state := {}
+var _out := {}
 var text := ""
 var current_line := 0
+
+func c(index: int, color: Color):
+	_out[index] = { color=color }
+
+func c_bold(index: int, color: Color):
+	_out[index] = { color=Color(color, 4.0) }
 
 func _get_line_syntax_highlighting(line: int) -> Dictionary:
 	text = get_text_edit().get_line(line)
 	current_line = line
-	state = {}
+	_out = {}
 	index = 0
 	deep = UString.count_leading(text, "\t")
 	var stripped = text.strip_edges()
-	var out = state
 	
 	# meta fields
 	var start := text.find("#.")
@@ -72,7 +78,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 		if i != -1:
 			_c(i, C_SYMBOL)
 			_c(i+1, Color.PINK)
-		return out
+		return _out
 	
 	# flag line
 	elif text.begins_with(S_FLAG):
@@ -83,7 +89,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 			if text[i] in ",;:&|":
 				_c(i, C_SYMBOL)
 				_c(i+1, C_FLAG)
-		return out
+		return _out
 	
 	# lang lines
 	elif text.begins_with(Soot.LANG):
@@ -140,9 +146,9 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 	if index != -1:
 		_c(index, C_COMMENT)
 		# erase all colors afterwards
-		for k in state.keys():
+		for k in _out.keys():
 			if k > index:
-				state.erase(k)
+				_out.erase(k)
 	
 	# line id for lang
 #	index = text.rfind(Soot.COMMENT_LANG)
@@ -150,7 +156,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 #		_c(index, C_SYMBOL)
 #		_c(index+len(Soot.COMMENT_LANG), C_COMMENT_LANG)
 	
-	return state
+	return _out
 
 # go backwards through the lines and try to find the flow/path/to/this/node.
 func _find_true_depth() -> int:
@@ -165,7 +171,7 @@ func _find_true_depth() -> int:
 	return deep
 
 func _c(i: int, clr: Color):
-	state[i] = {color=clr}
+	_out[i] = {color=clr}
 
 func _h_var(from: int, v: String, index: int):
 	if not len(v):
@@ -198,7 +204,7 @@ func _h_var(from: int, v: String, index: int):
 			_c(from, Color(Color.WHITE, SYMBOL_ALPHA))
 			from += 1
 		
-		_c(from, Color.DARK_GRAY if index % 2 != 0 else Color.WEB_GRAY)
+		_c(from, Color.WHITE if index % 2 != 0 else Color.GRAY)
 
 func _h_action_var(from: int, to: int):
 	var inner := text.substr(from, to-from)
@@ -246,10 +252,14 @@ func _h_node_action(from: int, to: int, color: Color):
 		from += len(parts[i]) + 1
 	
 func _h_eval(from: int, to: int):
-	_c(from, C_SYMBOL)
-	_c(from+1, C_CONTEXT_ACTION)
-	var t_color = C_CONTEXT_ACTION
-	var m_color = C_CONTEXT_ACTION
+	var t_color = C_STATE_ACTION
+	var m_color = C_STATE_ACTION
+	
+	if text[from] == "~":
+		_c(from, C_SYMBOL)
+		_c(from+1, C_STATE_ACTION)
+	else:
+		_c(from, C_STATE_ACTION)
 	
 	for i in range(from, to):
 		if text[i] == "$":
@@ -280,18 +290,21 @@ func _h_eval(from: int, to: int):
 		
 		elif text[i] == "(":
 			_c(i, C_SYMBOL)
-			t_color = Color.GRAY
+			t_color = C_SYMBOL
 			_c(i+1, t_color)
 		
 		elif text[i] in "`'\",":
 			_c(i, C_SYMBOL)
-			t_color = Color.GRAY
-			m_color = Color.GRAY
+			t_color = Color.WHITE
+			m_color = Color.WHITE
 			_c(i+1, t_color)
 		
-		elif text[i] in "-=+*/<>)()[]{}":
-			t_color = C_CONTEXT_ACTION
-			m_color = C_CONTEXT_ACTION
+		elif text[i] == "{":
+			_c(i, C_SYMBOL)
+		
+		elif text[i] in "-=+*/<>)()[]}":
+			t_color = C_STATE_ACTION
+			m_color = C_STATE_ACTION
 			_c(i, C_SYMBOL)
 			_c(i+1, t_color)
 
@@ -299,10 +312,10 @@ func _h_conditional(from: int, to: int):
 	var inner := text.substr(from, to-from)
 	var off := from
 	for part in UString.split_outside(inner, " "):
-		if part in ["in", "not"]:
-			_c(from, C_SYMBOL)
-		elif part in ["if", "elif", "else", "match", "and", "or"]:
-			_c(from, C_SYMBOL)
+#		if part in ["in", "not"]:
+#			_c(from, C_SYMBOL)
+		if part in ["in", "not", "if", "elif", "else", "match", "and", "or"]:
+			_c(from, C_SYMBOL_BOLD)# C_SYMBOL)
 		else:
 			_h_eval(from, from+len(part))
 		from += len(part) + 1
@@ -608,11 +621,11 @@ func _h_line(from: int, to: int):
 		elif part.begins_with(S_CASE_START):
 			var end := part.find(S_CASE_END)
 			_c(from, C_SYMBOL)
-			_c(from+1, C_SYMBOL_LIGHT)
+			_c(from+1, C_CASE)
 			if end != -1:
 				to = from + end
 				_h_case(from + len(S_CASE_START), to)
-				_c(to, C_SYMBOL_LIGHT)
+				_c(to, C_CASE)
 				_c(to+1, C_SYMBOL)
 				from += end + len(S_CASE_END) + 1
 				to = next_from-2

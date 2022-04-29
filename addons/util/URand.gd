@@ -420,7 +420,7 @@ static func noise_animated_v3(s: Vector3 = Vector3(1,2,3), time_scale: float = 1
 #
 
 # -0.5 - 0.5
-static func fbm(x:float=OS.get_system_time_msecs() * TIME_SCALE, octaves:int=2) -> float:
+static func fbm(x:float=Time.get_ticks_msec() * TIME_SCALE, octaves:int=2) -> float:
 	var total:float = 0.0 		# final result
 	var amplitude:float = 1.0	# amplitude
 	var maximum:float = 0.0		# maximum
